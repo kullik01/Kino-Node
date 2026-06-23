@@ -1,0 +1,175 @@
+/* Custom KinoNode media-center stylesheet, sits on top of AtlantaFX */
+
+.root {
+    -fx-font-family: 'Segoe UI', Inter, Helvetica, Arial, sans-serif;
+    -fx-background-color: #121212;
+    -fx-text-fill: #e0e0e0;
+}
+
+/* Sidebar navigation styling */
+.sidebar {
+    -fx-background-color: #181818;
+    -fx-padding: 25px 15px;
+    -fx-spacing: 15px;
+    -fx-pref-width: 230px;
+    -fx-border-color: #282828;
+    -fx-border-width: 0 1px 0 0;
+}
+
+.sidebar-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+    -fx-padding: 0 0 20px 10px;
+}
+
+.sidebar-button {
+    -fx-alignment: center-left;
+    -fx-background-color: transparent;
+    -fx-text-fill: #aaaaaa;
+    -fx-font-size: 14px;
+    -fx-padding: 10px 15px;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+    -fx-pref-width: 200px;
+}
+
+.sidebar-button:hover {
+    -fx-background-color: #242424;
+    -fx-text-fill: #ffffff;
+}
+
+.sidebar-button:selected, .sidebar-button.active {
+    -fx-background-color: #e50914; /* Media-center red */
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+/* Library movie grid styling */
+.movie-grid-scroll {
+    -fx-background: #121212;
+    -fx-background-color: transparent;
+    -fx-fit-to-width: true;
+}
+
+.movie-grid {
+    -fx-background-color: #121212;
+    -fx-hgap: 20px;
+    -fx-vgap: 20px;
+    -fx-padding: 20px;
+}
+
+/* Movie Card styling */
+.movie-card {
+    -fx-background-color: #1a1a1a;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px;
+    -fx-spacing: 6px;
+    -fx-pref-width: 166px;
+    -fx-pref-height: 290px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 6, 0.0, 0, 3);
+    -fx-alignment: top-center;
+}
+
+.movie-card:hover {
+    -fx-background-color: #222222;
+    -fx-scale-x: 1.04;
+    -fx-scale-y: 1.04;
+    -fx-effect: dropshadow(three-pass-box, rgba(229,9,20,0.25), 10, 0.0, 0, 4);
+}
+
+.movie-poster-container {
+    -fx-background-color: #282828;
+    -fx-background-radius: 6px;
+    -fx-pref-width: 150px;
+    -fx-pref-height: 220px;
+    -fx-alignment: center;
+}
+
+.movie-poster {
+    -fx-fit-width: 150px;
+    -fx-fit-height: 220px;
+    -fx-preserve-ratio: false;
+}
+
+.movie-title-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+    -fx-wrap-text: false;
+    -fx-text-overrun: ellipsis;
+    -fx-max-width: 150px;
+}
+
+.movie-year-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #888888;
+}
+
+/* Rating Control */
+.rating-bar {
+    -fx-spacing: 2px;
+    -fx-alignment: center-left;
+}
+
+.rating-reel {
+    -fx-font-size: 14px;
+    -fx-text-fill: #888888;
+    -fx-cursor: hand;
+}
+
+.rating-reel.active {
+    -fx-text-fill: #ffb703; /* Gold color for rated state */
+}
+
+/* Detail overlay styling */
+.detail-container {
+    -fx-background-color: #121212;
+    -fx-padding: 30px;
+}
+
+.detail-cover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.7), 15, 0.0, 0, 6);
+    -fx-background-radius: 8px;
+    -fx-fit-width: 240px;
+    -fx-fit-height: 360px;
+}
+
+.detail-title {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+}
+
+.detail-description {
+    -fx-font-size: 14px;
+    -fx-text-fill: #cccccc;
+    -fx-line-spacing: 4px;
+}
+
+.detail-metadata {
+    -fx-font-size: 13px;
+    -fx-text-fill: #999999;
+}
+
+/* Style for action buttons */
+.button-primary {
+    -fx-background-color: #e50914;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.button-primary:hover {
+    -fx-background-color: #f6121d;
+}
+
+.button-secondary {
+    -fx-background-color: #2a2a2a;
+    -fx-text-fill: #e0e0e0;
+}
+
+.button-secondary:hover {
+    -fx-background-color: #383838;
+    -fx-text-fill: white;
+}

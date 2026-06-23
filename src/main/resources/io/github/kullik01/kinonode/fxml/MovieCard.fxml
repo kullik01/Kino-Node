@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="io.github.kullik01.kinonode.controller.MovieCardController"
+      styleClass="movie-card" onMouseClicked="#onCardClicked">
+    
+    <VBox styleClass="movie-poster-container">
+        <ImageView fx:id="imgPoster" styleClass="movie-poster" />
+    </VBox>
+    
+    <Label fx:id="lblTitle" styleClass="movie-title-label" />
+    <Label fx:id="lblYear" styleClass="movie-year-label" />
+</VBox>

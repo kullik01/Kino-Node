@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="io.github.kullik01.kinonode.controller.MainController"
+            prefHeight="768.0" prefWidth="1024.0"
+            stylesheets="/io/github/kullik01/kinonode/css/theme.css">
+    
+    <!-- Sidebar on the Left -->
+    <left>
+        <VBox styleClass="sidebar">
+            <Label text="KinoNode" styleClass="sidebar-title"/>
+            
+            <Button fx:id="btnLibrary" text="🎬  Library" styleClass="sidebar-button" onAction="#showLibrary"/>
+            <Button fx:id="btnWatchlists" text="📁  Watchlists" styleClass="sidebar-button" onAction="#showWatchlists"/>
+            <Button fx:id="btnSettings" text="⚙️  Settings" styleClass="sidebar-button" onAction="#showSettings"/>
+        </VBox>
+    </left>
+    
+    <!-- Main Content Area in the Center -->
+    <center>
+        <StackPane fx:id="contentArea" style="-fx-background-color: #121212;">
+            <!-- Views will be dynamically loaded and swapped here -->
+        </StackPane>
+    </center>
+</BorderPane>

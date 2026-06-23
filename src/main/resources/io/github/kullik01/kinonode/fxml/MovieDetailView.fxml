@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="20.0" styleClass="detail-pane"
+      stylesheets="/io/github/kullik01/kinonode/css/theme.css"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="io.github.kullik01.kinonode.controller.MovieDetailController">
+    
+    <padding>
+        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+    </padding>
+
+    <!-- Header / Back button -->
+    <HBox alignment="CENTER_LEFT" spacing="15.0">
+        <Button onAction="#goBack" styleClass="button-secondary" text="⬅ Back to Library" />
+        <Label fx:id="lblHeaderTitle" styleClass="detail-title" text="Movie Details" />
+    </HBox>
+
+    <HBox spacing="30.0" VBox.vgrow="ALWAYS">
+        
+        <!-- Left Side: Poster and Watch/Play Actions -->
+        <VBox alignment="TOP_CENTER" prefWidth="250.0" spacing="15.0">
+            <VBox style="-fx-pref-width: 240px; -fx-pref-height: 360px; -fx-background-radius: 8px;" styleClass="movie-poster-container">
+                <ImageView fx:id="imgPoster" fitHeight="360.0" fitWidth="240.0" styleClass="detail-cover" />
+            </VBox>
+            <Button onAction="#changePoster" styleClass="button-secondary" prefWidth="200.0" text="🖼 Change Poster" />
+            
+            <VBox alignment="CENTER" spacing="10.0" style="-fx-padding: 15px 0 0 0;">
+                <Button fx:id="btnPlay" onAction="#playMovie" style="-fx-font-size: 16px;" styleClass="button-primary" prefWidth="200.0" text="▶ Play Movie" />
+                <Button fx:id="btnTrailer" onAction="#watchTrailer" styleClass="button-secondary" prefWidth="200.0" text="📺 Watch Trailer" />
+            </VBox>
+        </VBox>
+
+        <!-- Right Side: Editable details and custom rating -->
+        <VBox spacing="15.0" HBox.hgrow="ALWAYS">
+            
+            <GridPane hgap="15.0" vgap="15.0" VBox.vgrow="ALWAYS">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="100.0" prefWidth="120.0" />
+                    <ColumnConstraints hgrow="ALWAYS" />
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints minHeight="30.0" />
+                    <RowConstraints minHeight="30.0" />
+                    <RowConstraints minHeight="30.0" />
+                    <RowConstraints minHeight="100.0" prefHeight="120.0" valignment="TOP" />
+                    <RowConstraints minHeight="30.0" />
+                    <RowConstraints minHeight="30.0" />
+                    <RowConstraints minHeight="30.0" />
+                </rowConstraints>
+                
+                <!-- Title -->
+                <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="Title:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <TextField fx:id="txtTitle" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                <!-- Year -->
+                <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="Release Year:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <TextField fx:id="txtYear" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                <!-- Genre -->
+                <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="Genre:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <TextField fx:id="txtGenre" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                <!-- Description -->
+                <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <TextArea fx:id="txtDescription" prefHeight="100.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                <!-- Trailer URL -->
+                <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="Trailer Link:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                <TextField fx:id="txtTrailerUrl" promptText="https://www.youtube.com/watch?v=..." GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                
+                <!-- Rating -->
+                <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="Rating:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                <HBox fx:id="ratingContainer" alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                    <!-- Rating buttons and text will be populated dynamically -->
+                </HBox>
+
+                <!-- Watchlist association -->
+                <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="Watchlists:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                    <Label fx:id="lblWatchlistsList" style="-fx-text-fill: #aaaaaa;" text="None" HBox.hgrow="ALWAYS" />
+                    <MenuButton fx:id="menuWatchlists" styleClass="button-secondary" text="Add to Watchlist" />
+                </HBox>
+            </GridPane>
+
+            <!-- Feedback status -->
+            <Label fx:id="lblStatus" style="-fx-text-fill: #ffb703;" text="" />
+
+            <!-- Action buttons -->
+            <HBox alignment="CENTER_RIGHT" spacing="15.0">
+                <Button onAction="#saveChanges" styleClass="button-primary" prefWidth="130.0" text="Save Changes" />
+                <Button onAction="#cancelEdit" styleClass="button-secondary" prefWidth="100.0" text="Cancel" />
+            </HBox>
+        </VBox>
+
+    </HBox>
+</VBox>

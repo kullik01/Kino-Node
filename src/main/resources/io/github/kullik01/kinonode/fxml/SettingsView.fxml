@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="20.0" styleClass="detail-pane"
+      stylesheets="/io/github/kullik01/kinonode/css/theme.css"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="io.github.kullik01.kinonode.controller.SettingsController">
+    
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
+
+    <Label text="Application Settings" styleClass="detail-title" />
+
+    <!-- Workspaces Section -->
+    <VBox spacing="10.0">
+        <Label text="Workspace Folders" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;" />
+        <Label text="Root folders recursively scanned for video files" style="-fx-font-size: 12px; -fx-text-fill: #888888;" />
+        <HBox spacing="10.0">
+            <ListView fx:id="lstWorkspaces" prefHeight="150.0" HBox.hgrow="ALWAYS"
+                      style="-fx-background-color: #1e1e1e; -fx-border-color: #333333;" />
+            <VBox spacing="10.0">
+                <Button fx:id="btnAddFolder" onAction="#addWorkspace" prefWidth="100.0" styleClass="button-secondary" text="➕ Add" />
+                <Button fx:id="btnRemoveFolder" onAction="#removeWorkspace" prefWidth="100.0" styleClass="button-secondary" text="➖ Remove" />
+            </VBox>
+        </HBox>
+    </VBox>
+
+    <!-- Player & Extensions Section -->
+    <GridPane hgap="15.0" vgap="15.0">
+        <columnConstraints>
+            <ColumnConstraints minWidth="150.0" prefWidth="180.0" />
+            <ColumnConstraints hgrow="ALWAYS" />
+            <ColumnConstraints minWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints minHeight="30.0" />
+            <RowConstraints minHeight="30.0" />
+        </rowConstraints>
+
+        <!-- Player Executable -->
+        <Label text="External Media Player:" style="-fx-text-fill: white; -fx-font-weight: bold;"
+               GridPane.columnIndex="0" GridPane.rowIndex="0" />
+        <TextField fx:id="txtPlayerPath" promptText="Path to player binary (e.g. mpv.exe, vlc.exe)"
+                   GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <Button onAction="#browsePlayer" styleClass="button-secondary" text="📂 Browse"
+                GridPane.columnIndex="2" GridPane.rowIndex="0" />
+
+        <!-- Video Extensions -->
+        <Label text="Video Extensions:" style="-fx-text-fill: white; -fx-font-weight: bold;"
+               GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <TextField fx:id="txtExtensions" promptText="mp4, mkv, avi, mov, m4v"
+                   GridPane.columnIndex="1" GridPane.rowIndex="1" />
+    </GridPane>
+
+    <!-- Save State / Feedback Label -->
+    <Label fx:id="lblStatus" text="" style="-fx-text-fill: #ffb703; -fx-font-size: 14px;" />
+
+    <!-- Bottom Actions -->
+    <HBox alignment="CENTER_LEFT" spacing="15.0">
+        <Button onAction="#saveSettings" styleClass="button-primary" prefWidth="150.0" text="Save Settings" />
+    </HBox>
+</VBox>

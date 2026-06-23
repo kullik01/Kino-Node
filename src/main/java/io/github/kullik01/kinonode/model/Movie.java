@@ -1,0 +1,116 @@
+package io.github.kullik01.kinonode.model;
+
+import java.time.Instant;
+
+public class Movie {
+    private Integer id;
+    private String filePath;
+    private String title;
+    private Integer year;
+    private String genre;
+    private String description;
+    private Integer rating; // 0-10 or null
+    private String coverImagePath;
+    private String trailerUrl;
+    private Instant dateAdded;
+
+    public Movie() {
+        this.dateAdded = Instant.now();
+    }
+
+    public Movie(String filePath, String title) {
+        this.filePath = filePath;
+        this.title = title;
+        this.dateAdded = Instant.now();
+    }
+
+    // Getters and Setters
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getRating() {
+        return rating;
+    }
+
+    public void setRating(Integer rating) {
+        this.rating = rating;
+    }
+
+    public String getCoverImagePath() {
+        return coverImagePath;
+    }
+
+    public void setCoverImagePath(String coverImagePath) {
+        this.coverImagePath = coverImagePath;
+    }
+
+    public String getTrailerUrl() {
+        return trailerUrl;
+    }
+
+    public void setTrailerUrl(String trailerUrl) {
+        this.trailerUrl = trailerUrl;
+    }
+
+    public Instant getDateAdded() {
+        return dateAdded;
+    }
+
+    public void setDateAdded(Instant dateAdded) {
+        this.dateAdded = dateAdded;
+    }
+
+    @Override
+    public String toString() {
+        return "Movie{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", filePath='" + filePath + '\'' +
+                '}';
+    }
+}
