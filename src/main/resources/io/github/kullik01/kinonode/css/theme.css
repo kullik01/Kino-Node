@@ -1,32 +1,32 @@
-/* Custom KinoNode media-center stylesheet, sits on top of AtlantaFX */
+/* Modern dynamic stylesheet for KinoNode using AtlantaFX variables */
 
 .root {
     -fx-font-family: 'Segoe UI', Inter, Helvetica, Arial, sans-serif;
-    -fx-background-color: #121212;
-    -fx-text-fill: #e0e0e0;
+    -fx-background-color: -color-bg-default;
+    -fx-text-fill: -color-fg-default;
 }
 
 /* Sidebar navigation styling */
 .sidebar {
-    -fx-background-color: #181818;
+    -fx-background-color: -color-bg-subtle;
     -fx-padding: 25px 15px;
     -fx-spacing: 15px;
     -fx-pref-width: 230px;
-    -fx-border-color: #282828;
+    -fx-border-color: -color-border-default;
     -fx-border-width: 0 1px 0 0;
 }
 
 .sidebar-title {
     -fx-font-size: 22px;
     -fx-font-weight: bold;
-    -fx-text-fill: #ffffff;
+    -fx-text-fill: -color-fg-default;
     -fx-padding: 0 0 20px 10px;
 }
 
 .sidebar-button {
     -fx-alignment: center-left;
     -fx-background-color: transparent;
-    -fx-text-fill: #aaaaaa;
+    -fx-text-fill: -color-fg-muted;
     -fx-font-size: 14px;
     -fx-padding: 10px 15px;
     -fx-background-radius: 6px;
@@ -35,25 +35,25 @@
 }
 
 .sidebar-button:hover {
-    -fx-background-color: #242424;
-    -fx-text-fill: #ffffff;
+    -fx-background-color: -color-bg-hover;
+    -fx-text-fill: -color-fg-default;
 }
 
 .sidebar-button:selected, .sidebar-button.active {
-    -fx-background-color: #e50914; /* Media-center red */
-    -fx-text-fill: #ffffff;
+    -fx-background-color: -color-accent-emphasis;
+    -fx-text-fill: -color-fg-on-accent;
     -fx-font-weight: bold;
 }
 
 /* Library movie grid styling */
 .movie-grid-scroll {
-    -fx-background: #121212;
+    -fx-background: -color-bg-default;
     -fx-background-color: transparent;
     -fx-fit-to-width: true;
 }
 
 .movie-grid {
-    -fx-background-color: #121212;
+    -fx-background-color: -color-bg-default;
     -fx-hgap: 20px;
     -fx-vgap: 20px;
     -fx-padding: 20px;
@@ -61,26 +61,30 @@
 
 /* Movie Card styling */
 .movie-card {
-    -fx-background-color: #1a1a1a;
+    -fx-background-color: -color-bg-overlay;
     -fx-background-radius: 8px;
     -fx-padding: 8px;
     -fx-spacing: 6px;
     -fx-pref-width: 166px;
     -fx-pref-height: 290px;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 6, 0.0, 0, 3);
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 6, 0.0, 0, 3);
     -fx-alignment: top-center;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
 }
 
 .movie-card:hover {
-    -fx-background-color: #222222;
+    -fx-background-color: -color-bg-hover;
     -fx-scale-x: 1.04;
     -fx-scale-y: 1.04;
-    -fx-effect: dropshadow(three-pass-box, rgba(229,9,20,0.25), 10, 0.0, 0, 4);
+    -fx-effect: dropshadow(three-pass-box, -color-accent-muted, 8, 0.0, 0, 3);
+    -fx-border-color: -color-accent-emphasis;
 }
 
 .movie-poster-container {
-    -fx-background-color: #282828;
+    -fx-background-color: -color-bg-subtle;
     -fx-background-radius: 6px;
     -fx-pref-width: 150px;
     -fx-pref-height: 220px;
@@ -96,7 +100,7 @@
 .movie-title-label {
     -fx-font-size: 13px;
     -fx-font-weight: bold;
-    -fx-text-fill: #ffffff;
+    -fx-text-fill: -color-fg-default;
     -fx-wrap-text: false;
     -fx-text-overrun: ellipsis;
     -fx-max-width: 150px;
@@ -104,7 +108,7 @@
 
 .movie-year-label {
     -fx-font-size: 11px;
-    -fx-text-fill: #888888;
+    -fx-text-fill: -color-fg-muted;
 }
 
 /* Rating Control */
@@ -115,22 +119,22 @@
 
 .rating-reel {
     -fx-font-size: 14px;
-    -fx-text-fill: #888888;
+    -fx-text-fill: -color-fg-muted;
     -fx-cursor: hand;
 }
 
 .rating-reel.active {
-    -fx-text-fill: #ffb703; /* Gold color for rated state */
+    -fx-text-fill: #ffb703; /* Gold color for ratings */
 }
 
 /* Detail overlay styling */
 .detail-container {
-    -fx-background-color: #121212;
+    -fx-background-color: -color-bg-default;
     -fx-padding: 30px;
 }
 
 .detail-cover {
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.7), 15, 0.0, 0, 6);
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 15, 0.0, 0, 6);
     -fx-background-radius: 8px;
     -fx-fit-width: 240px;
     -fx-fit-height: 360px;
@@ -139,37 +143,49 @@
 .detail-title {
     -fx-font-size: 32px;
     -fx-font-weight: bold;
-    -fx-text-fill: #ffffff;
+    -fx-text-fill: -color-fg-default;
 }
 
 .detail-description {
     -fx-font-size: 14px;
-    -fx-text-fill: #cccccc;
+    -fx-text-fill: -color-fg-default;
     -fx-line-spacing: 4px;
 }
 
 .detail-metadata {
     -fx-font-size: 13px;
-    -fx-text-fill: #999999;
+    -fx-text-fill: -color-fg-muted;
 }
 
-/* Style for action buttons */
+/* Accent Buttons */
 .button-primary {
-    -fx-background-color: #e50914;
-    -fx-text-fill: white;
+    -fx-background-color: -color-accent-emphasis;
+    -fx-text-fill: -color-fg-on-accent;
     -fx-font-weight: bold;
 }
 
 .button-primary:hover {
-    -fx-background-color: #f6121d;
+    -fx-background-color: -color-accent-fg;
 }
 
 .button-secondary {
-    -fx-background-color: #2a2a2a;
-    -fx-text-fill: #e0e0e0;
+    -fx-background-color: -color-bg-subtle;
+    -fx-text-fill: -color-fg-default;
 }
 
 .button-secondary:hover {
-    -fx-background-color: #383838;
-    -fx-text-fill: white;
+    -fx-background-color: -color-bg-hover;
+}
+
+/* Custom Text Inputs */
+.text-input {
+    -fx-background-color: -color-bg-default;
+    -fx-text-fill: -color-fg-default;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.text-input:focused {
+    -fx-border-color: -color-accent-emphasis;
 }

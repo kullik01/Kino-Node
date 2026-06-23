@@ -31,8 +31,6 @@ public class WatchlistsController implements Refreshable {
     @FXML private Label lblMovieCount;
     @FXML private ListView<Movie> lstMovies;
 
-    @FXML private Button btnMoveUp;
-    @FXML private Button btnMoveDown;
     @FXML private Button btnRemoveMovie;
 
     private WatchlistRepository watchlistRepository;
@@ -125,6 +123,11 @@ public class WatchlistsController implements Refreshable {
             }
         });
 
+        // Update button states on selection changes
+        lstMovies.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            updateButtonStates();
+        });
+
         updateButtonStates();
         refresh();
     }
@@ -169,8 +172,6 @@ public class WatchlistsController implements Refreshable {
 
     private void updateButtonStates() {
         boolean selected = lstMovies.getSelectionModel().getSelectedItem() != null;
-        btnMoveUp.setDisable(!selected);
-        btnMoveDown.setDisable(!selected);
         btnRemoveMovie.setDisable(!selected);
     }
 
@@ -227,33 +228,7 @@ public class WatchlistsController implements Refreshable {
         }
     }
 
-    @FXML
-    private void moveMovieUp() {
-        int index = lstMovies.getSelectionModel().getSelectedIndex();
-        if (index <= 0 || selectedWatchlist == null) return;
 
-        List<Movie> list = new ArrayList<>(lstMovies.getItems());
-        Collections.swap(list, index, index - 1);
-        saveAndReloadOrder(list, index - 1);
-    }
-
-    @FXML
-    private void moveMovieDown() {
-        int index = lstMovies.getSelectionModel().getSelectedIndex();
-        if (index < 0 || index >= lstMovies.getItems().size() - 1 || selectedWatchlist == null) return;
-
-        List<Movie> list = new ArrayList<>(lstMovies.getItems());
-        Collections.swap(list, index, index + 1);
-        saveAndReloadOrder(list, index + 1);
-    }
-
-    private void saveAndReloadOrder(List<Movie> swapedList, int newSelectIndex) {
-        List<Integer> ids = swapedList.stream().map(Movie::getId).collect(Collectors.toList());
-        watchlistRepository.updateMoviePositionsInWatchlist(selectedWatchlist.getId(), ids);
-        
-        loadWatchlistMovies();
-        lstMovies.getSelectionModel().select(newSelectIndex);
-    }
 
     @FXML
     private void removeMovie() {

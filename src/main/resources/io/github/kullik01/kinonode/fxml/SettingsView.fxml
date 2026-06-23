@@ -25,14 +25,13 @@
 
     <!-- Workspaces Section -->
     <VBox spacing="10.0">
-        <Label text="Workspace Folders" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;" />
-        <Label text="Root folders recursively scanned for video files" style="-fx-font-size: 12px; -fx-text-fill: #888888;" />
+        <Label text="Workspace Folders" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+        <Label text="Root folders recursively scanned for video files" style="-fx-font-size: 12px; -fx-text-fill: -color-fg-muted;" />
         <HBox spacing="10.0">
-            <ListView fx:id="lstWorkspaces" prefHeight="150.0" HBox.hgrow="ALWAYS"
-                      style="-fx-background-color: #1e1e1e; -fx-border-color: #333333;" />
+            <ListView fx:id="lstWorkspaces" prefHeight="150.0" HBox.hgrow="ALWAYS" />
             <VBox spacing="10.0">
                 <Button fx:id="btnAddFolder" onAction="#addWorkspace" prefWidth="100.0" styleClass="button-secondary" text="➕ Add" />
-                <Button fx:id="btnRemoveFolder" onAction="#removeWorkspace" prefWidth="100.0" styleClass="button-secondary" text="➖ Remove" />
+                <Button fx:id="btnRemoveFolder" onAction="#removeWorkspace" prefWidth="100.0" styleClass="button-secondary" text="🗑 Remove" />
             </VBox>
         </HBox>
     </VBox>
@@ -50,25 +49,35 @@
         </rowConstraints>
 
         <!-- Player Executable -->
-        <Label text="External Media Player:" style="-fx-text-fill: white; -fx-font-weight: bold;"
-               GridPane.columnIndex="0" GridPane.rowIndex="0" />
-        <TextField fx:id="txtPlayerPath" promptText="Path to player binary (e.g. mpv.exe, vlc.exe)"
-                   GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <Label text="External Media Player:" style="-fx-font-weight: bold;"
+               GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
+        <VBox spacing="4.0" GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                <TextField fx:id="txtPlayerPath" promptText="Path to player binary (e.g. mpv.exe, vlc.exe)" HBox.hgrow="ALWAYS" />
+                <Label fx:id="lblPlayerStatus" />
+            </HBox>
+            <Label fx:id="lblPlayerError" style="-fx-text-fill: -color-danger-fg; -fx-font-size: 11px;" visible="false" managed="false" />
+        </VBox>
         <Button onAction="#browsePlayer" styleClass="button-secondary" text="📂 Browse"
-                GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                GridPane.columnIndex="2" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
 
         <!-- Video Extensions -->
-        <Label text="Video Extensions:" style="-fx-text-fill: white; -fx-font-weight: bold;"
-               GridPane.columnIndex="0" GridPane.rowIndex="1" />
-        <TextField fx:id="txtExtensions" promptText="mp4, mkv, avi, mov, m4v"
-                   GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        <Label text="Video Extensions:" style="-fx-font-weight: bold;"
+               GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+        <VBox spacing="4.0" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                <TextField fx:id="txtExtensions" promptText="mp4, mkv, avi, mov, m4v" HBox.hgrow="ALWAYS" />
+                <Label fx:id="lblExtensionsStatus" />
+            </HBox>
+            <Label fx:id="lblExtensionsError" style="-fx-text-fill: -color-danger-fg; -fx-font-size: 11px;" visible="false" managed="false" />
+        </VBox>
     </GridPane>
 
     <!-- Save State / Feedback Label -->
-    <Label fx:id="lblStatus" text="" style="-fx-text-fill: #ffb703; -fx-font-size: 14px;" />
+    <Label fx:id="lblStatus" text="" style="-fx-text-fill: -color-success-fg; -fx-font-size: 14px;" />
 
     <!-- Bottom Actions -->
     <HBox alignment="CENTER_LEFT" spacing="15.0">
-        <Button onAction="#saveSettings" styleClass="button-primary" prefWidth="150.0" text="Save Settings" />
+        <Button fx:id="btnSave" onAction="#saveSettings" styleClass="button-primary" prefWidth="150.0" text="Save Settings" />
     </HBox>
 </VBox>

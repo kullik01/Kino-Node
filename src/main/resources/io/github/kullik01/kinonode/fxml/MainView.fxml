@@ -2,7 +2,9 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import atlantafx.base.controls.ToggleSwitch?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
@@ -19,14 +21,23 @@
             
             <Button fx:id="btnLibrary" text="🎬  Library" styleClass="sidebar-button" onAction="#showLibrary"/>
             <Button fx:id="btnWatchlists" text="📁  Watchlists" styleClass="sidebar-button" onAction="#showWatchlists"/>
-            <Button fx:id="btnSettings" text="⚙️  Settings" styleClass="sidebar-button" onAction="#showSettings"/>
+            <Button fx:id="btnSettings" text="⚙  Settings" styleClass="sidebar-button" onAction="#showSettings"/>
         </VBox>
     </left>
     
     <!-- Main Content Area in the Center -->
     <center>
-        <StackPane fx:id="contentArea" style="-fx-background-color: #121212;">
-            <!-- Views will be dynamically loaded and swapped here -->
-        </StackPane>
+        <VBox style="-fx-background-color: -color-bg-default;">
+            <!-- Header HBox containing the Theme Toggle Switch in the Upper Right -->
+            <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 15 25 10 25; -fx-background-color: -color-bg-default;">
+                <HBox HBox.hgrow="ALWAYS"/>
+                <ToggleSwitch fx:id="btnThemeToggle" text="☀ Light Mode"/>
+            </HBox>
+            
+            <!-- Actual Content Area for Views swapping -->
+            <StackPane fx:id="contentArea" VBox.vgrow="ALWAYS">
+                <!-- Views will be dynamically loaded and swapped here -->
+            </StackPane>
+        </VBox>
     </center>
 </BorderPane>

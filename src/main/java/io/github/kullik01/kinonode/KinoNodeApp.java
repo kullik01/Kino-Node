@@ -31,6 +31,7 @@
 package io.github.kullik01.kinonode;
 
 import atlantafx.base.theme.PrimerDark;
+import atlantafx.base.theme.PrimerLight;
 import io.github.kullik01.kinonode.service.AppContext;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -51,8 +52,14 @@ public class KinoNodeApp extends Application {
         // Initialize Database and Repositories
         AppContext.getInstance();
 
-        // Apply AtlantaFX Dark theme by default
-        Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
+        // Apply theme from settings
+        var settingsRepo = AppContext.getInstance().getSettingsRepository();
+        String theme = settingsRepo.get("theme_mode", "light");
+        if ("dark".equals(theme)) {
+            Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
+        } else {
+            Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+        }
 
         URL fxmlLocation = getClass().getResource("/io/github/kullik01/kinonode/fxml/MainView.fxml");
         if (fxmlLocation == null) {

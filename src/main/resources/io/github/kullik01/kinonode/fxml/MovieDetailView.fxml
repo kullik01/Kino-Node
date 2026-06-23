@@ -63,41 +63,41 @@
                 </rowConstraints>
                 
                 <!-- Title -->
-                <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="Title:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <Label style="-fx-font-weight: bold;" text="Title:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                 <TextField fx:id="txtTitle" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
                 <!-- Year -->
-                <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="Release Year:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <Label style="-fx-font-weight: bold;" text="Release Year:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                 <TextField fx:id="txtYear" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
                 <!-- Genre -->
-                <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="Genre:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <Label style="-fx-font-weight: bold;" text="Genre:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
                 <TextField fx:id="txtGenre" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
                 <!-- Description -->
-                <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <Label style="-fx-font-weight: bold;" text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
                 <TextArea fx:id="txtDescription" prefHeight="100.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
                 <!-- Trailer URL -->
-                <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="Trailer Link:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                <Label style="-fx-font-weight: bold;" text="Trailer Link:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
                 <TextField fx:id="txtTrailerUrl" promptText="https://www.youtube.com/watch?v=..." GridPane.columnIndex="1" GridPane.rowIndex="4" />
                 
                 <!-- Rating -->
-                <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="Rating:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                <Label style="-fx-font-weight: bold;" text="Rating:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
                 <HBox fx:id="ratingContainer" alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
                     <!-- Rating buttons and text will be populated dynamically -->
                 </HBox>
 
                 <!-- Watchlist association -->
-                <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="Watchlists:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                <Label style="-fx-font-weight: bold;" text="Watchlists:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
                 <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
-                    <Label fx:id="lblWatchlistsList" style="-fx-text-fill: #aaaaaa;" text="None" HBox.hgrow="ALWAYS" />
+                    <Label fx:id="lblWatchlistsList" style="-fx-text-fill: -color-fg-muted;" text="None" HBox.hgrow="ALWAYS" />
                     <MenuButton fx:id="menuWatchlists" styleClass="button-secondary" text="Add to Watchlist" />
                 </HBox>
             </GridPane>
 
             <!-- Feedback status -->
-            <Label fx:id="lblStatus" style="-fx-text-fill: #ffb703;" text="" />
+            <Label fx:id="lblStatus" style="-fx-text-fill: -color-success-fg;" text="" />
 
             <!-- Action buttons -->
             <HBox alignment="CENTER_RIGHT" spacing="15.0">

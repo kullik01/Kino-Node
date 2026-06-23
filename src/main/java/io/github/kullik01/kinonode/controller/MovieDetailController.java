@@ -217,7 +217,7 @@ public class MovieDetailController {
                 });
                 menuWatchlists.getItems().add(item);
             } else {
-                MenuItem item = new MenuItem("Remove from: " + w.getName());
+                MenuItem item = new MenuItem("🗑 Remove from: " + w.getName());
                 item.setOnAction(e -> {
                     watchlistRepository.removeMovieFromWatchlist(w.getId(), movie.getId());
                     refreshWatchlistStatus();
