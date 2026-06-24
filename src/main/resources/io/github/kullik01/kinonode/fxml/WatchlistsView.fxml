@@ -25,7 +25,7 @@
             <Button maxWidth="Infinity" onAction="#createWatchlist" styleClass="button-primary" text="➕" HBox.hgrow="ALWAYS">
                 <tooltip><Tooltip showDelay="250ms" text="New"/></tooltip>
             </Button>
-            <Button maxWidth="Infinity" onAction="#renameWatchlist" styleClass="button-secondary" text="✏" HBox.hgrow="ALWAYS">
+            <Button maxWidth="Infinity" onAction="#renameWatchlist" styleClass="button-secondary" text="📝" HBox.hgrow="ALWAYS">
                 <tooltip><Tooltip showDelay="250ms" text="Rename"/></tooltip>
             </Button>
             <Button maxWidth="Infinity" onAction="#deleteWatchlist" styleClass="button-secondary" text="➖" HBox.hgrow="ALWAYS">

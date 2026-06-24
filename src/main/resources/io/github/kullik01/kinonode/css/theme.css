@@ -270,9 +270,7 @@
     -fx-fill: -color-fg-muted;
 }
 
-.sidebar-button:hover .settings-svg {
-    -fx-fill: -color-fg-default;
-}
+/* Hover effect removed for Settings header of tabs */
 
 .sidebar-button:selected .settings-svg,
 .sidebar-button.active .settings-svg {
