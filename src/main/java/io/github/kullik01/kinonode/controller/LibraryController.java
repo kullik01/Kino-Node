@@ -37,6 +37,7 @@ public class LibraryController implements Refreshable {
     private LibraryScanService libraryScanService;
     private List<Movie> allMovies = new ArrayList<>();
     private Task<LibraryScanService.ScanResult> activeScanTask;
+    private MovieDetailController currentMovieDetailController;
 
     @FXML
     public void initialize() {
@@ -62,6 +63,7 @@ public class LibraryController implements Refreshable {
 
     @Override
     public void refresh() {
+        currentMovieDetailController = null;
         allMovies = movieRepository.findAll();
         filterAndDisplayMovies();
     }
@@ -119,11 +121,18 @@ public class LibraryController implements Refreshable {
             Parent detailView = loader.load();
             
             MovieDetailController controller = loader.getController();
+            currentMovieDetailController = controller;
             controller.setMovie(movie);
 
             // Query current StackPane in MainView
-            StackPane contentArea = (StackPane) txtSearch.getScene().lookup("#contentArea");
+            javafx.scene.layout.StackPane contentArea = (javafx.scene.layout.StackPane) txtSearch.getScene().lookup("#contentArea");
             if (contentArea != null) {
+                javafx.scene.Node libraryViewNode = contentArea.getChildren().get(0);
+                controller.setOnBack(() -> {
+                    currentMovieDetailController = null;
+                    contentArea.getChildren().setAll(libraryViewNode);
+                    refresh();
+                });
                 contentArea.getChildren().setAll(detailView);
             }
         } catch (IOException e) {
@@ -181,5 +190,22 @@ public class LibraryController implements Refreshable {
         if (activeScanTask != null) {
             activeScanTask.cancel();
         }
+    }
+    public boolean hasUnsavedChanges() {
+        if (currentMovieDetailController != null) {
+            return currentMovieDetailController.hasUnsavedChanges();
+        }
+        return false;
+    }
+
+    public boolean performSave() {
+        if (currentMovieDetailController != null) {
+            return currentMovieDetailController.performSave();
+        }
+        return true;
+    }
+
+    public void clearMovieDetail() {
+        currentMovieDetailController = null;
     }
 }

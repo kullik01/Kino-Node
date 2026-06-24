@@ -89,21 +89,21 @@ public class WatchlistsController implements Refreshable {
                     titleLabel.setText(item.getTitle() + (item.getYear() != null ? " (" + item.getYear() + ")" : ""));
                     
                     ratingBox.getChildren().clear();
-                    if (item.getRating() != null) {
-                        for (int i = 1; i <= 10; i++) {
-                            Label reel = new Label("🎥");
-                            if (i <= item.getRating()) {
-                                reel.setStyle("-fx-font-size: 13px; -fx-text-fill: #ED8B00; -fx-opacity: 1.0;");
-                            } else {
-                                reel.setStyle("-fx-font-size: 13px; -fx-text-fill: #444444; -fx-opacity: 0.3;");
-                            }
-                            ratingBox.getChildren().add(reel);
+                    for (int i = 1; i <= 10; i++) {
+                        Label reel = new Label("🎥");
+                        reel.setMinSize(javafx.scene.control.Label.USE_PREF_SIZE, javafx.scene.control.Label.USE_PREF_SIZE);
+                        if (item.getRating() != null && i <= item.getRating()) {
+                            reel.setStyle("-fx-font-size: 13px; -fx-text-fill: #ED8B00; -fx-opacity: 1.0;");
+                        } else {
+                            reel.setStyle("-fx-font-size: 13px; -fx-text-fill: #444444; -fx-opacity: 0.3;");
                         }
+                        ratingBox.getChildren().add(reel);
+                    }
+                    if (item.getRating() != null) {
                         ratingTextLabel.setText(item.getRating() + "/10");
                         ratingTextLabel.setStyle("-fx-text-fill: #ED8B00; -fx-font-weight: bold; -fx-padding: 0 0 0 5px;");
                     } else {
-                        ratingTextLabel.setText("Unrated");
-                        ratingTextLabel.setStyle("-fx-text-fill: #555555; -fx-font-weight: bold; -fx-padding: 0 0 0 5px;");
+                        ratingTextLabel.setText("");
                     }
                     
                     // Thumbnail

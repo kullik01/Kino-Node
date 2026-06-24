@@ -140,23 +140,14 @@ public class MovieDetailController {
         });
         ratingContainer.getChildren().add(btnClear);
 
-        // '0' Rating button
-        Button btnZero = new Button("0");
-        btnZero.setStyle("-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 2px 5px; -fx-font-size: 13px; -fx-font-weight: bold;");
-        Tooltip zeroTooltip = new Tooltip("Rate 0/10");
-        zeroTooltip.setShowDelay(javafx.util.Duration.millis(250));
-        btnZero.setTooltip(zeroTooltip);
-        btnZero.setOnAction(e -> {
-            currentRating = 0;
-            updateRatingUI();
-        });
-        ratingContainer.getChildren().add(btnZero);
+
 
         // 10 Movie Camera icons (1 to 10)
         List<Label> reels = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
             final int score = i;
             Label reel = new Label("🎥");
+            reel.setMinSize(javafx.scene.control.Label.USE_PREF_SIZE, javafx.scene.control.Label.USE_PREF_SIZE);
             reel.getStyleClass().add("rating-reel");
             reel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-padding: 0 1px;");
             Tooltip reelTooltip = new Tooltip("Rate " + score + "/10");
@@ -170,35 +161,39 @@ public class MovieDetailController {
             ratingContainer.getChildren().add(reel);
         }
 
+        // Numerical display label
+        Label lblRatingVal = new Label();
+        lblRatingVal.setStyle("-fx-text-fill: #ED8B00; -fx-font-weight: bold; -fx-padding: 0 0 0 10px;");
+        ratingContainer.getChildren().add(lblRatingVal);
+
         updateRatingUI();
     }
 
     private void updateRatingUI() {
         // Find rating nodes
-        Button btnZero = (Button) ratingContainer.getChildren().get(1);
+        Label lblRatingVal = (Label) ratingContainer.getChildren().get(ratingContainer.getChildren().size() - 1);
+        
+        Button btnClear = (Button) ratingContainer.getChildren().get(0);
         
         if (currentRating == null) {
-            btnZero.setStyle("-fx-background-color: transparent; -fx-text-fill: #555555; -fx-font-weight: bold;");
-            for (int i = 2; i <= 11; i++) {
-                Label reel = (Label) ratingContainer.getChildren().get(i);
-                reel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #444444; -fx-opacity: 0.3;");
-            }
-        } else if (currentRating == 0) {
-            btnZero.setStyle("-fx-background-color: transparent; -fx-text-fill: #ED8B00; -fx-font-weight: bold;");
-            for (int i = 2; i <= 11; i++) {
-                Label reel = (Label) ratingContainer.getChildren().get(i);
-                reel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #444444; -fx-opacity: 0.3;");
-            }
-        } else {
-            btnZero.setStyle("-fx-background-color: transparent; -fx-text-fill: #555555; -fx-font-weight: bold;");
+            btnClear.setVisible(false);
             for (int i = 1; i <= 10; i++) {
-                Label reel = (Label) ratingContainer.getChildren().get(i + 1);
+                Label reel = (Label) ratingContainer.getChildren().get(i);
+                reel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #444444; -fx-opacity: 0.3;");
+            }
+            lblRatingVal.setText("");
+        } else {
+            btnClear.setVisible(true);
+            for (int i = 1; i <= 10; i++) {
+                Label reel = (Label) ratingContainer.getChildren().get(i);
                 if (i <= currentRating) {
                     reel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #ED8B00; -fx-opacity: 1.0;");
                 } else {
                     reel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #444444; -fx-opacity: 0.3;");
                 }
             }
+            lblRatingVal.setText(currentRating + "/10");
+            lblRatingVal.setStyle("-fx-text-fill: #ED8B00; -fx-font-weight: bold; -fx-padding: 0 0 0 10px;");
         }
     }
 
@@ -334,12 +329,32 @@ public class MovieDetailController {
         }
     }
 
-    @FXML
-    private void saveChanges() {
+    public boolean hasUnsavedChanges() {
+        if (movie == null) return false;
+        if (!java.util.Objects.equals(movie.getTitle(), txtTitle.getText().trim())) return true;
+        
+        String movieYear = movie.getYear() != null ? String.valueOf(movie.getYear()) : "";
+        if (!java.util.Objects.equals(movieYear, txtYear.getText().trim())) return true;
+        
+        String movieGenre = movie.getGenre() != null ? movie.getGenre() : "";
+        if (!java.util.Objects.equals(movieGenre, txtGenre.getText().trim())) return true;
+        
+        String movieDesc = movie.getDescription() != null ? movie.getDescription() : "";
+        if (!java.util.Objects.equals(movieDesc, txtDescription.getText().trim())) return true;
+        
+        String movieTrailer = movie.getTrailerUrl() != null ? movie.getTrailerUrl() : "";
+        if (!java.util.Objects.equals(movieTrailer, txtTrailerUrl.getText().trim())) return true;
+        
+        if (!java.util.Objects.equals(movie.getRating(), currentRating)) return true;
+        
+        return false;
+    }
+
+    public boolean performSave() {
         String title = txtTitle.getText().trim();
         if (title.isEmpty()) {
             showStatus("Title cannot be empty.");
-            return;
+            return false;
         }
 
         Integer year = null;
@@ -348,7 +363,7 @@ public class MovieDetailController {
                 year = Integer.parseInt(txtYear.getText().trim());
             } catch (NumberFormatException e) {
                 showStatus("Release year must be a valid integer number.");
-                return;
+                return false;
             }
         }
 
@@ -356,7 +371,7 @@ public class MovieDetailController {
         if (!trailer.isEmpty()) {
             if (!trailer.contains("youtube.com") && !trailer.contains("youtu.be")) {
                 showStatus("Trailer Link must be a valid YouTube URL.");
-                return;
+                return false;
             }
         }
 
@@ -368,27 +383,68 @@ public class MovieDetailController {
         movie.setRating(currentRating);
 
         movieRepository.update(movie);
-        goBack();
+        showStatus("Movie details saved successfully.");
+        return true;
+    }
+
+    @FXML
+    private void saveChanges() {
+        performSave();
     }
 
     @FXML
     private void cancelEdit() {
-        goBack();
+        if (hasUnsavedChanges()) {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Unsaved Changes");
+            alert.setHeaderText("You have unsaved changes.");
+            alert.setContentText("Do you want to save your changes before leaving?");
+            
+            javafx.scene.control.ButtonType btnTypeSave = new javafx.scene.control.ButtonType("Save");
+            javafx.scene.control.ButtonType btnTypeDiscard = new javafx.scene.control.ButtonType("Discard");
+            javafx.scene.control.ButtonType btnTypeCancel = new javafx.scene.control.ButtonType("Cancel", javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
+            
+            alert.getButtonTypes().setAll(btnTypeSave, btnTypeDiscard, btnTypeCancel);
+            
+            java.util.Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
+            if (result.isPresent()) {
+                if (result.get() == btnTypeSave) {
+                    if (performSave()) {
+                        goBack();
+                    }
+                } else if (result.get() == btnTypeDiscard) {
+                    goBack();
+                }
+            }
+        } else {
+            goBack();
+        }
+    }
+
+    private Runnable onBack;
+
+    public void setOnBack(Runnable onBack) {
+        this.onBack = onBack;
     }
 
     @FXML
     private void goBack() {
-        try {
-            URL url = getClass().getResource("/io/github/kullik01/kinonode/fxml/LibraryView.fxml");
-            FXMLLoader loader = new FXMLLoader(url);
-            Parent libraryView = loader.load();
-
-            StackPane contentArea = (StackPane) lblHeaderTitle.getScene().lookup("#contentArea");
-            if (contentArea != null) {
-                contentArea.getChildren().setAll(libraryView);
+        if (onBack != null) {
+            onBack.run();
+        } else {
+            // Fallback just in case
+            try {
+                URL url = getClass().getResource("/io/github/kullik01/kinonode/fxml/LibraryView.fxml");
+                FXMLLoader loader = new FXMLLoader(url);
+                Parent libraryView = loader.load();
+                
+                StackPane contentArea = (StackPane) lblHeaderTitle.getScene().lookup("#contentArea");
+                if (contentArea != null) {
+                    contentArea.getChildren().setAll(libraryView);
+                }
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, "Failed to load LibraryView FXML", e);
             }
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Failed to navigate back to library grid", e);
         }
     }
 }
