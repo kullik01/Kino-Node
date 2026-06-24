@@ -64,18 +64,20 @@ public class WatchlistsController implements Refreshable {
             private final HBox content = new HBox(15);
             private final ImageView thumbnail = new ImageView();
             private final Label titleLabel = new Label();
-            private final Label ratingLabel = new Label();
+            private final HBox ratingBox = new HBox(2);
+            private final Label ratingTextLabel = new Label();
             
             {
                 content.setAlignment(Pos.CENTER_LEFT);
                 thumbnail.setFitWidth(30);
                 thumbnail.setFitHeight(45);
-                titleLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: white;");
-                ratingLabel.setStyle("-fx-text-fill: #ffb703;");
+                titleLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
+                ratingTextLabel.setStyle("-fx-text-fill: #ED8B00; -fx-font-weight: bold; -fx-padding: 0 0 0 5px;");
+                ratingBox.setAlignment(Pos.CENTER_RIGHT);
                 
                 // Allow title to expand, keeping rating aligned to right
                 HBox.setHgrow(titleLabel, Priority.ALWAYS);
-                content.getChildren().addAll(thumbnail, titleLabel, ratingLabel);
+                content.getChildren().addAll(thumbnail, titleLabel, ratingBox, ratingTextLabel);
             }
             
             @Override
@@ -85,7 +87,24 @@ public class WatchlistsController implements Refreshable {
                     setGraphic(null);
                 } else {
                     titleLabel.setText(item.getTitle() + (item.getYear() != null ? " (" + item.getYear() + ")" : ""));
-                    ratingLabel.setText(item.getRating() != null ? "🎬 " + item.getRating() + "/10" : "Unrated");
+                    
+                    ratingBox.getChildren().clear();
+                    if (item.getRating() != null) {
+                        for (int i = 1; i <= 10; i++) {
+                            Label reel = new Label("🎥");
+                            if (i <= item.getRating()) {
+                                reel.setStyle("-fx-font-size: 13px; -fx-text-fill: #ED8B00; -fx-opacity: 1.0;");
+                            } else {
+                                reel.setStyle("-fx-font-size: 13px; -fx-text-fill: #444444; -fx-opacity: 0.3;");
+                            }
+                            ratingBox.getChildren().add(reel);
+                        }
+                        ratingTextLabel.setText(item.getRating() + "/10");
+                        ratingTextLabel.setStyle("-fx-text-fill: #ED8B00; -fx-font-weight: bold; -fx-padding: 0 0 0 5px;");
+                    } else {
+                        ratingTextLabel.setText("Unrated");
+                        ratingTextLabel.setStyle("-fx-text-fill: #555555; -fx-font-weight: bold; -fx-padding: 0 0 0 5px;");
+                    }
                     
                     // Thumbnail
                     Image img = null;

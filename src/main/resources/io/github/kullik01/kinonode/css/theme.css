@@ -194,7 +194,7 @@
 }
 
 .rating-reel.active {
-    -fx-text-fill: #ffb703; /* Gold color for ratings */
+    -fx-text-fill: #ED8B00; /* Gold color for ratings */
 }
 
 /* Detail overlay styling */

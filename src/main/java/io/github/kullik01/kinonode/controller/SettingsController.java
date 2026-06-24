@@ -37,6 +37,18 @@ public class SettingsController implements Refreshable {
     private String loadedWorkspaces = "";
     private String loadedPlayerPath = "";
 
+    private javafx.animation.PauseTransition statusTimer;
+
+    private void showStatus(String message) {
+        lblStatus.setText(message);
+        if (statusTimer != null) {
+            statusTimer.stop();
+        }
+        statusTimer = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(5));
+        statusTimer.setOnFinished(e -> lblStatus.setText(""));
+        statusTimer.play();
+    }
+
     @FXML
     public void initialize() {
         settingsRepository = AppContext.getInstance().getSettingsRepository();
@@ -87,7 +99,7 @@ public class SettingsController implements Refreshable {
             if (!lstWorkspaces.getItems().contains(path)) {
                 lstWorkspaces.getItems().add(path);
                 saveWorkspacesOnly();
-                lblStatus.setText("Workspace folder added.");
+                showStatus("Workspace folder added.");
             }
         }
     }
@@ -98,7 +110,7 @@ public class SettingsController implements Refreshable {
         if (selected != null) {
             lstWorkspaces.getItems().remove(selected);
             saveWorkspacesOnly();
-            lblStatus.setText("Workspace folder removed.");
+            showStatus("Workspace folder removed.");
         }
     }
 
@@ -134,7 +146,7 @@ public class SettingsController implements Refreshable {
         // Update dirty checking snapshots
         loadedPlayerPath = player;
 
-        lblStatus.setText("Settings saved successfully.");
+        showStatus("Settings saved successfully.");
     }
 
     private void saveWorkspacesOnly() {

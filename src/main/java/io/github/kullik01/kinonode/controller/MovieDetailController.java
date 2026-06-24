@@ -54,6 +54,18 @@ public class MovieDetailController {
     private MovieRepository movieRepository;
     private WatchlistRepository watchlistRepository;
 
+    private javafx.animation.PauseTransition statusTimer;
+
+    private void showStatus(String message) {
+        lblStatus.setText(message);
+        if (statusTimer != null) {
+            statusTimer.stop();
+        }
+        statusTimer = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(5));
+        statusTimer.setOnFinished(e -> lblStatus.setText(""));
+        statusTimer.play();
+    }
+
     @FXML
     public void initialize() {
         movieRepository = AppContext.getInstance().getMovieRepository();
@@ -140,11 +152,11 @@ public class MovieDetailController {
         });
         ratingContainer.getChildren().add(btnZero);
 
-        // 10 Film Clapperboard icons (1 to 10)
+        // 10 Movie Camera icons (1 to 10)
         List<Label> reels = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
             final int score = i;
-            Label reel = new Label("🎬");
+            Label reel = new Label("🎥");
             reel.getStyleClass().add("rating-reel");
             reel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-padding: 0 1px;");
             Tooltip reelTooltip = new Tooltip("Rate " + score + "/10");
@@ -158,44 +170,35 @@ public class MovieDetailController {
             ratingContainer.getChildren().add(reel);
         }
 
-        // Numerical display label
-        Label lblRatingVal = new Label();
-        lblRatingVal.setStyle("-fx-text-fill: #ffb703; -fx-font-weight: bold; -fx-padding: 0 0 0 10px;");
-        ratingContainer.getChildren().add(lblRatingVal);
-
         updateRatingUI();
     }
 
     private void updateRatingUI() {
         // Find rating nodes
         Button btnZero = (Button) ratingContainer.getChildren().get(1);
-        Label lblRatingVal = (Label) ratingContainer.getChildren().get(ratingContainer.getChildren().size() - 1);
         
         if (currentRating == null) {
             btnZero.setStyle("-fx-background-color: transparent; -fx-text-fill: #555555; -fx-font-weight: bold;");
             for (int i = 2; i <= 11; i++) {
                 Label reel = (Label) ratingContainer.getChildren().get(i);
-                reel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #444444;");
+                reel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #444444; -fx-opacity: 0.3;");
             }
-            lblRatingVal.setText("Unrated");
         } else if (currentRating == 0) {
-            btnZero.setStyle("-fx-background-color: transparent; -fx-text-fill: #ffb703; -fx-font-weight: bold;");
+            btnZero.setStyle("-fx-background-color: transparent; -fx-text-fill: #ED8B00; -fx-font-weight: bold;");
             for (int i = 2; i <= 11; i++) {
                 Label reel = (Label) ratingContainer.getChildren().get(i);
-                reel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #444444;");
+                reel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #444444; -fx-opacity: 0.3;");
             }
-            lblRatingVal.setText("0/10");
         } else {
             btnZero.setStyle("-fx-background-color: transparent; -fx-text-fill: #555555; -fx-font-weight: bold;");
             for (int i = 1; i <= 10; i++) {
                 Label reel = (Label) ratingContainer.getChildren().get(i + 1);
                 if (i <= currentRating) {
-                    reel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #ffb703;");
+                    reel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #ED8B00; -fx-opacity: 1.0;");
                 } else {
-                    reel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #444444;");
+                    reel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #444444; -fx-opacity: 0.3;");
                 }
             }
-            lblRatingVal.setText(currentRating + "/10");
         }
     }
 
@@ -221,7 +224,7 @@ public class MovieDetailController {
                 item.setOnAction(e -> {
                     watchlistRepository.addMovieToWatchlist(w.getId(), movie.getId());
                     refreshWatchlistStatus();
-                    lblStatus.setText("Added to watchlist " + w.getName());
+                    showStatus("Added to watchlist " + w.getName());
                 });
                 menuWatchlists.getItems().add(item);
             } else {
@@ -229,7 +232,7 @@ public class MovieDetailController {
                 item.setOnAction(e -> {
                     watchlistRepository.removeMovieFromWatchlist(w.getId(), movie.getId());
                     refreshWatchlistStatus();
-                    lblStatus.setText("Removed from watchlist " + w.getName());
+                    showStatus("Removed from watchlist " + w.getName());
                 });
                 menuWatchlists.getItems().add(item);
             }
@@ -250,7 +253,7 @@ public class MovieDetailController {
                     if (nw.getId() != null) {
                         watchlistRepository.addMovieToWatchlist(nw.getId(), movie.getId());
                         refreshWatchlistStatus();
-                        lblStatus.setText("Created watchlist and added movie.");
+                        showStatus("Created watchlist and added movie.");
                     }
                 }
             });
@@ -286,10 +289,10 @@ public class MovieDetailController {
                 
                 // Reload image
                 imgPoster.setImage(new Image(destPath.toUri().toURL().toExternalForm(), 240, 360, false, true));
-                lblStatus.setText("Poster image updated.");
+                showStatus("Poster image updated.");
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, "Failed to copy cover poster file", e);
-                lblStatus.setText("Error saving poster: " + e.getMessage());
+                showStatus("Error saving poster: " + e.getMessage());
             }
         }
     }
@@ -298,10 +301,7 @@ public class MovieDetailController {
     private void playMovie() {
         try {
             AppContext.getInstance().getPlaybackService().play(movie.getFilePath());
-            lblStatus.setText("Opening external player...");
-            javafx.animation.PauseTransition delay = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
-            delay.setOnFinished(event -> lblStatus.setText(""));
-            delay.play();
+            showStatus("Opening external player...");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to launch external media player", e);
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -324,13 +324,13 @@ public class MovieDetailController {
         try {
             if (java.awt.Desktop.isDesktopSupported() && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
                 java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
-                lblStatus.setText("Opening trailer link in browser...");
+                showStatus("Opening trailer link in browser...");
             } else {
-                lblStatus.setText("System web browser action not supported on this platform.");
+                showStatus("System web browser action not supported on this platform.");
             }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to open browser trailer link", e);
-            lblStatus.setText("Failed to open browser.");
+            showStatus("Failed to open browser.");
         }
     }
 
@@ -338,7 +338,7 @@ public class MovieDetailController {
     private void saveChanges() {
         String title = txtTitle.getText().trim();
         if (title.isEmpty()) {
-            lblStatus.setText("Title cannot be empty.");
+            showStatus("Title cannot be empty.");
             return;
         }
 
@@ -347,7 +347,7 @@ public class MovieDetailController {
             try {
                 year = Integer.parseInt(txtYear.getText().trim());
             } catch (NumberFormatException e) {
-                lblStatus.setText("Release year must be a valid integer number.");
+                showStatus("Release year must be a valid integer number.");
                 return;
             }
         }
@@ -355,7 +355,7 @@ public class MovieDetailController {
         String trailer = txtTrailerUrl.getText().trim();
         if (!trailer.isEmpty()) {
             if (!trailer.contains("youtube.com") && !trailer.contains("youtu.be")) {
-                lblStatus.setText("Trailer Link must be a valid YouTube URL.");
+                showStatus("Trailer Link must be a valid YouTube URL.");
                 return;
             }
         }
