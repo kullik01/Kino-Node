@@ -32,11 +32,11 @@
         <Region HBox.hgrow="ALWAYS" />
         
         <!-- Search and Sort -->
-        <TextField fx:id="txtSearch" promptText="Search movies..." prefWidth="200.0" />
-        <ComboBox fx:id="cmbSort" prefWidth="150.0" styleClass="button-secondary" />
+        <TextField fx:id="txtSearch" promptText="Search movies..." prefWidth="300.0" />
+        <ComboBox fx:id="cmbSort" prefWidth="250.0" styleClass="button-secondary" />
 
         <!-- Sync Button -->
-        <Button onAction="#syncLibrary" styleClass="button-primary, button-icon" minWidth="36" minHeight="36">
+        <Button onAction="#syncLibrary" styleClass="button-primary, button-icon" minWidth="36.0" maxWidth="36.0" minHeight="36.0">
             <graphic>
                 <SVGPath content="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z" fill="white"/>
             </graphic>
@@ -44,10 +44,10 @@
         </Button>
         
         <!-- Background Scan Progress Area -->
-        <HBox fx:id="progressArea" alignment="CENTER_LEFT" spacing="10.0" visible="false">
-            <ProgressBar fx:id="progressBar" prefWidth="150.0" />
-            <Label fx:id="lblProgress" style="-fx-text-fill: #ffb703; -fx-font-size: 12px;" text="" />
-            <Button onAction="#cancelSync" styleClass="button-secondary, button-icon" minWidth="36" minHeight="36">
+        <HBox fx:id="progressArea" alignment="CENTER_LEFT" spacing="10.0" visible="false" managed="${progressArea.visible}">
+            <ProgressBar fx:id="progressBar" prefWidth="250.0" />
+            <Label fx:id="lblProgress" style="-fx-text-fill: #ffb703; -fx-font-size: 12px;" text="" maxWidth="250.0" />
+            <Button onAction="#cancelSync" styleClass="button-secondary, button-icon" minWidth="36.0" maxWidth="36.0" minHeight="36.0">
                 <graphic>
                     <SVGPath content="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" fill="white"/>
                 </graphic>

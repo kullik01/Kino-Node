@@ -82,10 +82,21 @@ public class PlaybackService {
         LOGGER.log(Level.INFO, "Launching movie playback: {0} using player {1}", 
                 new Object[]{movieFilePath, playerPath.toAbsolutePath()});
 
-        ProcessBuilder pb = new ProcessBuilder(
-                playerPath.toAbsolutePath().toString(),
-                movieFile.getAbsolutePath()
-        );
+        ProcessBuilder pb;
+        if (System.getProperty("os.name").toLowerCase().contains("win")) {
+            pb = new ProcessBuilder(
+                    "cmd", "/c", "start", "\"\"",
+                    playerPath.toAbsolutePath().toString(),
+                    movieFile.getAbsolutePath()
+            );
+        } else {
+            pb = new ProcessBuilder(
+                    playerPath.toAbsolutePath().toString(),
+                    movieFile.getAbsolutePath()
+            );
+            pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+            pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+        }
         pb.start();
     }
 

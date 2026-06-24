@@ -12,6 +12,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import io.github.kullik01.kinonode.util.CustomAlert;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -147,21 +148,23 @@ public class LibraryController implements Refreshable {
             progressArea.setVisible(false);
             refresh();
             
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Sync Completed");
-            alert.setHeaderText("Sync Completed Successfully");
-            alert.setContentText("Total files scanned: " + result.totalScanned() + "\nNew movies added: " + result.newAdded());
-            alert.showAndWait();
+            CustomAlert.showInformation(
+                gridPane.getScene().getWindow(),
+                "Sync Completed",
+                "Sync Completed Successfully",
+                "Total files scanned: " + result.totalScanned() + "\nNew movies added: " + result.newAdded()
+            );
         });
 
         activeScanTask.setOnFailed(event -> {
             progressArea.setVisible(false);
             Throwable e = activeScanTask.getException();
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Sync Failed");
-            alert.setHeaderText("An error occurred during search");
-            alert.setContentText(e != null ? e.getMessage() : "Unknown database or file error");
-            alert.showAndWait();
+            CustomAlert.showInformation(
+                gridPane.getScene().getWindow(),
+                "Sync Failed",
+                "An error occurred during search",
+                e != null ? e.getMessage() : "Unknown database or file error"
+            );
         });
 
         activeScanTask.setOnCancelled(event -> {

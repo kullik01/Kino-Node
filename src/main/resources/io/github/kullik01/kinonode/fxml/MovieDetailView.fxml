@@ -13,6 +13,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.SVGPath?>
 
 <VBox spacing="20.0" styleClass="detail-pane"
       stylesheets="@../css/theme.css"
@@ -44,10 +45,16 @@
             </Button>
             
             <VBox alignment="CENTER" spacing="10.0" style="-fx-padding: 15px 0 0 0;">
-                <Button fx:id="btnPlay" onAction="#playMovie" styleClass="button-primary" text="▶">
+                <Button fx:id="btnPlay" onAction="#playMovie" styleClass="button-primary">
+                    <graphic>
+                        <SVGPath content="M8 5v14l11-7z" fill="white"/>
+                    </graphic>
                     <tooltip><Tooltip showDelay="250ms" text="Play Movie"/></tooltip>
                 </Button>
-                <Button fx:id="btnTrailer" onAction="#watchTrailer" styleClass="button-secondary" text="📺">
+                <Button fx:id="btnTrailer" onAction="#watchTrailer" styleClass="button-secondary">
+                    <graphic>
+                        <SVGPath content="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12zm-5-6l-7 4V7z" fill="white"/>
+                    </graphic>
                     <tooltip><Tooltip showDelay="250ms" text="Watch Trailer"/></tooltip>
                 </Button>
             </VBox>
@@ -112,10 +119,16 @@
 
             <!-- Action buttons -->
             <HBox alignment="CENTER_RIGHT" spacing="15.0">
-                <Button onAction="#saveChanges" styleClass="button-primary" text="💾">
+                <Button onAction="#saveChanges" styleClass="button-primary">
+                    <graphic>
+                        <SVGPath content="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" fill="white"/>
+                    </graphic>
                     <tooltip><Tooltip showDelay="250ms" text="Save Changes"/></tooltip>
                 </Button>
-                <Button onAction="#cancelEdit" styleClass="button-secondary" text="❌">
+                <Button onAction="#cancelEdit" styleClass="button-secondary">
+                    <graphic>
+                        <SVGPath content="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" fill="white"/>
+                    </graphic>
                     <tooltip><Tooltip showDelay="250ms" text="Cancel"/></tooltip>
                 </Button>
             </HBox>

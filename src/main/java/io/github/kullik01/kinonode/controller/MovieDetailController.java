@@ -299,6 +299,9 @@ public class MovieDetailController {
         try {
             AppContext.getInstance().getPlaybackService().play(movie.getFilePath());
             lblStatus.setText("Opening external player...");
+            javafx.animation.PauseTransition delay = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+            delay.setOnFinished(event -> lblStatus.setText(""));
+            delay.play();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to launch external media player", e);
             Alert alert = new Alert(Alert.AlertType.ERROR);
