@@ -12,7 +12,7 @@ public class AboutController implements Refreshable {
     @FXML private Label lblVersion;
     @FXML private Label lblExtensions;
     @FXML private Label lblDbPath;
-    @FXML private Label lblDbSize;
+
     @FXML private Label lblJavaRuntime;
     @FXML private Label lblOsDetails;
     @FXML private Label lblMovieCount;
@@ -42,22 +42,14 @@ public class AboutController implements Refreshable {
             lblDbPath.setText(dbPath.toAbsolutePath().toString().replace("\\", "/"));
             
             if (Files.exists(dbPath)) {
-                long bytes = Files.size(dbPath);
-                if (bytes < 1024) {
-                    lblDbSize.setText(bytes + " Bytes");
-                } else if (bytes < 1024 * 1024) {
-                    lblDbSize.setText(String.format("%.1f KB", bytes / 1024.0));
-                } else {
-                    lblDbSize.setText(String.format("%.2f MB", bytes / (1024.0 * 1024.0)));
-                }
+                // Database size logic removed per user request
             } else {
-                lblDbSize.setText("Not found");
+                // Do nothing
             }
         } catch (Exception e) {
             lblDbPath.setText("Unknown database path");
-            lblDbSize.setText("Unknown");
         }
-        
+
         // 3. System properties
         try {
             String javaVer = System.getProperty("java.version");
