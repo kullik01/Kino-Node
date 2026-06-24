@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <VBox spacing="15.0" style="-fx-background-color: -color-bg-default;"
-      stylesheets="/io/github/kullik01/kinonode/css/theme.css"
+      stylesheets="@../css/theme.css"
       xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="io.github.kullik01.kinonode.controller.LibraryController">
@@ -23,7 +23,7 @@
 
     <!-- Top Action Toolbar -->
     <HBox alignment="CENTER_LEFT" spacing="15.0">
-        <Label text="Movie Library" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;" />
+        <Label text="Movie Library" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2178dd;" />
         
         <!-- Search and Sort -->
         <TextField fx:id="txtSearch" promptText="Search movies..." prefWidth="200.0" />

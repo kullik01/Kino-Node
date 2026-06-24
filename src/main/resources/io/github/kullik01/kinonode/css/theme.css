@@ -59,6 +59,12 @@
     -color-info-subtle-hover: rgba(33, 120, 221, 0.22);
     -color-info-subtle-active: rgba(33, 120, 221, 0.32);
 
+    /* AtlantaFX core button overrides */
+    -color-button-bg: #2178dd;
+    -color-button-bg-hover: #2178dd;
+    -color-button-bg-focused: #2178dd;
+    -color-button-bg-pressed: #2178dd;
+
     /* Standard JavaFX lookups */
     -fx-accent: #2178dd;
     -fx-focus-color: #2178dd;
@@ -81,11 +87,11 @@
 .sidebar-title {
     -fx-font-size: 22px;
     -fx-font-weight: bold;
-    -fx-text-fill: -color-fg-default;
+    -fx-text-fill: #2178dd;
     -fx-padding: 0 0 20px 10px;
 }
 
-.sidebar-button {
+.root .button.sidebar-button {
     -fx-alignment: center-left;
     -fx-background-color: transparent;
     -fx-text-fill: -color-fg-muted;
@@ -94,16 +100,17 @@
     -fx-background-radius: 6px;
     -fx-cursor: hand;
     -fx-pref-width: 200px;
+    -fx-border-color: transparent;
 }
 
-.sidebar-button:hover {
-    -fx-background-color: -color-bg-hover;
-    -fx-text-fill: -color-fg-default;
+.root .button.sidebar-button:hover {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-fg-muted;
 }
 
-.sidebar-button:selected, .sidebar-button.active {
-    -fx-background-color: -color-accent-emphasis;
-    -fx-text-fill: -color-fg-on-accent;
+.root .button.sidebar-button:selected, .root .button.sidebar-button.active {
+    -fx-background-color: #2178dd;
+    -fx-text-fill: white;
     -fx-font-weight: bold;
 }
 
@@ -138,11 +145,11 @@
 }
 
 .movie-card:hover {
-    -fx-background-color: -color-bg-hover;
-    -fx-scale-x: 1.04;
-    -fx-scale-y: 1.04;
-    -fx-effect: dropshadow(three-pass-box, -color-accent-muted, 8, 0.0, 0, 3);
-    -fx-border-color: -color-accent-emphasis;
+    -fx-background-color: -color-bg-overlay;
+    -fx-scale-x: 1.0;
+    -fx-scale-y: 1.0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 6, 0.0, 0, 3);
+    -fx-border-color: transparent;
 }
 
 .movie-poster-container {
@@ -205,7 +212,7 @@
 .detail-title {
     -fx-font-size: 32px;
     -fx-font-weight: bold;
-    -fx-text-fill: -color-fg-default;
+    -fx-text-fill: #2178dd;
 }
 
 .detail-description {
@@ -219,24 +226,30 @@
     -fx-text-fill: -color-fg-muted;
 }
 
-/* Accent Buttons */
-.button-primary {
-    -fx-background-color: -color-accent-emphasis;
-    -fx-text-fill: -color-fg-on-accent;
+/* Accent and Global Buttons */
+.root .button, .root .button.button-primary, .root .button.button-secondary {
+    -fx-background-color: #2178dd;
+    -fx-text-fill: white;
     -fx-font-weight: bold;
+    -fx-border-color: transparent;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
 }
 
-.button-primary:hover {
-    -fx-background-color: -color-accent-emphasis-hover;
+/* Force hover and pressed states to be identical to remove the effect entirely */
+.root .button:hover, .root .button.button-primary:hover, .root .button.button-secondary:hover {
+    -fx-background-color: #2178dd;
+    -fx-text-fill: white;
+    -fx-opacity: 1.0;
+    -fx-effect: none;
+    -fx-border-color: transparent;
 }
 
-.button-secondary {
-    -fx-background-color: -color-bg-subtle;
-    -fx-text-fill: -color-fg-default;
-}
-
-.button-secondary:hover {
-    -fx-background-color: -color-bg-hover;
+.root .button:pressed, .root .button:default:hover:pressed {
+    -fx-background-color: #2178dd;
+    -fx-opacity: 1.0;
+    -fx-effect: none;
+    -fx-border-color: transparent;
 }
 
 /* Custom Text Inputs */
@@ -249,7 +262,7 @@
 }
 
 .text-input:focused {
-    -fx-border-color: -color-accent-emphasis;
+    -fx-border-color: #2178dd;
 }
 
 /* Sidebar Settings SVG Icon Styling */
@@ -263,7 +276,7 @@
 
 .sidebar-button:selected .settings-svg,
 .sidebar-button.active .settings-svg {
-    -fx-fill: -color-fg-on-accent;
+    -fx-fill: white;
 }
 
 /* About Card styling inspired by FocusBean */

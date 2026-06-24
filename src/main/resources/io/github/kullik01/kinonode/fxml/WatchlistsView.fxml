@@ -9,14 +9,14 @@
 <?import javafx.scene.layout.VBox?>
 
 <SplitPane dividerPositions="0.25" style="-fx-background-color: -color-bg-default;"
-           stylesheets="/io/github/kullik01/kinonode/css/theme.css"
+           stylesheets="@../css/theme.css"
            xmlns="http://javafx.com/javafx/21"
            xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="io.github.kullik01.kinonode.controller.WatchlistsController">
     
     <!-- Left Sidebar: Watchlists List -->
     <VBox spacing="15.0" style="-fx-background-color: -color-bg-subtle; -fx-padding: 20px;">
-        <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="My Watchlists" />
+        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2178dd;" text="My Watchlists" />
         
         <ListView fx:id="lstWatchlists" VBox.vgrow="ALWAYS" />
         
@@ -31,7 +31,7 @@
     <VBox fx:id="paneDetails" spacing="20.0" style="-fx-background-color: -color-bg-default; -fx-padding: 20px;">
         <HBox alignment="CENTER_LEFT" spacing="15.0">
             <VBox HBox.hgrow="ALWAYS">
-                <Label fx:id="lblWatchlistName" style="-fx-font-size: 22px; -fx-font-weight: bold;" text="Select a Watchlist" />
+                <Label fx:id="lblWatchlistName" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2178dd;" text="Select a Watchlist" />
                 <Label fx:id="lblMovieCount" style="-fx-font-size: 12px; -fx-text-fill: -color-fg-muted;" text="0 movies" />
             </VBox>
             

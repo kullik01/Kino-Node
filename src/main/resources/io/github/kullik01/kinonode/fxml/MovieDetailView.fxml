@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <VBox spacing="20.0" styleClass="detail-pane"
-      stylesheets="/io/github/kullik01/kinonode/css/theme.css"
+      stylesheets="@../css/theme.css"
       xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="io.github.kullik01.kinonode.controller.MovieDetailController">

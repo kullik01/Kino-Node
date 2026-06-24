@@ -13,7 +13,7 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="io.github.kullik01.kinonode.controller.MainController"
             prefHeight="768.0" prefWidth="1024.0"
-            stylesheets="/io/github/kullik01/kinonode/css/theme.css">
+            stylesheets="@../css/theme.css">
     
     <!-- Sidebar on the Left -->
     <left>
