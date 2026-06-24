@@ -84,6 +84,7 @@ The workflow bundles these files and attaches them directly to a draft GitHub Re
 
 This project is licensed under the BSD 3-Clause License - see the [LICENSE](LICENSE) file for details.
 
-## Author
+## Credits
 
 - **Hannah Kullik** (Author)
+- **Martin Urban** (Logo Designer)

@@ -44,13 +44,6 @@
     <!-- Sidebar on the Left -->
     <left>
         <VBox styleClass="sidebar">
-            <HBox alignment="CENTER" style="-fx-padding: 15 0 0 0;">
-                <ImageView fitHeight="64.0" fitWidth="64.0" preserveRatio="true">
-                    <image>
-                        <Image url="@../images/logo.png" />
-                    </image>
-                </ImageView>
-            </HBox>
             <Label text="KinoNode" styleClass="sidebar-title"/>
             
             <Button fx:id="btnLibrary" text="🎬  Library" styleClass="sidebar-button" onAction="#showLibrary"/>

@@ -7,7 +7,8 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.Region?>
-
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <VBox spacing="25.0" styleClass="detail-pane"
       stylesheets="@../css/theme.css"
       xmlns="http://javafx.com/javafx/21"
@@ -19,10 +20,17 @@
     </padding>
 
     <!-- Header Section -->
-    <VBox spacing="5.0">
-        <Label text="About KinoNode" styleClass="detail-title" />
-        <Label text="Personal Movie Library Manager" style="-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;" />
-    </VBox>
+    <HBox spacing="20.0" alignment="CENTER_LEFT">
+        <ImageView fitHeight="64.0" fitWidth="64.0" preserveRatio="true">
+            <image>
+                <Image url="@../images/logo.png" />
+            </image>
+        </ImageView>
+        <VBox spacing="5.0">
+            <Label text="About KinoNode" styleClass="detail-title" />
+            <Label text="Personal Movie Library Manager" style="-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;" />
+        </VBox>
+    </HBox>
 
     <!-- Cards Row -->
     <HBox spacing="20.0" alignment="TOP_LEFT">
@@ -45,11 +53,14 @@
                 <Label text="Developer:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                 <Label text="Hannah Kullik" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                <Label text="License:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                <Label text="BSD 3-Clause License" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <Label text="Logo Designer:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <Label text="Martin Urban" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                <Label text="License:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <Label text="BSD 3-Clause License" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                 
-                <Label text="Copyright:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                <Label text="© 2026 Hannah Kullik" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <Label text="Copyright:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                <Label text="© 2026 Hannah Kullik" GridPane.columnIndex="1" GridPane.rowIndex="4" />
             </GridPane>
             
             <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
