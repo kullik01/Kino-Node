@@ -30,6 +30,7 @@ public class LibraryScanService {
         return new Task<>() {
             @Override
             protected ScanResult call() throws Exception {
+                updateProgress(-1, 1);
                 updateMessage("Reading workspace settings...");
                 
                 String foldersSetting = settingsRepository.get("workspace_folders", "");
@@ -51,12 +52,14 @@ public class LibraryScanService {
                 updateMessage("Scanning directories...");
 
                 for (String folderPath : folders) {
+                    if (isCancelled()) break;
                     if (folderPath.isBlank()) continue;
                     Path path = Paths.get(folderPath.trim());
                     if (Files.exists(path) && Files.isDirectory(path)) {
                         Files.walkFileTree(path, new SimpleFileVisitor<>() {
                             @Override
                             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                                if (isCancelled()) return FileVisitResult.TERMINATE;
                                 String ext = PathUtils.getFileExtension(file.toFile());
                                 if (extensions.contains(ext)) {
                                     filesToScan.add(file);

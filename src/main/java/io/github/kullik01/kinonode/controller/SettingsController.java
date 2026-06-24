@@ -111,6 +111,9 @@ public class SettingsController implements Refreshable {
             lstWorkspaces.getItems().remove(selected);
             saveWorkspacesOnly();
             showStatus("Workspace folder removed.");
+            
+            io.github.kullik01.kinonode.repository.MovieRepository movieRepo = AppContext.getInstance().getMovieRepository();
+            movieRepo.deleteByFilePathPrefix(selected);
         }
     }
 

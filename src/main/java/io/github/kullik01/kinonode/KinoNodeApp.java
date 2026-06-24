@@ -70,6 +70,7 @@ public class KinoNodeApp extends Application {
         Parent root = loader.load();
         
         primaryStage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
+        primaryStage.getIcons().add(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
         primaryStage.setTitle("KinoNode - Personal Movie Library");
         Scene scene = new Scene(root, 1024, 768);
         scene.setFill(javafx.scene.paint.Color.TRANSPARENT);

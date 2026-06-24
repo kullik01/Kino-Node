@@ -31,7 +31,6 @@ public class LibraryController implements Refreshable {
     
     @FXML private HBox progressArea;
     @FXML private ProgressBar progressBar;
-    @FXML private Label lblProgress;
 
     private MovieRepository movieRepository;
     private LibraryScanService libraryScanService;
@@ -149,11 +148,12 @@ public class LibraryController implements Refreshable {
         activeScanTask = libraryScanService.createScanTask();
         
         progressBar.progressProperty().bind(activeScanTask.progressProperty());
-        lblProgress.textProperty().bind(activeScanTask.messageProperty());
         progressArea.setVisible(true);
 
         activeScanTask.setOnSucceeded(event -> {
             LibraryScanService.ScanResult result = activeScanTask.getValue();
+            progressBar.progressProperty().unbind();
+            progressBar.setProgress(0);
             progressArea.setVisible(false);
             refresh();
             
@@ -166,6 +166,8 @@ public class LibraryController implements Refreshable {
         });
 
         activeScanTask.setOnFailed(event -> {
+            progressBar.progressProperty().unbind();
+            progressBar.setProgress(0);
             progressArea.setVisible(false);
             Throwable e = activeScanTask.getException();
             CustomAlert.showInformation(
@@ -177,6 +179,8 @@ public class LibraryController implements Refreshable {
         });
 
         activeScanTask.setOnCancelled(event -> {
+            progressBar.progressProperty().unbind();
+            progressBar.setProgress(0);
             progressArea.setVisible(false);
         });
 

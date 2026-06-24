@@ -149,6 +149,16 @@ public class MovieRepository {
         }
     }
 
+    public void deleteByFilePathPrefix(String prefix) {
+        String sql = "DELETE FROM movies WHERE file_path LIKE ?";
+        try (PreparedStatement stmt = databaseService.getConnection().prepareStatement(sql)) {
+            stmt.setString(1, prefix + "%");
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Failed to delete movies by file path prefix: " + prefix, e);
+        }
+    }
+
     private Movie mapRowToMovie(ResultSet rs) throws SQLException {
         Movie movie = new Movie();
         movie.setId(rs.getInt("id"));
