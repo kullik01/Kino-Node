@@ -291,3 +291,8 @@
     -fx-min-width: 320px;
 }
 
+/* Remove tooltip shadow */
+.tooltip {
+    -fx-effect: none;
+}
+

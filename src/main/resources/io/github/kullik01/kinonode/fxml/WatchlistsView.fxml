@@ -28,7 +28,7 @@
             <Button maxWidth="Infinity" onAction="#renameWatchlist" styleClass="button-secondary" text="✏" HBox.hgrow="ALWAYS">
                 <tooltip><Tooltip showDelay="250ms" text="Rename"/></tooltip>
             </Button>
-            <Button maxWidth="Infinity" onAction="#deleteWatchlist" styleClass="button-secondary" text="🗑" HBox.hgrow="ALWAYS">
+            <Button maxWidth="Infinity" onAction="#deleteWatchlist" styleClass="button-secondary" text="➖" HBox.hgrow="ALWAYS">
                 <tooltip><Tooltip showDelay="250ms" text="Delete"/></tooltip>
             </Button>
         </HBox>
@@ -43,7 +43,7 @@
             </VBox>
             
             <HBox alignment="CENTER_RIGHT" spacing="10.0">
-                <Button fx:id="btnRemoveMovie" onAction="#removeMovie" styleClass="button-secondary" text="🗑">
+                <Button fx:id="btnRemoveMovie" onAction="#removeMovie" styleClass="button-secondary" text="➖">
                     <tooltip><Tooltip showDelay="250ms" text="Remove"/></tooltip>
                 </Button>
             </HBox>

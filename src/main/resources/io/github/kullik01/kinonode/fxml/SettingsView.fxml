@@ -34,7 +34,7 @@
                 <Button fx:id="btnAddFolder" onAction="#addWorkspace" prefWidth="100.0" styleClass="button-secondary" text="➕">
                     <tooltip><Tooltip showDelay="250ms" text="Add"/></tooltip>
                 </Button>
-                <Button fx:id="btnRemoveFolder" onAction="#removeWorkspace" prefWidth="100.0" styleClass="button-secondary" text="🗑">
+                <Button fx:id="btnRemoveFolder" onAction="#removeWorkspace" prefWidth="100.0" styleClass="button-secondary" text="➖">
                     <tooltip><Tooltip showDelay="250ms" text="Remove"/></tooltip>
                 </Button>
             </VBox>
