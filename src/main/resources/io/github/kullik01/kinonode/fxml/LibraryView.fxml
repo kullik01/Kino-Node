@@ -15,7 +15,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.SVGPath?>
 
-<VBox spacing="15.0" style="-fx-background-color: -color-bg-default;"
+<VBox spacing="15.0"
+
       stylesheets="@../css/theme.css"
       xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"

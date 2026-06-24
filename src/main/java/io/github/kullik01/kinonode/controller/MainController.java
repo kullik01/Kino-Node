@@ -85,6 +85,17 @@ public class MainController {
 
         // Show Library by default
         showLibrary();
+
+        javafx.application.Platform.runLater(() -> {
+            Stage stage = (Stage) rootPane.getScene().getWindow();
+            stage.maximizedProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal) {
+                    rootPane.getStyleClass().add("maximized");
+                } else {
+                    rootPane.getStyleClass().remove("maximized");
+                }
+            });
+        });
     }
 
     @FXML
@@ -93,10 +104,30 @@ public class MainController {
         stage.setIconified(true);
     }
 
+    private double normalX, normalY, normalWidth, normalHeight;
+
     @FXML
     private void maximizeWindow() {
         Stage stage = (Stage) rootPane.getScene().getWindow();
-        stage.setMaximized(!stage.isMaximized());
+        if (stage.isMaximized()) {
+            stage.setMaximized(false);
+            stage.setX(normalX);
+            stage.setY(normalY);
+            stage.setWidth(normalWidth);
+            stage.setHeight(normalHeight);
+        } else {
+            normalX = stage.getX();
+            normalY = stage.getY();
+            normalWidth = stage.getWidth();
+            normalHeight = stage.getHeight();
+            
+            javafx.geometry.Rectangle2D bounds = javafx.stage.Screen.getScreensForRectangle(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight()).get(0).getVisualBounds();
+            stage.setX(bounds.getMinX());
+            stage.setY(bounds.getMinY());
+            stage.setWidth(bounds.getWidth());
+            stage.setHeight(bounds.getHeight());
+            stage.setMaximized(true);
+        }
     }
 
     @FXML

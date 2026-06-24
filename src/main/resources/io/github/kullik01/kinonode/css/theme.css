@@ -198,6 +198,10 @@
 }
 
 /* Detail overlay styling */
+.detail-pane {
+    -fx-background-color: transparent;
+}
+
 .detail-container {
     -fx-background-color: -color-bg-default;
     -fx-padding: 30px;
@@ -228,7 +232,7 @@
 }
 
 /* Accent and Global Buttons */
-.root .button, .root .button.button-primary, .root .button.button-secondary {
+.root .button.button-primary, .root .button.button-secondary {
     -fx-background-color: #2178dd;
     -fx-text-fill: white;
     -fx-font-weight: bold;
@@ -238,7 +242,7 @@
 }
 
 /* Force hover and pressed states to be identical to remove the effect entirely */
-.root .button:hover, .root .button.button-primary:hover, .root .button.button-secondary:hover {
+.root .button.button-primary:hover, .root .button.button-secondary:hover {
     -fx-background-color: #2178dd;
     -fx-text-fill: white;
     -fx-opacity: 1.0;
@@ -246,7 +250,7 @@
     -fx-border-color: transparent;
 }
 
-.root .button:pressed, .root .button:default:hover:pressed {
+.root .button.button-primary:pressed, .root .button.button-secondary:pressed {
     -fx-background-color: #2178dd;
     -fx-opacity: 1.0;
     -fx-effect: none;
@@ -308,6 +312,30 @@
 /* Ensure the root stack pane has some padding to show the drop shadow */
 #rootPane {
     -fx-padding: 15px;
+}
+
+.maximized {
+    -fx-padding: 0 !important;
+}
+
+.maximized .main-window {
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-border-width: 0;
+    -fx-effect: none;
+}
+
+.maximized .title-bar {
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.maximized .main-content-vbox {
+    -fx-background-radius: 0;
+}
+
+.maximized .sidebar {
+    -fx-background-radius: 0;
 }
 
 .title-bar {
