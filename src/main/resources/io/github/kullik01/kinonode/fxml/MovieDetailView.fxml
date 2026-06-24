@@ -39,15 +39,15 @@
             <VBox style="-fx-pref-width: 240px; -fx-pref-height: 360px; -fx-background-radius: 8px;" styleClass="movie-poster-container">
                 <ImageView fx:id="imgPoster" fitHeight="360.0" fitWidth="240.0" styleClass="detail-cover" />
             </VBox>
-            <Button onAction="#changePoster" styleClass="button-secondary" prefWidth="200.0" text="🖼">
+            <Button onAction="#changePoster" styleClass="button-secondary" text="🖼">
                 <tooltip><Tooltip showDelay="250ms" text="Change Poster"/></tooltip>
             </Button>
             
             <VBox alignment="CENTER" spacing="10.0" style="-fx-padding: 15px 0 0 0;">
-                <Button fx:id="btnPlay" onAction="#playMovie" style="-fx-font-size: 16px;" styleClass="button-primary" prefWidth="200.0" text="▶">
+                <Button fx:id="btnPlay" onAction="#playMovie" styleClass="button-primary" text="▶">
                     <tooltip><Tooltip showDelay="250ms" text="Play Movie"/></tooltip>
                 </Button>
-                <Button fx:id="btnTrailer" onAction="#watchTrailer" styleClass="button-secondary" prefWidth="200.0" text="📺">
+                <Button fx:id="btnTrailer" onAction="#watchTrailer" styleClass="button-secondary" text="📺">
                     <tooltip><Tooltip showDelay="250ms" text="Watch Trailer"/></tooltip>
                 </Button>
             </VBox>
@@ -112,10 +112,10 @@
 
             <!-- Action buttons -->
             <HBox alignment="CENTER_RIGHT" spacing="15.0">
-                <Button onAction="#saveChanges" styleClass="button-primary" prefWidth="130.0" text="💾">
+                <Button onAction="#saveChanges" styleClass="button-primary" text="💾">
                     <tooltip><Tooltip showDelay="250ms" text="Save Changes"/></tooltip>
                 </Button>
-                <Button onAction="#cancelEdit" styleClass="button-secondary" prefWidth="100.0" text="❌">
+                <Button onAction="#cancelEdit" styleClass="button-secondary" text="❌">
                     <tooltip><Tooltip showDelay="250ms" text="Cancel"/></tooltip>
                 </Button>
             </HBox>

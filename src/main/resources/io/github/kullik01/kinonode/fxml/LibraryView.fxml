@@ -39,7 +39,7 @@
         <HBox fx:id="progressArea" alignment="CENTER_LEFT" spacing="10.0" visible="false">
             <ProgressBar fx:id="progressBar" prefWidth="150.0" />
             <Label fx:id="lblProgress" style="-fx-text-fill: #ffb703; -fx-font-size: 12px;" text="" />
-            <Button onAction="#cancelSync" style="-fx-font-size: 11px; -fx-padding: 3px 8px;" styleClass="button-secondary" text="❌">
+            <Button onAction="#cancelSync" styleClass="button-secondary" text="❌">
                 <tooltip><Tooltip showDelay="250ms" text="Cancel"/></tooltip>
             </Button>
         </HBox>

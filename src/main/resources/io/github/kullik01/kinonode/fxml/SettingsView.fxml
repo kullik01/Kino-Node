@@ -31,10 +31,10 @@
         <HBox spacing="10.0">
             <ListView fx:id="lstWorkspaces" prefHeight="150.0" HBox.hgrow="ALWAYS" />
             <VBox spacing="10.0">
-                <Button fx:id="btnAddFolder" onAction="#addWorkspace" prefWidth="100.0" styleClass="button-secondary" text="➕">
+                <Button fx:id="btnAddFolder" onAction="#addWorkspace" styleClass="button-secondary" text="➕">
                     <tooltip><Tooltip showDelay="250ms" text="Add"/></tooltip>
                 </Button>
-                <Button fx:id="btnRemoveFolder" onAction="#removeWorkspace" prefWidth="100.0" styleClass="button-secondary" text="➖">
+                <Button fx:id="btnRemoveFolder" onAction="#removeWorkspace" styleClass="button-secondary" text="➖">
                     <tooltip><Tooltip showDelay="250ms" text="Remove"/></tooltip>
                 </Button>
             </VBox>
@@ -71,9 +71,8 @@
     <!-- Save State / Feedback Label -->
     <Label fx:id="lblStatus" text="" style="-fx-text-fill: -color-success-fg; -fx-font-size: 14px;" />
 
-    <!-- Bottom Actions -->
     <HBox alignment="CENTER_LEFT" spacing="15.0">
-        <Button fx:id="btnSave" onAction="#saveSettings" styleClass="button-primary" prefWidth="150.0" text="💾">
+        <Button fx:id="btnSave" onAction="#saveSettings" styleClass="button-primary" text="💾">
             <tooltip><Tooltip showDelay="250ms" text="Save Settings"/></tooltip>
         </Button>
     </HBox>
