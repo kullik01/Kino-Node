@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
@@ -30,8 +31,12 @@
         <HBox spacing="10.0">
             <ListView fx:id="lstWorkspaces" prefHeight="150.0" HBox.hgrow="ALWAYS" />
             <VBox spacing="10.0">
-                <Button fx:id="btnAddFolder" onAction="#addWorkspace" prefWidth="100.0" styleClass="button-secondary" text="➕ Add" />
-                <Button fx:id="btnRemoveFolder" onAction="#removeWorkspace" prefWidth="100.0" styleClass="button-secondary" text="🗑 Remove" />
+                <Button fx:id="btnAddFolder" onAction="#addWorkspace" prefWidth="100.0" styleClass="button-secondary" text="➕">
+                    <tooltip><Tooltip showDelay="250ms" text="Add"/></tooltip>
+                </Button>
+                <Button fx:id="btnRemoveFolder" onAction="#removeWorkspace" prefWidth="100.0" styleClass="button-secondary" text="🗑">
+                    <tooltip><Tooltip showDelay="250ms" text="Remove"/></tooltip>
+                </Button>
             </VBox>
         </HBox>
     </VBox>
@@ -57,8 +62,10 @@
             </HBox>
             <Label fx:id="lblPlayerError" style="-fx-text-fill: -color-danger-fg; -fx-font-size: 11px;" visible="false" managed="false" />
         </VBox>
-        <Button onAction="#browsePlayer" styleClass="button-secondary" text="📂 Browse"
-                GridPane.columnIndex="2" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
+        <Button onAction="#browsePlayer" styleClass="button-secondary" text="📂"
+                GridPane.columnIndex="2" GridPane.rowIndex="0" GridPane.valignment="CENTER">
+            <tooltip><Tooltip showDelay="250ms" text="Browse"/></tooltip>
+        </Button>
     </GridPane>
 
     <!-- Save State / Feedback Label -->
@@ -66,6 +73,8 @@
 
     <!-- Bottom Actions -->
     <HBox alignment="CENTER_LEFT" spacing="15.0">
-        <Button fx:id="btnSave" onAction="#saveSettings" styleClass="button-primary" prefWidth="150.0" text="Save Settings" />
+        <Button fx:id="btnSave" onAction="#saveSettings" styleClass="button-primary" prefWidth="150.0" text="💾">
+            <tooltip><Tooltip showDelay="250ms" text="Save Settings"/></tooltip>
+        </Button>
     </HBox>
 </VBox>

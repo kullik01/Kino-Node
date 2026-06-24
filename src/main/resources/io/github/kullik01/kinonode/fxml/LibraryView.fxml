@@ -7,6 +7,7 @@
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -30,13 +31,17 @@
         <ComboBox fx:id="cmbSort" prefWidth="150.0" styleClass="button-secondary" />
 
         <!-- Sync Button -->
-        <Button onAction="#syncLibrary" styleClass="button-primary" text="🔄 Sync Library" />
+        <Button onAction="#syncLibrary" styleClass="button-primary" text="🔄">
+            <tooltip><Tooltip showDelay="250ms" text="Sync Library"/></tooltip>
+        </Button>
         
         <!-- Background Scan Progress Area -->
         <HBox fx:id="progressArea" alignment="CENTER_LEFT" spacing="10.0" visible="false">
             <ProgressBar fx:id="progressBar" prefWidth="150.0" />
             <Label fx:id="lblProgress" style="-fx-text-fill: #ffb703; -fx-font-size: 12px;" text="" />
-            <Button onAction="#cancelSync" style="-fx-font-size: 11px; -fx-padding: 3px 8px;" styleClass="button-secondary" text="Cancel" />
+            <Button onAction="#cancelSync" style="-fx-font-size: 11px; -fx-padding: 3px 8px;" styleClass="button-secondary" text="❌">
+                <tooltip><Tooltip showDelay="250ms" text="Cancel"/></tooltip>
+            </Button>
         </HBox>
     </HBox>
 

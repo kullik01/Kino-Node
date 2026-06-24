@@ -119,7 +119,9 @@ public class MovieDetailController {
         // Clear Rating button (Reset to unrated)
         Button btnClear = new Button("❌");
         btnClear.setStyle("-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 2px; -fx-font-size: 11px;");
-        btnClear.setTooltip(new Tooltip("Clear rating (unrated)"));
+        Tooltip clearTooltip = new Tooltip("Clear rating (unrated)");
+        clearTooltip.setShowDelay(javafx.util.Duration.millis(250));
+        btnClear.setTooltip(clearTooltip);
         btnClear.setOnAction(e -> {
             currentRating = null;
             updateRatingUI();
@@ -129,6 +131,9 @@ public class MovieDetailController {
         // '0' Rating button
         Button btnZero = new Button("0");
         btnZero.setStyle("-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 2px 5px; -fx-font-size: 13px; -fx-font-weight: bold;");
+        Tooltip zeroTooltip = new Tooltip("Rate 0/10");
+        zeroTooltip.setShowDelay(javafx.util.Duration.millis(250));
+        btnZero.setTooltip(zeroTooltip);
         btnZero.setOnAction(e -> {
             currentRating = 0;
             updateRatingUI();
@@ -142,6 +147,9 @@ public class MovieDetailController {
             Label reel = new Label("🎬");
             reel.getStyleClass().add("rating-reel");
             reel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-padding: 0 1px;");
+            Tooltip reelTooltip = new Tooltip("Rate " + score + "/10");
+            reelTooltip.setShowDelay(javafx.util.Duration.millis(250));
+            reel.setTooltip(reelTooltip);
             reel.setOnMouseClicked(e -> {
                 currentRating = score;
                 updateRatingUI();

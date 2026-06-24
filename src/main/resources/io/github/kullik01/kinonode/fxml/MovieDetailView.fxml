@@ -6,6 +6,7 @@
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -25,7 +26,9 @@
 
     <!-- Header / Back button -->
     <HBox alignment="CENTER_LEFT" spacing="15.0">
-        <Button onAction="#goBack" styleClass="button-secondary" text="⬅ Back to Library" />
+        <Button onAction="#goBack" styleClass="button-secondary" text="⬅">
+            <tooltip><Tooltip showDelay="250ms" text="Back to Library"/></tooltip>
+        </Button>
         <Label fx:id="lblHeaderTitle" styleClass="detail-title" text="Movie Details" />
     </HBox>
 
@@ -36,11 +39,17 @@
             <VBox style="-fx-pref-width: 240px; -fx-pref-height: 360px; -fx-background-radius: 8px;" styleClass="movie-poster-container">
                 <ImageView fx:id="imgPoster" fitHeight="360.0" fitWidth="240.0" styleClass="detail-cover" />
             </VBox>
-            <Button onAction="#changePoster" styleClass="button-secondary" prefWidth="200.0" text="🖼 Change Poster" />
+            <Button onAction="#changePoster" styleClass="button-secondary" prefWidth="200.0" text="🖼">
+                <tooltip><Tooltip showDelay="250ms" text="Change Poster"/></tooltip>
+            </Button>
             
             <VBox alignment="CENTER" spacing="10.0" style="-fx-padding: 15px 0 0 0;">
-                <Button fx:id="btnPlay" onAction="#playMovie" style="-fx-font-size: 16px;" styleClass="button-primary" prefWidth="200.0" text="▶ Play Movie" />
-                <Button fx:id="btnTrailer" onAction="#watchTrailer" styleClass="button-secondary" prefWidth="200.0" text="📺 Watch Trailer" />
+                <Button fx:id="btnPlay" onAction="#playMovie" style="-fx-font-size: 16px;" styleClass="button-primary" prefWidth="200.0" text="▶">
+                    <tooltip><Tooltip showDelay="250ms" text="Play Movie"/></tooltip>
+                </Button>
+                <Button fx:id="btnTrailer" onAction="#watchTrailer" styleClass="button-secondary" prefWidth="200.0" text="📺">
+                    <tooltip><Tooltip showDelay="250ms" text="Watch Trailer"/></tooltip>
+                </Button>
             </VBox>
         </VBox>
 
@@ -92,7 +101,9 @@
                 <Label style="-fx-font-weight: bold;" text="Watchlists:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
                 <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
                     <Label fx:id="lblWatchlistsList" style="-fx-text-fill: -color-fg-muted;" text="None" HBox.hgrow="ALWAYS" />
-                    <MenuButton fx:id="menuWatchlists" styleClass="button-secondary" text="Add to Watchlist" />
+                    <MenuButton fx:id="menuWatchlists" styleClass="button-secondary" text="➕">
+                        <tooltip><Tooltip showDelay="250ms" text="Add to Watchlist"/></tooltip>
+                    </MenuButton>
                 </HBox>
             </GridPane>
 
@@ -101,8 +112,12 @@
 
             <!-- Action buttons -->
             <HBox alignment="CENTER_RIGHT" spacing="15.0">
-                <Button onAction="#saveChanges" styleClass="button-primary" prefWidth="130.0" text="Save Changes" />
-                <Button onAction="#cancelEdit" styleClass="button-secondary" prefWidth="100.0" text="Cancel" />
+                <Button onAction="#saveChanges" styleClass="button-primary" prefWidth="130.0" text="💾">
+                    <tooltip><Tooltip showDelay="250ms" text="Save Changes"/></tooltip>
+                </Button>
+                <Button onAction="#cancelEdit" styleClass="button-secondary" prefWidth="100.0" text="❌">
+                    <tooltip><Tooltip showDelay="250ms" text="Cancel"/></tooltip>
+                </Button>
             </HBox>
         </VBox>
 

@@ -39,12 +39,20 @@ public class MainController {
         
         // Unselected (false) = Light Mode (Default)
         // Selected (true) = Dark Mode
-        if ("dark".equals(theme)) {
+        if (theme != null && theme.equals("dark")) {
             btnThemeToggle.setSelected(true);
-            btnThemeToggle.setText("🌙 Dark Mode");
+            btnThemeToggle.setText("🌙");
+            if (btnThemeToggle.getTooltip() != null) {
+                btnThemeToggle.getTooltip().setText("Dark Mode");
+                btnThemeToggle.getTooltip().setShowDelay(javafx.util.Duration.millis(250));
+            }
         } else {
             btnThemeToggle.setSelected(false);
-            btnThemeToggle.setText("☀ Light Mode");
+            btnThemeToggle.setText("☀");
+            if (btnThemeToggle.getTooltip() != null) {
+                btnThemeToggle.getTooltip().setText("Light Mode");
+                btnThemeToggle.getTooltip().setShowDelay(javafx.util.Duration.millis(250));
+            }
         }
 
         // Add selection listener AFTER setting initial values to avoid immediate toggle firing on load
@@ -139,11 +147,13 @@ public class MainController {
         var settingsRepo = AppContext.getInstance().getSettingsRepository();
         
         if (dark) {
-            btnThemeToggle.setText("🌙 Dark Mode");
+            btnThemeToggle.setText("🌙");
+            if (btnThemeToggle.getTooltip() != null) btnThemeToggle.getTooltip().setText("Dark Mode");
             Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
             settingsRepo.set("theme_mode", "dark");
         } else {
-            btnThemeToggle.setText("☀ Light Mode");
+            btnThemeToggle.setText("☀");
+            if (btnThemeToggle.getTooltip() != null) btnThemeToggle.getTooltip().setText("Light Mode");
             Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
             settingsRepo.set("theme_mode", "light");
         }
