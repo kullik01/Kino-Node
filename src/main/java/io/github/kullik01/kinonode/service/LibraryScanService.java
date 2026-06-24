@@ -33,7 +33,7 @@ public class LibraryScanService {
                 updateMessage("Reading workspace settings...");
                 
                 String foldersSetting = settingsRepository.get("workspace_folders", "");
-                String extensionsSetting = settingsRepository.get("video_extensions", "mp4,mkv,avi,mov,m4v");
+                String extensionsSetting = settingsRepository.get("video_extensions", "3gp,avi,flv,m4v,mkv,mov,mp4,mpeg,mpg,mts,ogg,ogv,ts,webm,wmv");
                 
                 if (foldersSetting.isBlank()) {
                     return new ScanResult(0, 0, List.of("No workspace folders configured. Please configure folders in Settings."));

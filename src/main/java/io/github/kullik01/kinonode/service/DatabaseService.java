@@ -100,6 +100,10 @@ public class DatabaseService {
             stmt.execute(createWatchlistsTable);
             stmt.execute(createWatchlistMoviesTable);
             stmt.execute(createSettingsTable);
+            
+            // Populate/update default video extensions structured alphabetically
+            stmt.execute("INSERT INTO settings (key, value) VALUES ('video_extensions', '3gp,avi,flv,m4v,mkv,mov,mp4,mpeg,mpg,mts,ogg,ogv,ts,webm,wmv') ON CONFLICT(key) DO UPDATE SET value = excluded.value;");
+            
             LOGGER.info("Database tables verified/created successfully.");
         }
     }

@@ -23,7 +23,7 @@
 
     <!-- Top Action Toolbar -->
     <HBox alignment="CENTER_LEFT" spacing="15.0">
-        <Label text="Movie Library" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;" />
+        <Label text="Movie Library" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;" />
         
         <!-- Search and Sort -->
         <TextField fx:id="txtSearch" promptText="Search movies..." prefWidth="200.0" />

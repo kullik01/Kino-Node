@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.Region?>
+
+<VBox spacing="25.0" styleClass="detail-pane"
+      stylesheets="/io/github/kullik01/kinonode/css/theme.css"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="io.github.kullik01.kinonode.controller.AboutController">
+    
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
+
+    <!-- Header Section -->
+    <VBox spacing="5.0">
+        <Label text="About KinoNode" styleClass="detail-title" />
+        <Label text="Personal Movie Library Manager" style="-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;" />
+    </VBox>
+
+    <!-- Cards Row -->
+    <HBox spacing="20.0" alignment="TOP_LEFT">
+        
+        <!-- Left Card: Application Details -->
+        <VBox styleClass="about-card" prefWidth="380.0">
+            <Label text="Application Details" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;" />
+            
+            <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
+            
+            <GridPane hgap="10.0" vgap="10.0">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="100.0" prefWidth="110.0" />
+                    <ColumnConstraints hgrow="ALWAYS" />
+                </columnConstraints>
+                
+                <Label text="Version:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <Label fx:id="lblVersion" text="1.0.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                <Label text="Developer:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <Label text="Hannah Kullik" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                <Label text="License:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <Label text="BSD 3-Clause License" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                
+                <Label text="Copyright:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <Label text="© 2026 Hannah Kullik" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            </GridPane>
+            
+            <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
+            
+            <Label text="System Environment" style="-fx-font-size: 13px; -fx-font-weight: bold;" />
+            <GridPane hgap="10.0" vgap="6.0">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="100.0" prefWidth="110.0" />
+                    <ColumnConstraints hgrow="ALWAYS" />
+                </columnConstraints>
+                
+                <Label text="Java Runtime:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <Label fx:id="lblJavaRuntime" text="Unknown" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                <Label text="Operating System:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <Label fx:id="lblOsDetails" text="Unknown" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            </GridPane>
+            
+            <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
+            
+            <Label text="Built With" style="-fx-font-size: 13px; -fx-font-weight: bold;" />
+            <VBox spacing="4.0">
+                <Label text="• Java 21 — Core runtime" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" />
+                <Label text="• JavaFX 21 — UI framework" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" />
+                <Label text="• SQLite — Data persistence" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" />
+                <Label text="• AtlantaFX — Modern CSS theme" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" />
+            </VBox>
+        </VBox>
+        
+        <!-- Right Card: System Configuration & Storage -->
+        <VBox styleClass="about-card" HBox.hgrow="ALWAYS" style="-fx-max-width: 600px;">
+            <Label text="System Configuration &amp; Storage" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;" />
+            
+            <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
+            
+            <GridPane hgap="10.0" vgap="10.0">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="130.0" prefWidth="140.0" />
+                    <ColumnConstraints hgrow="ALWAYS" />
+                </columnConstraints>
+                
+                <Label text="Library Movies:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <Label fx:id="lblMovieCount" text="0 movies" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                <Label text="Active Watchlists:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <Label fx:id="lblWatchlistCount" text="0 watchlists" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                <Label text="Database File Size:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <Label fx:id="lblDbSize" text="Unknown" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                
+                <Label text="Media Player Path:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <Label fx:id="lblPlayerPath" text="None" style="-fx-font-family: monospace; -fx-font-size: 11px;" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            </GridPane>
+            
+            <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
+            
+            <VBox spacing="8.0">
+                <Label text="Supported Video Extensions:" style="-fx-font-weight: bold;" />
+                <Label fx:id="lblExtensions" text="3gp, avi, flv, m4v, mkv, mov, mp4, mpeg, mpg, mts, ogg, ogv, ts, webm, wmv" 
+                       style="-fx-font-family: monospace; -fx-font-size: 12px; -fx-text-fill: -color-fg-default; -fx-background-color: -color-bg-default; -fx-padding: 8px; -fx-background-radius: 6px; -fx-border-color: -color-border-default; -fx-border-radius: 6px;" 
+                       wrapText="true" maxWidth="Infinity" />
+            </VBox>
+            
+            <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
+            
+            <VBox spacing="8.0">
+                <Label text="Database Storage Location:" style="-fx-font-weight: bold;" />
+                <Label fx:id="lblDbPath" text="" 
+                       style="-fx-font-family: monospace; -fx-font-size: 12px; -fx-text-fill: -color-fg-default; -fx-background-color: -color-bg-default; -fx-padding: 8px; -fx-background-radius: 6px; -fx-border-color: -color-border-default; -fx-border-radius: 6px;" 
+                       wrapText="true" maxWidth="Infinity" />
+            </VBox>
+        </VBox>
+    </HBox>
+</VBox>

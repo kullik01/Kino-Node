@@ -36,7 +36,7 @@
         </HBox>
     </VBox>
 
-    <!-- Player & Extensions Section -->
+    <!-- Player Section -->
     <GridPane hgap="15.0" vgap="15.0">
         <columnConstraints>
             <ColumnConstraints minWidth="150.0" prefWidth="180.0" />
@@ -44,7 +44,6 @@
             <ColumnConstraints minWidth="100.0" />
         </columnConstraints>
         <rowConstraints>
-            <RowConstraints minHeight="30.0" />
             <RowConstraints minHeight="30.0" />
         </rowConstraints>
 
@@ -60,17 +59,6 @@
         </VBox>
         <Button onAction="#browsePlayer" styleClass="button-secondary" text="📂 Browse"
                 GridPane.columnIndex="2" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
-
-        <!-- Video Extensions -->
-        <Label text="Video Extensions:" style="-fx-font-weight: bold;"
-               GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
-        <VBox spacing="4.0" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.valignment="CENTER">
-            <HBox spacing="10.0" alignment="CENTER_LEFT">
-                <TextField fx:id="txtExtensions" promptText="mp4, mkv, avi, mov, m4v" HBox.hgrow="ALWAYS" />
-                <Label fx:id="lblExtensionsStatus" />
-            </HBox>
-            <Label fx:id="lblExtensionsError" style="-fx-text-fill: -color-danger-fg; -fx-font-size: 11px;" visible="false" managed="false" />
-        </VBox>
     </GridPane>
 
     <!-- Save State / Feedback Label -->

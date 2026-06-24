@@ -6,6 +6,68 @@
     -fx-text-fill: -color-fg-default;
 }
 
+.root, * {
+    /* ── ALL blues locked to #2178dd (mandatory) ── */
+    -color-blue-0: #2178dd;
+    -color-blue-1: #2178dd;
+    -color-blue-2: #2178dd;
+    -color-blue-3: #2178dd;
+    -color-blue-4: #2178dd;
+    -color-blue-5: #2178dd;
+    -color-blue-6: #2178dd;
+    -color-blue-7: #2178dd;
+    -color-blue-8: #2178dd;
+    -color-blue-9: #2178dd;
+
+    /* Semantic Accent – all states use #2178dd */
+    -color-accent: #2178dd;
+    -color-accent-hover: #2178dd;
+    -color-accent-active: #2178dd;
+    -color-accent-solid: #2178dd;
+
+    -color-accent-emphasis: #2178dd;
+    -color-accent-emphasis-hover: #2178dd;
+    -color-accent-emphasis-active: #2178dd;
+
+    -color-accent-fg: #2178dd;
+    -color-accent-fg-hover: #2178dd;
+    -color-accent-fg-active: #2178dd;
+
+    -color-accent-muted: rgba(33, 120, 221, 0.4);
+    -color-accent-muted-hover: rgba(33, 120, 221, 0.5);
+    -color-accent-muted-active: rgba(33, 120, 221, 0.6);
+
+    -color-accent-subtle: rgba(33, 120, 221, 0.12);
+    -color-accent-subtle-hover: rgba(33, 120, 221, 0.22);
+    -color-accent-subtle-active: rgba(33, 120, 221, 0.32);
+
+    /* Semantic Info – all states use #2178dd */
+    -color-info: #2178dd;
+    -color-info-hover: #2178dd;
+    -color-info-active: #2178dd;
+    -color-info-solid: #2178dd;
+    -color-info-emphasis: #2178dd;
+    -color-info-emphasis-hover: #2178dd;
+    -color-info-emphasis-active: #2178dd;
+    -color-info-fg: #2178dd;
+    -color-info-fg-hover: #2178dd;
+    -color-info-fg-active: #2178dd;
+    -color-info-muted: rgba(33, 120, 221, 0.4);
+    -color-info-muted-hover: rgba(33, 120, 221, 0.5);
+    -color-info-muted-active: rgba(33, 120, 221, 0.6);
+    -color-info-subtle: rgba(33, 120, 221, 0.12);
+    -color-info-subtle-hover: rgba(33, 120, 221, 0.22);
+    -color-info-subtle-active: rgba(33, 120, 221, 0.32);
+
+    /* Standard JavaFX lookups */
+    -fx-accent: #2178dd;
+    -fx-focus-color: #2178dd;
+    -fx-faint-focus-color: rgba(33, 120, 221, 0.12);
+
+    /* Global text/graphics contrast color on accent backgrounds */
+    -color-fg-on-accent: white;
+}
+
 /* Sidebar navigation styling */
 .sidebar {
     -fx-background-color: -color-bg-subtle;
@@ -165,7 +227,7 @@
 }
 
 .button-primary:hover {
-    -fx-background-color: -color-accent-fg;
+    -fx-background-color: -color-accent-emphasis-hover;
 }
 
 .button-secondary {
@@ -189,3 +251,30 @@
 .text-input:focused {
     -fx-border-color: -color-accent-emphasis;
 }
+
+/* Sidebar Settings SVG Icon Styling */
+.sidebar-button .settings-svg {
+    -fx-fill: -color-fg-muted;
+}
+
+.sidebar-button:hover .settings-svg {
+    -fx-fill: -color-fg-default;
+}
+
+.sidebar-button:selected .settings-svg,
+.sidebar-button.active .settings-svg {
+    -fx-fill: -color-fg-on-accent;
+}
+
+/* About Card styling inspired by FocusBean */
+.about-card {
+    -fx-background-color: -color-bg-subtle;
+    -fx-background-radius: 12px;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 20px;
+    -fx-spacing: 15px;
+    -fx-min-width: 320px;
+}
+

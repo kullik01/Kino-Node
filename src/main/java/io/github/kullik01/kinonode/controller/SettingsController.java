@@ -28,18 +28,14 @@ public class SettingsController implements Refreshable {
     @FXML private Button btnAddFolder;
     @FXML private Button btnRemoveFolder;
     @FXML private TextField txtPlayerPath;
-    @FXML private TextField txtExtensions;
     @FXML private Label lblStatus;
     @FXML private Label lblPlayerStatus;
     @FXML private Label lblPlayerError;
-    @FXML private Label lblExtensionsStatus;
-    @FXML private Label lblExtensionsError;
     @FXML private Button btnSave;
 
     private SettingsRepository settingsRepository;
     private String loadedWorkspaces = "";
     private String loadedPlayerPath = "";
-    private String loadedExtensions = "";
 
     @FXML
     public void initialize() {
@@ -71,14 +67,9 @@ public class SettingsController implements Refreshable {
         String player = settingsRepository.get("player_executable_path", "");
         txtPlayerPath.setText(player);
 
-        // Load video extensions
-        String extensions = settingsRepository.get("video_extensions", "mp4,mkv,avi,mov,m4v");
-        txtExtensions.setText(extensions);
-
         // Store loaded state snapshots for dirty checking
         loadedWorkspaces = workspaces;
         loadedPlayerPath = player;
-        loadedExtensions = extensions;
 
         // Initial validation trigger
         validateAll();
@@ -140,22 +131,8 @@ public class SettingsController implements Refreshable {
         String player = txtPlayerPath.getText().trim().replace("\\", "/");
         settingsRepository.set("player_executable_path", player);
 
-        // Save extensions
-        String extRaw = txtExtensions.getText().trim();
-        String extensionsClean = Arrays.stream(extRaw.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.joining(","));
-        
-        if (extensionsClean.isEmpty()) {
-            extensionsClean = "mp4,mkv,avi,mov,m4v";
-        }
-        settingsRepository.set("video_extensions", extensionsClean);
-        txtExtensions.setText(extensionsClean);
-
         // Update dirty checking snapshots
         loadedPlayerPath = player;
-        loadedExtensions = extensionsClean;
 
         lblStatus.setText("Settings saved successfully.");
     }
@@ -171,16 +148,10 @@ public class SettingsController implements Refreshable {
             validatePlayerPath(newVal);
             updateSaveButtonState();
         });
-
-        txtExtensions.textProperty().addListener((obs, oldVal, newVal) -> {
-            validateExtensions(newVal);
-            updateSaveButtonState();
-        });
     }
 
     private void validateAll() {
         validatePlayerPath(txtPlayerPath.getText());
-        validateExtensions(txtExtensions.getText());
         updateSaveButtonState();
     }
 
@@ -194,33 +165,6 @@ public class SettingsController implements Refreshable {
                 setValidationStatus(txtPlayerPath, lblPlayerStatus, lblPlayerError, true, null);
             } else {
                 setValidationStatus(txtPlayerPath, lblPlayerStatus, lblPlayerError, false, "Executable file does not exist.");
-            }
-        }
-    }
-
-    private void validateExtensions(String ext) {
-        if (ext == null || ext.isBlank()) {
-            setValidationStatus(txtExtensions, lblExtensionsStatus, lblExtensionsError, false, "Extensions list cannot be empty.");
-        } else {
-            String clean = ext.trim();
-            boolean valid = true;
-            String[] parts = clean.split(",");
-            if (parts.length == 0) {
-                valid = false;
-            } else {
-                for (String part : parts) {
-                    String trimmed = part.trim();
-                    if (trimmed.isEmpty() || !trimmed.matches("^[a-zA-Z0-9]+$")) {
-                        valid = false;
-                        break;
-                    }
-                }
-            }
-
-            if (valid) {
-                setValidationStatus(txtExtensions, lblExtensionsStatus, lblExtensionsError, true, null);
-            } else {
-                setValidationStatus(txtExtensions, lblExtensionsStatus, lblExtensionsError, false, "Invalid format. Use comma-separated alphanumeric values (e.g. mp4,mkv).");
             }
         }
     }
@@ -263,42 +207,16 @@ public class SettingsController implements Refreshable {
             File file = new File(playerPath);
             isPlayerValid = file.exists() && file.isFile();
         }
-
-        boolean isExtensionsValid = false;
-        String ext = txtExtensions.getText();
-        if (ext != null && !ext.isBlank()) {
-            String[] parts = ext.split(",");
-            if (parts.length > 0) {
-                isExtensionsValid = true;
-                for (String part : parts) {
-                    String trimmed = part.trim();
-                    if (trimmed.isEmpty() || !trimmed.matches("^[a-zA-Z0-9]+$")) {
-                        isExtensionsValid = false;
-                        break;
-                    }
-                }
-            }
-        }
         
-        return !isPlayerValid || !isExtensionsValid;
+        return !isPlayerValid;
     }
 
     public boolean hasUnsavedChanges() {
         String currentWorkspaces = String.join(";", lstWorkspaces.getItems());
         String currentPlayer = txtPlayerPath.getText() != null ? txtPlayerPath.getText().trim().replace("\\", "/") : "";
         
-        String extRaw = txtExtensions.getText() != null ? txtExtensions.getText().trim() : "";
-        String currentExtensions = Arrays.stream(extRaw.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.joining(","));
-        if (currentExtensions.isEmpty()) {
-            currentExtensions = "mp4,mkv,avi,mov,m4v";
-        }
-        
         return !currentWorkspaces.equals(loadedWorkspaces)
-                || !currentPlayer.equals(loadedPlayerPath)
-                || !currentExtensions.equals(loadedExtensions);
+                || !currentPlayer.equals(loadedPlayerPath);
     }
 
     private void setupWorkspaceCellFactory() {
@@ -316,7 +234,7 @@ public class SettingsController implements Refreshable {
                     // Folder icon
                     SVGPath folderIcon = new SVGPath();
                     folderIcon.setContent("M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z");
-                    folderIcon.setStyle("-fx-fill: -color-accent-emphasis;");
+                    folderIcon.setStyle("-fx-fill: #2178dd;");
                     folderIcon.setScaleX(0.95);
                     folderIcon.setScaleY(0.95);
                     

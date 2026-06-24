@@ -24,6 +24,7 @@ public class MainController {
     @FXML private Button btnLibrary;
     @FXML private Button btnWatchlists;
     @FXML private Button btnSettings;
+    @FXML private Button btnAbout;
     @FXML private ToggleSwitch btnThemeToggle;
 
     private final Map<String, Parent> views = new HashMap<>();
@@ -68,6 +69,11 @@ public class MainController {
     @FXML
     private void showSettings() {
         navigate("Settings", "/io/github/kullik01/kinonode/fxml/SettingsView.fxml", btnSettings);
+    }
+
+    @FXML
+    private void showAbout() {
+        navigate("About", "/io/github/kullik01/kinonode/fxml/AboutView.fxml", btnAbout);
     }
 
     private void navigate(String name, String fxmlPath, Button targetButton) {
