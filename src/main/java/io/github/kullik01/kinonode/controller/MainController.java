@@ -10,6 +10,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
+import javafx.stage.Screen;
+import javafx.geometry.Rectangle2D;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
@@ -20,6 +24,8 @@ import java.util.logging.Logger;
 public class MainController {
     private static final Logger LOGGER = Logger.getLogger(MainController.class.getName());
 
+    @FXML private StackPane rootPane;
+    @FXML private HBox titleBar;
     @FXML private StackPane contentArea;
     @FXML private Button btnLibrary;
     @FXML private Button btnWatchlists;
@@ -30,9 +36,26 @@ public class MainController {
     private final Map<String, Parent> views = new HashMap<>();
     private final Map<String, Object> controllers = new HashMap<>();
     private Button activeButton;
+    private double xOffset = 0;
+    private double yOffset = 0;
 
     @FXML
     public void initialize() {
+        // Window dragging logic
+        titleBar.setOnMousePressed(event -> {
+            Stage stage = (Stage) rootPane.getScene().getWindow();
+            xOffset = stage.getX() - event.getScreenX();
+            yOffset = stage.getY() - event.getScreenY();
+        });
+        titleBar.setOnMouseDragged(event -> {
+            Stage stage = (Stage) rootPane.getScene().getWindow();
+            // Don't drag if maximized
+            if (!stage.isMaximized()) {
+                stage.setX(event.getScreenX() + xOffset);
+                stage.setY(event.getScreenY() + yOffset);
+            }
+        });
+
         // Load initial theme button state from settings (Default is light)
         var settingsRepo = AppContext.getInstance().getSettingsRepository();
         String theme = settingsRepo.get("theme_mode", "light");
@@ -62,6 +85,24 @@ public class MainController {
 
         // Show Library by default
         showLibrary();
+    }
+
+    @FXML
+    private void minimizeWindow() {
+        Stage stage = (Stage) rootPane.getScene().getWindow();
+        stage.setIconified(true);
+    }
+
+    @FXML
+    private void maximizeWindow() {
+        Stage stage = (Stage) rootPane.getScene().getWindow();
+        stage.setMaximized(!stage.isMaximized());
+    }
+
+    @FXML
+    private void closeWindow() {
+        Stage stage = (Stage) rootPane.getScene().getWindow();
+        stage.close();
     }
 
     @FXML

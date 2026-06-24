@@ -82,6 +82,7 @@
     -fx-pref-width: 230px;
     -fx-border-color: -color-border-default;
     -fx-border-width: 0 1px 0 0;
+    -fx-background-radius: 0 0 0 12px;
 }
 
 .sidebar-title {
@@ -294,3 +295,88 @@
     -fx-effect: none;
 }
 
+/* Custom Window Decorations */
+.main-window {
+    -fx-background-color: -color-bg-default;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 15, 0.0, 0, 5);
+}
+
+/* Ensure the root stack pane has some padding to show the drop shadow */
+#rootPane {
+    -fx-padding: 15px;
+}
+
+.title-bar {
+    -fx-background-color: -color-bg-subtle;
+    -fx-background-radius: 12px 12px 0 0;
+    -fx-padding: 0 0 0 15px;
+    -fx-min-height: 35px;
+    -fx-max-height: 35px;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.title-bar-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-muted;
+}
+
+.window-controls {
+    -fx-padding: 0;
+}
+
+.window-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-family: "Segoe UI Symbol", "Segoe MDL2 Assets", sans-serif;
+    -fx-font-size: 12px;
+    -fx-padding: 5px 15px;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-border-color: transparent;
+    -fx-min-height: 35px;
+}
+
+.window-button:hover {
+    -fx-background-color: -color-bg-overlay;
+    -fx-text-fill: -color-fg-default;
+    -fx-opacity: 1.0;
+    -fx-effect: none;
+    -fx-border-color: transparent;
+}
+
+.window-button:pressed {
+    -fx-background-color: -color-bg-inset;
+    -fx-text-fill: -color-fg-default;
+    -fx-opacity: 1.0;
+    -fx-effect: none;
+    -fx-border-color: transparent;
+}
+
+.close-button:hover {
+    -fx-background-color: #e81123;
+    -fx-text-fill: white;
+}
+
+.close-button:pressed {
+    -fx-background-color: #f1707a;
+    -fx-text-fill: white;
+}
+
+.title-bar .maximize-button {
+    -fx-background-radius: 0;
+}
+
+.title-bar .close-button {
+    -fx-background-radius: 0 12px 0 0;
+}
+
+.main-content-vbox {
+    -fx-background-color: -color-bg-default;
+    -fx-background-radius: 0 0 12px 0;
+}
