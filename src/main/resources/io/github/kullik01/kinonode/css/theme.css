@@ -77,16 +77,15 @@
 /* Sidebar navigation styling */
 .sidebar {
     -fx-background-color: -color-bg-subtle;
-    -fx-padding: 25px 15px;
+    -fx-padding: 20px 5px;
     -fx-spacing: 15px;
-    -fx-pref-width: 230px;
+    -fx-pref-width: 140px;
     -fx-border-color: -color-border-default;
     -fx-border-width: 0 1px 0 0;
-    -fx-background-radius: 0 0 0 12px;
 }
 
 .sidebar-title {
-    -fx-font-size: 22px;
+    -fx-font-size: 24px;
     -fx-font-weight: bold;
     -fx-text-fill: #2178dd;
     -fx-padding: 0 0 20px 10px;
@@ -97,10 +96,10 @@
     -fx-background-color: transparent;
     -fx-text-fill: -color-fg-muted;
     -fx-font-size: 14px;
-    -fx-padding: 10px 15px;
+    -fx-padding: 10px 10px;
     -fx-background-radius: 6px;
     -fx-cursor: hand;
-    -fx-pref-width: 200px;
+    -fx-pref-width: 125px;
     -fx-border-color: transparent;
 }
 
@@ -124,9 +123,10 @@
 
 .movie-grid {
     -fx-background-color: -color-bg-default;
-    -fx-hgap: 20px;
+    -fx-hgap: 15px;
     -fx-vgap: 20px;
-    -fx-padding: 20px;
+    -fx-padding: 5px;
+    -fx-alignment: top-center;
 }
 
 /* Movie Card styling */
@@ -302,16 +302,11 @@
 /* Custom Window Decorations */
 .main-window {
     -fx-background-color: -color-bg-default;
-    -fx-background-radius: 12px;
-    -fx-border-radius: 12px;
-    -fx-border-color: -color-border-default;
-    -fx-border-width: 1px;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 15, 0.0, 0, 5);
 }
 
-/* Ensure the root stack pane has some padding to show the drop shadow */
+/* Ensure the root stack pane has no padding */
 #rootPane {
-    -fx-padding: 15px;
+    -fx-padding: 0px;
 }
 
 .maximized {
@@ -406,5 +401,4 @@
 
 .main-content-vbox {
     -fx-background-color: -color-bg-default;
-    -fx-background-radius: 0 0 12px 0;
 }

@@ -10,10 +10,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-import javafx.stage.Screen;
-import javafx.geometry.Rectangle2D;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
@@ -25,7 +22,6 @@ public class MainController {
     private static final Logger LOGGER = Logger.getLogger(MainController.class.getName());
 
     @FXML private StackPane rootPane;
-    @FXML private HBox titleBar;
     @FXML private StackPane contentArea;
     @FXML private Button btnLibrary;
     @FXML private Button btnWatchlists;
@@ -41,25 +37,6 @@ public class MainController {
 
     @FXML
     public void initialize() {
-        // Window dragging logic
-        titleBar.setOnMousePressed(event -> {
-            Stage stage = (Stage) rootPane.getScene().getWindow();
-            xOffset = stage.getX() - event.getScreenX();
-            yOffset = stage.getY() - event.getScreenY();
-        });
-        titleBar.setOnMouseDragged(event -> {
-            Stage stage = (Stage) rootPane.getScene().getWindow();
-            // Don't drag if maximized
-            if (!stage.isMaximized()) {
-                stage.setX(event.getScreenX() + xOffset);
-                stage.setY(event.getScreenY() + yOffset);
-            }
-        });
-        titleBar.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
-                maximizeWindow();
-            }
-        });
 
         // Load initial theme button state from settings (Default is light)
         var settingsRepo = AppContext.getInstance().getSettingsRepository();
@@ -103,43 +80,7 @@ public class MainController {
         });
     }
 
-    @FXML
-    private void minimizeWindow() {
-        Stage stage = (Stage) rootPane.getScene().getWindow();
-        stage.setIconified(true);
-    }
-
-    private double normalX, normalY, normalWidth, normalHeight;
-
-    @FXML
-    private void maximizeWindow() {
-        Stage stage = (Stage) rootPane.getScene().getWindow();
-        if (stage.isMaximized()) {
-            stage.setMaximized(false);
-            stage.setX(normalX);
-            stage.setY(normalY);
-            stage.setWidth(normalWidth);
-            stage.setHeight(normalHeight);
-        } else {
-            normalX = stage.getX();
-            normalY = stage.getY();
-            normalWidth = stage.getWidth();
-            normalHeight = stage.getHeight();
-            
-            javafx.geometry.Rectangle2D bounds = javafx.stage.Screen.getScreensForRectangle(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight()).get(0).getVisualBounds();
-            stage.setX(bounds.getMinX());
-            stage.setY(bounds.getMinY());
-            stage.setWidth(bounds.getWidth());
-            stage.setHeight(bounds.getHeight());
-            stage.setMaximized(true);
-        }
-    }
-
-    @FXML
-    private void closeWindow() {
-        Stage stage = (Stage) rootPane.getScene().getWindow();
-        stage.close();
-    }
+    
 
     @FXML
     private void showLibrary() {
