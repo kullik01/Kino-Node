@@ -134,6 +134,7 @@ public class MovieDetailController {
         
         // Clear Rating button (Reset to unrated)
         Button btnClear = new Button("❌");
+        btnClear.setMinSize(javafx.scene.control.Button.USE_PREF_SIZE, javafx.scene.control.Button.USE_PREF_SIZE);
         btnClear.setStyle("-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 2px; -fx-font-size: 11px;");
         Tooltip clearTooltip = new Tooltip("Clear rating (unrated)");
         clearTooltip.setShowDelay(javafx.util.Duration.millis(250));

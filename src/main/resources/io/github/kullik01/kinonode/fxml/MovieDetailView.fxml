@@ -27,7 +27,7 @@
 
     <!-- Header / Back button -->
     <HBox alignment="CENTER_LEFT" spacing="15.0">
-        <Button onAction="#goBack" styleClass="button-secondary" text="⬅">
+        <Button onAction="#goBack" styleClass="button-secondary" text="⬅" minWidth="-Infinity">
             <tooltip><Tooltip showDelay="250ms" text="Back to Library"/></tooltip>
         </Button>
         <Label fx:id="lblHeaderTitle" styleClass="detail-title" text="Movie Details" />
@@ -40,7 +40,7 @@
             <VBox style="-fx-pref-width: 240px; -fx-pref-height: 360px; -fx-background-radius: 8px;" styleClass="movie-poster-container">
                 <ImageView fx:id="imgPoster" fitHeight="360.0" fitWidth="240.0" styleClass="detail-cover" />
             </VBox>
-            <Button onAction="#changePoster" styleClass="button-secondary" text="🖼">
+            <Button onAction="#changePoster" styleClass="button-secondary" text="🖼" minWidth="-Infinity">
                 <tooltip><Tooltip showDelay="250ms" text="Change Poster"/></tooltip>
             </Button>
             
@@ -108,7 +108,7 @@
                 <Label style="-fx-font-weight: bold;" text="Watchlists:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
                 <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
                     <Label fx:id="lblWatchlistsList" style="-fx-text-fill: -color-fg-muted;" text="None" HBox.hgrow="ALWAYS" />
-                    <MenuButton fx:id="menuWatchlists" styleClass="button-secondary" text="➕">
+                    <MenuButton fx:id="menuWatchlists" styleClass="button-secondary" text="➕" minWidth="-Infinity">
                         <tooltip><Tooltip showDelay="250ms" text="Add to Watchlist"/></tooltip>
                     </MenuButton>
                 </HBox>

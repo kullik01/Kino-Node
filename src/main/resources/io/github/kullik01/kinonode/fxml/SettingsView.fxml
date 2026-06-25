@@ -32,10 +32,10 @@
         <HBox spacing="10.0">
             <ListView fx:id="lstWorkspaces" prefHeight="150.0" HBox.hgrow="ALWAYS" />
             <VBox spacing="10.0">
-                <Button fx:id="btnAddFolder" onAction="#addWorkspace" styleClass="button-secondary" text="➕">
+                <Button fx:id="btnAddFolder" onAction="#addWorkspace" styleClass="button-secondary" text="➕" minWidth="-Infinity">
                     <tooltip><Tooltip showDelay="250ms" text="Add"/></tooltip>
                 </Button>
-                <Button fx:id="btnRemoveFolder" onAction="#removeWorkspace" styleClass="button-secondary" text="➖">
+                <Button fx:id="btnRemoveFolder" onAction="#removeWorkspace" styleClass="button-secondary" text="➖" minWidth="-Infinity">
                     <tooltip><Tooltip showDelay="250ms" text="Remove"/></tooltip>
                 </Button>
             </VBox>
@@ -63,7 +63,7 @@
             </HBox>
             <Label fx:id="lblPlayerError" style="-fx-text-fill: -color-danger-fg; -fx-font-size: 11px;" visible="false" managed="false" />
         </VBox>
-        <Button onAction="#browsePlayer" styleClass="button-secondary" text="📂"
+        <Button onAction="#browsePlayer" styleClass="button-secondary" text="📂" minWidth="-Infinity"
                 GridPane.columnIndex="2" GridPane.rowIndex="0" GridPane.valignment="CENTER">
             <tooltip><Tooltip showDelay="250ms" text="Browse"/></tooltip>
         </Button>
