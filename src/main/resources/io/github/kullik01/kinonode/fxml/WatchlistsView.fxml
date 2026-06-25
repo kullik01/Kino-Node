@@ -29,7 +29,7 @@
                 <tooltip><Tooltip showDelay="250ms" text="Rename"/></tooltip>
             </Button>
             <Button onAction="#deleteWatchlist" styleClass="button-secondary" text="➖">
-                <tooltip><Tooltip showDelay="250ms" text="Delete"/></tooltip>
+                <tooltip><Tooltip showDelay="250ms" text="Remove"/></tooltip>
             </Button>
         </HBox>
     </VBox>
@@ -38,7 +38,7 @@
     <VBox fx:id="paneDetails" spacing="20.0" style="-fx-background-color: -color-bg-default; -fx-padding: 20px;">
         <HBox alignment="CENTER_LEFT" spacing="15.0">
             <VBox HBox.hgrow="ALWAYS">
-                <Label fx:id="lblWatchlistName" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2178dd;" text="Select a Watchlist" />
+                <Label fx:id="lblWatchlistName" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2178dd;" text="Select a Movie" />
                 <Label fx:id="lblMovieCount" style="-fx-font-size: 12px; -fx-text-fill: -color-fg-muted;" text="0 movies" />
             </VBox>
             

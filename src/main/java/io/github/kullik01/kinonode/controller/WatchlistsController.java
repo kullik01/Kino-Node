@@ -169,7 +169,7 @@ public class WatchlistsController implements Refreshable {
 
     private void loadWatchlistMovies() {
         if (selectedWatchlist == null) {
-            lblWatchlistName.setText("Select a Watchlist");
+            lblWatchlistName.setText("Select a Movie");
             lblMovieCount.setText("0 movies");
             lstMovies.getItems().clear();
             paneDetails.setDisable(true);
@@ -194,19 +194,69 @@ public class WatchlistsController implements Refreshable {
         btnRemoveMovie.setDisable(!selected);
     }
 
+    private Optional<String> showWatchlistDialog(String title, String header, String defaultText) {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle(title);
+        dialog.setHeaderText(header);
+
+        dialog.getDialogPane().setPrefSize(480, 280);
+        dialog.getDialogPane().setMinSize(480, 280);
+
+        ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
+
+        VBox vbox = new VBox(5);
+        Label errorLabel = new Label("The text you entered is not ASCII code. Only standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space) can be used.");
+        errorLabel.setWrapText(true);
+        errorLabel.setPrefWidth(430);
+        errorLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+        errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+        errorLabel.setVisible(false);
+
+        TextField textField = new TextField(defaultText);
+        textField.setPromptText("Watchlist Name");
+        
+        vbox.getChildren().addAll(errorLabel, textField);
+        dialog.getDialogPane().setContent(vbox);
+
+        javafx.scene.Node okButton = dialog.getDialogPane().lookupButton(okButtonType);
+        okButton.setDisable(defaultText.trim().isEmpty() || defaultText.length() > 30);
+
+        textField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.length() > 30) {
+                textField.setText(oldValue);
+                return;
+            }
+            if (!newValue.matches("\\A\\p{ASCII}*\\z")) {
+                errorLabel.setVisible(true);
+                okButton.setDisable(true);
+            } else {
+                errorLabel.setVisible(false);
+                okButton.setDisable(newValue.trim().isEmpty());
+            }
+        });
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == okButtonType) {
+                return textField.getText();
+            }
+            return null;
+        });
+
+        return dialog.showAndWait();
+    }
+
     @FXML
     private void createWatchlist() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("New Watchlist");
-        dialog.setHeaderText("Create a new watchlist");
-        dialog.setContentText("Watchlist Name:");
-        Optional<String> result = dialog.showAndWait();
+        Optional<String> result = showWatchlistDialog("New Watchlist", "Create a new watchlist", "");
         
         result.ifPresent(name -> {
             String cleanName = name.trim();
             if (!cleanName.isEmpty()) {
-                watchlistRepository.insert(new Watchlist(cleanName));
-                refresh();
+                if (validateWatchlistName(cleanName, -1)) {
+                    watchlistRepository.insert(new Watchlist(cleanName));
+                    refresh();
+                }
             }
         });
     }
@@ -215,20 +265,35 @@ public class WatchlistsController implements Refreshable {
     private void renameWatchlist() {
         if (selectedWatchlist == null) return;
 
-        TextInputDialog dialog = new TextInputDialog(selectedWatchlist.getName());
-        dialog.setTitle("Rename Watchlist");
-        dialog.setHeaderText("Rename watchlist: " + selectedWatchlist.getName());
-        dialog.setContentText("New Name:");
-        Optional<String> result = dialog.showAndWait();
+        Optional<String> result = showWatchlistDialog("Rename Watchlist", "Rename watchlist: " + selectedWatchlist.getName(), selectedWatchlist.getName());
         
         result.ifPresent(name -> {
             String cleanName = name.trim();
             if (!cleanName.isEmpty() && !cleanName.equals(selectedWatchlist.getName())) {
-                selectedWatchlist.setName(cleanName);
-                watchlistRepository.update(selectedWatchlist);
-                refresh();
+                if (validateWatchlistName(cleanName, selectedWatchlist.getId() == null ? -1 : selectedWatchlist.getId())) {
+                    selectedWatchlist.setName(cleanName);
+                    watchlistRepository.update(selectedWatchlist);
+                    refresh();
+                }
             }
         });
+    }
+
+    private boolean validateWatchlistName(String cleanName, int currentId) {
+        List<Watchlist> watchlists = watchlistRepository.findAll();
+        for (Watchlist w : watchlists) {
+            if (w.getName().equalsIgnoreCase(cleanName)) {
+                if (w.getId() != null && w.getId() != currentId) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Validation Error");
+                    alert.setHeaderText("Duplicate Watchlist");
+                    alert.setContentText("A watchlist with this name already exists. Please choose a different name.");
+                    alert.showAndWait();
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     @FXML
@@ -254,8 +319,16 @@ public class WatchlistsController implements Refreshable {
         Movie selectedMovie = lstMovies.getSelectionModel().getSelectedItem();
         if (selectedMovie == null || selectedWatchlist == null) return;
 
-        watchlistRepository.removeMovieFromWatchlist(selectedWatchlist.getId(), selectedMovie.getId());
-        loadWatchlistMovies();
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Remove Movie");
+        alert.setHeaderText("Remove from Watchlist");
+        alert.setContentText("Are you sure you want to remove this movie from " + selectedWatchlist.getName() + "?");
+        Optional<ButtonType> result = alert.showAndWait();
+        
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            watchlistRepository.removeMovieFromWatchlist(selectedWatchlist.getId(), selectedMovie.getId());
+            loadWatchlistMovies();
+        }
     }
 
     private void playMovie(Movie movie) {

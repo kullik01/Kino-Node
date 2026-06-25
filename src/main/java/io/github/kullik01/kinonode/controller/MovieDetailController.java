@@ -14,6 +14,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import java.io.File;
 import java.io.IOException;
@@ -225,9 +226,16 @@ public class MovieDetailController {
             } else {
                 MenuItem item = new MenuItem("➖ Remove from: " + w.getName());
                 item.setOnAction(e -> {
-                    watchlistRepository.removeMovieFromWatchlist(w.getId(), movie.getId());
-                    refreshWatchlistStatus();
-                    showStatus("Removed from watchlist " + w.getName());
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("Remove Movie");
+                    alert.setHeaderText("Remove from Watchlist");
+                    alert.setContentText("Are you sure you want to remove this movie from " + w.getName() + "?");
+                    Optional<ButtonType> alertResult = alert.showAndWait();
+                    if (alertResult.isPresent() && alertResult.get() == ButtonType.OK) {
+                        watchlistRepository.removeMovieFromWatchlist(w.getId(), movie.getId());
+                        refreshWatchlistStatus();
+                        showStatus("Removed from watchlist " + w.getName());
+                    }
                 });
                 menuWatchlists.getItems().add(item);
             }
@@ -236,24 +244,91 @@ public class MovieDetailController {
         // Option to create new watchlist
         MenuItem createNew = new MenuItem("➕ Create New Watchlist...");
         createNew.setOnAction(e -> {
-            TextInputDialog dialog = new TextInputDialog();
-            dialog.setTitle("New Watchlist");
-            dialog.setHeaderText("Create a new watchlist");
-            dialog.setContentText("Watchlist Name:");
-            Optional<String> result = dialog.showAndWait();
+            Optional<String> result = showWatchlistDialog("New Watchlist", "Create a new watchlist", "");
             result.ifPresent(name -> {
                 String cleanName = name.trim();
                 if (!cleanName.isEmpty()) {
-                    Watchlist nw = watchlistRepository.insert(new Watchlist(cleanName));
-                    if (nw.getId() != null) {
-                        watchlistRepository.addMovieToWatchlist(nw.getId(), movie.getId());
-                        refreshWatchlistStatus();
-                        showStatus("Created watchlist and added movie.");
+                    if (validateWatchlistName(cleanName, -1)) {
+                        Watchlist nw = watchlistRepository.insert(new Watchlist(cleanName));
+                        if (nw.getId() != null) {
+                            watchlistRepository.addMovieToWatchlist(nw.getId(), movie.getId());
+                            refreshWatchlistStatus();
+                            showStatus("Created watchlist and added movie.");
+                        }
                     }
                 }
             });
         });
         menuWatchlists.getItems().add(createNew);
+    }
+
+    private Optional<String> showWatchlistDialog(String title, String header, String defaultText) {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle(title);
+        dialog.setHeaderText(header);
+
+        dialog.getDialogPane().setPrefSize(480, 280);
+        dialog.getDialogPane().setMinSize(480, 280);
+
+        ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
+
+        VBox vbox = new VBox(5);
+        Label errorLabel = new Label("The text you entered is not ASCII code. Only standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space) can be used.");
+        errorLabel.setWrapText(true);
+        errorLabel.setPrefWidth(430);
+        errorLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+        errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+        errorLabel.setVisible(false);
+
+        TextField textField = new TextField(defaultText);
+        textField.setPromptText("Watchlist Name");
+        
+        vbox.getChildren().addAll(errorLabel, textField);
+        dialog.getDialogPane().setContent(vbox);
+
+        javafx.scene.Node okButton = dialog.getDialogPane().lookupButton(okButtonType);
+        okButton.setDisable(defaultText.trim().isEmpty() || defaultText.length() > 30);
+
+        textField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.length() > 30) {
+                textField.setText(oldValue);
+                return;
+            }
+            if (!newValue.matches("\\A\\p{ASCII}*\\z")) {
+                errorLabel.setVisible(true);
+                okButton.setDisable(true);
+            } else {
+                errorLabel.setVisible(false);
+                okButton.setDisable(newValue.trim().isEmpty());
+            }
+        });
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == okButtonType) {
+                return textField.getText();
+            }
+            return null;
+        });
+
+        return dialog.showAndWait();
+    }
+
+    private boolean validateWatchlistName(String cleanName, int currentId) {
+        List<Watchlist> watchlists = watchlistRepository.findAll();
+        for (Watchlist w : watchlists) {
+            if (w.getName().equalsIgnoreCase(cleanName)) {
+                if (w.getId() != null && w.getId() != currentId) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Validation Error");
+                    alert.setHeaderText("Duplicate Watchlist");
+                    alert.setContentText("A watchlist with this name already exists. Please choose a different name.");
+                    alert.showAndWait();
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     @FXML
