@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 public class WatchlistsController implements Refreshable {
     private static final Logger LOGGER = Logger.getLogger(WatchlistsController.class.getName());
+    private static Image PLACEHOLDER_IMAGE;
 
     @FXML private ListView<Watchlist> lstWatchlists;
     @FXML private VBox paneDetails;
@@ -127,17 +128,20 @@ public class WatchlistsController implements Refreshable {
                         File f = new File(item.getCoverImagePath());
                         if (f.exists()) {
                             try {
-                                img = new Image(f.toURI().toURL().toExternalForm(), 30, 45, false, true);
+                                img = new Image(f.toURI().toURL().toExternalForm(), 30, 45, false, true, true);
                             } catch (MalformedURLException ignored) {}
                         }
                     }
                     if (img == null) {
-                        try {
-                            var resource = getClass().getResource("/io/github/kullik01/kinonode/images/placeholder_cover.jpg");
-                            if (resource != null) {
-                                img = new Image(resource.toExternalForm(), 30, 45, false, true);
-                            }
-                        } catch (Exception ignored) {}
+                        if (PLACEHOLDER_IMAGE == null) {
+                            try {
+                                var resource = getClass().getResource("/io/github/kullik01/kinonode/images/placeholder_cover.jpg");
+                                if (resource != null) {
+                                    PLACEHOLDER_IMAGE = new Image(resource.toExternalForm(), 30, 45, false, true, true);
+                                }
+                            } catch (Exception ignored) {}
+                        }
+                        img = PLACEHOLDER_IMAGE;
                     }
                     if (img != null) {
                         thumbnail.setImage(img);

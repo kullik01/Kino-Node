@@ -40,6 +40,8 @@ public class LibraryController implements Refreshable {
     private List<Movie> allMovies = new ArrayList<>();
     private Task<LibraryScanService.ScanResult> activeScanTask;
     private MovieDetailController currentMovieDetailController;
+    private final java.util.Map<Integer, Parent> cardCache = new java.util.HashMap<>();
+    private final java.util.Map<Integer, MovieCardController> controllerCache = new java.util.HashMap<>();
 
     @FXML
     public void initialize() {
@@ -105,19 +107,31 @@ public class LibraryController implements Refreshable {
             }
         }
 
-        gridPane.getChildren().clear();
+        java.util.List<javafx.scene.Node> newCards = new java.util.ArrayList<>();
         for (Movie m : filtered) {
-            try {
-                URL url = getClass().getResource("/io/github/kullik01/kinonode/fxml/MovieCard.fxml");
-                FXMLLoader loader = new FXMLLoader(url);
-                Parent card = loader.load();
-                MovieCardController controller = loader.getController();
-                controller.setMovie(m, this::openMovieDetail);
-                gridPane.getChildren().add(card);
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Failed to load MovieCard FXML", e);
+            Parent card = cardCache.get(m.getId());
+            MovieCardController controller = controllerCache.get(m.getId());
+            if (card == null) {
+                try {
+                    URL url = getClass().getResource("/io/github/kullik01/kinonode/fxml/MovieCard.fxml");
+                    FXMLLoader loader = new FXMLLoader(url);
+                    card = loader.load();
+                    controller = loader.getController();
+                    
+                    cardCache.put(m.getId(), card);
+                    controllerCache.put(m.getId(), controller);
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, "Failed to load MovieCard FXML", e);
+                    continue;
+                }
             }
+            
+            if (controller != null) {
+                controller.setMovie(m, this::openMovieDetail);
+            }
+            newCards.add(card);
         }
+        gridPane.getChildren().setAll(newCards);
     }
 
     private void openMovieDetail(Movie movie) {

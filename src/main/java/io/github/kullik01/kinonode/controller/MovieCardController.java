@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 
 public class MovieCardController {
     private static final Logger LOGGER = Logger.getLogger(MovieCardController.class.getName());
+    private static Image PLACEHOLDER_IMAGE;
 
     @FXML private ImageView imgPoster;
     @FXML private Label lblTitle;
@@ -39,7 +40,8 @@ public class MovieCardController {
             File f = new File(path);
             if (f.exists()) {
                 try {
-                    image = new Image(f.toURI().toURL().toExternalForm(), 150, 220, false, true);
+                    // 6th argument is backgroundLoading=true
+                    image = new Image(f.toURI().toURL().toExternalForm(), 150, 220, false, true, true);
                 } catch (MalformedURLException e) {
                     LOGGER.log(Level.WARNING, "Failed to load poster image: " + path, e);
                 }
@@ -47,14 +49,17 @@ public class MovieCardController {
         }
 
         if (image == null) {
-            try {
-                var resource = getClass().getResource("/io/github/kullik01/kinonode/images/placeholder_cover.jpg");
-                if (resource != null) {
-                    image = new Image(resource.toExternalForm(), 150, 220, false, true);
+            if (PLACEHOLDER_IMAGE == null) {
+                try {
+                    var resource = getClass().getResource("/io/github/kullik01/kinonode/images/placeholder_cover.jpg");
+                    if (resource != null) {
+                        PLACEHOLDER_IMAGE = new Image(resource.toExternalForm(), 150, 220, false, true, true);
+                    }
+                } catch (Exception e) {
+                    LOGGER.log(Level.WARNING, "Failed to load placeholder cover resource", e);
                 }
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to load placeholder cover resource", e);
             }
+            image = PLACEHOLDER_IMAGE;
         }
         
         if (image != null) {

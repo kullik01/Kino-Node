@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 
 public class MovieDetailController {
     private static final Logger LOGGER = Logger.getLogger(MovieDetailController.class.getName());
+    private static Image PLACEHOLDER_IMAGE;
 
     @FXML private Label lblHeaderTitle;
     @FXML private ImageView imgPoster;
@@ -106,7 +107,7 @@ public class MovieDetailController {
             File f = new File(path);
             if (f.exists()) {
                 try {
-                    image = new Image(f.toURI().toURL().toExternalForm(), 240, 360, false, true);
+                    image = new Image(f.toURI().toURL().toExternalForm(), 240, 360, false, true, true);
                 } catch (MalformedURLException e) {
                     LOGGER.log(Level.WARNING, "Failed to load poster in details: " + path, e);
                 }
@@ -114,14 +115,17 @@ public class MovieDetailController {
         }
 
         if (image == null) {
-            try {
-                var resource = getClass().getResource("/io/github/kullik01/kinonode/images/placeholder_cover.jpg");
-                if (resource != null) {
-                    image = new Image(resource.toExternalForm(), 240, 360, false, true);
+            if (PLACEHOLDER_IMAGE == null) {
+                try {
+                    var resource = getClass().getResource("/io/github/kullik01/kinonode/images/placeholder_cover.jpg");
+                    if (resource != null) {
+                        PLACEHOLDER_IMAGE = new Image(resource.toExternalForm(), 240, 360, false, true, true);
+                    }
+                } catch (Exception e) {
+                    LOGGER.log(Level.WARNING, "Failed to load details placeholder cover", e);
                 }
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to load details placeholder cover", e);
             }
+            image = PLACEHOLDER_IMAGE;
         }
         
         if (image != null) {
@@ -365,7 +369,7 @@ public class MovieDetailController {
                 movie.setCoverImagePath(newPath);
                 
                 // Reload image
-                imgPoster.setImage(new Image(destPath.toUri().toURL().toExternalForm(), 240, 360, false, true));
+                imgPoster.setImage(new Image(destPath.toUri().toURL().toExternalForm(), 240, 360, false, true, true));
                 showStatus("Poster image updated.");
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, "Failed to copy cover poster file", e);
