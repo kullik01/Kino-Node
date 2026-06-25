@@ -475,7 +475,7 @@ public class MovieDetailController {
     }
 
     @FXML
-    private void cancelEdit() {
+    private void goBack() {
         if (hasUnsavedChanges()) {
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
             alert.setTitle("Unsaved Changes");
@@ -492,14 +492,14 @@ public class MovieDetailController {
             if (result.isPresent()) {
                 if (result.get() == btnTypeSave) {
                     if (performSave()) {
-                        goBack();
+                        executeBack();
                     }
                 } else if (result.get() == btnTypeDiscard) {
-                    goBack();
+                    executeBack();
                 }
             }
         } else {
-            goBack();
+            executeBack();
         }
     }
 
@@ -509,8 +509,7 @@ public class MovieDetailController {
         this.onBack = onBack;
     }
 
-    @FXML
-    private void goBack() {
+    private void executeBack() {
         if (onBack != null) {
             onBack.run();
         } else {

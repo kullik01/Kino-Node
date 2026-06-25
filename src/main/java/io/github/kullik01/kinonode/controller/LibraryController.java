@@ -12,6 +12,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import io.github.kullik01.kinonode.util.CustomAlert;
 import java.io.IOException;
 import java.net.URL;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class LibraryController implements Refreshable {
     private static final Logger LOGGER = Logger.getLogger(LibraryController.class.getName());
 
+    @FXML private VBox libraryRoot;
     @FXML private TextField txtSearch;
     @FXML private ComboBox<String> cmbSort;
     @FXML private FlowPane gridPane;
@@ -65,7 +67,9 @@ public class LibraryController implements Refreshable {
 
     @Override
     public void refresh() {
-        currentMovieDetailController = null;
+        if (currentMovieDetailController != null) {
+            return; // Preserve the movie detail view when switching tabs
+        }
         allMovies = movieRepository.findAll();
         filterAndDisplayMovies();
     }
@@ -126,16 +130,14 @@ public class LibraryController implements Refreshable {
             currentMovieDetailController = controller;
             controller.setMovie(movie);
 
-            // Query current StackPane in MainView
-            javafx.scene.layout.StackPane contentArea = (javafx.scene.layout.StackPane) txtSearch.getScene().lookup("#contentArea");
-            if (contentArea != null) {
-                javafx.scene.Node libraryViewNode = contentArea.getChildren().get(0);
+            StackPane rootPane = (StackPane) libraryRoot.getParent();
+            if (rootPane != null) {
                 controller.setOnBack(() -> {
                     currentMovieDetailController = null;
-                    contentArea.getChildren().setAll(libraryViewNode);
+                    rootPane.getChildren().setAll(libraryRoot);
                     refresh();
                 });
-                contentArea.getChildren().setAll(detailView);
+                rootPane.getChildren().setAll(detailView);
             }
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to load MovieDetailView FXML", e);
@@ -197,22 +199,5 @@ public class LibraryController implements Refreshable {
         if (activeScanTask != null) {
             activeScanTask.cancel();
         }
-    }
-    public boolean hasUnsavedChanges() {
-        if (currentMovieDetailController != null) {
-            return currentMovieDetailController.hasUnsavedChanges();
-        }
-        return false;
-    }
-
-    public boolean performSave() {
-        if (currentMovieDetailController != null) {
-            return currentMovieDetailController.performSave();
-        }
-        return true;
-    }
-
-    public void clearMovieDetail() {
-        currentMovieDetailController = null;
     }
 }

@@ -15,12 +15,11 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.SVGPath?>
 
-<VBox spacing="15.0"
-
-      stylesheets="@../css/theme.css"
-      xmlns="http://javafx.com/javafx/21"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="io.github.kullik01.kinonode.controller.LibraryController">
+<StackPane stylesheets="@../css/theme.css"
+           xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="io.github.kullik01.kinonode.controller.LibraryController">
+    <VBox fx:id="libraryRoot" spacing="15.0">
     
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
@@ -60,4 +59,5 @@
     <ScrollPane fitToWidth="true" styleClass="movie-grid-scroll" VBox.vgrow="ALWAYS">
         <FlowPane fx:id="gridPane" styleClass="movie-grid" />
     </ScrollPane>
-</VBox>
+    </VBox>
+</StackPane>

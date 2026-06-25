@@ -177,12 +177,6 @@ public class MainController {
                 showUnsavedChangesDialog(settingsController, proceed);
                 return;
             }
-        } else if (activeButton == btnLibrary) {
-            LibraryController libraryController = (LibraryController) controllers.get("Library");
-            if (libraryController != null && libraryController.hasUnsavedChanges()) {
-                showLibraryUnsavedChangesDialog(libraryController, proceed);
-                return;
-            }
         }
         
         proceed.run();
@@ -226,37 +220,7 @@ public class MainController {
         }
     }
 
-    private void showLibraryUnsavedChangesDialog(LibraryController libraryController, Runnable proceed) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Unsaved Changes");
-        alert.setHeaderText("You have unsaved movie details.");
-        alert.setContentText("Do you want to save your changes before leaving?");
-        
-        javafx.scene.control.ButtonType btnTypeSave = new javafx.scene.control.ButtonType("Save");
-        javafx.scene.control.ButtonType btnTypeDiscard = new javafx.scene.control.ButtonType("Discard");
-        javafx.scene.control.ButtonType btnTypeCancel = new javafx.scene.control.ButtonType("Cancel", javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
-        
-        alert.getButtonTypes().setAll(btnTypeSave, btnTypeDiscard, btnTypeCancel);
-        
-        if (contentArea.getScene() != null && contentArea.getScene().getWindow() != null) {
-            javafx.stage.Stage stage = (javafx.stage.Stage) alert.getDialogPane().getScene().getWindow();
-            stage.getIcons().addAll(((javafx.stage.Stage) contentArea.getScene().getWindow()).getIcons());
-        }
-        
-        var result = alert.showAndWait();
-        if (result.isPresent()) {
-            if (result.get() == btnTypeSave) {
-                if (libraryController.performSave()) {
-                    libraryController.clearMovieDetail();
-                    proceed.run();
-                }
-            } else if (result.get() == btnTypeDiscard) {
-                libraryController.clearMovieDetail();
-                libraryController.refresh();
-                proceed.run();
-            }
-        }
-    }
+    
 
     private void toggleTheme(boolean dark) {
         var settingsRepo = AppContext.getInstance().getSettingsRepository();
