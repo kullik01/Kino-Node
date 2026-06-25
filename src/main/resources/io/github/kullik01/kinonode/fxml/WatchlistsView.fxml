@@ -25,10 +25,10 @@
             <Button onAction="#createWatchlist" styleClass="button-primary" text="➕">
                 <tooltip><Tooltip showDelay="250ms" text="New"/></tooltip>
             </Button>
-            <Button onAction="#renameWatchlist" styleClass="button-secondary" text="📝">
+            <Button fx:id="btnRenameWatchlist" onAction="#renameWatchlist" styleClass="button-secondary" text="📝">
                 <tooltip><Tooltip showDelay="250ms" text="Rename"/></tooltip>
             </Button>
-            <Button onAction="#deleteWatchlist" styleClass="button-secondary" text="➖">
+            <Button fx:id="btnDeleteWatchlist" onAction="#deleteWatchlist" styleClass="button-secondary" text="➖">
                 <tooltip><Tooltip showDelay="250ms" text="Remove"/></tooltip>
             </Button>
         </HBox>

@@ -91,6 +91,9 @@ public class MovieDetailController {
         
         btnTrailer.setDisable(txtTrailerUrl.getText().trim().isEmpty());
         
+        String filePath = movie.getFilePath();
+        btnPlay.setDisable(filePath == null || filePath.trim().isEmpty() || !new File(filePath).exists());
+        
         loadPoster();
         buildRatingWidget();
         refreshWatchlistStatus();

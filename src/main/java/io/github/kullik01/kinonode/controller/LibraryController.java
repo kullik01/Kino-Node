@@ -28,6 +28,7 @@ public class LibraryController implements Refreshable {
     @FXML private TextField txtSearch;
     @FXML private ComboBox<String> cmbSort;
     @FXML private FlowPane gridPane;
+    @FXML private Button btnSyncLibrary;
     
     @FXML private HBox progressArea;
     @FXML private ProgressBar progressBar;
@@ -56,6 +57,8 @@ public class LibraryController implements Refreshable {
         // Real-time filters and sorts
         txtSearch.textProperty().addListener((obs, oldVal, newVal) -> filterAndDisplayMovies());
         cmbSort.valueProperty().addListener((obs, oldVal, newVal) -> filterAndDisplayMovies());
+        
+        btnSyncLibrary.disableProperty().bind(progressArea.visibleProperty());
 
         refresh();
     }

@@ -55,6 +55,12 @@ public class SettingsController implements Refreshable {
     @FXML
     public void initialize() {
         settingsRepository = AppContext.getInstance().getSettingsRepository();
+        
+        btnRemoveFolder.setDisable(true);
+        lstWorkspaces.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            btnRemoveFolder.setDisable(newVal == null);
+        });
+
         setupValidationListeners();
         setupWorkspaceCellFactory();
         loadSettings();
@@ -175,6 +181,10 @@ public class SettingsController implements Refreshable {
             validatePlayerPath(newVal);
             updateSaveButtonState();
         });
+        
+        lstWorkspaces.getItems().addListener((javafx.collections.ListChangeListener.Change<? extends String> c) -> {
+            updateSaveButtonState();
+        });
     }
 
     private void validateAll() {
@@ -224,7 +234,7 @@ public class SettingsController implements Refreshable {
     }
 
     private void updateSaveButtonState() {
-        btnSave.setDisable(hasValidationErrors());
+        btnSave.setDisable(hasValidationErrors() || !hasUnsavedChanges());
     }
 
     public boolean hasValidationErrors() {

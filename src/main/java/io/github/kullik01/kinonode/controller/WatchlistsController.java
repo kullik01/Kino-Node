@@ -30,7 +30,8 @@ public class WatchlistsController implements Refreshable {
     @FXML private Label lblWatchlistName;
     @FXML private Label lblMovieCount;
     @FXML private ListView<Movie> lstMovies;
-
+    @FXML private Button btnRenameWatchlist;
+    @FXML private Button btnDeleteWatchlist;
     @FXML private Button btnRemoveMovie;
 
     private WatchlistRepository watchlistRepository;
@@ -57,7 +58,10 @@ public class WatchlistsController implements Refreshable {
         lstWatchlists.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             selectedWatchlist = newVal;
             loadWatchlistMovies();
+            updateWatchlistButtonStates(newVal != null);
         });
+        
+        updateWatchlistButtonStates(false);
 
         // Custom Cell Factory for Movies inside Watchlist
         lstMovies.setCellFactory(lv -> new ListCell<>() {
@@ -203,6 +207,11 @@ public class WatchlistsController implements Refreshable {
     private void updateButtonStates() {
         boolean selected = lstMovies.getSelectionModel().getSelectedItem() != null;
         btnRemoveMovie.setDisable(!selected);
+    }
+    
+    private void updateWatchlistButtonStates(boolean hasSelection) {
+        if (btnRenameWatchlist != null) btnRenameWatchlist.setDisable(!hasSelection);
+        if (btnDeleteWatchlist != null) btnDeleteWatchlist.setDisable(!hasSelection);
     }
 
     private Optional<String> showWatchlistDialog(String title, String header, String defaultText) {
