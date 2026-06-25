@@ -100,7 +100,7 @@
                 
                 <!-- Rating -->
                 <Label style="-fx-font-weight: bold;" text="Rating:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
-                <HBox fx:id="ratingContainer" alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                <HBox fx:id="ratingContainer" alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
                     <!-- Rating buttons and text will be populated dynamically -->
                 </HBox>
 

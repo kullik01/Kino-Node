@@ -16,8 +16,8 @@ KinoNode is a modern, lightweight, open-source personal movie library manager bu
 
 ## Technology Stack
 
-- **JDK Baseline**: Java 21 (LTS)
-- **UI Toolkit**: JavaFX (OpenJFX) 21
+- **JDK Baseline**: Java 25 (LTS)
+- **UI Toolkit**: JavaFX (OpenJFX) 25
 - **Theming**: AtlantaFX (Primer Dark) + Custom media-center CSS
 - **Persistence**: Embedded SQLite via `sqlite-jdbc` (zero-setup single-file database)
 - **Build Tool**: Gradle (with Kotlin DSL)
@@ -27,7 +27,7 @@ KinoNode is a modern, lightweight, open-source personal movie library manager bu
 
 ## Local Development & Running
 
-KinoNode requires Java 21 or later. You can run the application locally using the Gradle wrapper:
+KinoNode requires Java 25 or later. You can run the application locally using the Gradle wrapper:
 
 ```bash
 # Clone the repository

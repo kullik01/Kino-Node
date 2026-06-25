@@ -83,8 +83,8 @@
             
             <Label text="Built With" style="-fx-font-size: 13px; -fx-font-weight: bold;" />
             <VBox spacing="4.0">
-                <Label text="• Java 21 — Core runtime" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" />
-                <Label text="• JavaFX 21 — UI framework" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" />
+                <Label text="• Java 25 — Core runtime" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" />
+                <Label text="• JavaFX 25 — UI framework" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" />
                 <Label text="• SQLite — Data persistence" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" />
                 <Label text="• AtlantaFX — Modern CSS theme" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" />
             </VBox>
@@ -108,9 +108,16 @@
                 <Label text="Active Watchlists:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                 <Label fx:id="lblWatchlistCount" text="0 watchlists" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                <Label text="Media Player Path:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                <Label fx:id="lblPlayerPath" text="None" style="-fx-font-family: monospace; -fx-font-size: 11px;" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             </GridPane>
+            
+            <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
+            
+            <VBox spacing="8.0">
+                <Label text="Media Player Path:" style="-fx-font-weight: bold;" />
+                <Label fx:id="lblPlayerPath" text="None" 
+                       style="-fx-font-family: monospace; -fx-font-size: 12px; -fx-text-fill: -color-fg-default; -fx-background-color: -color-bg-default; -fx-padding: 8px; -fx-background-radius: 6px; -fx-border-color: -color-border-default; -fx-border-radius: 6px;" 
+                       wrapText="true" maxWidth="Infinity" />
+            </VBox>
             
             <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
             

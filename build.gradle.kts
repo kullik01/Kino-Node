@@ -12,7 +12,7 @@ repositories {
 }
 
 val junitVersion = "5.10.2"
-val javafxVersion = "21.0.2"
+val javafxVersion = "25.0.2"
 val sqliteVersion = "3.45.1.0"
 val atlantafxVersion = "2.0.1"
 
@@ -27,7 +27,7 @@ val platform = when {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion.set(JavaLanguageVersion.of(25))
     }
     modularity.inferModulePath.set(true)
 }

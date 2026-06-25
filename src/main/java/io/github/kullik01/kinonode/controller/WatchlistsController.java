@@ -72,11 +72,22 @@ public class WatchlistsController implements Refreshable {
                 thumbnail.setFitWidth(30);
                 thumbnail.setFitHeight(45);
                 titleLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
+                titleLabel.setWrapText(true);
+                titleLabel.setMinWidth(0);
+                ratingTextLabel.setPrefWidth(50);
+                ratingTextLabel.setMinWidth(50);
+                ratingTextLabel.setMaxWidth(50);
+                ratingTextLabel.setAlignment(Pos.CENTER_RIGHT);
                 ratingTextLabel.setStyle("-fx-text-fill: #ED8B00; -fx-font-weight: bold; -fx-padding: 0 0 0 5px;");
                 ratingBox.setAlignment(Pos.CENTER_RIGHT);
                 
                 // Allow title to expand, keeping rating aligned to right
                 HBox.setHgrow(titleLabel, Priority.ALWAYS);
+                ratingBox.setMinSize(javafx.scene.layout.Region.USE_PREF_SIZE, javafx.scene.layout.Region.USE_PREF_SIZE);
+                ratingTextLabel.setMinSize(javafx.scene.layout.Region.USE_PREF_SIZE, javafx.scene.layout.Region.USE_PREF_SIZE);
+                
+                content.maxWidthProperty().bind(lv.widthProperty().subtract(40));
+                
                 content.getChildren().addAll(thumbnail, titleLabel, ratingBox, ratingTextLabel);
             }
             

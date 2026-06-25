@@ -164,6 +164,7 @@ public class MovieDetailController {
 
         // Numerical display label
         Label lblRatingVal = new Label();
+        lblRatingVal.setMinSize(javafx.scene.layout.Region.USE_PREF_SIZE, javafx.scene.layout.Region.USE_PREF_SIZE);
         lblRatingVal.setStyle("-fx-text-fill: #ED8B00; -fx-font-weight: bold; -fx-padding: 0 0 0 10px;");
         ratingContainer.getChildren().add(lblRatingVal);
 
