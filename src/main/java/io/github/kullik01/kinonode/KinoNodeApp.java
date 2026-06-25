@@ -75,7 +75,6 @@ public class KinoNodeApp extends Application {
         Scene scene = new Scene(root, 1024, 768);
         scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
         primaryStage.setScene(scene);
-        io.github.kullik01.kinonode.util.ResizeHelper.addResizeListener(primaryStage);
         primaryStage.show();
     }
 

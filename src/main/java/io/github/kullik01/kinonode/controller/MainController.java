@@ -55,6 +55,11 @@ public class MainController {
                 stage.setY(event.getScreenY() + yOffset);
             }
         });
+        titleBar.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                maximizeWindow();
+            }
+        });
 
         // Load initial theme button state from settings (Default is light)
         var settingsRepo = AppContext.getInstance().getSettingsRepository();
