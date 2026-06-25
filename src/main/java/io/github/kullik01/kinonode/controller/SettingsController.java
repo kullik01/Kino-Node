@@ -4,9 +4,11 @@ import io.github.kullik01.kinonode.repository.SettingsRepository;
 import io.github.kullik01.kinonode.service.AppContext;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Alert;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -20,6 +22,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class SettingsController implements Refreshable {
@@ -108,12 +111,21 @@ public class SettingsController implements Refreshable {
     private void removeWorkspace() {
         String selected = lstWorkspaces.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            lstWorkspaces.getItems().remove(selected);
-            saveWorkspacesOnly();
-            showStatus("Workspace folder removed.");
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Remove Workspace");
+            alert.setHeaderText("Remove workspace: " + selected);
+            alert.setContentText("Are you sure you want to remove this workspace? Movies from this workspace will be removed from your library, but files will not be deleted from your disk.");
+            alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
             
-            io.github.kullik01.kinonode.repository.MovieRepository movieRepo = AppContext.getInstance().getMovieRepository();
-            movieRepo.deleteByFilePathPrefix(selected);
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                lstWorkspaces.getItems().remove(selected);
+                saveWorkspacesOnly();
+                showStatus("Workspace folder removed.");
+                
+                io.github.kullik01.kinonode.repository.MovieRepository movieRepo = AppContext.getInstance().getMovieRepository();
+                movieRepo.deleteByFilePathPrefix(selected);
+            }
         }
     }
 

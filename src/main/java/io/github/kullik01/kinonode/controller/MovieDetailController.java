@@ -230,6 +230,7 @@ public class MovieDetailController {
                     alert.setTitle("Remove Movie");
                     alert.setHeaderText("Remove from Watchlist");
                     alert.setContentText("Are you sure you want to remove this movie from " + w.getName() + "?");
+                    alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
                     Optional<ButtonType> alertResult = alert.showAndWait();
                     if (alertResult.isPresent() && alertResult.get() == ButtonType.OK) {
                         watchlistRepository.removeMovieFromWatchlist(w.getId(), movie.getId());
@@ -323,6 +324,7 @@ public class MovieDetailController {
                     alert.setTitle("Validation Error");
                     alert.setHeaderText("Duplicate Watchlist");
                     alert.setContentText("A watchlist with this name already exists. Please choose a different name.");
+                    alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
                     alert.showAndWait();
                     return false;
                 }

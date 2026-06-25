@@ -288,6 +288,7 @@ public class WatchlistsController implements Refreshable {
                     alert.setTitle("Validation Error");
                     alert.setHeaderText("Duplicate Watchlist");
                     alert.setContentText("A watchlist with this name already exists. Please choose a different name.");
+                    alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
                     alert.showAndWait();
                     return false;
                 }
@@ -304,6 +305,7 @@ public class WatchlistsController implements Refreshable {
         alert.setTitle("Delete Watchlist");
         alert.setHeaderText("Delete watchlist: " + selectedWatchlist.getName());
         alert.setContentText("Are you sure you want to delete this watchlist? Movies will not be deleted from your disk or library.");
+        alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
         
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -323,6 +325,7 @@ public class WatchlistsController implements Refreshable {
         alert.setTitle("Remove Movie");
         alert.setHeaderText("Remove from Watchlist");
         alert.setContentText("Are you sure you want to remove this movie from " + selectedWatchlist.getName() + "?");
+        alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
         Optional<ButtonType> result = alert.showAndWait();
         
         if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -340,6 +343,7 @@ public class WatchlistsController implements Refreshable {
             alert.setTitle("Playback Failed");
             alert.setHeaderText("Cannot open media player");
             alert.setContentText(e.getMessage());
+            alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
             alert.showAndWait();
         }
     }
