@@ -16,6 +16,7 @@ public class AboutController implements Refreshable {
     @FXML private Label lblJavaRuntime;
     @FXML private Label lblOsDetails;
     @FXML private Label lblMovieCount;
+    @FXML private Label lblDbSize;
     @FXML private Label lblWatchlistCount;
     @FXML private Label lblPlayerPath;
 
@@ -42,9 +43,15 @@ public class AboutController implements Refreshable {
             lblDbPath.setText(dbPath.toAbsolutePath().toString().replace("\\", "/"));
             
             if (Files.exists(dbPath)) {
-                // Database size logic removed per user request
+                long sizeBytes = Files.size(dbPath);
+                double sizeMB = sizeBytes / (1024.0 * 1024.0);
+                if (lblDbSize != null) {
+                    lblDbSize.setText(String.format("%.2f MB", sizeMB));
+                }
             } else {
-                // Do nothing
+                if (lblDbSize != null) {
+                    lblDbSize.setText("Unknown");
+                }
             }
         } catch (Exception e) {
             lblDbPath.setText("Unknown database path");

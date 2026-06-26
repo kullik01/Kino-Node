@@ -105,8 +105,11 @@
                 <Label text="Library Movies:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                 <Label fx:id="lblMovieCount" text="0 movies" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-                <Label text="Active Watchlists:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                <Label fx:id="lblWatchlistCount" text="0 watchlists" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Label text="Database Size:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <Label fx:id="lblDbSize" text="Unknown" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                <Label text="Active Watchlists:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <Label fx:id="lblWatchlistCount" text="0 watchlists" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
             </GridPane>
             
