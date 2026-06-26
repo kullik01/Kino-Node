@@ -88,10 +88,33 @@ public class LibraryScanService {
 
                     if (!movieRepository.existsByFilePath(absolutePath)) {
                         Movie movie = parseMovieFromFile(file.toFile());
+                        
+                        // Check with IMDB
+                        updateMessage("Checking IMDB for: " + movie.getTitle());
+                        ImdbService.enrichMovieData(movie);
+                        
                         movieRepository.insert(movie);
                         newMoviesAdded++;
                         logs.add("Added: " + movie.getTitle());
                         LOGGER.log(Level.INFO, "Imported movie: {0}", movie.getTitle());
+                    } else {
+                        Movie existingMovie = movieRepository.findByFilePath(absolutePath);
+                        if (existingMovie != null && (existingMovie.getCoverImagePath() == null || existingMovie.getCoverImagePath().isBlank())) {
+                            updateMessage("Checking IMDB for existing movie: " + existingMovie.getTitle());
+                            String originalTitle = existingMovie.getTitle();
+                            
+                            // Re-parse the title from the filename just in case the stored title is full of garbage tags
+                            Movie freshlyParsed = parseMovieFromFile(file.toFile());
+                            existingMovie.setTitle(freshlyParsed.getTitle());
+                            
+                            ImdbService.enrichMovieData(existingMovie);
+                            // Always update if title or year or cover was changed
+                            if (!originalTitle.equals(existingMovie.getTitle()) || existingMovie.getCoverImagePath() != null) {
+                                movieRepository.update(existingMovie);
+                                logs.add("Enriched: " + existingMovie.getTitle());
+                                LOGGER.log(Level.INFO, "Enriched existing movie: {0}", existingMovie.getTitle());
+                            }
+                        }
                     }
                 }
 
@@ -107,6 +130,17 @@ public class LibraryScanService {
         
         // Clean up name: replace dots and underscores with spaces
         String cleanName = filename.replace(".", " ").replace("_", " ");
+        
+        // Remove common garbage tags from release names
+        String[] garbageTags = {
+            "1080p", "720p", "480p", "2160p", "4k", "bluray", "blu-ray", "webrip", "hdrip", "dvdrip", "brrip",
+            "x264", "x265", "hevc", "aac", "ac3", "dts", "remux", "dual", "audio", "deutsch", "german", "english", 
+            "hd", "horrorfilm", "uncut", "extended", "director's cut", "directors cut"
+        };
+        
+        for (String tag : garbageTags) {
+            cleanName = cleanName.replaceAll("(?i)\\b" + tag + "\\b", "");
+        }
         
         // Match year: matches space and 4-digit numbers in optional parentheses or brackets
         Pattern yearPattern = Pattern.compile("^(.*?)\\s*[\\(\\[]?(19\\d{2}|20\\d{2})[\\)\\]]?(.*)$");
@@ -125,8 +159,8 @@ public class LibraryScanService {
             } catch (NumberFormatException ignored) {}
         }
         
-        // Remove multiple consecutive spaces
-        title = title.replaceAll("\\s+", " ").trim();
+        // Remove multiple consecutive spaces and trailing hyphens
+        title = title.replaceAll("\\s+", " ").replaceAll("-\\s*$", "").trim();
         if (title.isEmpty()) {
             title = filename;
         }

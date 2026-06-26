@@ -34,36 +34,36 @@
         <Label fx:id="lblHeaderTitle" styleClass="detail-title" text="Movie Details" />
     </HBox>
 
-    <HBox spacing="30.0" VBox.vgrow="ALWAYS">
-        
-        <!-- Left Side: Poster and Watch/Play Actions -->
-        <VBox alignment="TOP_CENTER" prefWidth="250.0" spacing="15.0">
-            <VBox style="-fx-pref-width: 240px; -fx-pref-height: 360px; -fx-background-radius: 8px;" styleClass="movie-poster-container">
-                <ImageView fx:id="imgPoster" fitHeight="360.0" fitWidth="240.0" styleClass="detail-cover" />
-            </VBox>
-            <Button onAction="#changePoster" styleClass="button-secondary" text="🖼" minWidth="-Infinity">
-                <tooltip><Tooltip showDelay="250ms" text="Change Poster"/></tooltip>
-            </Button>
+    <ScrollPane fitToWidth="true" styleClass="edge-to-edge" style="-fx-background-color: transparent; -fx-control-inner-background: transparent;" VBox.vgrow="ALWAYS">
+        <HBox spacing="30.0" style="-fx-padding: 0 10px 0 0;">
             
-            <VBox alignment="CENTER" spacing="10.0" style="-fx-padding: 15px 0 0 0;">
-                <Button fx:id="btnPlay" onAction="#playMovie" styleClass="button-primary">
-                    <graphic>
-                        <SVGPath content="M8 5v14l11-7z" fill="white"/>
-                    </graphic>
-                    <tooltip><Tooltip showDelay="250ms" text="Play Movie"/></tooltip>
+            <!-- Left Side: Poster and Watch/Play Actions -->
+            <VBox alignment="TOP_CENTER" prefWidth="250.0" spacing="15.0">
+                <VBox style="-fx-pref-width: 240px; -fx-pref-height: 360px; -fx-background-radius: 8px;" styleClass="movie-poster-container">
+                    <ImageView fx:id="imgPoster" fitHeight="360.0" fitWidth="240.0" styleClass="detail-cover" />
+                </VBox>
+                <Button onAction="#changePoster" styleClass="button-secondary" text="🖼" minWidth="-Infinity">
+                    <tooltip><Tooltip showDelay="250ms" text="Change Poster"/></tooltip>
                 </Button>
-                <Button fx:id="btnTrailer" onAction="#watchTrailer" styleClass="button-secondary">
-                    <graphic>
-                        <SVGPath content="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12zm-5-6l-7 4V7z" fill="white"/>
-                    </graphic>
-                    <tooltip><Tooltip showDelay="250ms" text="Watch Trailer"/></tooltip>
-                </Button>
+                
+                <VBox alignment="CENTER" spacing="10.0" style="-fx-padding: 15px 0 0 0;">
+                    <Button fx:id="btnPlay" onAction="#playMovie" styleClass="button-primary">
+                        <graphic>
+                            <SVGPath content="M8 5v14l11-7z" fill="white"/>
+                        </graphic>
+                        <tooltip><Tooltip showDelay="250ms" text="Play Movie"/></tooltip>
+                    </Button>
+                    <Button fx:id="btnTrailer" onAction="#watchTrailer" styleClass="button-secondary">
+                        <graphic>
+                            <SVGPath content="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12zm-5-6l-7 4V7z" fill="white"/>
+                        </graphic>
+                        <tooltip><Tooltip showDelay="250ms" text="Watch Trailer"/></tooltip>
+                    </Button>
+                </VBox>
             </VBox>
-        </VBox>
 
-        <!-- Right Side: Editable details and custom rating -->
-        <ScrollPane fitToWidth="true" styleClass="edge-to-edge" style="-fx-background-color: transparent; -fx-control-inner-background: transparent;" HBox.hgrow="ALWAYS">
-            <VBox spacing="15.0" style="-fx-padding: 0 20px 0 0;">
+            <!-- Right Side: Editable details and custom rating -->
+            <VBox spacing="15.0" HBox.hgrow="ALWAYS">
             
             <GridPane hgap="15.0" vgap="15.0" VBox.vgrow="ALWAYS">
                 <columnConstraints>
@@ -141,10 +141,9 @@
                 </HBox>
             </GridPane>
 
-            <!-- Feedback status -->
-            <Label fx:id="lblStatus" style="-fx-text-fill: -color-success-fg;" text="" />
+                <!-- Feedback status -->
+                <Label fx:id="lblStatus" style="-fx-text-fill: -color-success-fg;" text="" />
             </VBox>
-        </ScrollPane>
-
-    </HBox>
+        </HBox>
+    </ScrollPane>
 </VBox>

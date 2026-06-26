@@ -38,6 +38,8 @@ module io.github.kullik01.kinonode {
     requires java.logging;
     requires java.desktop;
     requires atlantafx.base;
+    requires com.google.gson;
+    requires java.net.http;
 
     // Export packages
     exports io.github.kullik01.kinonode;

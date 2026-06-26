@@ -26,10 +26,10 @@ public class CustomAlert {
             stage.getIcons().addAll(ownerStage.getIcons());
         }
         stage.initModality(Modality.WINDOW_MODAL);
-        stage.initStyle(StageStyle.TRANSPARENT);
+        stage.initStyle(StageStyle.UNDECORATED);
         
         BorderPane root = new BorderPane();
-        root.getStyleClass().add("main-window");
+        root.setStyle("-fx-background-color: -color-bg-default; -fx-border-color: -color-border-default; -fx-border-width: 1px; -fx-border-radius: 8px; -fx-background-radius: 8px;");
         root.getStylesheets().add(CustomAlert.class.getResource("/io/github/kullik01/kinonode/css/theme.css").toExternalForm());
         
         // Title Bar
@@ -52,7 +52,7 @@ public class CustomAlert {
         // Content
         VBox contentBox = new VBox(15);
         contentBox.setPadding(new Insets(20));
-        contentBox.setStyle("-fx-background-color: -color-bg-default; -fx-background-radius: 0 0 12px 12px;");
+        contentBox.setStyle("-fx-background-radius: 0 0 8px 8px;");
         
         Label headerLabel = new Label(header);
         headerLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
@@ -85,7 +85,7 @@ public class CustomAlert {
         });
         
         StackPane wrapper = new StackPane(root);
-        wrapper.setStyle("-fx-background-color: transparent; -fx-padding: 15px;");
+        wrapper.setStyle("-fx-background-color: transparent; -fx-padding: 0px;");
         
         Scene scene = new Scene(wrapper);
         scene.setFill(Color.TRANSPARENT);

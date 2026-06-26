@@ -58,6 +58,9 @@ dependencies {
     // AtlantaFX styling
     implementation("io.github.mkpaz:atlantafx-base:${atlantafxVersion}")
     
+    // JSON parsing
+    implementation("com.google.code.gson:gson:2.10.1")
+    
     testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
