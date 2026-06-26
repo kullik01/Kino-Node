@@ -34,7 +34,6 @@ public class SettingsController implements Refreshable {
     @FXML private Label lblStatus;
     @FXML private Label lblPlayerStatus;
     @FXML private Label lblPlayerError;
-    @FXML private Button btnSave;
 
     private SettingsRepository settingsRepository;
     private String loadedWorkspaces = "";
@@ -64,6 +63,15 @@ public class SettingsController implements Refreshable {
         setupValidationListeners();
         setupWorkspaceCellFactory();
         loadSettings();
+        
+        // Auto-save when changing tabs (which removes lstWorkspaces from the scene)
+        lstWorkspaces.sceneProperty().addListener((obs, oldVal, newVal) -> {
+            if (oldVal != null && newVal == null) {
+                if (hasUnsavedChanges() && !hasValidationErrors()) {
+                    saveSettings();
+                }
+            }
+        });
     }
 
     @Override
@@ -155,8 +163,7 @@ public class SettingsController implements Refreshable {
         }
     }
 
-    @FXML
-    public void saveSettings() {
+    private void saveSettings() {
         // Save paths
         saveWorkspacesOnly();
 
@@ -179,17 +186,15 @@ public class SettingsController implements Refreshable {
     private void setupValidationListeners() {
         txtPlayerPath.textProperty().addListener((obs, oldVal, newVal) -> {
             validatePlayerPath(newVal);
-            updateSaveButtonState();
         });
         
         lstWorkspaces.getItems().addListener((javafx.collections.ListChangeListener.Change<? extends String> c) -> {
-            updateSaveButtonState();
+            // Unsaved changes detected
         });
     }
 
     private void validateAll() {
         validatePlayerPath(txtPlayerPath.getText());
-        updateSaveButtonState();
     }
 
     private void validatePlayerPath(String path) {
@@ -231,10 +236,6 @@ public class SettingsController implements Refreshable {
                 errorLabel.setManaged(true);
             }
         }
-    }
-
-    private void updateSaveButtonState() {
-        btnSave.setDisable(hasValidationErrors() || !hasUnsavedChanges());
     }
 
     public boolean hasValidationErrors() {

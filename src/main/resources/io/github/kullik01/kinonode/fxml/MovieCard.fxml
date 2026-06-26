@@ -15,4 +15,5 @@
     
     <Label fx:id="lblTitle" styleClass="movie-title-label" />
     <Label fx:id="lblYear" styleClass="movie-year-label" />
+    <Label fx:id="lblCinematographer" styleClass="movie-year-label" />
 </VBox>

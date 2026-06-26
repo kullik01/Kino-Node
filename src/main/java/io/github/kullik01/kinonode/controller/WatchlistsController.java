@@ -102,7 +102,11 @@ public class WatchlistsController implements Refreshable {
                 if (empty || item == null) {
                     setGraphic(null);
                 } else {
-                    titleLabel.setText(item.getTitle() + (item.getYear() != null ? " (" + item.getYear() + ")" : ""));
+                    String text = item.getTitle() + (item.getYear() != null ? " (" + item.getYear() + ")" : "");
+                    if (item.getCinematographer() != null && !item.getCinematographer().isBlank()) {
+                        text += " - " + item.getCinematographer();
+                    }
+                    titleLabel.setText(text);
                     
                     ratingBox.getChildren().clear();
                     for (int i = 1; i <= 10; i++) {

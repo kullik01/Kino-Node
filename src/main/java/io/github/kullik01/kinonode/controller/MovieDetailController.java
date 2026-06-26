@@ -42,6 +42,11 @@ public class MovieDetailController {
     @FXML private TextField txtTitle;
     @FXML private TextField txtYear;
     @FXML private TextField txtGenre;
+    @FXML private TextField txtDirector;
+    @FXML private TextField txtWriter;
+    @FXML private TextField txtProducer;
+    @FXML private TextField txtCinematographer;
+    @FXML private TextField txtComposer;
     @FXML private TextArea txtDescription;
     @FXML private TextField txtTrailerUrl;
     
@@ -87,6 +92,11 @@ public class MovieDetailController {
         txtTitle.setText(movie.getTitle());
         txtYear.setText(movie.getYear() != null ? String.valueOf(movie.getYear()) : "");
         txtGenre.setText(movie.getGenre() != null ? movie.getGenre() : "");
+        txtDirector.setText(movie.getDirector() != null ? movie.getDirector() : "");
+        txtWriter.setText(movie.getWriter() != null ? movie.getWriter() : "");
+        txtProducer.setText(movie.getProducer() != null ? movie.getProducer() : "");
+        txtCinematographer.setText(movie.getCinematographer() != null ? movie.getCinematographer() : "");
+        txtComposer.setText(movie.getComposer() != null ? movie.getComposer() : "");
         txtDescription.setText(movie.getDescription() != null ? movie.getDescription() : "");
         txtTrailerUrl.setText(movie.getTrailerUrl() != null ? movie.getTrailerUrl() : "");
         
@@ -98,6 +108,15 @@ public class MovieDetailController {
         loadPoster();
         buildRatingWidget();
         refreshWatchlistStatus();
+        
+        // Auto-save when changing tabs (which removes the view from the scene)
+        lblHeaderTitle.sceneProperty().addListener((obs, oldVal, newVal) -> {
+            if (oldVal != null && newVal == null) {
+                if (hasUnsavedChanges()) {
+                    performSave();
+                }
+            }
+        });
     }
 
     private void loadPoster() {
@@ -425,6 +444,21 @@ public class MovieDetailController {
         String movieGenre = movie.getGenre() != null ? movie.getGenre() : "";
         if (!java.util.Objects.equals(movieGenre, txtGenre.getText().trim())) return true;
         
+        String movieDirector = movie.getDirector() != null ? movie.getDirector() : "";
+        if (!java.util.Objects.equals(movieDirector, txtDirector.getText().trim())) return true;
+
+        String movieWriter = movie.getWriter() != null ? movie.getWriter() : "";
+        if (!java.util.Objects.equals(movieWriter, txtWriter.getText().trim())) return true;
+
+        String movieProducer = movie.getProducer() != null ? movie.getProducer() : "";
+        if (!java.util.Objects.equals(movieProducer, txtProducer.getText().trim())) return true;
+
+        String movieCinematographer = movie.getCinematographer() != null ? movie.getCinematographer() : "";
+        if (!java.util.Objects.equals(movieCinematographer, txtCinematographer.getText().trim())) return true;
+
+        String movieComposer = movie.getComposer() != null ? movie.getComposer() : "";
+        if (!java.util.Objects.equals(movieComposer, txtComposer.getText().trim())) return true;
+        
         String movieDesc = movie.getDescription() != null ? movie.getDescription() : "";
         if (!java.util.Objects.equals(movieDesc, txtDescription.getText().trim())) return true;
         
@@ -464,6 +498,11 @@ public class MovieDetailController {
         movie.setTitle(title);
         movie.setYear(year);
         movie.setGenre(txtGenre.getText().trim().isEmpty() ? null : txtGenre.getText().trim());
+        movie.setDirector(txtDirector.getText().trim().isEmpty() ? null : txtDirector.getText().trim());
+        movie.setWriter(txtWriter.getText().trim().isEmpty() ? null : txtWriter.getText().trim());
+        movie.setProducer(txtProducer.getText().trim().isEmpty() ? null : txtProducer.getText().trim());
+        movie.setCinematographer(txtCinematographer.getText().trim().isEmpty() ? null : txtCinematographer.getText().trim());
+        movie.setComposer(txtComposer.getText().trim().isEmpty() ? null : txtComposer.getText().trim());
         movie.setDescription(txtDescription.getText().trim().isEmpty() ? null : txtDescription.getText().trim());
         movie.setTrailerUrl(trailer.isEmpty() ? null : trailer);
         movie.setRating(currentRating);
@@ -474,37 +513,11 @@ public class MovieDetailController {
     }
 
     @FXML
-    private void saveChanges() {
-        performSave();
-    }
-
-    @FXML
     private void goBack() {
         if (hasUnsavedChanges()) {
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Unsaved Changes");
-            alert.setHeaderText("You have unsaved changes.");
-            alert.setContentText("Do you want to save your changes before leaving?");
-            
-            javafx.scene.control.ButtonType btnTypeSave = new javafx.scene.control.ButtonType("Save");
-            javafx.scene.control.ButtonType btnTypeDiscard = new javafx.scene.control.ButtonType("Discard");
-            javafx.scene.control.ButtonType btnTypeCancel = new javafx.scene.control.ButtonType("Cancel", javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
-            
-            alert.getButtonTypes().setAll(btnTypeSave, btnTypeDiscard, btnTypeCancel);
-            
-            java.util.Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
-            if (result.isPresent()) {
-                if (result.get() == btnTypeSave) {
-                    if (performSave()) {
-                        executeBack();
-                    }
-                } else if (result.get() == btnTypeDiscard) {
-                    executeBack();
-                }
-            }
-        } else {
-            executeBack();
+            performSave();
         }
+        executeBack();
     }
 
     private Runnable onBack;

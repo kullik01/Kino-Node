@@ -76,8 +76,8 @@ public class MovieRepository {
 
     public Movie insert(Movie movie) {
         String sql = """
-            INSERT INTO movies (file_path, title, year, genre, description, rating, cover_image_path, trailer_url, date_added)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+            INSERT INTO movies (file_path, title, year, genre, description, rating, cover_image_path, trailer_url, director, writer, producer, cinematographer, composer, date_added)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """;
         try (PreparedStatement stmt = databaseService.getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, movie.getFilePath());
@@ -94,7 +94,12 @@ public class MovieRepository {
             
             stmt.setString(7, movie.getCoverImagePath());
             stmt.setString(8, movie.getTrailerUrl());
-            stmt.setLong(9, movie.getDateAdded().getEpochSecond());
+            stmt.setString(9, movie.getDirector());
+            stmt.setString(10, movie.getWriter());
+            stmt.setString(11, movie.getProducer());
+            stmt.setString(12, movie.getCinematographer());
+            stmt.setString(13, movie.getComposer());
+            stmt.setLong(14, movie.getDateAdded().getEpochSecond());
             
             int affectedRows = stmt.executeUpdate();
             if (affectedRows > 0) {
@@ -112,7 +117,7 @@ public class MovieRepository {
 
     public void update(Movie movie) {
         String sql = """
-            UPDATE movies SET file_path = ?, title = ?, year = ?, genre = ?, description = ?, rating = ?, cover_image_path = ?, trailer_url = ?, date_added = ?
+            UPDATE movies SET file_path = ?, title = ?, year = ?, genre = ?, description = ?, rating = ?, cover_image_path = ?, trailer_url = ?, director = ?, writer = ?, producer = ?, cinematographer = ?, composer = ?, date_added = ?
             WHERE id = ?;
             """;
         try (PreparedStatement stmt = databaseService.getConnection().prepareStatement(sql)) {
@@ -130,8 +135,13 @@ public class MovieRepository {
             
             stmt.setString(7, movie.getCoverImagePath());
             stmt.setString(8, movie.getTrailerUrl());
-            stmt.setLong(9, movie.getDateAdded().getEpochSecond());
-            stmt.setInt(10, movie.getId());
+            stmt.setString(9, movie.getDirector());
+            stmt.setString(10, movie.getWriter());
+            stmt.setString(11, movie.getProducer());
+            stmt.setString(12, movie.getCinematographer());
+            stmt.setString(13, movie.getComposer());
+            stmt.setLong(14, movie.getDateAdded().getEpochSecond());
+            stmt.setInt(15, movie.getId());
             
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -176,6 +186,11 @@ public class MovieRepository {
         
         movie.setCoverImagePath(rs.getString("cover_image_path"));
         movie.setTrailerUrl(rs.getString("trailer_url"));
+        movie.setDirector(rs.getString("director"));
+        movie.setWriter(rs.getString("writer"));
+        movie.setProducer(rs.getString("producer"));
+        movie.setCinematographer(rs.getString("cinematographer"));
+        movie.setComposer(rs.getString("composer"));
         movie.setDateAdded(Instant.ofEpochSecond(rs.getLong("date_added")));
         return movie;
     }

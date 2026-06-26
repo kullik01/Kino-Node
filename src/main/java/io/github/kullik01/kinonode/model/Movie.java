@@ -12,6 +12,11 @@ public class Movie {
     private Integer rating; // 0-10 or null
     private String coverImagePath;
     private String trailerUrl;
+    private String director;
+    private String writer;
+    private String producer;
+    private String cinematographer;
+    private String composer;
     private Instant dateAdded;
 
     public Movie() {
@@ -103,6 +108,46 @@ public class Movie {
 
     public void setDateAdded(Instant dateAdded) {
         this.dateAdded = dateAdded;
+    }
+
+    public String getDirector() {
+        return director;
+    }
+
+    public void setDirector(String director) {
+        this.director = director;
+    }
+
+    public String getWriter() {
+        return writer;
+    }
+
+    public void setWriter(String writer) {
+        this.writer = writer;
+    }
+
+    public String getProducer() {
+        return producer;
+    }
+
+    public void setProducer(String producer) {
+        this.producer = producer;
+    }
+
+    public String getCinematographer() {
+        return cinematographer;
+    }
+
+    public void setCinematographer(String cinematographer) {
+        this.cinematographer = cinematographer;
+    }
+
+    public String getComposer() {
+        return composer;
+    }
+
+    public void setComposer(String composer) {
+        this.composer = composer;
     }
 
     @Override

@@ -65,6 +65,11 @@ public class DatabaseService {
                 rating INTEGER,
                 cover_image_path TEXT,
                 trailer_url TEXT,
+                director TEXT,
+                writer TEXT,
+                producer TEXT,
+                cinematographer TEXT,
+                composer TEXT,
                 date_added INTEGER NOT NULL
             );
             """;
@@ -103,6 +108,17 @@ public class DatabaseService {
             
             // Populate/update default video extensions structured alphabetically
             stmt.execute("INSERT INTO settings (key, value) VALUES ('video_extensions', '3gp,avi,flv,m4v,mkv,mov,mp4,mpeg,mpg,mts,ogg,ogv,ts,webm,wmv') ON CONFLICT(key) DO UPDATE SET value = excluded.value;");
+            
+            // Schema migration for new columns
+            String[] newColumns = {"director", "writer", "producer", "cinematographer", "composer"};
+            for (String col : newColumns) {
+                try {
+                    stmt.execute("ALTER TABLE movies ADD COLUMN " + col + " TEXT;");
+                    LOGGER.info("Added new column to movies: " + col);
+                } catch (SQLException e) {
+                    // Ignore, column likely already exists
+                }
+            }
             
             LOGGER.info("Database tables verified/created successfully.");
         }

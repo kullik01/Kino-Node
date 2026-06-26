@@ -107,58 +107,8 @@ public class MainController {
             return; // Already on this tab
         }
         
-        Runnable proceed = () -> {
-            loadView(name, fxmlPath);
-            setActiveButton(targetButton);
-        };
-        
-        if (activeButton == btnSettings) {
-            SettingsController settingsController = (SettingsController) controllers.get("Settings");
-            if (settingsController != null && settingsController.hasUnsavedChanges()) {
-                showUnsavedChangesDialog(settingsController, proceed);
-                return;
-            }
-        }
-        
-        proceed.run();
-    }
-
-    private void showUnsavedChangesDialog(SettingsController settingsController, Runnable proceed) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Unsaved Settings");
-        alert.setHeaderText("You have unsaved settings.");
-        alert.setContentText("Do you want to save your changes before leaving?");
-        
-        javafx.scene.control.ButtonType btnTypeSave = new javafx.scene.control.ButtonType("Save");
-        javafx.scene.control.ButtonType btnTypeDiscard = new javafx.scene.control.ButtonType("Discard");
-        javafx.scene.control.ButtonType btnTypeCancel = new javafx.scene.control.ButtonType("Cancel", javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
-        
-        alert.getButtonTypes().setAll(btnTypeSave, btnTypeDiscard, btnTypeCancel);
-        
-        if (contentArea.getScene() != null && contentArea.getScene().getWindow() != null) {
-            javafx.stage.Stage stage = (javafx.stage.Stage) alert.getDialogPane().getScene().getWindow();
-            stage.getIcons().addAll(((javafx.stage.Stage) contentArea.getScene().getWindow()).getIcons());
-        }
-        
-        var result = alert.showAndWait();
-        if (result.isPresent()) {
-            if (result.get() == btnTypeSave) {
-                if (settingsController.hasValidationErrors()) {
-                    javafx.scene.control.Alert errAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-                    errAlert.setTitle("Validation Error");
-                    errAlert.setHeaderText("Cannot save settings.");
-                    errAlert.setContentText("Please fix validation errors before saving.");
-                    errAlert.showAndWait();
-                } else {
-                    settingsController.saveSettings();
-                    proceed.run();
-                }
-            } else if (result.get() == btnTypeDiscard) {
-                settingsController.refresh(); // Discard changes by reloading
-                proceed.run();
-            }
-            // If Cancel, do nothing (stays on Settings page)
-        }
+        loadView(name, fxmlPath);
+        setActiveButton(targetButton);
     }
 
     
