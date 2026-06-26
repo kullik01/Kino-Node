@@ -16,6 +16,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -93,8 +95,9 @@ public class ImdbService {
                             }
                         }
                         
-                        // IMDb Suggestion API also returns "s" which contains actor names.
-                        // But we don't have an actors field, maybe append to description? Or leave out.
+                        // Fetch extended details from Wikidata using the IMDb ID
+                        String imdbIdStr = result.get("id").getAsString();
+                        fetchWikidataDetails(imdbIdStr, movie);
                         
                         LOGGER.info("Successfully fetched IMDb data for: " + movie.getTitle());
                         break; // Only use the top result
@@ -106,6 +109,65 @@ public class ImdbService {
 
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Error enriching movie data from IMDb for query: " + query, e);
+        }
+    }
+
+    private static void fetchWikidataDetails(String imdbId, Movie movie) {
+        try {
+            String sparqlQuery = "SELECT ?directorLabel ?writerLabel ?producerLabel ?cinematographerLabel ?composerLabel WHERE { " +
+                    "?movie wdt:P345 '" + imdbId + "'. " +
+                    "OPTIONAL { ?movie wdt:P57 ?director. } " +
+                    "OPTIONAL { ?movie wdt:P58 ?writer. } " +
+                    "OPTIONAL { ?movie wdt:P162 ?producer. } " +
+                    "OPTIONAL { ?movie wdt:P344 ?cinematographer. } " +
+                    "OPTIONAL { ?movie wdt:P86 ?composer. } " +
+                    "SERVICE wikibase:label { bd:serviceParam wikibase:language 'en'. } " +
+                    "}";
+                    
+            String urlStr = "https://query.wikidata.org/sparql?query=" + URLEncoder.encode(sparqlQuery, StandardCharsets.UTF_8).replace("+", "%20") + "&format=json";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlStr))
+                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) KinoNode/1.0")
+                    .header("Accept", "application/json")
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                JsonObject jsonObject = JsonParser.parseString(response.body()).getAsJsonObject();
+                if (jsonObject.has("results")) {
+                    JsonArray bindings = jsonObject.getAsJsonObject("results").getAsJsonArray("bindings");
+                    
+                    Set<String> directors = new LinkedHashSet<>();
+                    Set<String> writers = new LinkedHashSet<>();
+                    Set<String> producers = new LinkedHashSet<>();
+                    Set<String> cinematographers = new LinkedHashSet<>();
+                    Set<String> composers = new LinkedHashSet<>();
+                    
+                    for (JsonElement element : bindings) {
+                        JsonObject row = element.getAsJsonObject();
+                        if (row.has("directorLabel")) directors.add(row.getAsJsonObject("directorLabel").get("value").getAsString());
+                        if (row.has("writerLabel")) writers.add(row.getAsJsonObject("writerLabel").get("value").getAsString());
+                        if (row.has("producerLabel")) producers.add(row.getAsJsonObject("producerLabel").get("value").getAsString());
+                        if (row.has("cinematographerLabel")) cinematographers.add(row.getAsJsonObject("cinematographerLabel").get("value").getAsString());
+                        if (row.has("composerLabel")) composers.add(row.getAsJsonObject("composerLabel").get("value").getAsString());
+                    }
+                    
+                    if (!directors.isEmpty()) movie.setDirector(String.join(", ", directors));
+                    if (!writers.isEmpty()) movie.setWriter(String.join(", ", writers));
+                    if (!producers.isEmpty()) movie.setProducer(String.join(", ", producers));
+                    if (!cinematographers.isEmpty()) movie.setCinematographer(String.join(", ", cinematographers));
+                    if (!composers.isEmpty()) movie.setComposer(String.join(", ", composers));
+                    
+                    LOGGER.info("Successfully fetched Wikidata for IMDb ID: " + imdbId);
+                }
+            } else {
+                LOGGER.warning("Failed to fetch Wikidata. HTTP " + response.statusCode());
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error fetching Wikidata for IMDb ID: " + imdbId, e);
         }
     }
 

@@ -99,7 +99,13 @@ public class LibraryScanService {
                         LOGGER.log(Level.INFO, "Imported movie: {0}", movie.getTitle());
                     } else {
                         Movie existingMovie = movieRepository.findByFilePath(absolutePath);
-                        if (existingMovie != null && (existingMovie.getCoverImagePath() == null || existingMovie.getCoverImagePath().isBlank())) {
+                        boolean needsEnrichment = existingMovie != null && (
+                            existingMovie.getCoverImagePath() == null || existingMovie.getCoverImagePath().isBlank() ||
+                            existingMovie.getDirector() == null || existingMovie.getDirector().isBlank() ||
+                            existingMovie.getWriter() == null || existingMovie.getWriter().isBlank()
+                        );
+                        
+                        if (needsEnrichment) {
                             updateMessage("Checking IMDB for existing movie: " + existingMovie.getTitle());
                             String originalTitle = existingMovie.getTitle();
                             
@@ -108,12 +114,10 @@ public class LibraryScanService {
                             existingMovie.setTitle(freshlyParsed.getTitle());
                             
                             ImdbService.enrichMovieData(existingMovie);
-                            // Always update if title or year or cover was changed
-                            if (!originalTitle.equals(existingMovie.getTitle()) || existingMovie.getCoverImagePath() != null) {
-                                movieRepository.update(existingMovie);
-                                logs.add("Enriched: " + existingMovie.getTitle());
-                                LOGGER.log(Level.INFO, "Enriched existing movie: {0}", existingMovie.getTitle());
-                            }
+                            // Always update after attempting enrichment to save new fields (Director, Writer, etc)
+                            movieRepository.update(existingMovie);
+                            logs.add("Enriched: " + existingMovie.getTitle());
+                            LOGGER.log(Level.INFO, "Enriched existing movie: {0}", existingMovie.getTitle());
                         }
                     }
                 }
