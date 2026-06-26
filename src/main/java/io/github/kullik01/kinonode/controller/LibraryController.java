@@ -50,18 +50,18 @@ public class LibraryController implements Refreshable {
 
         // Setup sort and filter options
         cmbSort.getItems().addAll(
+                "Cinematographer",
+                "Composer",
+                "Director",
+                "Genre",
+                "Producer",
+                "Rating (Highest)",
                 "Recently Added",
+                "Release Year",
+                "Title",
                 "Title (A-Z)",
                 "Title (Z-A)",
-                "Release Year",
-                "Rating (Highest)",
-                "Title",
-                "Genre",
-                "Director",
-                "Writer",
-                "Producer",
-                "Cinematographer",
-                "Composer"
+                "Writer"
         );
         
         String savedSortFilter = AppContext.getInstance().getSettingsRepository().get("library_sort_filter", "Recently Added");
@@ -99,14 +99,14 @@ public class LibraryController implements Refreshable {
                     if (query.isEmpty()) return true;
                     
                     return switch (sortOption) {
-                        case "Title" -> m.getTitle().toLowerCase().contains(query);
+                        case "Title" -> m.getTitle() != null && m.getTitle().toLowerCase().contains(query);
                         case "Genre" -> m.getGenre() != null && m.getGenre().toLowerCase().contains(query);
                         case "Director" -> m.getDirector() != null && m.getDirector().toLowerCase().contains(query);
                         case "Writer" -> m.getWriter() != null && m.getWriter().toLowerCase().contains(query);
                         case "Producer" -> m.getProducer() != null && m.getProducer().toLowerCase().contains(query);
                         case "Cinematographer" -> m.getCinematographer() != null && m.getCinematographer().toLowerCase().contains(query);
                         case "Composer" -> m.getComposer() != null && m.getComposer().toLowerCase().contains(query);
-                        default -> m.getTitle().toLowerCase().contains(query) ||
+                        default -> (m.getTitle() != null && m.getTitle().toLowerCase().contains(query)) ||
                                 (m.getGenre() != null && m.getGenre().toLowerCase().contains(query)) ||
                                 (m.getDescription() != null && m.getDescription().toLowerCase().contains(query)) ||
                                 (m.getDirector() != null && m.getDirector().toLowerCase().contains(query)) ||
@@ -121,8 +121,8 @@ public class LibraryController implements Refreshable {
         // Sort movies
         if (sortOption != null) {
             switch (sortOption) {
-                case "Title (A-Z)" -> filtered.sort(Comparator.comparing(Movie::getTitle, String.CASE_INSENSITIVE_ORDER));
-                case "Title (Z-A)" -> filtered.sort(Comparator.comparing(Movie::getTitle, String.CASE_INSENSITIVE_ORDER).reversed());
+                case "Title (A-Z)" -> filtered.sort(Comparator.comparing(Movie::getTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)));
+                case "Title (Z-A)" -> filtered.sort(Comparator.comparing(Movie::getTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)).reversed());
                 case "Release Year" -> filtered.sort((m1, m2) -> {
                     if (m1.getYear() == null && m2.getYear() == null) return 0;
                     if (m1.getYear() == null) return 1;
@@ -135,7 +135,7 @@ public class LibraryController implements Refreshable {
                     if (m2.getRating() == null) return -1;
                     return Integer.compare(m2.getRating(), m1.getRating()); // Descending
                 });
-                default -> filtered.sort(Comparator.comparing(Movie::getDateAdded).reversed()); // Default sort for Filters and Recently Added
+                default -> filtered.sort(Comparator.comparing(Movie::getDateAdded, Comparator.nullsLast(Comparator.naturalOrder())).reversed()); // Default sort for Filters and Recently Added
             }
         }
 
