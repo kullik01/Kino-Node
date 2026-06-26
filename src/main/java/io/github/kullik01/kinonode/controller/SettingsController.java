@@ -126,6 +126,8 @@ public class SettingsController implements Refreshable {
         String selected = lstWorkspaces.getSelectionModel().getSelectedItem();
         if (selected != null) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            javafx.stage.Stage stage = (javafx.stage.Stage) alert.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
             alert.setTitle("Remove Workspace");
             alert.setHeaderText("Remove workspace: " + selected);
             alert.setContentText("Are you sure you want to remove this workspace? Movies from this workspace will be removed from your library, but files will not be deleted from your disk.");

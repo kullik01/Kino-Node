@@ -255,6 +255,8 @@ public class MovieDetailController {
                 MenuItem item = new MenuItem("➖ Remove from: " + w.getName());
                 item.setOnAction(e -> {
                     Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    javafx.stage.Stage stage = (javafx.stage.Stage) alert.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
                     alert.setTitle("Remove Movie");
                     alert.setHeaderText("Remove from Watchlist");
                     alert.setContentText("Are you sure you want to remove this movie from " + w.getName() + "?");
@@ -298,6 +300,9 @@ public class MovieDetailController {
 
         dialog.getDialogPane().setPrefSize(480, 280);
         dialog.getDialogPane().setMinSize(480, 280);
+        
+        javafx.stage.Stage stage = (javafx.stage.Stage) dialog.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
 
         ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
@@ -367,6 +372,8 @@ public class MovieDetailController {
             if (w.getName().equalsIgnoreCase(cleanName)) {
                 if (w.getId() != null && w.getId() != currentId) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
+                    javafx.stage.Stage stage = (javafx.stage.Stage) alert.getDialogPane().getScene().getWindow();
+                    stage.getIcons().add(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
                     alert.setTitle("Validation Error");
                     alert.setHeaderText("Duplicate Watchlist");
                     alert.setContentText("A watchlist with this name already exists. Please choose a different name.");
@@ -423,6 +430,8 @@ public class MovieDetailController {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to launch external media player", e);
             Alert alert = new Alert(Alert.AlertType.ERROR);
+            javafx.stage.Stage stage = (javafx.stage.Stage) alert.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
             alert.setTitle("Playback Failed");
             alert.setHeaderText("Could not launch external media player");
             alert.setContentText(e.getMessage());

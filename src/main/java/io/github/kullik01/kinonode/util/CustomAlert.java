@@ -40,6 +40,13 @@ public class CustomAlert {
         Label titleLabel = new Label(title);
         titleLabel.getStyleClass().add("title-bar-label");
         
+        javafx.scene.image.ImageView logoView = new javafx.scene.image.ImageView(new javafx.scene.image.Image(CustomAlert.class.getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
+        logoView.setFitHeight(16);
+        logoView.setFitWidth(16);
+        
+        titleBar.getChildren().add(logoView);
+        titleBar.setSpacing(5);
+        
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         

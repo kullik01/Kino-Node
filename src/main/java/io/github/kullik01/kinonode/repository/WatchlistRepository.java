@@ -185,10 +185,14 @@ public class WatchlistRepository {
             stmt.setInt(2, movieId);
             stmt.executeUpdate();
             
-            // Re-order remaining movies
+            // Re-order remaining movies or delete if empty
             List<Movie> remaining = findMoviesInWatchlist(watchlistId);
-            List<Integer> ids = remaining.stream().map(Movie::getId).toList();
-            updateMoviePositionsInWatchlist(watchlistId, ids);
+            if (remaining.isEmpty()) {
+                delete(watchlistId);
+            } else {
+                List<Integer> ids = remaining.stream().map(Movie::getId).toList();
+                updateMoviePositionsInWatchlist(watchlistId, ids);
+            }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to remove movie from watchlist", e);
         }
