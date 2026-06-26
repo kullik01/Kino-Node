@@ -222,7 +222,7 @@ public class WatchlistsController implements Refreshable {
         if (btnDeleteWatchlist != null) btnDeleteWatchlist.setDisable(!hasSelection);
     }
 
-    private Optional<String> showWatchlistDialog(String title, String header, String defaultText) {
+    private Optional<String> showWatchlistDialog(String title, String header, String defaultText, int currentId) {
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle(title);
         dialog.setHeaderText(header);
@@ -234,7 +234,7 @@ public class WatchlistsController implements Refreshable {
         dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
 
         VBox vbox = new VBox(5);
-        Label errorLabel = new Label("The text you entered is not ASCII code. Only standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space) can be used.");
+        Label errorLabel = new Label();
         errorLabel.setWrapText(true);
         errorLabel.setPrefWidth(430);
         errorLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
@@ -256,11 +256,29 @@ public class WatchlistsController implements Refreshable {
                 return;
             }
             if (!newValue.matches("\\A\\p{ASCII}*\\z")) {
+                errorLabel.setText("The text you entered is not ASCII code. Only standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space) can be used.");
                 errorLabel.setVisible(true);
                 okButton.setDisable(true);
             } else {
-                errorLabel.setVisible(false);
-                okButton.setDisable(newValue.trim().isEmpty());
+                boolean duplicate = false;
+                List<Watchlist> watchlists = watchlistRepository.findAll();
+                for (Watchlist w : watchlists) {
+                    if (w.getName().equalsIgnoreCase(newValue.trim())) {
+                        if (w.getId() != null && w.getId() != currentId) {
+                            duplicate = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (duplicate) {
+                    errorLabel.setText("A watchlist with this name already exists. Please choose a different name.");
+                    errorLabel.setVisible(true);
+                    okButton.setDisable(true);
+                } else {
+                    errorLabel.setVisible(false);
+                    okButton.setDisable(newValue.trim().isEmpty());
+                }
             }
         });
 
@@ -276,7 +294,7 @@ public class WatchlistsController implements Refreshable {
 
     @FXML
     private void createWatchlist() {
-        Optional<String> result = showWatchlistDialog("New Watchlist", "Create a new watchlist", "");
+        Optional<String> result = showWatchlistDialog("New Watchlist", "Create a new watchlist", "", -1);
         
         result.ifPresent(name -> {
             String cleanName = name.trim();
@@ -293,7 +311,7 @@ public class WatchlistsController implements Refreshable {
     private void renameWatchlist() {
         if (selectedWatchlist == null) return;
 
-        Optional<String> result = showWatchlistDialog("Rename Watchlist", "Rename watchlist: " + selectedWatchlist.getName(), selectedWatchlist.getName());
+        Optional<String> result = showWatchlistDialog("Rename Watchlist", "Rename watchlist: " + selectedWatchlist.getName(), selectedWatchlist.getName(), selectedWatchlist.getId() == null ? -1 : selectedWatchlist.getId());
         
         result.ifPresent(name -> {
             String cleanName = name.trim();

@@ -273,7 +273,7 @@ public class MovieDetailController {
         // Option to create new watchlist
         MenuItem createNew = new MenuItem("➕ Create New Watchlist...");
         createNew.setOnAction(e -> {
-            Optional<String> result = showWatchlistDialog("New Watchlist", "Create a new watchlist", "");
+            Optional<String> result = showWatchlistDialog("New Watchlist", "Create a new watchlist", "", -1);
             result.ifPresent(name -> {
                 String cleanName = name.trim();
                 if (!cleanName.isEmpty()) {
@@ -291,7 +291,7 @@ public class MovieDetailController {
         menuWatchlists.getItems().add(createNew);
     }
 
-    private Optional<String> showWatchlistDialog(String title, String header, String defaultText) {
+    private Optional<String> showWatchlistDialog(String title, String header, String defaultText, int currentId) {
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle(title);
         dialog.setHeaderText(header);
@@ -303,7 +303,7 @@ public class MovieDetailController {
         dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
 
         VBox vbox = new VBox(5);
-        Label errorLabel = new Label("The text you entered is not ASCII code. Only standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space) can be used.");
+        Label errorLabel = new Label();
         errorLabel.setWrapText(true);
         errorLabel.setPrefWidth(430);
         errorLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
@@ -325,11 +325,29 @@ public class MovieDetailController {
                 return;
             }
             if (!newValue.matches("\\A\\p{ASCII}*\\z")) {
+                errorLabel.setText("The text you entered is not ASCII code. Only standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space) can be used.");
                 errorLabel.setVisible(true);
                 okButton.setDisable(true);
             } else {
-                errorLabel.setVisible(false);
-                okButton.setDisable(newValue.trim().isEmpty());
+                boolean duplicate = false;
+                List<Watchlist> watchlists = watchlistRepository.findAll();
+                for (Watchlist w : watchlists) {
+                    if (w.getName().equalsIgnoreCase(newValue.trim())) {
+                        if (w.getId() != null && w.getId() != currentId) {
+                            duplicate = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (duplicate) {
+                    errorLabel.setText("A watchlist with this name already exists. Please choose a different name.");
+                    errorLabel.setVisible(true);
+                    okButton.setDisable(true);
+                } else {
+                    errorLabel.setVisible(false);
+                    okButton.setDisable(newValue.trim().isEmpty());
+                }
             }
         });
 
