@@ -343,6 +343,12 @@ public class WatchlistsController implements Refreshable {
                     alert.setTitle("Validation Error");
                     alert.setHeaderText("Duplicate Watchlist");
                     alert.setContentText("A watchlist with this name already exists. Please choose a different name.");
+                    
+                    javafx.scene.image.ImageView customIcon = new javafx.scene.image.ImageView(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/error_icon.png")));
+                    customIcon.setFitHeight(48);
+                    customIcon.setFitWidth(48);
+                    alert.getDialogPane().setGraphic(customIcon);
+                    
                     alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
                     alert.showAndWait();
                     return false;
@@ -362,6 +368,12 @@ public class WatchlistsController implements Refreshable {
         alert.setTitle("Delete Watchlist");
         alert.setHeaderText("Delete watchlist: " + selectedWatchlist.getName());
         alert.setContentText("Are you sure you want to delete this watchlist? Movies will not be deleted from your disk or library.");
+        
+        javafx.scene.image.ImageView customIcon = new javafx.scene.image.ImageView(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/removal_icon.png")));
+        customIcon.setFitHeight(48);
+        customIcon.setFitWidth(48);
+        alert.getDialogPane().setGraphic(customIcon);
+        
         alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
         
         Optional<ButtonType> result = alert.showAndWait();
@@ -384,6 +396,12 @@ public class WatchlistsController implements Refreshable {
         alert.setTitle("Remove Movie");
         alert.setHeaderText("Remove from Watchlist");
         alert.setContentText("Are you sure you want to remove this movie from " + selectedWatchlist.getName() + "?");
+        
+        javafx.scene.image.ImageView customIcon = new javafx.scene.image.ImageView(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/removal_icon.png")));
+        customIcon.setFitHeight(48);
+        customIcon.setFitWidth(48);
+        alert.getDialogPane().setGraphic(customIcon);
+        
         alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
         Optional<ButtonType> result = alert.showAndWait();
         
@@ -404,6 +422,12 @@ public class WatchlistsController implements Refreshable {
             alert.setTitle("Playback Failed");
             alert.setHeaderText("Cannot open media player");
             alert.setContentText(e.getMessage());
+            
+            javafx.scene.image.ImageView customIcon = new javafx.scene.image.ImageView(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/error_icon.png")));
+            customIcon.setFitHeight(48);
+            customIcon.setFitWidth(48);
+            alert.getDialogPane().setGraphic(customIcon);
+            
             alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
             alert.showAndWait();
         }

@@ -260,6 +260,12 @@ public class MovieDetailController {
                     alert.setTitle("Remove Movie");
                     alert.setHeaderText("Remove from Watchlist");
                     alert.setContentText("Are you sure you want to remove this movie from " + w.getName() + "?");
+                    
+                    javafx.scene.image.ImageView customIcon = new javafx.scene.image.ImageView(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/removal_icon.png")));
+                    customIcon.setFitHeight(48);
+                    customIcon.setFitWidth(48);
+                    alert.getDialogPane().setGraphic(customIcon);
+                    
                     alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
                     Optional<ButtonType> alertResult = alert.showAndWait();
                     if (alertResult.isPresent() && alertResult.get() == ButtonType.OK) {
@@ -377,6 +383,12 @@ public class MovieDetailController {
                     alert.setTitle("Validation Error");
                     alert.setHeaderText("Duplicate Watchlist");
                     alert.setContentText("A watchlist with this name already exists. Please choose a different name.");
+                    
+                    javafx.scene.image.ImageView customIcon = new javafx.scene.image.ImageView(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/error_icon.png")));
+                    customIcon.setFitHeight(48);
+                    customIcon.setFitWidth(48);
+                    alert.getDialogPane().setGraphic(customIcon);
+                    
                     alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
                     alert.showAndWait();
                     return false;
@@ -435,6 +447,12 @@ public class MovieDetailController {
             alert.setTitle("Playback Failed");
             alert.setHeaderText("Could not launch external media player");
             alert.setContentText(e.getMessage());
+            
+            javafx.scene.image.ImageView customIcon = new javafx.scene.image.ImageView(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/error_icon.png")));
+            customIcon.setFitHeight(48);
+            customIcon.setFitWidth(48);
+            alert.getDialogPane().setGraphic(customIcon);
+            
             alert.showAndWait();
         }
     }

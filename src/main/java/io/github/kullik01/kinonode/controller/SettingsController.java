@@ -131,6 +131,12 @@ public class SettingsController implements Refreshable {
             alert.setTitle("Remove Workspace");
             alert.setHeaderText("Remove workspace: " + selected);
             alert.setContentText("Are you sure you want to remove this workspace? Movies from this workspace will be removed from your library, but files will not be deleted from your disk.");
+            
+            javafx.scene.image.ImageView customIcon = new javafx.scene.image.ImageView(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/removal_icon.png")));
+            customIcon.setFitHeight(48);
+            customIcon.setFitWidth(48);
+            alert.getDialogPane().setGraphic(customIcon);
+            
             alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
             
             Optional<ButtonType> result = alert.showAndWait();
