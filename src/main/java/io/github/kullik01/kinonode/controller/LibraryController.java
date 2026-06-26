@@ -48,19 +48,33 @@ public class LibraryController implements Refreshable {
         movieRepository = AppContext.getInstance().getMovieRepository();
         libraryScanService = AppContext.getInstance().getLibraryScanService();
 
-        // Setup sort options
+        // Setup sort and filter options
         cmbSort.getItems().addAll(
+                "Recently Added",
                 "Title (A-Z)",
                 "Title (Z-A)",
                 "Release Year",
                 "Rating (Highest)",
-                "Recently Added"
+                "Title",
+                "Genre",
+                "Director",
+                "Writer",
+                "Producer",
+                "Cinematographer",
+                "Composer"
         );
-        cmbSort.setValue("Recently Added");
+        
+        String savedSortFilter = AppContext.getInstance().getSettingsRepository().get("library_sort_filter", "Recently Added");
+        cmbSort.setValue(savedSortFilter);
 
         // Real-time filters and sorts
         txtSearch.textProperty().addListener((obs, oldVal, newVal) -> filterAndDisplayMovies());
-        cmbSort.valueProperty().addListener((obs, oldVal, newVal) -> filterAndDisplayMovies());
+        cmbSort.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                AppContext.getInstance().getSettingsRepository().set("library_sort_filter", newVal);
+            }
+            filterAndDisplayMovies();
+        });
         
         btnSyncLibrary.disableProperty().bind(progressArea.visibleProperty());
 
@@ -78,15 +92,33 @@ public class LibraryController implements Refreshable {
 
     private void filterAndDisplayMovies() {
         String query = txtSearch.getText().toLowerCase().trim();
+        String sortOption = cmbSort.getValue() != null ? cmbSort.getValue() : "Recently Added";
+        
         List<Movie> filtered = allMovies.stream()
-                .filter(m -> query.isEmpty() ||
-                        m.getTitle().toLowerCase().contains(query) ||
-                        (m.getGenre() != null && m.getGenre().toLowerCase().contains(query)) ||
-                        (m.getDescription() != null && m.getDescription().toLowerCase().contains(query)))
+                .filter(m -> {
+                    if (query.isEmpty()) return true;
+                    
+                    return switch (sortOption) {
+                        case "Title" -> m.getTitle().toLowerCase().contains(query);
+                        case "Genre" -> m.getGenre() != null && m.getGenre().toLowerCase().contains(query);
+                        case "Director" -> m.getDirector() != null && m.getDirector().toLowerCase().contains(query);
+                        case "Writer" -> m.getWriter() != null && m.getWriter().toLowerCase().contains(query);
+                        case "Producer" -> m.getProducer() != null && m.getProducer().toLowerCase().contains(query);
+                        case "Cinematographer" -> m.getCinematographer() != null && m.getCinematographer().toLowerCase().contains(query);
+                        case "Composer" -> m.getComposer() != null && m.getComposer().toLowerCase().contains(query);
+                        default -> m.getTitle().toLowerCase().contains(query) ||
+                                (m.getGenre() != null && m.getGenre().toLowerCase().contains(query)) ||
+                                (m.getDescription() != null && m.getDescription().toLowerCase().contains(query)) ||
+                                (m.getDirector() != null && m.getDirector().toLowerCase().contains(query)) ||
+                                (m.getWriter() != null && m.getWriter().toLowerCase().contains(query)) ||
+                                (m.getProducer() != null && m.getProducer().toLowerCase().contains(query)) ||
+                                (m.getCinematographer() != null && m.getCinematographer().toLowerCase().contains(query)) ||
+                                (m.getComposer() != null && m.getComposer().toLowerCase().contains(query));
+                    };
+                })
                 .collect(Collectors.toList());
 
         // Sort movies
-        String sortOption = cmbSort.getValue();
         if (sortOption != null) {
             switch (sortOption) {
                 case "Title (A-Z)" -> filtered.sort(Comparator.comparing(Movie::getTitle, String.CASE_INSENSITIVE_ORDER));
@@ -103,7 +135,7 @@ public class LibraryController implements Refreshable {
                     if (m2.getRating() == null) return -1;
                     return Integer.compare(m2.getRating(), m1.getRating()); // Descending
                 });
-                case "Recently Added" -> filtered.sort(Comparator.comparing(Movie::getDateAdded).reversed());
+                default -> filtered.sort(Comparator.comparing(Movie::getDateAdded).reversed()); // Default sort for Filters and Recently Added
             }
         }
 

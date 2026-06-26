@@ -31,9 +31,9 @@
         
         <Region HBox.hgrow="ALWAYS" />
         
-        <!-- Search and Sort -->
-        <TextField fx:id="txtSearch" promptText="Search movies..." prefWidth="300.0" />
-        <ComboBox fx:id="cmbSort" prefWidth="250.0" styleClass="button-secondary" />
+        <!-- Search and Sort/Filter -->
+        <TextField fx:id="txtSearch" promptText="Search movies..." prefWidth="250.0" />
+        <ComboBox fx:id="cmbSort" prefWidth="200.0" styleClass="button-secondary" />
 
         <!-- Sync Button -->
         <Button fx:id="btnSyncLibrary" onAction="#syncLibrary" styleClass="button-primary, button-icon" minWidth="36.0" maxWidth="36.0" minHeight="36.0">
