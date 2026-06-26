@@ -96,4 +96,32 @@ public class AboutController implements Refreshable {
             lblPlayerPath.setText("Unknown");
         }
     }
+
+    @FXML
+    private void openPlayerLocation() {
+        try {
+            Optional<Path> playerPathOpt = AppContext.getInstance().getPlaybackService().getPlayerPath();
+            if (playerPathOpt.isPresent() && Files.exists(playerPathOpt.get().getParent())) {
+                if (java.awt.Desktop.isDesktopSupported() && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.OPEN)) {
+                    java.awt.Desktop.getDesktop().open(playerPathOpt.get().getParent().toFile());
+                }
+            }
+        } catch (Exception e) {
+            // Ignore if it cannot be opened
+        }
+    }
+
+    @FXML
+    private void openDatabaseLocation() {
+        try {
+            Path dbPath = AppContext.getInstance().getDatabaseService().getDbPath();
+            if (dbPath != null && Files.exists(dbPath.getParent())) {
+                if (java.awt.Desktop.isDesktopSupported() && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.OPEN)) {
+                    java.awt.Desktop.getDesktop().open(dbPath.getParent().toFile());
+                }
+            }
+        } catch (Exception e) {
+            // Ignore if it cannot be opened
+        }
+    }
 }

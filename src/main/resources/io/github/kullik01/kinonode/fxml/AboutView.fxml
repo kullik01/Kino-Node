@@ -9,6 +9,8 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Tooltip?>
 <VBox spacing="25.0" styleClass="detail-pane"
       stylesheets="@../css/theme.css"
       xmlns="http://javafx.com/javafx/21"
@@ -117,9 +119,14 @@
             
             <VBox spacing="8.0">
                 <Label text="Media Player Path:" style="-fx-font-weight: bold;" />
-                <Label fx:id="lblPlayerPath" text="None" 
-                       style="-fx-font-family: monospace; -fx-font-size: 12px; -fx-text-fill: -color-fg-default; -fx-background-color: -color-bg-default; -fx-padding: 8px; -fx-background-radius: 6px; -fx-border-color: -color-border-default; -fx-border-radius: 6px;" 
-                       wrapText="true" maxWidth="Infinity" />
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label fx:id="lblPlayerPath" text="None" 
+                           style="-fx-font-family: monospace; -fx-font-size: 12px; -fx-text-fill: -color-fg-default; -fx-background-color: -color-bg-default; -fx-padding: 8px; -fx-background-radius: 6px; -fx-border-color: -color-border-default; -fx-border-radius: 6px;" 
+                           wrapText="true" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+                    <Button onAction="#openPlayerLocation" styleClass="button-secondary" text="📂" minWidth="-Infinity">
+                        <tooltip><Tooltip showDelay="250ms" text="Open Location"/></tooltip>
+                    </Button>
+                </HBox>
             </VBox>
             
             <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
@@ -135,9 +142,14 @@
             
             <VBox spacing="8.0">
                 <Label text="Database Storage Location:" style="-fx-font-weight: bold;" />
-                <Label fx:id="lblDbPath" text="" 
-                       style="-fx-font-family: monospace; -fx-font-size: 12px; -fx-text-fill: -color-fg-default; -fx-background-color: -color-bg-default; -fx-padding: 8px; -fx-background-radius: 6px; -fx-border-color: -color-border-default; -fx-border-radius: 6px;" 
-                       wrapText="true" maxWidth="Infinity" />
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label fx:id="lblDbPath" text="" 
+                           style="-fx-font-family: monospace; -fx-font-size: 12px; -fx-text-fill: -color-fg-default; -fx-background-color: -color-bg-default; -fx-padding: 8px; -fx-background-radius: 6px; -fx-border-color: -color-border-default; -fx-border-radius: 6px;" 
+                           wrapText="true" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+                    <Button onAction="#openDatabaseLocation" styleClass="button-secondary" text="📂" minWidth="-Infinity">
+                        <tooltip><Tooltip showDelay="250ms" text="Open Location"/></tooltip>
+                    </Button>
+                </HBox>
             </VBox>
         </VBox>
     </HBox>
