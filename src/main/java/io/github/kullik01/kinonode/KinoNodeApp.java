@@ -71,6 +71,11 @@ public class KinoNodeApp extends Application {
         
         primaryStage.getIcons().add(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
         primaryStage.setTitle("KinoNode - Personal Movie Library");
+        
+        // Ensure the application supports every resolution configuration gracefully
+        primaryStage.setMinWidth(800);
+        primaryStage.setMinHeight(600);
+        
         Scene scene = new Scene(root, 1024, 768);
         primaryStage.setScene(scene);
         primaryStage.show();

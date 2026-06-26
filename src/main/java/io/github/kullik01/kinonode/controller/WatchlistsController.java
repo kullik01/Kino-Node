@@ -255,7 +255,12 @@ public class WatchlistsController implements Refreshable {
         dialog.getDialogPane().setContent(vbox);
 
         javafx.scene.Node okButton = dialog.getDialogPane().lookupButton(okButtonType);
-        okButton.setDisable(defaultText.trim().isEmpty() || defaultText.length() > 30);
+        okButton.setDisable(true); // Always disable initially; user must type or change the name
+
+        if (currentId != -1) {
+            errorLabel.setText("A watchlist with this name already exists. Please choose a different name.");
+            errorLabel.setVisible(true);
+        }
 
         textField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.length() > 30) {
@@ -283,8 +288,15 @@ public class WatchlistsController implements Refreshable {
                     errorLabel.setVisible(true);
                     okButton.setDisable(true);
                 } else {
-                    errorLabel.setVisible(false);
-                    okButton.setDisable(newValue.trim().isEmpty());
+                    boolean isUnchanged = currentId != -1 && newValue.trim().equalsIgnoreCase(defaultText.trim());
+                    if (isUnchanged) {
+                        errorLabel.setText("A watchlist with this name already exists. Please choose a different name.");
+                        errorLabel.setVisible(true);
+                        okButton.setDisable(true);
+                    } else {
+                        errorLabel.setVisible(false);
+                        okButton.setDisable(newValue.trim().isEmpty());
+                    }
                 }
             }
         });
