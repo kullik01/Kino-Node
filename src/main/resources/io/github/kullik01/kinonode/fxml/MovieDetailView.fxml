@@ -123,7 +123,12 @@
 
                 <!-- Trailer URL -->
                 <Label style="-fx-font-weight: bold;" text="Trailer Link:" GridPane.columnIndex="0" GridPane.rowIndex="9" />
-                <TextField fx:id="txtTrailerUrl" promptText="https://www.youtube.com/watch?v=..." GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="9">
+                    <TextField fx:id="txtTrailerUrl" editable="false" mouseTransparent="true" focusTraversable="false" promptText="https://www.youtube.com/watch?v=..." HBox.hgrow="ALWAYS" />
+                    <Button fx:id="btnEditTrailer" onAction="#editTrailerUrl" styleClass="button-secondary" text="📝" minWidth="-Infinity">
+                        <tooltip><Tooltip showDelay="250ms" text="Edit Trailer Link"/></tooltip>
+                    </Button>
+                </HBox>
                 
                 <!-- Rating -->
                 <Label style="-fx-font-weight: bold;" text="Rating:" GridPane.columnIndex="0" GridPane.rowIndex="10" />

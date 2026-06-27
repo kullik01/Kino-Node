@@ -479,6 +479,86 @@ public class MovieDetailController {
         }
     }
 
+    @FXML
+    private void editTrailerUrl() {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Edit Trailer Link");
+        dialog.setHeaderText("YouTube Trailer URL");
+
+        dialog.getDialogPane().setPrefSize(480, 280);
+        dialog.getDialogPane().setMinSize(480, 280);
+
+        javafx.stage.Stage stage = (javafx.stage.Stage) dialog.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
+        
+        javafx.scene.image.ImageView customIcon = new javafx.scene.image.ImageView(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/question_mark.png")));
+        customIcon.setFitHeight(48);
+        customIcon.setFitWidth(48);
+        dialog.getDialogPane().setGraphic(customIcon);
+
+        ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
+
+        VBox vbox = new VBox(5);
+        Label errorLabel = new Label();
+        errorLabel.setWrapText(true);
+        errorLabel.setPrefWidth(430);
+        errorLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+        errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+        
+        String defaultText = txtTrailerUrl.getText().trim();
+        
+        if (!defaultText.isEmpty()) {
+            errorLabel.setText("This is the current YouTube link and must be updated by a new one.");
+            errorLabel.setVisible(true);
+        } else {
+            errorLabel.setVisible(false);
+        }
+
+        TextField textField = new TextField(defaultText);
+        textField.setPromptText("https://www.youtube.com/watch?v=...");
+        
+        vbox.getChildren().addAll(new Label("Enter the new YouTube Trailer Link:"), errorLabel, textField);
+        dialog.getDialogPane().setContent(vbox);
+
+        javafx.scene.Node okButton = dialog.getDialogPane().lookupButton(okButtonType);
+        okButton.setDisable(true);
+
+        textField.textProperty().addListener((observable, oldValue, newValue) -> {
+            String url = newValue.trim();
+            boolean isUnchanged = url.equalsIgnoreCase(defaultText);
+            
+            if (isUnchanged && !defaultText.isEmpty()) {
+                errorLabel.setText("This is the current YouTube link and must be updated by a new one.");
+                errorLabel.setVisible(true);
+                okButton.setDisable(true);
+            } else if (!url.isEmpty() && !url.contains("youtube.com") && !url.contains("youtu.be")) {
+                errorLabel.setText("Trailer Link must be a valid YouTube URL.");
+                errorLabel.setVisible(true);
+                okButton.setDisable(true);
+            } else {
+                errorLabel.setVisible(false);
+                okButton.setDisable(url.isEmpty());
+            }
+        });
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == okButtonType) {
+                return textField.getText();
+            }
+            return null;
+        });
+        
+        java.util.Optional<String> result = dialog.showAndWait();
+        result.ifPresent(url -> {
+            String newUrl = url.trim();
+            txtTrailerUrl.setText(newUrl);
+            movie.setTrailerUrl(newUrl.isEmpty() ? null : newUrl);
+            movieRepository.update(movie);
+            showStatus("Trailer Link updated!");
+        });
+    }
+
     public boolean hasUnsavedChanges() {
         if (movie == null) return false;
         if (!java.util.Objects.equals(movie.getTitle(), txtTitle.getText().trim())) return true;

@@ -93,6 +93,9 @@ public class LibraryScanService {
                         updateMessage("Checking IMDB for: " + movie.getTitle());
                         ImdbService.enrichMovieData(movie);
                         
+                        updateMessage("Checking YouTube for trailer: " + movie.getTitle());
+                        YoutubeService.fetchYoutubeTrailer(movie);
+                        
                         movieRepository.insert(movie);
                         newMoviesAdded++;
                         logs.add("Added: " + movie.getTitle());
@@ -114,6 +117,12 @@ public class LibraryScanService {
                             existingMovie.setTitle(freshlyParsed.getTitle());
                             
                             ImdbService.enrichMovieData(existingMovie);
+                            
+                            if (existingMovie.getTrailerUrl() == null || existingMovie.getTrailerUrl().isBlank()) {
+                                updateMessage("Checking YouTube for trailer: " + existingMovie.getTitle());
+                                YoutubeService.fetchYoutubeTrailer(existingMovie);
+                            }
+                            
                             // Always update after attempting enrichment to save new fields (Director, Writer, etc)
                             movieRepository.update(existingMovie);
                             logs.add("Enriched: " + existingMovie.getTitle());
