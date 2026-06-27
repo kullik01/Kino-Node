@@ -105,7 +105,8 @@ public class LibraryScanService {
                         boolean needsEnrichment = existingMovie != null && (
                             existingMovie.getCoverImagePath() == null || existingMovie.getCoverImagePath().isBlank() ||
                             existingMovie.getDirector() == null || existingMovie.getDirector().isBlank() ||
-                            existingMovie.getWriter() == null || existingMovie.getWriter().isBlank()
+                            existingMovie.getWriter() == null || existingMovie.getWriter().isBlank() ||
+                            existingMovie.getTrailerUrl() == null || existingMovie.getTrailerUrl().isBlank()
                         );
                         
                         if (needsEnrichment) {

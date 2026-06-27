@@ -479,6 +479,167 @@ public class MovieDetailController {
         }
     }
 
+    private enum InputConstraint {
+        ANY,
+        NUMBERS_ONLY,
+        NO_NUMBERS
+    }
+
+    private void showEditDialog(String title, String fieldName, TextInputControl control, InputConstraint constraint, java.util.function.Consumer<String> updater) {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Edit " + title);
+        dialog.setHeaderText("Edit " + fieldName);
+
+        dialog.getDialogPane().setPrefSize(480, 280);
+        dialog.getDialogPane().setMinSize(480, 280);
+
+        javafx.stage.Stage stage = (javafx.stage.Stage) dialog.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
+        
+        javafx.scene.image.ImageView customIcon = new javafx.scene.image.ImageView(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/question_mark.png")));
+        customIcon.setFitHeight(48);
+        customIcon.setFitWidth(48);
+        dialog.getDialogPane().setGraphic(customIcon);
+
+        ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
+
+        VBox vbox = new VBox(5);
+        Label errorLabel = new Label();
+        errorLabel.setWrapText(true);
+        errorLabel.setPrefWidth(430);
+        errorLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+        errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+        
+        String defaultText = control.getText() != null ? control.getText().trim() : "";
+        
+        if (!defaultText.isEmpty()) {
+            errorLabel.setText("This is the current " + fieldName + " and must be updated by a new one.");
+            errorLabel.setVisible(true);
+        } else {
+            errorLabel.setVisible(false);
+        }
+
+        TextInputControl inputField;
+        if (control instanceof TextArea) {
+            TextArea ta = new TextArea(defaultText);
+            ta.setWrapText(true);
+            ta.setPrefHeight(100);
+            inputField = ta;
+        } else {
+            inputField = new TextField(defaultText);
+        }
+        
+        if (constraint == InputConstraint.NUMBERS_ONLY) {
+            inputField.setTextFormatter(new TextFormatter<>(change -> {
+                if (change.getText().matches("\\d*")) {
+                    return change;
+                }
+                return null;
+            }));
+        } else if (constraint == InputConstraint.NO_NUMBERS) {
+            inputField.setTextFormatter(new TextFormatter<>(change -> {
+                if (change.getText().matches("[^0-9]*")) {
+                    return change;
+                }
+                return null;
+            }));
+        }
+        
+        vbox.getChildren().addAll(new Label("Enter the new " + fieldName + ":"), errorLabel, inputField);
+        dialog.getDialogPane().setContent(vbox);
+
+        javafx.scene.Node okButton = dialog.getDialogPane().lookupButton(okButtonType);
+        okButton.setDisable(true);
+
+        inputField.textProperty().addListener((observable, oldValue, newValue) -> {
+            String val = newValue.trim();
+            boolean isUnchanged = val.equals(defaultText);
+            
+            if (!newValue.matches("\\A\\p{ASCII}*\\z")) {
+                errorLabel.setText("The text you entered is not ASCII code. Only standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space) can be used.");
+                errorLabel.setVisible(true);
+                okButton.setDisable(true);
+            } else if (isUnchanged) {
+                if (!defaultText.isEmpty()) {
+                    errorLabel.setText("This is the current " + fieldName + " and must be updated by a new one.");
+                    errorLabel.setVisible(true);
+                }
+                okButton.setDisable(true);
+            } else {
+                errorLabel.setVisible(false);
+                okButton.setDisable(false);
+            }
+        });
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == okButtonType) {
+                return inputField.getText();
+            }
+            return null;
+        });
+        
+        java.util.Optional<String> result = dialog.showAndWait();
+        result.ifPresent(val -> {
+            String newVal = val.trim();
+            control.setText(newVal);
+            updater.accept(newVal);
+            movieRepository.update(movie);
+            showStatus(title + " updated!");
+        });
+    }
+
+    @FXML
+    private void editTitle() {
+        showEditDialog("Title", "Movie Title", txtTitle, InputConstraint.ANY, val -> movie.setTitle(val.isEmpty() ? null : val));
+    }
+
+    @FXML
+    private void editYear() {
+        showEditDialog("Year", "Release Year", txtYear, InputConstraint.NUMBERS_ONLY, val -> {
+            try {
+                movie.setYear(val.isEmpty() ? null : Integer.parseInt(val));
+            } catch (NumberFormatException e) {
+                showStatus("Year must be a number!");
+            }
+        });
+    }
+
+    @FXML
+    private void editGenre() {
+        showEditDialog("Genre", "Genre", txtGenre, InputConstraint.NO_NUMBERS, val -> movie.setGenre(val.isEmpty() ? null : val));
+    }
+
+    @FXML
+    private void editDirector() {
+        showEditDialog("Director", "Director(s)", txtDirector, InputConstraint.NO_NUMBERS, val -> movie.setDirector(val.isEmpty() ? null : val));
+    }
+
+    @FXML
+    private void editWriter() {
+        showEditDialog("Writer", "Writer(s)", txtWriter, InputConstraint.NO_NUMBERS, val -> movie.setWriter(val.isEmpty() ? null : val));
+    }
+
+    @FXML
+    private void editProducer() {
+        showEditDialog("Producer", "Producer(s)", txtProducer, InputConstraint.NO_NUMBERS, val -> movie.setProducer(val.isEmpty() ? null : val));
+    }
+
+    @FXML
+    private void editCinematographer() {
+        showEditDialog("Cinematographer", "Cinematographer(s)", txtCinematographer, InputConstraint.NO_NUMBERS, val -> movie.setCinematographer(val.isEmpty() ? null : val));
+    }
+
+    @FXML
+    private void editComposer() {
+        showEditDialog("Composer", "Composer(s)", txtComposer, InputConstraint.NO_NUMBERS, val -> movie.setComposer(val.isEmpty() ? null : val));
+    }
+
+    @FXML
+    private void editDescription() {
+        showEditDialog("Description", "Description", txtDescription, InputConstraint.NO_NUMBERS, val -> movie.setDescription(val.isEmpty() ? null : val));
+    }
+
     @FXML
     private void editTrailerUrl() {
         Dialog<String> dialog = new Dialog<>();
@@ -528,7 +689,11 @@ public class MovieDetailController {
             String url = newValue.trim();
             boolean isUnchanged = url.equalsIgnoreCase(defaultText);
             
-            if (isUnchanged && !defaultText.isEmpty()) {
+            if (!newValue.matches("\\A\\p{ASCII}*\\z")) {
+                errorLabel.setText("The text you entered is not ASCII code. Only standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space) can be used.");
+                errorLabel.setVisible(true);
+                okButton.setDisable(true);
+            } else if (isUnchanged && !defaultText.isEmpty()) {
                 errorLabel.setText("This is the current YouTube link and must be updated by a new one.");
                 errorLabel.setVisible(true);
                 okButton.setDisable(true);
