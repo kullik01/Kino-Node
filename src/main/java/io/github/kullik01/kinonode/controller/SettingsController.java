@@ -1,29 +1,39 @@
 /**
  * BSD 3-Clause License
  *
- * <p>Copyright (c) 2026, Hannah Kullik
+ * <p>
+ * Copyright (c) 2026, Hannah Kullik
  *
- * <p>Redistribution and use in source and binary forms, with or without modification, are permitted
- * provided that the following conditions are met:
+ * <p>
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * <p>1. Redistributions of source code must retain the above copyright notice, this list of
- * conditions and the following disclaimer.
+ * <p>
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
  *
- * <p>2. Redistributions in binary form must reproduce the above copyright notice, this list of
- * conditions and the following disclaimer in the documentation and/or other materials provided with
- * the distribution.
+ * <p>
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
  *
- * <p>3. Neither the name of the copyright holder nor the names of its contributors may be used to
- * endorse or promote products derived from this software without specific prior written permission.
+ * <p>
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ * may be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
- * <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
- * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * <p>
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 package io.github.kullik01.kinonode.controller;
 
@@ -51,20 +61,28 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
 /**
- * Controller for the application Settings view. Handles configuration of workspace directories and
- * external media player paths. Implements {@link Refreshable} to support reloading configurations
- * dynamically. Features live validations, custom ListView graphic cells, and automated tab exit
+ * Controller for the application Settings view. Handles configuration of
+ * workspace directories and external media player paths. Implements
+ * {@link Refreshable} to support reloading configurations dynamically. Features
+ * live validations, custom ListView graphic cells, and automated tab exit
  * saving.
  */
 public class SettingsController implements Refreshable {
 
-  @FXML private ListView<String> lstWorkspaces;
-  @FXML private Button btnAddFolder;
-  @FXML private Button btnRemoveFolder;
-  @FXML private TextField txtPlayerPath;
-  @FXML private Label lblStatus;
-  @FXML private Label lblPlayerStatus;
-  @FXML private Label lblPlayerError;
+  @FXML
+  private ListView<String> lstWorkspaces;
+  @FXML
+  private Button btnAddFolder;
+  @FXML
+  private Button btnRemoveFolder;
+  @FXML
+  private TextField txtPlayerPath;
+  @FXML
+  private Label lblStatus;
+  @FXML
+  private Label lblPlayerStatus;
+  @FXML
+  private Label lblPlayerError;
 
   private SettingsRepository settingsRepository;
   private String loadedWorkspaces = "";
@@ -77,43 +95,39 @@ public class SettingsController implements Refreshable {
     if (statusTimer != null) {
       statusTimer.stop();
     }
-    statusTimer = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(5));
+    statusTimer =
+        new javafx.animation.PauseTransition(javafx.util.Duration.seconds(5));
     statusTimer.setOnFinished(e -> lblStatus.setText(""));
     statusTimer.play();
   }
 
   /**
-   * Initializes the settings view, setting up control actions, listeners, and validators. Registers
-   * scene-detach hooks for automated saves.
+   * Initializes the settings view, setting up control actions, listeners, and
+   * validators. Registers scene-detach hooks for automated saves.
    */
   @FXML
   public void initialize() {
     settingsRepository = AppContext.getInstance().getSettingsRepository();
 
     btnRemoveFolder.setDisable(true);
-    lstWorkspaces
-        .getSelectionModel()
-        .selectedItemProperty()
-        .addListener(
-            (observable, oldValue, newValue) -> {
-              btnRemoveFolder.setDisable(newValue == null);
-            });
+    lstWorkspaces.getSelectionModel().selectedItemProperty()
+        .addListener((observable, oldValue, newValue) -> {
+          btnRemoveFolder.setDisable(newValue == null);
+        });
 
     setupValidationListeners();
     setupWorkspaceCellFactory();
     loadSettings();
 
     // Auto-save when changing tabs (which removes lstWorkspaces from the scene)
-    lstWorkspaces
-        .sceneProperty()
-        .addListener(
-            (observable, oldValue, newValue) -> {
-              if (oldValue != null && newValue == null) {
-                if (hasUnsavedChanges() && !hasValidationErrors()) {
-                  saveSettings();
-                }
-              }
-            });
+    lstWorkspaces.sceneProperty()
+        .addListener((observable, oldValue, newValue) -> {
+          if (oldValue != null && newValue == null) {
+            if (hasUnsavedChanges() && !hasValidationErrors()) {
+              saveSettings();
+            }
+          }
+        });
   }
 
   /** Reloads settings details and clears status warnings. */
@@ -129,10 +143,8 @@ public class SettingsController implements Refreshable {
     String tmpWorkspaces = settingsRepository.get("workspace_folders", "");
     if (!tmpWorkspaces.isBlank()) {
       List<String> tmpFolderList =
-          Arrays.stream(tmpWorkspaces.split(";"))
-              .map(String::trim)
-              .filter(s -> !s.isEmpty())
-              .collect(Collectors.toList());
+          Arrays.stream(tmpWorkspaces.split(";")).map(String::trim)
+              .filter(s -> !s.isEmpty()).collect(Collectors.toList());
       lstWorkspaces.getItems().addAll(tmpFolderList);
     }
 
@@ -156,7 +168,8 @@ public class SettingsController implements Refreshable {
     File tmpSelectedDirectory = tmpChooser.showDialog(tmpWindow);
 
     if (tmpSelectedDirectory != null) {
-      String tmpPath = tmpSelectedDirectory.getAbsolutePath().replace("\\", "/");
+      String tmpPath =
+          tmpSelectedDirectory.getAbsolutePath().replace("\\", "/");
       if (!lstWorkspaces.getItems().contains(tmpPath)) {
         lstWorkspaces.getItems().add(tmpPath);
         saveWorkspacesOnly();
@@ -170,12 +183,11 @@ public class SettingsController implements Refreshable {
     String tmpSelected = lstWorkspaces.getSelectionModel().getSelectedItem();
     if (tmpSelected != null) {
       Alert tmpAlert = new Alert(Alert.AlertType.CONFIRMATION);
-      javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
-      tmpStage
-          .getIcons()
-          .add(
-              new javafx.scene.image.Image(
-                  getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
+      javafx.stage.Stage tmpStage =
+          (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
+      tmpStage.getIcons()
+          .add(new javafx.scene.image.Image(getClass().getResourceAsStream(
+              "/io/github/kullik01/kinonode/images/logo.png")));
       tmpAlert.setTitle("Remove Workspace");
       tmpAlert.setHeaderText("Remove workspace: " + tmpSelected);
       tmpAlert.setContentText(
@@ -183,10 +195,8 @@ public class SettingsController implements Refreshable {
 
       javafx.scene.image.ImageView tmpCustomIcon =
           new javafx.scene.image.ImageView(
-              new javafx.scene.image.Image(
-                  getClass()
-                      .getResourceAsStream(
-                          "/io/github/kullik01/kinonode/images/removal_icon.png")));
+              new javafx.scene.image.Image(getClass().getResourceAsStream(
+                  "/io/github/kullik01/kinonode/images/removal_icon.png")));
       tmpCustomIcon.setFitHeight(48);
       tmpCustomIcon.setFitWidth(48);
       tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
@@ -199,7 +209,8 @@ public class SettingsController implements Refreshable {
         saveWorkspacesOnly();
         showStatus("Workspace folder removed.");
 
-        // Clear movies belonging to the removed workspace from local database records
+        // Clear movies belonging to the removed workspace from local database
+        // records
         io.github.kullik01.kinonode.repository.MovieRepository tmpMovieRepository =
             AppContext.getInstance().getMovieRepository();
         tmpMovieRepository.deleteByFilePathPrefix(tmpSelected);
@@ -215,11 +226,11 @@ public class SettingsController implements Refreshable {
     // Add extension filters for executables based on the operating system
     String tmpOperatingSystem = System.getProperty("os.name").toLowerCase();
     if (tmpOperatingSystem.contains("win")) {
-      tmpChooser
-          .getExtensionFilters()
-          .add(new FileChooser.ExtensionFilter("Executable Files", "*.exe", "*.bat", "*.cmd"));
+      tmpChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
+          "Executable Files", "*.exe", "*.bat", "*.cmd"));
     } else {
-      tmpChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All Files", "*"));
+      tmpChooser.getExtensionFilters()
+          .add(new FileChooser.ExtensionFilter("All Files", "*"));
     }
 
     Window tmpWindow = txtPlayerPath.getScene().getWindow();
@@ -250,19 +261,15 @@ public class SettingsController implements Refreshable {
   }
 
   private void setupValidationListeners() {
-    txtPlayerPath
-        .textProperty()
-        .addListener(
-            (observable, oldValue, newValue) -> {
-              validatePlayerPath(newValue);
-            });
+    txtPlayerPath.textProperty()
+        .addListener((observable, oldValue, newValue) -> {
+          validatePlayerPath(newValue);
+        });
 
-    lstWorkspaces
-        .getItems()
-        .addListener(
-            (javafx.collections.ListChangeListener.Change<? extends String> tmpChange) -> {
-              // Unsaved changes detected
-            });
+    lstWorkspaces.getItems().addListener((
+        javafx.collections.ListChangeListener.Change<? extends String> tmpChange) -> {
+      // Unsaved changes detected
+    });
   }
 
   private void validateAll() {
@@ -271,25 +278,24 @@ public class SettingsController implements Refreshable {
 
   private void validatePlayerPath(String path) {
     if (path == null || path.isBlank()) {
-      // Empty path is considered valid (meaning no custom external player configured)
-      setValidationStatus(txtPlayerPath, lblPlayerStatus, lblPlayerError, true, null);
+      // Empty path is considered valid (meaning no custom external player
+      // configured)
+      setValidationStatus(txtPlayerPath, lblPlayerStatus, lblPlayerError, true,
+          null);
     } else {
       File tmpFile = new File(path);
       if (tmpFile.exists() && tmpFile.isFile()) {
-        setValidationStatus(txtPlayerPath, lblPlayerStatus, lblPlayerError, true, null);
+        setValidationStatus(txtPlayerPath, lblPlayerStatus, lblPlayerError,
+            true, null);
       } else {
-        setValidationStatus(
-            txtPlayerPath,
-            lblPlayerStatus,
-            lblPlayerError,
-            false,
-            "Executable file does not exist.");
+        setValidationStatus(txtPlayerPath, lblPlayerStatus, lblPlayerError,
+            false, "Executable file does not exist.");
       }
     }
   }
 
-  private void setValidationStatus(
-      TextField field, Label statusLabel, Label errorLabel, boolean isValid, String errorMessage) {
+  private void setValidationStatus(TextField field, Label statusLabel,
+      Label errorLabel, boolean isValid, String errorMessage) {
     if (isValid) {
       field.setStyle(""); // Clean default style
       statusLabel.setGraphic(null); // No check icon
@@ -321,7 +327,8 @@ public class SettingsController implements Refreshable {
   /**
    * Verifies if any inputs have errors that prevent settings from saving.
    *
-   * @return {@code true} if errors exist, {@code false} if settings are ready to be saved
+   * @return {@code true} if errors exist, {@code false} if settings are ready
+   *         to be saved
    */
   public boolean hasValidationErrors() {
     boolean tmpIsPlayerValid = true;
@@ -341,60 +348,63 @@ public class SettingsController implements Refreshable {
    */
   public boolean hasUnsavedChanges() {
     String tmpCurrentWorkspaces = String.join(";", lstWorkspaces.getItems());
-    String tmpCurrentPlayer =
-        txtPlayerPath.getText() != null ? txtPlayerPath.getText().trim().replace("\\", "/") : "";
+    String tmpCurrentPlayer = txtPlayerPath.getText() != null
+        ? txtPlayerPath.getText().trim().replace("\\", "/")
+        : "";
 
-    return !tmpCurrentWorkspaces.equals(loadedWorkspaces) || !tmpCurrentPlayer.equals(loadedPlayerPath);
+    return !tmpCurrentWorkspaces.equals(loadedWorkspaces)
+        || !tmpCurrentPlayer.equals(loadedPlayerPath);
   }
 
   private void setupWorkspaceCellFactory() {
     lstWorkspaces.setCellFactory(
-        tmpListView ->
-            new javafx.scene.control.ListCell<String>() {
-              @Override
-              protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                  setText(null);
-                  setGraphic(null);
-                } else {
-                  HBox tmpBox = new HBox(10);
-                  tmpBox.setAlignment(Pos.CENTER_LEFT);
+        tmpListView -> new javafx.scene.control.ListCell<String>() {
+          @Override
+          protected void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+              setText(null);
+              setGraphic(null);
+            } else {
+              HBox tmpBox = new HBox(10);
+              tmpBox.setAlignment(Pos.CENTER_LEFT);
 
-                  // Folder icon visual layout setup
-                  SVGPath tmpFolderIcon = new SVGPath();
-                  tmpFolderIcon.setContent(
-                      "M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z");
-                  tmpFolderIcon.setStyle("-fx-fill: #2178dd;");
-                  tmpFolderIcon.setScaleX(0.95);
-                  tmpFolderIcon.setScaleY(0.95);
+              // Folder icon visual layout setup
+              SVGPath tmpFolderIcon = new SVGPath();
+              tmpFolderIcon.setContent(
+                  "M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z");
+              tmpFolderIcon.setStyle("-fx-fill: #2178dd;");
+              tmpFolderIcon.setScaleX(0.95);
+              tmpFolderIcon.setScaleY(0.95);
 
-                  Label tmpLabelPath = new Label(item);
-                  tmpLabelPath.setMaxWidth(400);
-                  tmpLabelPath.setWrapText(false);
+              Label tmpLabelPath = new Label(item);
+              tmpLabelPath.setMaxWidth(400);
+              tmpLabelPath.setWrapText(false);
 
-                  Region tmpSpacer = new Region();
-                  HBox.setHgrow(tmpSpacer, Priority.ALWAYS);
+              Region tmpSpacer = new Region();
+              HBox.setHgrow(tmpSpacer, Priority.ALWAYS);
 
-                  // Validate directory folder existence and show a warning SVG if missing
-                  File tmpDir = new File(item);
-                  if (tmpDir.exists() && tmpDir.isDirectory()) {
-                    tmpLabelPath.setStyle("");
-                    tmpBox.getChildren().addAll(tmpFolderIcon, tmpLabelPath);
-                  } else {
-                    SVGPath tmpStatusIcon = new SVGPath();
-                    tmpStatusIcon.setContent(
-                        "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z");
-                    tmpStatusIcon.setStyle("-fx-fill: -color-danger-fg;");
-                    tmpStatusIcon.setScaleX(0.8);
-                    tmpStatusIcon.setScaleY(0.8);
-                    tmpLabelPath.setStyle("-fx-text-fill: -color-danger-fg;");
+              // Validate directory folder existence and show a warning SVG if
+              // missing
+              File tmpDir = new File(item);
+              if (tmpDir.exists() && tmpDir.isDirectory()) {
+                tmpLabelPath.setStyle("");
+                tmpBox.getChildren().addAll(tmpFolderIcon, tmpLabelPath);
+              } else {
+                SVGPath tmpStatusIcon = new SVGPath();
+                tmpStatusIcon.setContent(
+                    "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z");
+                tmpStatusIcon.setStyle("-fx-fill: -color-danger-fg;");
+                tmpStatusIcon.setScaleX(0.8);
+                tmpStatusIcon.setScaleY(0.8);
+                tmpLabelPath.setStyle("-fx-text-fill: -color-danger-fg;");
 
-                    tmpBox.getChildren().addAll(tmpFolderIcon, tmpLabelPath, tmpSpacer, tmpStatusIcon);
-                  }
-                  setGraphic(tmpBox);
-                }
+                tmpBox.getChildren().addAll(tmpFolderIcon, tmpLabelPath,
+                    tmpSpacer, tmpStatusIcon);
               }
-            });
+              setGraphic(tmpBox);
+            }
+          }
+        });
   }
 }

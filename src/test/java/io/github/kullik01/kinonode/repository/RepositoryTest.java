@@ -1,29 +1,39 @@
 /**
  * BSD 3-Clause License
  *
- * <p>Copyright (c) 2026, Hannah Kullik
+ * <p>
+ * Copyright (c) 2026, Hannah Kullik
  *
- * <p>Redistribution and use in source and binary forms, with or without modification, are permitted
- * provided that the following conditions are met:
+ * <p>
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * <p>1. Redistributions of source code must retain the above copyright notice, this list of
- * conditions and the following disclaimer.
+ * <p>
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
  *
- * <p>2. Redistributions in binary form must reproduce the above copyright notice, this list of
- * conditions and the following disclaimer in the documentation and/or other materials provided with
- * the distribution.
+ * <p>
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
  *
- * <p>3. Neither the name of the copyright holder nor the names of its contributors may be used to
- * endorse or promote products derived from this software without specific prior written permission.
+ * <p>
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ * may be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
- * <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
- * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * <p>
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 package io.github.kullik01.kinonode.repository;
 
@@ -51,7 +61,8 @@ public class RepositoryTest {
     Path tmpDatabasePath = tempDir.resolve("test_kinonode.db");
     databaseService = new DatabaseService(tmpDatabasePath);
     movieRepository = new MovieRepository(databaseService);
-    watchlistRepository = new WatchlistRepository(databaseService, movieRepository);
+    watchlistRepository =
+        new WatchlistRepository(databaseService, movieRepository);
     settingsRepository = new SettingsRepository(databaseService);
   }
 
@@ -86,7 +97,8 @@ public class RepositoryTest {
     assertTrue(movieRepository.existsByFilePath("C:/movies/inception.mp4"));
 
     // Find by File Path
-    Movie tmpFoundByPath = movieRepository.findByFilePath("C:/movies/inception.mp4");
+    Movie tmpFoundByPath =
+        movieRepository.findByFilePath("C:/movies/inception.mp4");
     assertNotNull(tmpFoundByPath);
     assertEquals(tmpInserted.getId(), tmpFoundByPath.getId());
 
@@ -112,29 +124,37 @@ public class RepositoryTest {
     assertEquals("Action Movies", tmpInserted.getName());
 
     // Insert movie
-    Movie tmpMovie1 = movieRepository.insert(new Movie("C:/movies/diehard.mp4", "Die Hard"));
-    Movie tmpMovie2 = movieRepository.insert(new Movie("C:/movies/matrix.mp4", "The Matrix"));
+    Movie tmpMovie1 =
+        movieRepository.insert(new Movie("C:/movies/diehard.mp4", "Die Hard"));
+    Movie tmpMovie2 =
+        movieRepository.insert(new Movie("C:/movies/matrix.mp4", "The Matrix"));
 
     // Add to watchlist
-    watchlistRepository.addMovieToWatchlist(tmpInserted.getId(), tmpMovie1.getId());
-    watchlistRepository.addMovieToWatchlist(tmpInserted.getId(), tmpMovie2.getId());
+    watchlistRepository.addMovieToWatchlist(tmpInserted.getId(),
+        tmpMovie1.getId());
+    watchlistRepository.addMovieToWatchlist(tmpInserted.getId(),
+        tmpMovie2.getId());
 
     // Check movies in watchlist
-    List<Movie> tmpMovies = watchlistRepository.findMoviesInWatchlist(tmpInserted.getId());
+    List<Movie> tmpMovies =
+        watchlistRepository.findMoviesInWatchlist(tmpInserted.getId());
     assertEquals(2, tmpMovies.size());
     assertEquals("Die Hard", tmpMovies.get(0).getTitle());
     assertEquals("The Matrix", tmpMovies.get(1).getTitle());
 
     // Reorder
-    watchlistRepository.updateMoviePositionsInWatchlist(
-        tmpInserted.getId(), List.of(tmpMovie2.getId(), tmpMovie1.getId()));
-    List<Movie> tmpReordered = watchlistRepository.findMoviesInWatchlist(tmpInserted.getId());
+    watchlistRepository.updateMoviePositionsInWatchlist(tmpInserted.getId(),
+        List.of(tmpMovie2.getId(), tmpMovie1.getId()));
+    List<Movie> tmpReordered =
+        watchlistRepository.findMoviesInWatchlist(tmpInserted.getId());
     assertEquals("The Matrix", tmpReordered.get(0).getTitle());
     assertEquals("Die Hard", tmpReordered.get(1).getTitle());
 
     // Remove movie
-    watchlistRepository.removeMovieFromWatchlist(tmpInserted.getId(), tmpMovie2.getId());
-    List<Movie> tmpAfterRemoval = watchlistRepository.findMoviesInWatchlist(tmpInserted.getId());
+    watchlistRepository.removeMovieFromWatchlist(tmpInserted.getId(),
+        tmpMovie2.getId());
+    List<Movie> tmpAfterRemoval =
+        watchlistRepository.findMoviesInWatchlist(tmpInserted.getId());
     assertEquals(1, tmpAfterRemoval.size());
     assertEquals("Die Hard", tmpAfterRemoval.get(0).getTitle());
 
@@ -146,9 +166,11 @@ public class RepositoryTest {
   @Test
   public void testSettingsCrud() {
     settingsRepository.set("workspace_folders", "C:/Movies;D:/Videos");
-    assertEquals("C:/Movies;D:/Videos", settingsRepository.get("workspace_folders", ""));
+    assertEquals("C:/Movies;D:/Videos",
+        settingsRepository.get("workspace_folders", ""));
 
     settingsRepository.set("workspace_folders", "C:/NewMovies");
-    assertEquals("C:/NewMovies", settingsRepository.get("workspace_folders", ""));
+    assertEquals("C:/NewMovies",
+        settingsRepository.get("workspace_folders", ""));
   }
 }

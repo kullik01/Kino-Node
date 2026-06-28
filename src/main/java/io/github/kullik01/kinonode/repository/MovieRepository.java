@@ -1,29 +1,39 @@
 /**
  * BSD 3-Clause License
  *
- * <p>Copyright (c) 2026, Hannah Kullik
+ * <p>
+ * Copyright (c) 2026, Hannah Kullik
  *
- * <p>Redistribution and use in source and binary forms, with or without modification, are permitted
- * provided that the following conditions are met:
+ * <p>
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * <p>1. Redistributions of source code must retain the above copyright notice, this list of
- * conditions and the following disclaimer.
+ * <p>
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
  *
- * <p>2. Redistributions in binary form must reproduce the above copyright notice, this list of
- * conditions and the following disclaimer in the documentation and/or other materials provided with
- * the distribution.
+ * <p>
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
  *
- * <p>3. Neither the name of the copyright holder nor the names of its contributors may be used to
- * endorse or promote products derived from this software without specific prior written permission.
+ * <p>
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ * may be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
- * <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
- * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * <p>
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 package io.github.kullik01.kinonode.repository;
 
@@ -37,12 +47,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Data access repository for managing {@link Movie} entities in the database. Handles database
- * operations such as retrieving, inserting, updating, and deleting movie records using standard
- * JDBC.
+ * Data access repository for managing {@link Movie} entities in the database.
+ * Handles database operations such as retrieving, inserting, updating, and
+ * deleting movie records using standard JDBC.
  */
 public class MovieRepository {
-  private static final Logger LOGGER = Logger.getLogger(MovieRepository.class.getName());
+  private static final Logger LOGGER =
+      Logger.getLogger(MovieRepository.class.getName());
   private final DatabaseService databaseService;
 
   /**
@@ -55,15 +66,20 @@ public class MovieRepository {
   }
 
   /**
-   * Retrieves all movies stored in the database, ordered by the date they were added descending.
+   * Retrieves all movies stored in the database, ordered by the date they were
+   * added descending.
    *
-   * @return a list of all {@link Movie} objects found, or an empty list if none exist or on error
+   * @return a list of all {@link Movie} objects found, or an empty list if none
+   *         exist or on error
    */
   public List<Movie> findAll() {
     List<Movie> tmpMovies = new ArrayList<>();
     String tmpSql = "SELECT * FROM movies ORDER BY date_added DESC";
-    // Query the database using a simple statement since no parameters are needed
-    try (Statement tmpStatement = databaseService.getConnection().createStatement();
+    // Query the database using a simple statement since no parameters are
+    // needed
+    try (
+        Statement tmpStatement =
+            databaseService.getConnection().createStatement();
         ResultSet tmpResultSet = tmpStatement.executeQuery(tmpSql)) {
       // Loop through each row of the result set and map it to a Movie object
       while (tmpResultSet.next()) {
@@ -79,12 +95,15 @@ public class MovieRepository {
    * Finds a single movie by its database identifier.
    *
    * @param id the database ID of the movie to find
-   * @return the {@link Movie} with the specified ID, or null if not found or on error
+   * @return the {@link Movie} with the specified ID, or null if not found or on
+   *         error
    */
   public Movie findById(int id) {
     String tmpSql = "SELECT * FROM movies WHERE id = ?";
-    // Use a prepared statement to prevent SQL injection and specify the ID parameter
-    try (PreparedStatement tmpPreparedStatement = databaseService.getConnection().prepareStatement(tmpSql)) {
+    // Use a prepared statement to prevent SQL injection and specify the ID
+    // parameter
+    try (PreparedStatement tmpPreparedStatement =
+        databaseService.getConnection().prepareStatement(tmpSql)) {
       tmpPreparedStatement.setInt(1, id);
       try (ResultSet tmpResultSet = tmpPreparedStatement.executeQuery()) {
         // If a matching record is found, map it to a Movie object and return it
@@ -93,7 +112,8 @@ public class MovieRepository {
         }
       }
     } catch (SQLException tmpException) {
-      LOGGER.log(Level.SEVERE, "Failed to find movie by ID: " + id, tmpException);
+      LOGGER.log(Level.SEVERE, "Failed to find movie by ID: " + id,
+          tmpException);
     }
     return null;
   }
@@ -102,12 +122,14 @@ public class MovieRepository {
    * Finds a movie by its file system path.
    *
    * @param filePath the file system path of the movie to search for
-   * @return the {@link Movie} with the specified file path, or null if not found or on error
+   * @return the {@link Movie} with the specified file path, or null if not
+   *         found or on error
    */
   public Movie findByFilePath(String filePath) {
     String tmpSql = "SELECT * FROM movies WHERE file_path = ?";
     // Locate movie based on the unique filePath parameter
-    try (PreparedStatement tmpPreparedStatement = databaseService.getConnection().prepareStatement(tmpSql)) {
+    try (PreparedStatement tmpPreparedStatement =
+        databaseService.getConnection().prepareStatement(tmpSql)) {
       tmpPreparedStatement.setString(1, filePath);
       try (ResultSet tmpResultSet = tmpPreparedStatement.executeQuery()) {
         // Return the mapped Movie object if found
@@ -116,13 +138,15 @@ public class MovieRepository {
         }
       }
     } catch (SQLException tmpException) {
-      LOGGER.log(Level.SEVERE, "Failed to find movie by file path: " + filePath, tmpException);
+      LOGGER.log(Level.SEVERE, "Failed to find movie by file path: " + filePath,
+          tmpException);
     }
     return null;
   }
 
   /**
-   * Checks if a movie with the specified file system path exists in the database.
+   * Checks if a movie with the specified file system path exists in the
+   * database.
    *
    * @param filePath the file system path to check
    * @return true if a movie with the given file path exists; false otherwise
@@ -130,24 +154,28 @@ public class MovieRepository {
   public boolean existsByFilePath(String filePath) {
     String tmpSql = "SELECT 1 FROM movies WHERE file_path = ?";
     // Execute a lightweight query to check for existence of the file path
-    try (PreparedStatement tmpPreparedStatement = databaseService.getConnection().prepareStatement(tmpSql)) {
+    try (PreparedStatement tmpPreparedStatement =
+        databaseService.getConnection().prepareStatement(tmpSql)) {
       tmpPreparedStatement.setString(1, filePath);
       try (ResultSet tmpResultSet = tmpPreparedStatement.executeQuery()) {
         // rs.next() will return true if at least one row matches
         return tmpResultSet.next();
       }
     } catch (SQLException tmpException) {
-      LOGGER.log(Level.SEVERE, "Failed to check movie existence by file path: " + filePath, tmpException);
+      LOGGER.log(Level.SEVERE,
+          "Failed to check movie existence by file path: " + filePath,
+          tmpException);
     }
     return false;
   }
 
   /**
-   * Inserts a new movie record into the database and updates the entity's ID field with the
-   * database-generated key.
+   * Inserts a new movie record into the database and updates the entity's ID
+   * field with the database-generated key.
    *
    * @param movie the {@link Movie} entity to insert
-   * @return the inserted {@link Movie} entity, potentially containing the generated ID
+   * @return the inserted {@link Movie} entity, potentially containing the
+   *         generated ID
    */
   public Movie insert(Movie movie) {
     String tmpSql =
@@ -155,22 +183,28 @@ public class MovieRepository {
             INSERT INTO movies (file_path, title, year, genre, description, rating, cover_image_path, trailer_url, director, writer, producer, cinematographer, composer, date_added)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """;
-    // Prepare statement requesting generated keys to retrieve the auto-incremented ID
-    try (PreparedStatement tmpPreparedStatement =
-        databaseService.getConnection().prepareStatement(tmpSql, Statement.RETURN_GENERATED_KEYS)) {
+    // Prepare statement requesting generated keys to retrieve the
+    // auto-incremented ID
+    try (
+        PreparedStatement tmpPreparedStatement = databaseService.getConnection()
+            .prepareStatement(tmpSql, Statement.RETURN_GENERATED_KEYS)) {
       tmpPreparedStatement.setString(1, movie.getFilePath());
       tmpPreparedStatement.setString(2, movie.getTitle());
 
       // Year can be null, so check and handle using Types.INTEGER if null
-      if (movie.getYear() != null) tmpPreparedStatement.setInt(3, movie.getYear());
-      else tmpPreparedStatement.setNull(3, Types.INTEGER);
+      if (movie.getYear() != null)
+        tmpPreparedStatement.setInt(3, movie.getYear());
+      else
+        tmpPreparedStatement.setNull(3, Types.INTEGER);
 
       tmpPreparedStatement.setString(4, movie.getGenre());
       tmpPreparedStatement.setString(5, movie.getDescription());
 
       // Rating can be null, so check and handle using Types.INTEGER if null
-      if (movie.getRating() != null) tmpPreparedStatement.setInt(6, movie.getRating());
-      else tmpPreparedStatement.setNull(6, Types.INTEGER);
+      if (movie.getRating() != null)
+        tmpPreparedStatement.setInt(6, movie.getRating());
+      else
+        tmpPreparedStatement.setNull(6, Types.INTEGER);
 
       tmpPreparedStatement.setString(7, movie.getCoverImagePath());
       tmpPreparedStatement.setString(8, movie.getTrailerUrl());
@@ -185,14 +219,16 @@ public class MovieRepository {
       int tmpAffectedRows = tmpPreparedStatement.executeUpdate();
       // If the row was successfully inserted, fetch the auto-generated ID
       if (tmpAffectedRows > 0) {
-        try (ResultSet tmpGeneratedKeys = tmpPreparedStatement.getGeneratedKeys()) {
+        try (ResultSet tmpGeneratedKeys =
+            tmpPreparedStatement.getGeneratedKeys()) {
           if (tmpGeneratedKeys.next()) {
             movie.setId(tmpGeneratedKeys.getInt(1));
           }
         }
       }
     } catch (SQLException tmpException) {
-      LOGGER.log(Level.SEVERE, "Failed to insert movie: " + movie, tmpException);
+      LOGGER.log(Level.SEVERE, "Failed to insert movie: " + movie,
+          tmpException);
     }
     return movie;
   }
@@ -208,20 +244,25 @@ public class MovieRepository {
             UPDATE movies SET file_path = ?, title = ?, year = ?, genre = ?, description = ?, rating = ?, cover_image_path = ?, trailer_url = ?, director = ?, writer = ?, producer = ?, cinematographer = ?, composer = ?, date_added = ?
             WHERE id = ?;
             """;
-    try (PreparedStatement tmpPreparedStatement = databaseService.getConnection().prepareStatement(tmpSql)) {
+    try (PreparedStatement tmpPreparedStatement =
+        databaseService.getConnection().prepareStatement(tmpSql)) {
       tmpPreparedStatement.setString(1, movie.getFilePath());
       tmpPreparedStatement.setString(2, movie.getTitle());
 
       // Year can be null, check and handle using Types.INTEGER if null
-      if (movie.getYear() != null) tmpPreparedStatement.setInt(3, movie.getYear());
-      else tmpPreparedStatement.setNull(3, Types.INTEGER);
+      if (movie.getYear() != null)
+        tmpPreparedStatement.setInt(3, movie.getYear());
+      else
+        tmpPreparedStatement.setNull(3, Types.INTEGER);
 
       tmpPreparedStatement.setString(4, movie.getGenre());
       tmpPreparedStatement.setString(5, movie.getDescription());
 
       // Rating can be null, check and handle using Types.INTEGER if null
-      if (movie.getRating() != null) tmpPreparedStatement.setInt(6, movie.getRating());
-      else tmpPreparedStatement.setNull(6, Types.INTEGER);
+      if (movie.getRating() != null)
+        tmpPreparedStatement.setInt(6, movie.getRating());
+      else
+        tmpPreparedStatement.setNull(6, Types.INTEGER);
 
       tmpPreparedStatement.setString(7, movie.getCoverImagePath());
       tmpPreparedStatement.setString(8, movie.getTrailerUrl());
@@ -236,7 +277,8 @@ public class MovieRepository {
 
       tmpPreparedStatement.executeUpdate();
     } catch (SQLException tmpException) {
-      LOGGER.log(Level.SEVERE, "Failed to update movie: " + movie, tmpException);
+      LOGGER.log(Level.SEVERE, "Failed to update movie: " + movie,
+          tmpException);
     }
   }
 
@@ -247,34 +289,39 @@ public class MovieRepository {
    */
   public void delete(int id) {
     String tmpSql = "DELETE FROM movies WHERE id = ?";
-    try (PreparedStatement tmpPreparedStatement = databaseService.getConnection().prepareStatement(tmpSql)) {
+    try (PreparedStatement tmpPreparedStatement =
+        databaseService.getConnection().prepareStatement(tmpSql)) {
       tmpPreparedStatement.setInt(1, id);
       tmpPreparedStatement.executeUpdate();
     } catch (SQLException tmpException) {
-      LOGGER.log(Level.SEVERE, "Failed to delete movie by id: " + id, tmpException);
+      LOGGER.log(Level.SEVERE, "Failed to delete movie by id: " + id,
+          tmpException);
     }
   }
 
   /**
-   * Deletes all movie records whose file paths start with a specified prefix. This is useful for
-   * clearing movies belonging to a deleted directory.
+   * Deletes all movie records whose file paths start with a specified prefix.
+   * This is useful for clearing movies belonging to a deleted directory.
    *
    * @param prefix the file path prefix to match
    */
   public void deleteByFilePathPrefix(String prefix) {
     String tmpSql = "DELETE FROM movies WHERE file_path LIKE ?";
-    try (PreparedStatement tmpPreparedStatement = databaseService.getConnection().prepareStatement(tmpSql)) {
+    try (PreparedStatement tmpPreparedStatement =
+        databaseService.getConnection().prepareStatement(tmpSql)) {
       // Append wildcard % to check for any files starting with the prefix
       tmpPreparedStatement.setString(1, prefix + "%");
       tmpPreparedStatement.executeUpdate();
     } catch (SQLException tmpException) {
-      LOGGER.log(Level.SEVERE, "Failed to delete movies by file path prefix: " + prefix, tmpException);
+      LOGGER.log(Level.SEVERE,
+          "Failed to delete movies by file path prefix: " + prefix,
+          tmpException);
     }
   }
 
   /**
-   * Maps a single row from a database ResultSet to a Movie object. Handles retrieving nullable
-   * integer values (year, rating) by checking wasNull().
+   * Maps a single row from a database ResultSet to a Movie object. Handles
+   * retrieving nullable integer values (year, rating) by checking wasNull().
    *
    * @param rs the ResultSet containing the database row
    * @return a mapped {@link Movie} object
@@ -286,14 +333,16 @@ public class MovieRepository {
     tmpMovie.setFilePath(resultSet.getString("file_path"));
     tmpMovie.setTitle(resultSet.getString("title"));
 
-    // Year is optional and can be null; rs.getInt returning 0 requires rs.wasNull check
+    // Year is optional and can be null; rs.getInt returning 0 requires
+    // rs.wasNull check
     int tmpYear = resultSet.getInt("year");
     tmpMovie.setYear(resultSet.wasNull() ? null : tmpYear);
 
     tmpMovie.setGenre(resultSet.getString("genre"));
     tmpMovie.setDescription(resultSet.getString("description"));
 
-    // Rating is optional and can be null; rs.getInt returning 0 requires rs.wasNull check
+    // Rating is optional and can be null; rs.getInt returning 0 requires
+    // rs.wasNull check
     int tmpRating = resultSet.getInt("rating");
     tmpMovie.setRating(resultSet.wasNull() ? null : tmpRating);
 
@@ -304,8 +353,10 @@ public class MovieRepository {
     tmpMovie.setProducer(resultSet.getString("producer"));
     tmpMovie.setCinematographer(resultSet.getString("cinematographer"));
     tmpMovie.setComposer(resultSet.getString("composer"));
-    // Re-construct the Instant object using the epoch second retrieved from the database
-    tmpMovie.setDateAdded(Instant.ofEpochSecond(resultSet.getLong("date_added")));
+    // Re-construct the Instant object using the epoch second retrieved from the
+    // database
+    tmpMovie
+        .setDateAdded(Instant.ofEpochSecond(resultSet.getLong("date_added")));
     return tmpMovie;
   }
 }

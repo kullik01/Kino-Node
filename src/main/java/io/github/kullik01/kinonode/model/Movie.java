@@ -1,38 +1,49 @@
 /**
  * BSD 3-Clause License
  *
- * <p>Copyright (c) 2026, Hannah Kullik
+ * <p>
+ * Copyright (c) 2026, Hannah Kullik
  *
- * <p>Redistribution and use in source and binary forms, with or without modification, are permitted
- * provided that the following conditions are met:
+ * <p>
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * <p>1. Redistributions of source code must retain the above copyright notice, this list of
- * conditions and the following disclaimer.
+ * <p>
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
  *
- * <p>2. Redistributions in binary form must reproduce the above copyright notice, this list of
- * conditions and the following disclaimer in the documentation and/or other materials provided with
- * the distribution.
+ * <p>
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
  *
- * <p>3. Neither the name of the copyright holder nor the names of its contributors may be used to
- * endorse or promote products derived from this software without specific prior written permission.
+ * <p>
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ * may be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
- * <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
- * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * <p>
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 package io.github.kullik01.kinonode.model;
 
 import java.time.Instant;
 
 /**
- * Represents a Movie entity in the Kino-Node application. This class stores metadata about a movie,
- * including its file path, title, production details (director, writer, producer, etc.), release
- * year, genre, description, rating, and resources like cover image path and trailer URL.
+ * Represents a Movie entity in the Kino-Node application. This class stores
+ * metadata about a movie, including its file path, title, production details
+ * (director, writer, producer, etc.), release year, genre, description, rating,
+ * and resources like cover image path and trailer URL.
  */
 public class Movie {
   private Integer id;
@@ -58,8 +69,8 @@ public class Movie {
   }
 
   /**
-   * Constructs a new Movie with a specified file path and title, and sets the date added to the
-   * current timestamp.
+   * Constructs a new Movie with a specified file path and title, and sets the
+   * date added to the current timestamp.
    *
    * @param filePath the file system path to the movie file
    * @param title the title of the movie
@@ -342,21 +353,14 @@ public class Movie {
   }
 
   /**
-   * Returns a string representation of the Movie object, including its ID, title, and file path.
+   * Returns a string representation of the Movie object, including its ID,
+   * title, and file path.
    *
    * @return a string representing this Movie
    */
   @Override
   public String toString() {
-    return "Movie{"
-        + "id="
-        + id
-        + ", title='"
-        + title
-        + '\''
-        + ", filePath='"
-        + filePath
-        + '\''
-        + '}';
+    return "Movie{" + "id=" + id + ", title='" + title + '\'' + ", filePath='"
+        + filePath + '\'' + '}';
   }
 }

@@ -1,29 +1,39 @@
 /**
  * BSD 3-Clause License
  *
- * <p>Copyright (c) 2026, Hannah Kullik
+ * <p>
+ * Copyright (c) 2026, Hannah Kullik
  *
- * <p>Redistribution and use in source and binary forms, with or without modification, are permitted
- * provided that the following conditions are met:
+ * <p>
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * <p>1. Redistributions of source code must retain the above copyright notice, this list of
- * conditions and the following disclaimer.
+ * <p>
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
  *
- * <p>2. Redistributions in binary form must reproduce the above copyright notice, this list of
- * conditions and the following disclaimer in the documentation and/or other materials provided with
- * the distribution.
+ * <p>
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
  *
- * <p>3. Neither the name of the copyright holder nor the names of its contributors may be used to
- * endorse or promote products derived from this software without specific prior written permission.
+ * <p>
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ * may be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
- * <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
- * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * <p>
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 package io.github.kullik01.kinonode.util;
 
@@ -45,9 +55,10 @@ import javafx.stage.StageStyle;
 import javafx.stage.Window;
 
 /**
- * A utility class to display custom, undecorated modal alerts in the application. The alert dialog
- * utilizes the application's CSS theme for styling and implements custom title bar drag logic to
- * allow moving the undecorated window.
+ * A utility class to display custom, undecorated modal alerts in the
+ * application. The alert dialog utilizes the application's CSS theme for
+ * styling and implements custom title bar drag logic to allow moving the
+ * undecorated window.
  */
 public class CustomAlert {
 
@@ -59,7 +70,8 @@ public class CustomAlert {
    * @param header the header text for the dialog content section
    * @param content the detailed message content for the dialog
    */
-  public static void showInformation(Window owner, String title, String header, String content) {
+  public static void showInformation(Window owner, String title, String header,
+      String content) {
     Stage tmpStage = new Stage();
 
     // Inherit the owner stage characteristics if available
@@ -76,10 +88,9 @@ public class CustomAlert {
     tmpRoot.setStyle(
         "-fx-background-color: -color-bg-default; -fx-border-color: -color-border-default; -fx-border-width: 1px; -fx-border-radius: 8px; -fx-background-radius: 8px;");
     tmpRoot.getStylesheets()
-        .add(
-            CustomAlert.class
-                .getResource("/io/github/kullik01/kinonode/css/theme.css")
-                .toExternalForm());
+        .add(CustomAlert.class
+            .getResource("/io/github/kullik01/kinonode/css/theme.css")
+            .toExternalForm());
 
     // Build the Title Bar
     HBox tmpTitleBar = new HBox();
@@ -89,11 +100,9 @@ public class CustomAlert {
     Label tmpTitleLabel = new Label(title);
     tmpTitleLabel.getStyleClass().add("title-bar-label");
 
-    javafx.scene.image.ImageView tmpLogoView =
-        new javafx.scene.image.ImageView(
-            new javafx.scene.image.Image(
-                CustomAlert.class.getResourceAsStream(
-                    "/io/github/kullik01/kinonode/images/logo.png")));
+    javafx.scene.image.ImageView tmpLogoView = new javafx.scene.image.ImageView(
+        new javafx.scene.image.Image(CustomAlert.class.getResourceAsStream(
+            "/io/github/kullik01/kinonode/images/logo.png")));
     tmpLogoView.setFitHeight(16);
     tmpLogoView.setFitWidth(16);
 
@@ -128,7 +137,8 @@ public class CustomAlert {
     HBox tmpButtonBox = new HBox(tmpOkButton);
     tmpButtonBox.setAlignment(Pos.CENTER_RIGHT);
 
-    tmpContentBox.getChildren().addAll(tmpHeaderLabel, tmpTextLabel, tmpButtonBox);
+    tmpContentBox.getChildren().addAll(tmpHeaderLabel, tmpTextLabel,
+        tmpButtonBox);
 
     tmpRoot.setTop(tmpTitleBar);
     tmpRoot.setCenter(tmpContentBox);
@@ -136,16 +146,14 @@ public class CustomAlert {
     // Implement custom window dragging logic for undecorated stages
     final double[] tmpXOffset = {0};
     final double[] tmpYOffset = {0};
-    tmpTitleBar.setOnMousePressed(
-        event -> {
-          tmpXOffset[0] = tmpStage.getX() - event.getScreenX();
-          tmpYOffset[0] = tmpStage.getY() - event.getScreenY();
-        });
-    tmpTitleBar.setOnMouseDragged(
-        event -> {
-          tmpStage.setX(event.getScreenX() + tmpXOffset[0]);
-          tmpStage.setY(event.getScreenY() + tmpYOffset[0]);
-        });
+    tmpTitleBar.setOnMousePressed(event -> {
+      tmpXOffset[0] = tmpStage.getX() - event.getScreenX();
+      tmpYOffset[0] = tmpStage.getY() - event.getScreenY();
+    });
+    tmpTitleBar.setOnMouseDragged(event -> {
+      tmpStage.setX(event.getScreenX() + tmpXOffset[0]);
+      tmpStage.setY(event.getScreenY() + tmpYOffset[0]);
+    });
 
     StackPane tmpWrapper = new StackPane(tmpRoot);
     tmpWrapper.setStyle("-fx-background-color: transparent; -fx-padding: 0px;");

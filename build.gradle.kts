@@ -187,7 +187,7 @@ tasks.register<Zip>("linuxAppImageZip") {
 configure<com.diffplug.gradle.spotless.SpotlessExtension> {
     java {
         target("src/main/java/**/*.java", "src/test/java/**/*.java")
-        googleJavaFormat()
+        eclipse().configFile(rootProject.file("eclipse-java-google-style.xml"))
     }
 }
 

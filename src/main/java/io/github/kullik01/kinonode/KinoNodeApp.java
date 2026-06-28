@@ -1,29 +1,39 @@
 /**
  * BSD 3-Clause License
  *
- * <p>Copyright (c) 2026, Hannah Kullik
+ * <p>
+ * Copyright (c) 2026, Hannah Kullik
  *
- * <p>Redistribution and use in source and binary forms, with or without modification, are permitted
- * provided that the following conditions are met:
+ * <p>
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * <p>1. Redistributions of source code must retain the above copyright notice, this list of
- * conditions and the following disclaimer.
+ * <p>
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
  *
- * <p>2. Redistributions in binary form must reproduce the above copyright notice, this list of
- * conditions and the following disclaimer in the documentation and/or other materials provided with
- * the distribution.
+ * <p>
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
  *
- * <p>3. Neither the name of the copyright holder nor the names of its contributors may be used to
- * endorse or promote products derived from this software without specific prior written permission.
+ * <p>
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ * may be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
- * <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
- * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * <p>
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 package io.github.kullik01.kinonode;
 
@@ -39,39 +49,47 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
- * Main application class for KinoNode. Bootstraps services and sets up window presentation. This
- * class handles database service initialization, configuration-based theme loading, FXML layout
- * loading, window setup, and cleanup on exit.
+ * Main application class for KinoNode. Bootstraps services and sets up window
+ * presentation. This class handles database service initialization,
+ * configuration-based theme loading, FXML layout loading, window setup, and
+ * cleanup on exit.
  */
 public class KinoNodeApp extends Application {
 
   /**
-   * Starts the primary stage of the JavaFX application. This method initializes the application
-   * context, reads the user's preferred theme, configures the global stylesheet, loads the main
-   * view layout, and displays the main window.
+   * Starts the primary stage of the JavaFX application. This method initializes
+   * the application context, reads the user's preferred theme, configures the
+   * global stylesheet, loads the main view layout, and displays the main
+   * window.
    *
-   * @param primaryStage the primary Stage for this application, onto which the application scene
-   *     can be set
-   * @throws Exception if FXML loading fails or context initialization encounters an error
+   * @param primaryStage the primary Stage for this application, onto which the
+   *        application scene can be set
+   * @throws Exception if FXML loading fails or context initialization
+   *         encounters an error
    */
   @Override
   public void start(Stage primaryStage) throws Exception {
-    // Initialize Database and Repositories via the application context singleton
+    // Initialize Database and Repositories via the application context
+    // singleton
     AppContext.getInstance();
 
     // Retrieve user's configured theme and apply the corresponding stylesheet
-    var tmpSettingsRepository = AppContext.getInstance().getSettingsRepository();
+    var tmpSettingsRepository =
+        AppContext.getInstance().getSettingsRepository();
     String tmpTheme = tmpSettingsRepository.get("theme_mode", "light");
     if ("dark".equals(tmpTheme)) {
       // Use AtlantaFX PrimerDark theme for dark mode
-      Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
+      Application
+          .setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
     } else {
       // Default to AtlantaFX PrimerLight theme for light mode
-      Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+      Application
+          .setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
     }
 
     // Locate the main view FXML resource
-    URL tmpFxmlLocation = getClass().getResource("/io/github/kullik01/kinonode/fxml/MainView.fxml");
+    URL tmpFxmlLocation = getClass()
+        .getResource("/io/github/kullik01/kinonode/fxml/MainView.fxml");
     if (tmpFxmlLocation == null) {
       throw new IOException("FXML file not found: MainView.fxml");
     }
@@ -81,26 +99,25 @@ public class KinoNodeApp extends Application {
     Parent tmpRoot = tmpLoader.load();
 
     // Set the application logo and title
-    primaryStage
-        .getIcons()
-        .add(
-            new javafx.scene.image.Image(
-                getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
+    primaryStage.getIcons().add(new javafx.scene.image.Image(getClass()
+        .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
     primaryStage.setTitle("KinoNode - Personal Movie Library");
 
     // Ensure the application window maintains a functional minimum dimension
     primaryStage.setMinWidth(800);
     primaryStage.setMinHeight(600);
 
-    // Initialize the main scene, associate it with the stage, and display the window
+    // Initialize the main scene, associate it with the stage, and display the
+    // window
     Scene tmpScene = new Scene(tmpRoot, 1024, 768);
     primaryStage.setScene(tmpScene);
     primaryStage.show();
   }
 
   /**
-   * Performs clean shutdown operations when the application stops. This ensures the database
-   * connections and other application context resources are closed properly on app exit.
+   * Performs clean shutdown operations when the application stops. This ensures
+   * the database connections and other application context resources are closed
+   * properly on app exit.
    *
    * @throws Exception if an error occurs during shutdown
    */
@@ -112,7 +129,8 @@ public class KinoNodeApp extends Application {
   }
 
   /**
-   * Main entry point for the application. Launches the JavaFX application framework.
+   * Main entry point for the application. Launches the JavaFX application
+   * framework.
    *
    * @param arguments the command-line arguments
    */
