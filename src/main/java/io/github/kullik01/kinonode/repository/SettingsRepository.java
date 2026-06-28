@@ -1,32 +1,29 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright (c) 2026, Hannah Kullik
+ * <p>Copyright (c) 2026, Hannah Kullik
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * <p>Redistribution and use in source and binary forms, with or without modification, are permitted
+ * provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
+ * <p>1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
+ * <p>2. Redistributions in binary form must reproduce the above copyright notice, this list of
+ * conditions and the following disclaimer in the documentation and/or other materials provided with
+ * the distribution.
  *
- * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived from
- *    this software without specific prior written permission.
+ * <p>3. Neither the name of the copyright holder nor the names of its contributors may be used to
+ * endorse or promote products derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+ * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package io.github.kullik01.kinonode.repository;
 
@@ -37,41 +34,69 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Data access repository for managing system/application settings in the database. Provides
+ * key-value pair persistence mechanisms with upsert support.
+ */
 public class SettingsRepository {
-    private static final Logger LOGGER = Logger.getLogger(SettingsRepository.class.getName());
-    private final DatabaseService databaseService;
+  private static final Logger LOGGER = Logger.getLogger(SettingsRepository.class.getName());
+  private final DatabaseService databaseService;
 
-    public SettingsRepository(DatabaseService databaseService) {
-        this.databaseService = databaseService;
-    }
+  /**
+   * Constructs a SettingsRepository with the specified database service.
+   *
+   * @param databaseService the service providing the active database connection
+   */
+  public SettingsRepository(DatabaseService databaseService) {
+    this.databaseService = databaseService;
+  }
 
-    public String get(String key, String defaultValue) {
-        String query = "SELECT value FROM settings WHERE key = ?";
-        try (PreparedStatement stmt = databaseService.getConnection().prepareStatement(query)) {
-            stmt.setString(1, key);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    String val = rs.getString("value");
-                    return val != null ? val : defaultValue;
-                }
-            }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to load setting: " + key, e);
+  /**
+   * Retrieves the configuration value associated with the specified key. If the key does not exist
+   * or its value is null, the default value is returned.
+   *
+   * @param key the unique configuration key
+   * @param defaultValue the default value to return if the key is not found or has a null value
+   * @return the configuration value, or defaultValue if key is missing or database error occurs
+   */
+  public String get(String key, String defaultValue) {
+    String query = "SELECT value FROM settings WHERE key = ?";
+    try (PreparedStatement stmt = databaseService.getConnection().prepareStatement(query)) {
+      stmt.setString(1, key);
+      try (ResultSet rs = stmt.executeQuery()) {
+        // Check if a record exists for the given key
+        if (rs.next()) {
+          String val = rs.getString("value");
+          // Fallback to default if the retrieved column value is null
+          return val != null ? val : defaultValue;
         }
-        return defaultValue;
+      }
+    } catch (SQLException e) {
+      LOGGER.log(Level.SEVERE, "Failed to load setting: " + key, e);
     }
+    return defaultValue;
+  }
 
-    public void set(String key, String value) {
-        String upsert = """
+  /**
+   * Saves or updates a configuration setting key-value pair. Uses SQL upsert (ON CONFLICT)
+   * semantics to handle existing keys.
+   *
+   * @param key the configuration key to set
+   * @param value the configuration value to store
+   */
+  public void set(String key, String value) {
+    // SQL query that attempts an INSERT and updates the value on key conflict
+    String upsert =
+        """
             INSERT INTO settings (key, value) VALUES (?, ?)
             ON CONFLICT(key) DO UPDATE SET value = excluded.value;
             """;
-        try (PreparedStatement stmt = databaseService.getConnection().prepareStatement(upsert)) {
-            stmt.setString(1, key);
-            stmt.setString(2, value);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to save setting: " + key, e);
-        }
+    try (PreparedStatement stmt = databaseService.getConnection().prepareStatement(upsert)) {
+      stmt.setString(1, key);
+      stmt.setString(2, value);
+      stmt.executeUpdate();
+    } catch (SQLException e) {
+      LOGGER.log(Level.SEVERE, "Failed to save setting: " + key, e);
     }
+  }
 }

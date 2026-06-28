@@ -1,344 +1,400 @@
 /**
  * BSD 3-Clause License
  *
- * Copyright (c) 2026, Hannah Kullik
+ * <p>Copyright (c) 2026, Hannah Kullik
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * <p>Redistribution and use in source and binary forms, with or without modification, are permitted
+ * provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
+ * <p>1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
+ * <p>2. Redistributions in binary form must reproduce the above copyright notice, this list of
+ * conditions and the following disclaimer in the documentation and/or other materials provided with
+ * the distribution.
  *
- * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived from
- *    this software without specific prior written permission.
+ * <p>3. Neither the name of the copyright holder nor the names of its contributors may be used to
+ * endorse or promote products derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+ * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package io.github.kullik01.kinonode.controller;
 
 import io.github.kullik01.kinonode.repository.SettingsRepository;
 import io.github.kullik01.kinonode.service.AppContext;
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Alert;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.SVGPath;
-import javafx.scene.paint.Color;
-import javafx.geometry.Pos;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
+/**
+ * Controller for the application Settings view. Handles configuration of workspace directories and
+ * external media player paths. Implements {@link Refreshable} to support reloading configurations
+ * dynamically. Features live validations, custom ListView graphic cells, and automated tab exit
+ * saving.
+ */
 public class SettingsController implements Refreshable {
 
-    @FXML private ListView<String> lstWorkspaces;
-    @FXML private Button btnAddFolder;
-    @FXML private Button btnRemoveFolder;
-    @FXML private TextField txtPlayerPath;
-    @FXML private Label lblStatus;
-    @FXML private Label lblPlayerStatus;
-    @FXML private Label lblPlayerError;
+  @FXML private ListView<String> lstWorkspaces;
+  @FXML private Button btnAddFolder;
+  @FXML private Button btnRemoveFolder;
+  @FXML private TextField txtPlayerPath;
+  @FXML private Label lblStatus;
+  @FXML private Label lblPlayerStatus;
+  @FXML private Label lblPlayerError;
 
-    private SettingsRepository settingsRepository;
-    private String loadedWorkspaces = "";
-    private String loadedPlayerPath = "";
+  private SettingsRepository settingsRepository;
+  private String loadedWorkspaces = "";
+  private String loadedPlayerPath = "";
 
-    private javafx.animation.PauseTransition statusTimer;
+  private javafx.animation.PauseTransition statusTimer;
 
-    private void showStatus(String message) {
-        lblStatus.setText(message);
-        if (statusTimer != null) {
-            statusTimer.stop();
-        }
-        statusTimer = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(5));
-        statusTimer.setOnFinished(e -> lblStatus.setText(""));
-        statusTimer.play();
+  private void showStatus(String message) {
+    lblStatus.setText(message);
+    if (statusTimer != null) {
+      statusTimer.stop();
     }
+    statusTimer = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(5));
+    statusTimer.setOnFinished(e -> lblStatus.setText(""));
+    statusTimer.play();
+  }
 
-    @FXML
-    public void initialize() {
-        settingsRepository = AppContext.getInstance().getSettingsRepository();
-        
-        btnRemoveFolder.setDisable(true);
-        lstWorkspaces.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            btnRemoveFolder.setDisable(newVal == null);
-        });
+  /**
+   * Initializes the settings view, setting up control actions, listeners, and validators. Registers
+   * scene-detach hooks for automated saves.
+   */
+  @FXML
+  public void initialize() {
+    settingsRepository = AppContext.getInstance().getSettingsRepository();
 
-        setupValidationListeners();
-        setupWorkspaceCellFactory();
-        loadSettings();
-        
-        // Auto-save when changing tabs (which removes lstWorkspaces from the scene)
-        lstWorkspaces.sceneProperty().addListener((obs, oldVal, newVal) -> {
-            if (oldVal != null && newVal == null) {
+    btnRemoveFolder.setDisable(true);
+    lstWorkspaces
+        .getSelectionModel()
+        .selectedItemProperty()
+        .addListener(
+            (obs, oldVal, newVal) -> {
+              btnRemoveFolder.setDisable(newVal == null);
+            });
+
+    setupValidationListeners();
+    setupWorkspaceCellFactory();
+    loadSettings();
+
+    // Auto-save when changing tabs (which removes lstWorkspaces from the scene)
+    lstWorkspaces
+        .sceneProperty()
+        .addListener(
+            (obs, oldVal, newVal) -> {
+              if (oldVal != null && newVal == null) {
                 if (hasUnsavedChanges() && !hasValidationErrors()) {
-                    saveSettings();
+                  saveSettings();
                 }
-            }
-        });
+              }
+            });
+  }
+
+  /** Reloads settings details and clears status warnings. */
+  @Override
+  public void refresh() {
+    loadSettings();
+    lblStatus.setText("");
+  }
+
+  private void loadSettings() {
+    // Load workspaces
+    lstWorkspaces.getItems().clear();
+    String workspaces = settingsRepository.get("workspace_folders", "");
+    if (!workspaces.isBlank()) {
+      List<String> folderList =
+          Arrays.stream(workspaces.split(";"))
+              .map(String::trim)
+              .filter(s -> !s.isEmpty())
+              .collect(Collectors.toList());
+      lstWorkspaces.getItems().addAll(folderList);
     }
 
-    @Override
-    public void refresh() {
-        loadSettings();
-        lblStatus.setText("");
-    }
+    // Load player path
+    String player = settingsRepository.get("player_executable_path", "");
+    txtPlayerPath.setText(player);
 
-    private void loadSettings() {
-        // Load workspaces
-        lstWorkspaces.getItems().clear();
-        String workspaces = settingsRepository.get("workspace_folders", "");
-        if (!workspaces.isBlank()) {
-            List<String> folderList = Arrays.stream(workspaces.split(";"))
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .collect(Collectors.toList());
-            lstWorkspaces.getItems().addAll(folderList);
-        }
+    // Store loaded state snapshots for dirty checking
+    loadedWorkspaces = workspaces;
+    loadedPlayerPath = player;
 
-        // Load player path
-        String player = settingsRepository.get("player_executable_path", "");
-        txtPlayerPath.setText(player);
+    // Initial validation trigger
+    validateAll();
+  }
 
-        // Store loaded state snapshots for dirty checking
-        loadedWorkspaces = workspaces;
-        loadedPlayerPath = player;
+  @FXML
+  private void addWorkspace() {
+    DirectoryChooser chooser = new DirectoryChooser();
+    chooser.setTitle("Select Workspace Folder");
+    Window window = btnAddFolder.getScene().getWindow();
+    File selectedDirectory = chooser.showDialog(window);
 
-        // Initial validation trigger
-        validateAll();
-    }
-
-    @FXML
-    private void addWorkspace() {
-        DirectoryChooser chooser = new DirectoryChooser();
-        chooser.setTitle("Select Workspace Folder");
-        Window window = btnAddFolder.getScene().getWindow();
-        File selectedDirectory = chooser.showDialog(window);
-        
-        if (selectedDirectory != null) {
-            String path = selectedDirectory.getAbsolutePath().replace("\\", "/");
-            if (!lstWorkspaces.getItems().contains(path)) {
-                lstWorkspaces.getItems().add(path);
-                saveWorkspacesOnly();
-                showStatus("Workspace folder added.");
-            }
-        }
-    }
-
-    @FXML
-    private void removeWorkspace() {
-        String selected = lstWorkspaces.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            javafx.stage.Stage stage = (javafx.stage.Stage) alert.getDialogPane().getScene().getWindow();
-            stage.getIcons().add(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
-            alert.setTitle("Remove Workspace");
-            alert.setHeaderText("Remove workspace: " + selected);
-            alert.setContentText("Are you sure you want to remove this workspace? Movies from this workspace will be removed from your library, but files will not be deleted from your disk.");
-            
-            javafx.scene.image.ImageView customIcon = new javafx.scene.image.ImageView(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/removal_icon.png")));
-            customIcon.setFitHeight(48);
-            customIcon.setFitWidth(48);
-            alert.getDialogPane().setGraphic(customIcon);
-            
-            alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-            
-            Optional<ButtonType> result = alert.showAndWait();
-            if (result.isPresent() && result.get() == ButtonType.OK) {
-                lstWorkspaces.getItems().remove(selected);
-                saveWorkspacesOnly();
-                showStatus("Workspace folder removed.");
-                
-                io.github.kullik01.kinonode.repository.MovieRepository movieRepo = AppContext.getInstance().getMovieRepository();
-                movieRepo.deleteByFilePathPrefix(selected);
-            }
-        }
-    }
-
-    @FXML
-    private void browsePlayer() {
-        FileChooser chooser = new FileChooser();
-        chooser.setTitle("Select External Media Player Executable");
-        
-        // Add extension filters for executables
-        String os = System.getProperty("os.name").toLowerCase();
-        if (os.contains("win")) {
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Executable Files", "*.exe", "*.bat", "*.cmd"));
-        } else {
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All Files", "*"));
-        }
-
-        Window window = txtPlayerPath.getScene().getWindow();
-        File file = chooser.showOpenDialog(window);
-        if (file != null) {
-            txtPlayerPath.setText(file.getAbsolutePath().replace("\\", "/"));
-        }
-    }
-
-    private void saveSettings() {
-        // Save paths
+    if (selectedDirectory != null) {
+      String path = selectedDirectory.getAbsolutePath().replace("\\", "/");
+      if (!lstWorkspaces.getItems().contains(path)) {
+        lstWorkspaces.getItems().add(path);
         saveWorkspacesOnly();
+        showStatus("Workspace folder added.");
+      }
+    }
+  }
 
-        // Save player
-        String player = txtPlayerPath.getText().trim().replace("\\", "/");
-        settingsRepository.set("player_executable_path", player);
+  @FXML
+  private void removeWorkspace() {
+    String selected = lstWorkspaces.getSelectionModel().getSelectedItem();
+    if (selected != null) {
+      Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+      javafx.stage.Stage stage = (javafx.stage.Stage) alert.getDialogPane().getScene().getWindow();
+      stage
+          .getIcons()
+          .add(
+              new javafx.scene.image.Image(
+                  getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
+      alert.setTitle("Remove Workspace");
+      alert.setHeaderText("Remove workspace: " + selected);
+      alert.setContentText(
+          "Are you sure you want to remove this workspace? Movies from this workspace will be removed from your library, but files will not be deleted from your disk.");
 
-        // Update dirty checking snapshots
-        loadedPlayerPath = player;
+      javafx.scene.image.ImageView customIcon =
+          new javafx.scene.image.ImageView(
+              new javafx.scene.image.Image(
+                  getClass()
+                      .getResourceAsStream(
+                          "/io/github/kullik01/kinonode/images/removal_icon.png")));
+      customIcon.setFitHeight(48);
+      customIcon.setFitWidth(48);
+      alert.getDialogPane().setGraphic(customIcon);
 
-        showStatus("Settings saved successfully.");
+      alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+
+      Optional<ButtonType> result = alert.showAndWait();
+      if (result.isPresent() && result.get() == ButtonType.OK) {
+        lstWorkspaces.getItems().remove(selected);
+        saveWorkspacesOnly();
+        showStatus("Workspace folder removed.");
+
+        // Clear movies belonging to the removed workspace from local database records
+        io.github.kullik01.kinonode.repository.MovieRepository movieRepo =
+            AppContext.getInstance().getMovieRepository();
+        movieRepo.deleteByFilePathPrefix(selected);
+      }
+    }
+  }
+
+  @FXML
+  private void browsePlayer() {
+    FileChooser chooser = new FileChooser();
+    chooser.setTitle("Select External Media Player Executable");
+
+    // Add extension filters for executables based on the operating system
+    String os = System.getProperty("os.name").toLowerCase();
+    if (os.contains("win")) {
+      chooser
+          .getExtensionFilters()
+          .add(new FileChooser.ExtensionFilter("Executable Files", "*.exe", "*.bat", "*.cmd"));
+    } else {
+      chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All Files", "*"));
     }
 
-    private void saveWorkspacesOnly() {
-        String pathsStr = String.join(";", lstWorkspaces.getItems());
-        settingsRepository.set("workspace_folders", pathsStr);
-        loadedWorkspaces = pathsStr;
+    Window window = txtPlayerPath.getScene().getWindow();
+    File file = chooser.showOpenDialog(window);
+    if (file != null) {
+      txtPlayerPath.setText(file.getAbsolutePath().replace("\\", "/"));
+    }
+  }
+
+  private void saveSettings() {
+    // Save paths
+    saveWorkspacesOnly();
+
+    // Save player
+    String player = txtPlayerPath.getText().trim().replace("\\", "/");
+    settingsRepository.set("player_executable_path", player);
+
+    // Update dirty checking snapshots
+    loadedPlayerPath = player;
+
+    showStatus("Settings saved successfully.");
+  }
+
+  private void saveWorkspacesOnly() {
+    String pathsStr = String.join(";", lstWorkspaces.getItems());
+    settingsRepository.set("workspace_folders", pathsStr);
+    loadedWorkspaces = pathsStr;
+  }
+
+  private void setupValidationListeners() {
+    txtPlayerPath
+        .textProperty()
+        .addListener(
+            (obs, oldVal, newVal) -> {
+              validatePlayerPath(newVal);
+            });
+
+    lstWorkspaces
+        .getItems()
+        .addListener(
+            (javafx.collections.ListChangeListener.Change<? extends String> c) -> {
+              // Unsaved changes detected
+            });
+  }
+
+  private void validateAll() {
+    validatePlayerPath(txtPlayerPath.getText());
+  }
+
+  private void validatePlayerPath(String path) {
+    if (path == null || path.isBlank()) {
+      // Empty path is considered valid (meaning no custom external player configured)
+      setValidationStatus(txtPlayerPath, lblPlayerStatus, lblPlayerError, true, null);
+    } else {
+      File file = new File(path);
+      if (file.exists() && file.isFile()) {
+        setValidationStatus(txtPlayerPath, lblPlayerStatus, lblPlayerError, true, null);
+      } else {
+        setValidationStatus(
+            txtPlayerPath,
+            lblPlayerStatus,
+            lblPlayerError,
+            false,
+            "Executable file does not exist.");
+      }
+    }
+  }
+
+  private void setValidationStatus(
+      TextField field, Label statusLabel, Label errorLabel, boolean isValid, String errorMessage) {
+    if (isValid) {
+      field.setStyle(""); // Clean default style
+      statusLabel.setGraphic(null); // No check icon
+
+      if (errorLabel != null) {
+        errorLabel.setVisible(false);
+        errorLabel.setManaged(false);
+      }
+    } else {
+      // Highlight the text field with AtlantaFX/CSS danger styling
+      field.setStyle("-fx-border-color: -color-danger-fg;");
+
+      SVGPath crossIcon = new SVGPath();
+      crossIcon.setContent(
+          "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z");
+      crossIcon.setStyle("-fx-fill: -color-danger-fg;");
+      crossIcon.setScaleX(0.85);
+      crossIcon.setScaleY(0.85);
+      statusLabel.setGraphic(crossIcon);
+
+      if (errorLabel != null) {
+        errorLabel.setText(errorMessage);
+        errorLabel.setVisible(true);
+        errorLabel.setManaged(true);
+      }
+    }
+  }
+
+  /**
+   * Verifies if any inputs have errors that prevent settings from saving.
+   *
+   * @return {@code true} if errors exist, {@code false} if settings are ready to be saved
+   */
+  public boolean hasValidationErrors() {
+    boolean isPlayerValid = true;
+    String playerPath = txtPlayerPath.getText();
+    if (playerPath != null && !playerPath.isBlank()) {
+      File file = new File(playerPath);
+      isPlayerValid = file.exists() && file.isFile();
     }
 
-    private void setupValidationListeners() {
-        txtPlayerPath.textProperty().addListener((obs, oldVal, newVal) -> {
-            validatePlayerPath(newVal);
-        });
-        
-        lstWorkspaces.getItems().addListener((javafx.collections.ListChangeListener.Change<? extends String> c) -> {
-            // Unsaved changes detected
-        });
-    }
+    return !isPlayerValid;
+  }
 
-    private void validateAll() {
-        validatePlayerPath(txtPlayerPath.getText());
-    }
+  /**
+   * Checks if current input configurations differ from loaded settings.
+   *
+   * @return {@code true} if unsaved changes exist; {@code false} otherwise
+   */
+  public boolean hasUnsavedChanges() {
+    String currentWorkspaces = String.join(";", lstWorkspaces.getItems());
+    String currentPlayer =
+        txtPlayerPath.getText() != null ? txtPlayerPath.getText().trim().replace("\\", "/") : "";
 
-    private void validatePlayerPath(String path) {
-        if (path == null || path.isBlank()) {
-            // Empty is valid
-            setValidationStatus(txtPlayerPath, lblPlayerStatus, lblPlayerError, true, null);
-        } else {
-            File file = new File(path);
-            if (file.exists() && file.isFile()) {
-                setValidationStatus(txtPlayerPath, lblPlayerStatus, lblPlayerError, true, null);
-            } else {
-                setValidationStatus(txtPlayerPath, lblPlayerStatus, lblPlayerError, false, "Executable file does not exist.");
-            }
-        }
-    }
+    return !currentWorkspaces.equals(loadedWorkspaces) || !currentPlayer.equals(loadedPlayerPath);
+  }
 
-    private void setValidationStatus(TextField field, Label statusLabel, Label errorLabel, boolean isValid, String errorMessage) {
-        if (isValid) {
-            field.setStyle(""); // Clean default style
-            statusLabel.setGraphic(null); // No check icon
-            
-            if (errorLabel != null) {
-                errorLabel.setVisible(false);
-                errorLabel.setManaged(false);
-            }
-        } else {
-            field.setStyle("-fx-border-color: -color-danger-fg;");
-            
-            SVGPath crossIcon = new SVGPath();
-            crossIcon.setContent("M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z");
-            crossIcon.setStyle("-fx-fill: -color-danger-fg;");
-            crossIcon.setScaleX(0.85);
-            crossIcon.setScaleY(0.85);
-            statusLabel.setGraphic(crossIcon);
-            
-            if (errorLabel != null) {
-                errorLabel.setText(errorMessage);
-                errorLabel.setVisible(true);
-                errorLabel.setManaged(true);
-            }
-        }
-    }
-
-    public boolean hasValidationErrors() {
-        boolean isPlayerValid = true;
-        String playerPath = txtPlayerPath.getText();
-        if (playerPath != null && !playerPath.isBlank()) {
-            File file = new File(playerPath);
-            isPlayerValid = file.exists() && file.isFile();
-        }
-        
-        return !isPlayerValid;
-    }
-
-    public boolean hasUnsavedChanges() {
-        String currentWorkspaces = String.join(";", lstWorkspaces.getItems());
-        String currentPlayer = txtPlayerPath.getText() != null ? txtPlayerPath.getText().trim().replace("\\", "/") : "";
-        
-        return !currentWorkspaces.equals(loadedWorkspaces)
-                || !currentPlayer.equals(loadedPlayerPath);
-    }
-
-    private void setupWorkspaceCellFactory() {
-        lstWorkspaces.setCellFactory(lv -> new javafx.scene.control.ListCell<String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
+  private void setupWorkspaceCellFactory() {
+    lstWorkspaces.setCellFactory(
+        lv ->
+            new javafx.scene.control.ListCell<String>() {
+              @Override
+              protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
-                    setText(null);
-                    setGraphic(null);
+                  setText(null);
+                  setGraphic(null);
                 } else {
-                    HBox box = new HBox(10);
-                    box.setAlignment(Pos.CENTER_LEFT);
-                    
-                    // Folder icon
-                    SVGPath folderIcon = new SVGPath();
-                    folderIcon.setContent("M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z");
-                    folderIcon.setStyle("-fx-fill: #2178dd;");
-                    folderIcon.setScaleX(0.95);
-                    folderIcon.setScaleY(0.95);
-                    
-                    Label lblPath = new Label(item);
-                    lblPath.setMaxWidth(400);
-                    lblPath.setWrapText(false);
-                    
-                    Region spacer = new Region();
-                    HBox.setHgrow(spacer, Priority.ALWAYS);
-                    
-                    // Status icon (only cross if missing, else empty)
-                    File dir = new File(item);
-                    if (dir.exists() && dir.isDirectory()) {
-                        lblPath.setStyle("");
-                        box.getChildren().addAll(folderIcon, lblPath);
-                    } else {
-                        SVGPath statusIcon = new SVGPath();
-                        statusIcon.setContent("M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z");
-                        statusIcon.setStyle("-fx-fill: -color-danger-fg;");
-                        statusIcon.setScaleX(0.8);
-                        statusIcon.setScaleY(0.8);
-                        lblPath.setStyle("-fx-text-fill: -color-danger-fg;");
-                        
-                        box.getChildren().addAll(folderIcon, lblPath, spacer, statusIcon);
-                    }
-                    setGraphic(box);
+                  HBox box = new HBox(10);
+                  box.setAlignment(Pos.CENTER_LEFT);
+
+                  // Folder icon visual layout setup
+                  SVGPath folderIcon = new SVGPath();
+                  folderIcon.setContent(
+                      "M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z");
+                  folderIcon.setStyle("-fx-fill: #2178dd;");
+                  folderIcon.setScaleX(0.95);
+                  folderIcon.setScaleY(0.95);
+
+                  Label lblPath = new Label(item);
+                  lblPath.setMaxWidth(400);
+                  lblPath.setWrapText(false);
+
+                  Region spacer = new Region();
+                  HBox.setHgrow(spacer, Priority.ALWAYS);
+
+                  // Validate directory folder existence and show a warning SVG if missing
+                  File dir = new File(item);
+                  if (dir.exists() && dir.isDirectory()) {
+                    lblPath.setStyle("");
+                    box.getChildren().addAll(folderIcon, lblPath);
+                  } else {
+                    SVGPath statusIcon = new SVGPath();
+                    statusIcon.setContent(
+                        "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z");
+                    statusIcon.setStyle("-fx-fill: -color-danger-fg;");
+                    statusIcon.setScaleX(0.8);
+                    statusIcon.setScaleY(0.8);
+                    lblPath.setStyle("-fx-text-fill: -color-danger-fg;");
+
+                    box.getChildren().addAll(folderIcon, lblPath, spacer, statusIcon);
+                  }
+                  setGraphic(box);
                 }
-            }
-        });
-    }
+              }
+            });
+  }
 }

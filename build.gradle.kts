@@ -32,6 +32,7 @@ plugins {
     java
     application
     id("org.beryx.jlink") version "3.2.0"
+    id("com.diffplug.spotless") version "6.25.0"
 }
 
 group = "io.github.kullik01"
@@ -182,4 +183,12 @@ tasks.register<Zip>("linuxAppImageZip") {
     archiveFileName.set("KinoNode-${version}-Linux.zip")
     destinationDirectory.set(layout.buildDirectory.dir("distributions"))
 }
+
+configure<com.diffplug.gradle.spotless.SpotlessExtension> {
+    java {
+        target("src/main/java/**/*.java", "src/test/java/**/*.java")
+        googleJavaFormat()
+    }
+}
+
 
