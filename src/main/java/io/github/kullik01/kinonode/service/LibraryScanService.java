@@ -244,7 +244,7 @@ public class LibraryScanService {
    * @return a {@link Movie} entity populated with parsed title, year, and path
    *         properties
    */
-  private Movie parseMovieFromFile(File file) {
+  Movie parseMovieFromFile(File file) {
     String tmpFilename = PathUtils.getFileNameWithoutExtension(file);
 
     // Clean up name: replace dots and underscores with spaces
