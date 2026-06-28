@@ -112,6 +112,8 @@ public class KinoNodeApp extends Application {
     Scene tmpScene = new Scene(tmpRoot, 1024, 768);
     primaryStage.setScene(tmpScene);
     primaryStage.show();
+    primaryStage.toFront();
+    primaryStage.requestFocus();
   }
 
   /**
