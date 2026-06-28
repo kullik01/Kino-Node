@@ -148,6 +148,8 @@ public class LibraryScanService {
         LOGGER.log(Level.INFO, "Found {0} potential video files to scan.",
             tmpTotalFiles);
 
+        Set<String> tmpExistingFilePaths = movieRepository.findAllFilePaths();
+
         // Process each discovered video file
         for (int tmpIndex = 0; tmpIndex < tmpTotalFiles; tmpIndex++) {
           if (isCancelled()) {
@@ -163,7 +165,7 @@ public class LibraryScanService {
               + tmpTotalFiles + "): " + tmpFile.getFileName());
 
           // Case 1: The movie file is not yet registered in the repository
-          if (!movieRepository.existsByFilePath(tmpAbsolutePath)) {
+          if (!tmpExistingFilePaths.contains(tmpAbsolutePath)) {
             Movie tmpMovie = parseMovieFromFile(tmpFile.toFile());
 
             // Check and enrich movie details using IMDb suggestion and Wikidata

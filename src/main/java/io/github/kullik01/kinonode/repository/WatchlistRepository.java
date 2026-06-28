@@ -373,10 +373,10 @@ public class WatchlistRepository {
           tmpConnection.prepareStatement(tmpSql)) {
         // Add update operations to the batch sequentially based on the list
         // index
-        for (int i = 0; i < movieIdsInOrder.size(); i++) {
-          tmpPreparedStatement.setInt(1, i);
+        for (int tmpIndex = 0; tmpIndex < movieIdsInOrder.size(); tmpIndex++) {
+          tmpPreparedStatement.setInt(1, tmpIndex);
           tmpPreparedStatement.setInt(2, watchlistId);
-          tmpPreparedStatement.setInt(3, movieIdsInOrder.get(i));
+          tmpPreparedStatement.setInt(3, movieIdsInOrder.get(tmpIndex));
           tmpPreparedStatement.addBatch();
         }
         tmpPreparedStatement.executeBatch();

@@ -254,8 +254,8 @@ public class MovieDetailController {
 
     // 10 Movie Camera icons (1 to 10) representing the rating value
     List<Label> tmpReels = new ArrayList<>();
-    for (int i = 1; i <= 10; i++) {
-      final int tmpScore = i;
+    for (int tmpIndex = 1; tmpIndex <= 10; tmpIndex++) {
+      final int tmpScore = tmpIndex;
       Label tmpReel = new Label("🎥");
       tmpReel.setMinSize(javafx.scene.control.Label.USE_PREF_SIZE,
           javafx.scene.control.Label.USE_PREF_SIZE);
@@ -294,8 +294,8 @@ public class MovieDetailController {
     if (currentRating == null) {
       tmpBtnClear.setVisible(false);
       // Gray out all film reels when unrated
-      for (int i = 1; i <= 10; i++) {
-        Label tmpReel = (Label) ratingContainer.getChildren().get(i);
+      for (int tmpIndex = 1; tmpIndex <= 10; tmpIndex++) {
+        Label tmpReel = (Label) ratingContainer.getChildren().get(tmpIndex);
         tmpReel.setStyle(
             "-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #444444; -fx-opacity: 0.3;");
       }
@@ -303,9 +303,9 @@ public class MovieDetailController {
     } else {
       tmpBtnClear.setVisible(true);
       // Highlight rating reels up to the current selected rating level
-      for (int i = 1; i <= 10; i++) {
-        Label tmpReel = (Label) ratingContainer.getChildren().get(i);
-        if (i <= currentRating) {
+      for (int tmpIndex = 1; tmpIndex <= 10; tmpIndex++) {
+        Label tmpReel = (Label) ratingContainer.getChildren().get(tmpIndex);
+        if (tmpIndex <= currentRating) {
           tmpReel.setStyle(
               "-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #ED8B00; -fx-opacity: 1.0;");
         } else {

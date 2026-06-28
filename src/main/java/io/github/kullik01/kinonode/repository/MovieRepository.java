@@ -170,6 +170,29 @@ public class MovieRepository {
   }
 
   /**
+   * Retrieves all file system paths for movies currently stored in the
+   * database.
+   *
+   * @return a set of all file path strings, or an empty set on error
+   */
+  public java.util.Set<String> findAllFilePaths() {
+    java.util.Set<String> tmpPaths = new java.util.HashSet<>();
+    String tmpSql = "SELECT file_path FROM movies";
+    try (
+        Statement tmpStatement =
+            databaseService.getConnection().createStatement();
+        ResultSet tmpResultSet = tmpStatement.executeQuery(tmpSql)) {
+      while (tmpResultSet.next()) {
+        tmpPaths.add(tmpResultSet.getString("file_path"));
+      }
+    } catch (SQLException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to find all movie file paths",
+          tmpException);
+    }
+    return tmpPaths;
+  }
+
+  /**
    * Inserts a new movie record into the database and updates the entity's ID
    * field with the database-generated key.
    *

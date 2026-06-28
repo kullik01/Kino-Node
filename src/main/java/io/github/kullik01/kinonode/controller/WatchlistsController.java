@@ -175,11 +175,11 @@ public class WatchlistsController implements Refreshable {
 
           // Render movie rating film reel icons dynamically in the cell
           ratingBox.getChildren().clear();
-          for (int i = 1; i <= 10; i++) {
+          for (int tmpIndex = 1; tmpIndex <= 10; tmpIndex++) {
             Label tmpReel = new Label("🎥");
             tmpReel.setMinSize(javafx.scene.control.Label.USE_PREF_SIZE,
                 javafx.scene.control.Label.USE_PREF_SIZE);
-            if (item.getRating() != null && i <= item.getRating()) {
+            if (item.getRating() != null && tmpIndex <= item.getRating()) {
               tmpReel.setStyle(
                   "-fx-font-size: 13px; -fx-text-fill: #ED8B00; -fx-opacity: 1.0;");
             } else {
