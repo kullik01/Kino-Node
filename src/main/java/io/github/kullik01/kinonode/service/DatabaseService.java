@@ -75,26 +75,26 @@ public class DatabaseService {
   private void initialize() {
     try {
       // Ensure parent directory exists
-      Path parentDir = dbPath.getParent();
-      if (parentDir != null && !Files.exists(parentDir)) {
-        Files.createDirectories(parentDir);
-        LOGGER.info("Created app data directory: " + parentDir.toAbsolutePath());
+      Path tmpParentDir = dbPath.getParent();
+      if (tmpParentDir != null && !Files.exists(tmpParentDir)) {
+        Files.createDirectories(tmpParentDir);
+        LOGGER.info("Created app data directory: " + tmpParentDir.toAbsolutePath());
       }
 
       // Connect to database
-      String url = "jdbc:sqlite:" + dbPath.toAbsolutePath().toString().replace("\\", "/");
-      connection = DriverManager.getConnection(url);
+      String tmpUrl = "jdbc:sqlite:" + dbPath.toAbsolutePath().toString().replace("\\", "/");
+      connection = DriverManager.getConnection(tmpUrl);
       LOGGER.info("Connected to SQLite database at: " + dbPath.toAbsolutePath());
 
       // Enable Foreign Keys in SQLite
-      try (Statement stmt = connection.createStatement()) {
-        stmt.execute("PRAGMA foreign_keys = ON;");
+      try (Statement tmpStmt = connection.createStatement()) {
+        tmpStmt.execute("PRAGMA foreign_keys = ON;");
       }
 
       createTables();
-    } catch (IOException | SQLException e) {
-      LOGGER.log(Level.SEVERE, "Failed to initialize database", e);
-      throw new RuntimeException("Database initialization failed", e);
+    } catch (IOException | SQLException tmpE) {
+      LOGGER.log(Level.SEVERE, "Failed to initialize database", tmpE);
+      throw new RuntimeException("Database initialization failed", tmpE);
     }
   }
 
@@ -105,7 +105,7 @@ public class DatabaseService {
    * @throws SQLException if a database access error occurs or SQL statement fails
    */
   private void createTables() throws SQLException {
-    String createMoviesTable =
+    String tmpCreateMoviesTable =
         """
             CREATE TABLE IF NOT EXISTS movies (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -126,7 +126,7 @@ public class DatabaseService {
             );
             """;
 
-    String createWatchlistsTable =
+    String tmpCreateWatchlistsTable =
         """
             CREATE TABLE IF NOT EXISTS watchlists (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -135,7 +135,7 @@ public class DatabaseService {
             );
             """;
 
-    String createWatchlistMoviesTable =
+    String tmpCreateWatchlistMoviesTable =
         """
             CREATE TABLE IF NOT EXISTS watchlist_movies (
                 watchlist_id INTEGER NOT NULL,
@@ -147,7 +147,7 @@ public class DatabaseService {
             );
             """;
 
-    String createSettingsTable =
+    String tmpCreateSettingsTable =
         """
             CREATE TABLE IF NOT EXISTS settings (
                 key TEXT PRIMARY KEY,
@@ -155,23 +155,23 @@ public class DatabaseService {
             );
             """;
 
-    try (Statement stmt = connection.createStatement()) {
-      stmt.execute(createMoviesTable);
-      stmt.execute(createWatchlistsTable);
-      stmt.execute(createWatchlistMoviesTable);
-      stmt.execute(createSettingsTable);
+    try (Statement tmpStmt = connection.createStatement()) {
+      tmpStmt.execute(tmpCreateMoviesTable);
+      tmpStmt.execute(tmpCreateWatchlistsTable);
+      tmpStmt.execute(tmpCreateWatchlistMoviesTable);
+      tmpStmt.execute(tmpCreateSettingsTable);
 
       // Populate/update default video extensions structured alphabetically
-      stmt.execute(
+      tmpStmt.execute(
           "INSERT INTO settings (key, value) VALUES ('video_extensions', '3gp,avi,flv,m4v,mkv,mov,mp4,mpeg,mpg,mts,ogg,ogv,ts,webm,wmv') ON CONFLICT(key) DO UPDATE SET value = excluded.value;");
 
       // Schema migration for new columns
-      String[] newColumns = {"director", "writer", "producer", "cinematographer", "composer"};
-      for (String col : newColumns) {
+      String[] tmpNewColumns = {"director", "writer", "producer", "cinematographer", "composer"};
+      for (String tmpCol : tmpNewColumns) {
         try {
-          stmt.execute("ALTER TABLE movies ADD COLUMN " + col + " TEXT;");
-          LOGGER.info("Added new column to movies: " + col);
-        } catch (SQLException e) {
+          tmpStmt.execute("ALTER TABLE movies ADD COLUMN " + tmpCol + " TEXT;");
+          LOGGER.info("Added new column to movies: " + tmpCol);
+        } catch (SQLException tmpE) {
           // Ignore, column likely already exists. This avoids failure during runtime if schema is
           // already upgraded.
         }
@@ -191,14 +191,14 @@ public class DatabaseService {
     try {
       // Check if connection is null or has been closed, and re-establish if needed
       if (connection == null || connection.isClosed()) {
-        String url = "jdbc:sqlite:" + dbPath.toAbsolutePath().toString().replace("\\", "/");
-        connection = DriverManager.getConnection(url);
-        try (Statement stmt = connection.createStatement()) {
-          stmt.execute("PRAGMA foreign_keys = ON;");
+        String tmpUrl = "jdbc:sqlite:" + dbPath.toAbsolutePath().toString().replace("\\", "/");
+        connection = DriverManager.getConnection(tmpUrl);
+        try (Statement tmpStmt = connection.createStatement()) {
+          tmpStmt.execute("PRAGMA foreign_keys = ON;");
         }
       }
-    } catch (SQLException e) {
-      LOGGER.log(Level.SEVERE, "Failed to reopen database connection", e);
+    } catch (SQLException tmpE) {
+      LOGGER.log(Level.SEVERE, "Failed to reopen database connection", tmpE);
     }
     return connection;
   }
@@ -218,8 +218,8 @@ public class DatabaseService {
       try {
         connection.close();
         LOGGER.info("Database connection closed.");
-      } catch (SQLException e) {
-        LOGGER.log(Level.WARNING, "Failed to close database connection", e);
+      } catch (SQLException tmpE) {
+        LOGGER.log(Level.WARNING, "Failed to close database connection", tmpE);
       }
     }
   }
@@ -231,27 +231,27 @@ public class DatabaseService {
    * @return the resolved {@link Path} to the database file
    */
   private static Path resolveDefaultDbPath() {
-    String osName = System.getProperty("os.name").toLowerCase();
-    Path appDataDir;
+    String tmpOsName = System.getProperty("os.name").toLowerCase();
+    Path tmpAppDataDir;
 
     // Differentiate path generation strategy based on the platform OS
-    if (osName.contains("win")) {
-      String appData = System.getenv("APPDATA");
-      if (appData == null || appData.isBlank()) {
-        appData = System.getProperty("user.home");
+    if (tmpOsName.contains("win")) {
+      String tmpAppData = System.getenv("APPDATA");
+      if (tmpAppData == null || tmpAppData.isBlank()) {
+        tmpAppData = System.getProperty("user.home");
       }
-      appDataDir = Paths.get(appData, "KinoNode");
-    } else if (osName.contains("mac")) {
-      appDataDir =
+      tmpAppDataDir = Paths.get(tmpAppData, "KinoNode");
+    } else if (tmpOsName.contains("mac")) {
+      tmpAppDataDir =
           Paths.get(System.getProperty("user.home"), "Library", "Application Support", "KinoNode");
     } else {
       // Linux/Unix fallback path using XDG standard if available
-      String xdgDataHome = System.getenv("XDG_DATA_HOME");
-      if (xdgDataHome == null || xdgDataHome.isBlank()) {
-        xdgDataHome = System.getProperty("user.home") + "/.local/share";
+      String tmpXdgDataHome = System.getenv("XDG_DATA_HOME");
+      if (tmpXdgDataHome == null || tmpXdgDataHome.isBlank()) {
+        tmpXdgDataHome = System.getProperty("user.home") + "/.local/share";
       }
-      appDataDir = Paths.get(xdgDataHome, "KinoNode");
+      tmpAppDataDir = Paths.get(tmpXdgDataHome, "KinoNode");
     }
-    return appDataDir.resolve(DB_FILENAME);
+    return tmpAppDataDir.resolve(DB_FILENAME);
   }
 }

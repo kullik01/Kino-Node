@@ -60,17 +60,17 @@ public class YoutubeService {
     if (movie.getTitle() == null || movie.getTitle().isBlank()) return;
 
     // Append year to query only if it's a valid year, to refine search accuracy
-    String yearStr =
+    String tmpYearStr =
         movie.getYear() != null && movie.getYear() > 0 ? String.valueOf(movie.getYear()) : "";
-    String query = movie.getTitle() + " " + yearStr + " english trailer";
+    String tmpQuery = movie.getTitle() + " " + tmpYearStr + " english trailer";
 
     try {
-      String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8).replace("+", "%20");
-      String urlStr = "https://www.youtube.com/results?search_query=" + encodedQuery;
+      String tmpEncodedQuery = URLEncoder.encode(tmpQuery, StandardCharsets.UTF_8).replace("+", "%20");
+      String tmpUrlStr = "https://www.youtube.com/results?search_query=" + tmpEncodedQuery;
 
-      HttpRequest request =
+      HttpRequest tmpRequest =
           HttpRequest.newBuilder()
-              .uri(URI.create(urlStr))
+              .uri(URI.create(tmpUrlStr))
               // Set headers and a pre-configured consent cookie to bypass Google's redirect screens
               // and scrape directly
               .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
@@ -79,23 +79,23 @@ public class YoutubeService {
               .GET()
               .build();
 
-      HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      HttpResponse<String> tmpResponse = client.send(tmpRequest, HttpResponse.BodyHandlers.ofString());
 
-      if (response.statusCode() == 200) {
-        String html = response.body();
+      if (tmpResponse.statusCode() == 200) {
+        String tmpHtml = tmpResponse.body();
         // Regex pattern to extract the first videoId field out of the script block (ytInitialData)
         // in the response page
-        Pattern pattern = Pattern.compile("\"videoId\":\"([a-zA-Z0-9_-]{11})\"");
-        Matcher matcher = pattern.matcher(html);
-        if (matcher.find()) {
-          String videoId = matcher.group(1);
-          movie.setTrailerUrl("https://www.youtube.com/watch?v=" + videoId);
+        Pattern tmpPattern = Pattern.compile("\"videoId\":\"([a-zA-Z0-9_-]{11})\"");
+        Matcher tmpMatcher = tmpPattern.matcher(tmpHtml);
+        if (tmpMatcher.find()) {
+          String tmpVideoId = tmpMatcher.group(1);
+          movie.setTrailerUrl("https://www.youtube.com/watch?v=" + tmpVideoId);
           LOGGER.info(
               "Found YouTube trailer for " + movie.getTitle() + ": " + movie.getTrailerUrl());
         }
       }
-    } catch (Exception e) {
-      LOGGER.log(Level.WARNING, "Failed to fetch YouTube trailer for " + movie.getTitle(), e);
+    } catch (Exception tmpE) {
+      LOGGER.log(Level.WARNING, "Failed to fetch YouTube trailer for " + movie.getTitle(), tmpE);
     }
   }
 }

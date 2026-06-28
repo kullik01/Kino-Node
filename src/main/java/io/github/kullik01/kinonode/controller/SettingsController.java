@@ -126,23 +126,23 @@ public class SettingsController implements Refreshable {
   private void loadSettings() {
     // Load workspaces
     lstWorkspaces.getItems().clear();
-    String workspaces = settingsRepository.get("workspace_folders", "");
-    if (!workspaces.isBlank()) {
-      List<String> folderList =
-          Arrays.stream(workspaces.split(";"))
+    String tmpWorkspaces = settingsRepository.get("workspace_folders", "");
+    if (!tmpWorkspaces.isBlank()) {
+      List<String> tmpFolderList =
+          Arrays.stream(tmpWorkspaces.split(";"))
               .map(String::trim)
               .filter(s -> !s.isEmpty())
               .collect(Collectors.toList());
-      lstWorkspaces.getItems().addAll(folderList);
+      lstWorkspaces.getItems().addAll(tmpFolderList);
     }
 
     // Load player path
-    String player = settingsRepository.get("player_executable_path", "");
-    txtPlayerPath.setText(player);
+    String tmpPlayer = settingsRepository.get("player_executable_path", "");
+    txtPlayerPath.setText(tmpPlayer);
 
     // Store loaded state snapshots for dirty checking
-    loadedWorkspaces = workspaces;
-    loadedPlayerPath = player;
+    loadedWorkspaces = tmpWorkspaces;
+    loadedPlayerPath = tmpPlayer;
 
     // Initial validation trigger
     validateAll();
@@ -150,15 +150,15 @@ public class SettingsController implements Refreshable {
 
   @FXML
   private void addWorkspace() {
-    DirectoryChooser chooser = new DirectoryChooser();
-    chooser.setTitle("Select Workspace Folder");
-    Window window = btnAddFolder.getScene().getWindow();
-    File selectedDirectory = chooser.showDialog(window);
+    DirectoryChooser tmpChooser = new DirectoryChooser();
+    tmpChooser.setTitle("Select Workspace Folder");
+    Window tmpWindow = btnAddFolder.getScene().getWindow();
+    File tmpSelectedDirectory = tmpChooser.showDialog(tmpWindow);
 
-    if (selectedDirectory != null) {
-      String path = selectedDirectory.getAbsolutePath().replace("\\", "/");
-      if (!lstWorkspaces.getItems().contains(path)) {
-        lstWorkspaces.getItems().add(path);
+    if (tmpSelectedDirectory != null) {
+      String tmpPath = tmpSelectedDirectory.getAbsolutePath().replace("\\", "/");
+      if (!lstWorkspaces.getItems().contains(tmpPath)) {
+        lstWorkspaces.getItems().add(tmpPath);
         saveWorkspacesOnly();
         showStatus("Workspace folder added.");
       }
@@ -167,65 +167,65 @@ public class SettingsController implements Refreshable {
 
   @FXML
   private void removeWorkspace() {
-    String selected = lstWorkspaces.getSelectionModel().getSelectedItem();
-    if (selected != null) {
-      Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-      javafx.stage.Stage stage = (javafx.stage.Stage) alert.getDialogPane().getScene().getWindow();
-      stage
+    String tmpSelected = lstWorkspaces.getSelectionModel().getSelectedItem();
+    if (tmpSelected != null) {
+      Alert tmpAlert = new Alert(Alert.AlertType.CONFIRMATION);
+      javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
+      tmpStage
           .getIcons()
           .add(
               new javafx.scene.image.Image(
                   getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
-      alert.setTitle("Remove Workspace");
-      alert.setHeaderText("Remove workspace: " + selected);
-      alert.setContentText(
+      tmpAlert.setTitle("Remove Workspace");
+      tmpAlert.setHeaderText("Remove workspace: " + tmpSelected);
+      tmpAlert.setContentText(
           "Are you sure you want to remove this workspace? Movies from this workspace will be removed from your library, but files will not be deleted from your disk.");
 
-      javafx.scene.image.ImageView customIcon =
+      javafx.scene.image.ImageView tmpCustomIcon =
           new javafx.scene.image.ImageView(
               new javafx.scene.image.Image(
                   getClass()
                       .getResourceAsStream(
                           "/io/github/kullik01/kinonode/images/removal_icon.png")));
-      customIcon.setFitHeight(48);
-      customIcon.setFitWidth(48);
-      alert.getDialogPane().setGraphic(customIcon);
+      tmpCustomIcon.setFitHeight(48);
+      tmpCustomIcon.setFitWidth(48);
+      tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
 
-      alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+      tmpAlert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 
-      Optional<ButtonType> result = alert.showAndWait();
-      if (result.isPresent() && result.get() == ButtonType.OK) {
-        lstWorkspaces.getItems().remove(selected);
+      Optional<ButtonType> tmpResult = tmpAlert.showAndWait();
+      if (tmpResult.isPresent() && tmpResult.get() == ButtonType.OK) {
+        lstWorkspaces.getItems().remove(tmpSelected);
         saveWorkspacesOnly();
         showStatus("Workspace folder removed.");
 
         // Clear movies belonging to the removed workspace from local database records
-        io.github.kullik01.kinonode.repository.MovieRepository movieRepo =
+        io.github.kullik01.kinonode.repository.MovieRepository tmpMovieRepo =
             AppContext.getInstance().getMovieRepository();
-        movieRepo.deleteByFilePathPrefix(selected);
+        tmpMovieRepo.deleteByFilePathPrefix(tmpSelected);
       }
     }
   }
 
   @FXML
   private void browsePlayer() {
-    FileChooser chooser = new FileChooser();
-    chooser.setTitle("Select External Media Player Executable");
+    FileChooser tmpChooser = new FileChooser();
+    tmpChooser.setTitle("Select External Media Player Executable");
 
     // Add extension filters for executables based on the operating system
-    String os = System.getProperty("os.name").toLowerCase();
-    if (os.contains("win")) {
-      chooser
+    String tmpOs = System.getProperty("os.name").toLowerCase();
+    if (tmpOs.contains("win")) {
+      tmpChooser
           .getExtensionFilters()
           .add(new FileChooser.ExtensionFilter("Executable Files", "*.exe", "*.bat", "*.cmd"));
     } else {
-      chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All Files", "*"));
+      tmpChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All Files", "*"));
     }
 
-    Window window = txtPlayerPath.getScene().getWindow();
-    File file = chooser.showOpenDialog(window);
-    if (file != null) {
-      txtPlayerPath.setText(file.getAbsolutePath().replace("\\", "/"));
+    Window tmpWindow = txtPlayerPath.getScene().getWindow();
+    File tmpFile = tmpChooser.showOpenDialog(tmpWindow);
+    if (tmpFile != null) {
+      txtPlayerPath.setText(tmpFile.getAbsolutePath().replace("\\", "/"));
     }
   }
 
@@ -234,19 +234,19 @@ public class SettingsController implements Refreshable {
     saveWorkspacesOnly();
 
     // Save player
-    String player = txtPlayerPath.getText().trim().replace("\\", "/");
-    settingsRepository.set("player_executable_path", player);
+    String tmpPlayer = txtPlayerPath.getText().trim().replace("\\", "/");
+    settingsRepository.set("player_executable_path", tmpPlayer);
 
     // Update dirty checking snapshots
-    loadedPlayerPath = player;
+    loadedPlayerPath = tmpPlayer;
 
     showStatus("Settings saved successfully.");
   }
 
   private void saveWorkspacesOnly() {
-    String pathsStr = String.join(";", lstWorkspaces.getItems());
-    settingsRepository.set("workspace_folders", pathsStr);
-    loadedWorkspaces = pathsStr;
+    String tmpPathsStr = String.join(";", lstWorkspaces.getItems());
+    settingsRepository.set("workspace_folders", tmpPathsStr);
+    loadedWorkspaces = tmpPathsStr;
   }
 
   private void setupValidationListeners() {
@@ -274,8 +274,8 @@ public class SettingsController implements Refreshable {
       // Empty path is considered valid (meaning no custom external player configured)
       setValidationStatus(txtPlayerPath, lblPlayerStatus, lblPlayerError, true, null);
     } else {
-      File file = new File(path);
-      if (file.exists() && file.isFile()) {
+      File tmpFile = new File(path);
+      if (tmpFile.exists() && tmpFile.isFile()) {
         setValidationStatus(txtPlayerPath, lblPlayerStatus, lblPlayerError, true, null);
       } else {
         setValidationStatus(
@@ -302,13 +302,13 @@ public class SettingsController implements Refreshable {
       // Highlight the text field with AtlantaFX/CSS danger styling
       field.setStyle("-fx-border-color: -color-danger-fg;");
 
-      SVGPath crossIcon = new SVGPath();
-      crossIcon.setContent(
+      SVGPath tmpCrossIcon = new SVGPath();
+      tmpCrossIcon.setContent(
           "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z");
-      crossIcon.setStyle("-fx-fill: -color-danger-fg;");
-      crossIcon.setScaleX(0.85);
-      crossIcon.setScaleY(0.85);
-      statusLabel.setGraphic(crossIcon);
+      tmpCrossIcon.setStyle("-fx-fill: -color-danger-fg;");
+      tmpCrossIcon.setScaleX(0.85);
+      tmpCrossIcon.setScaleY(0.85);
+      statusLabel.setGraphic(tmpCrossIcon);
 
       if (errorLabel != null) {
         errorLabel.setText(errorMessage);
@@ -324,14 +324,14 @@ public class SettingsController implements Refreshable {
    * @return {@code true} if errors exist, {@code false} if settings are ready to be saved
    */
   public boolean hasValidationErrors() {
-    boolean isPlayerValid = true;
-    String playerPath = txtPlayerPath.getText();
-    if (playerPath != null && !playerPath.isBlank()) {
-      File file = new File(playerPath);
-      isPlayerValid = file.exists() && file.isFile();
+    boolean tmpIsPlayerValid = true;
+    String tmpPlayerPath = txtPlayerPath.getText();
+    if (tmpPlayerPath != null && !tmpPlayerPath.isBlank()) {
+      File tmpFile = new File(tmpPlayerPath);
+      tmpIsPlayerValid = tmpFile.exists() && tmpFile.isFile();
     }
 
-    return !isPlayerValid;
+    return !tmpIsPlayerValid;
   }
 
   /**
@@ -340,11 +340,11 @@ public class SettingsController implements Refreshable {
    * @return {@code true} if unsaved changes exist; {@code false} otherwise
    */
   public boolean hasUnsavedChanges() {
-    String currentWorkspaces = String.join(";", lstWorkspaces.getItems());
-    String currentPlayer =
+    String tmpCurrentWorkspaces = String.join(";", lstWorkspaces.getItems());
+    String tmpCurrentPlayer =
         txtPlayerPath.getText() != null ? txtPlayerPath.getText().trim().replace("\\", "/") : "";
 
-    return !currentWorkspaces.equals(loadedWorkspaces) || !currentPlayer.equals(loadedPlayerPath);
+    return !tmpCurrentWorkspaces.equals(loadedWorkspaces) || !tmpCurrentPlayer.equals(loadedPlayerPath);
   }
 
   private void setupWorkspaceCellFactory() {
@@ -358,41 +358,41 @@ public class SettingsController implements Refreshable {
                   setText(null);
                   setGraphic(null);
                 } else {
-                  HBox box = new HBox(10);
-                  box.setAlignment(Pos.CENTER_LEFT);
+                  HBox tmpBox = new HBox(10);
+                  tmpBox.setAlignment(Pos.CENTER_LEFT);
 
                   // Folder icon visual layout setup
-                  SVGPath folderIcon = new SVGPath();
-                  folderIcon.setContent(
+                  SVGPath tmpFolderIcon = new SVGPath();
+                  tmpFolderIcon.setContent(
                       "M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z");
-                  folderIcon.setStyle("-fx-fill: #2178dd;");
-                  folderIcon.setScaleX(0.95);
-                  folderIcon.setScaleY(0.95);
+                  tmpFolderIcon.setStyle("-fx-fill: #2178dd;");
+                  tmpFolderIcon.setScaleX(0.95);
+                  tmpFolderIcon.setScaleY(0.95);
 
-                  Label lblPath = new Label(item);
-                  lblPath.setMaxWidth(400);
-                  lblPath.setWrapText(false);
+                  Label tmpLblPath = new Label(item);
+                  tmpLblPath.setMaxWidth(400);
+                  tmpLblPath.setWrapText(false);
 
-                  Region spacer = new Region();
-                  HBox.setHgrow(spacer, Priority.ALWAYS);
+                  Region tmpSpacer = new Region();
+                  HBox.setHgrow(tmpSpacer, Priority.ALWAYS);
 
                   // Validate directory folder existence and show a warning SVG if missing
-                  File dir = new File(item);
-                  if (dir.exists() && dir.isDirectory()) {
-                    lblPath.setStyle("");
-                    box.getChildren().addAll(folderIcon, lblPath);
+                  File tmpDir = new File(item);
+                  if (tmpDir.exists() && tmpDir.isDirectory()) {
+                    tmpLblPath.setStyle("");
+                    tmpBox.getChildren().addAll(tmpFolderIcon, tmpLblPath);
                   } else {
-                    SVGPath statusIcon = new SVGPath();
-                    statusIcon.setContent(
+                    SVGPath tmpStatusIcon = new SVGPath();
+                    tmpStatusIcon.setContent(
                         "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z");
-                    statusIcon.setStyle("-fx-fill: -color-danger-fg;");
-                    statusIcon.setScaleX(0.8);
-                    statusIcon.setScaleY(0.8);
-                    lblPath.setStyle("-fx-text-fill: -color-danger-fg;");
+                    tmpStatusIcon.setStyle("-fx-fill: -color-danger-fg;");
+                    tmpStatusIcon.setScaleX(0.8);
+                    tmpStatusIcon.setScaleY(0.8);
+                    tmpLblPath.setStyle("-fx-text-fill: -color-danger-fg;");
 
-                    box.getChildren().addAll(folderIcon, lblPath, spacer, statusIcon);
+                    tmpBox.getChildren().addAll(tmpFolderIcon, tmpLblPath, tmpSpacer, tmpStatusIcon);
                   }
-                  setGraphic(box);
+                  setGraphic(tmpBox);
                 }
               }
             });

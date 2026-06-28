@@ -65,41 +65,41 @@ public class PlaybackService {
    *     found, or {@link Optional#empty()}
    */
   public Optional<Path> getPlayerPath() {
-    String configured = settingsRepository.get("player_executable_path", "");
-    if (!configured.isBlank()) {
-      Path path = Paths.get(configured);
-      if (Files.exists(path)) {
-        return Optional.of(path);
+    String tmpConfigured = settingsRepository.get("player_executable_path", "");
+    if (!tmpConfigured.isBlank()) {
+      Path tmpPath = Paths.get(tmpConfigured);
+      if (Files.exists(tmpPath)) {
+        return Optional.of(tmpPath);
       }
     }
 
     // Try to auto-detect mpv on PATH
-    Optional<Path> mpvOnPath = findExecutableOnPath("mpv");
-    if (mpvOnPath.isPresent()) {
-      return mpvOnPath;
+    Optional<Path> tmpMpvOnPath = findExecutableOnPath("mpv");
+    if (tmpMpvOnPath.isPresent()) {
+      return tmpMpvOnPath;
     }
 
     // Try to auto-detect vlc on PATH
-    Optional<Path> vlcOnPath = findExecutableOnPath("vlc");
-    if (vlcOnPath.isPresent()) {
-      return vlcOnPath;
+    Optional<Path> tmpVlcOnPath = findExecutableOnPath("vlc");
+    if (tmpVlcOnPath.isPresent()) {
+      return tmpVlcOnPath;
     }
 
     // Try common installation directories for VLC depending on OS platforms
-    String osName = System.getProperty("os.name").toLowerCase();
-    if (osName.contains("win")) {
-      Path vlcDefault64 = Paths.get("C:\\Program Files\\VideoLAN\\VLC\\vlc.exe");
-      if (Files.exists(vlcDefault64)) {
-        return Optional.of(vlcDefault64);
+    String tmpOsName = System.getProperty("os.name").toLowerCase();
+    if (tmpOsName.contains("win")) {
+      Path tmpVlcDefault64 = Paths.get("C:\\Program Files\\VideoLAN\\VLC\\vlc.exe");
+      if (Files.exists(tmpVlcDefault64)) {
+        return Optional.of(tmpVlcDefault64);
       }
-      Path vlcDefault32 = Paths.get("C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe");
-      if (Files.exists(vlcDefault32)) {
-        return Optional.of(vlcDefault32);
+      Path tmpVlcDefault32 = Paths.get("C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe");
+      if (Files.exists(tmpVlcDefault32)) {
+        return Optional.of(tmpVlcDefault32);
       }
-    } else if (osName.contains("mac")) {
-      Path vlcMac = Paths.get("/Applications/VLC.app/Contents/MacOS/VLC");
-      if (Files.exists(vlcMac)) {
-        return Optional.of(vlcMac);
+    } else if (tmpOsName.contains("mac")) {
+      Path tmpVlcMac = Paths.get("/Applications/VLC.app/Contents/MacOS/VLC");
+      if (Files.exists(tmpVlcMac)) {
+        return Optional.of(tmpVlcMac);
       }
     }
 
@@ -115,43 +115,43 @@ public class PlaybackService {
    *     process fails
    */
   public void play(String movieFilePath) throws Exception {
-    Optional<Path> playerPathOpt = getPlayerPath();
-    if (playerPathOpt.isEmpty()) {
+    Optional<Path> tmpPlayerPathOpt = getPlayerPath();
+    if (tmpPlayerPathOpt.isEmpty()) {
       throw new IllegalStateException(
           "No external media player executable configured or auto-detected.");
     }
 
-    Path playerPath = playerPathOpt.get();
-    File movieFile = new File(movieFilePath);
-    if (!movieFile.exists()) {
+    Path tmpPlayerPath = tmpPlayerPathOpt.get();
+    File tmpMovieFile = new File(movieFilePath);
+    if (!tmpMovieFile.exists()) {
       throw new IllegalArgumentException("Movie file does not exist: " + movieFilePath);
     }
 
     LOGGER.log(
         Level.INFO,
         "Launching movie playback: {0} using player {1}",
-        new Object[] {movieFilePath, playerPath.toAbsolutePath()});
+        new Object[] {movieFilePath, tmpPlayerPath.toAbsolutePath()});
 
-    ProcessBuilder pb;
+    ProcessBuilder tmpPb;
     // Windows requires starting process asynchronously via cmd start command to prevent
     // blocking/freezing the parent UI
     if (System.getProperty("os.name").toLowerCase().contains("win")) {
-      pb =
+      tmpPb =
           new ProcessBuilder(
               "cmd",
               "/c",
               "start",
               "\"\"",
-              playerPath.toAbsolutePath().toString(),
-              movieFile.getAbsolutePath());
+              tmpPlayerPath.toAbsolutePath().toString(),
+              tmpMovieFile.getAbsolutePath());
     } else {
       // Unix-based systems execute the binary directly and discard std outputs to decouple process
       // lifecycle
-      pb = new ProcessBuilder(playerPath.toAbsolutePath().toString(), movieFile.getAbsolutePath());
-      pb.redirectError(ProcessBuilder.Redirect.DISCARD);
-      pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+      tmpPb = new ProcessBuilder(tmpPlayerPath.toAbsolutePath().toString(), tmpMovieFile.getAbsolutePath());
+      tmpPb.redirectError(ProcessBuilder.Redirect.DISCARD);
+      tmpPb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
     }
-    pb.start();
+    tmpPb.start();
   }
 
   /**
@@ -162,20 +162,20 @@ public class PlaybackService {
    * @return an {@link Optional} containing the resolved path, or {@link Optional#empty()}
    */
   private Optional<Path> findExecutableOnPath(String name) {
-    String cmd = System.getProperty("os.name").toLowerCase().contains("win") ? "where" : "which";
+    String tmpCmd = System.getProperty("os.name").toLowerCase().contains("win") ? "where" : "which";
     try {
-      Process p = new ProcessBuilder(cmd, name).start();
-      try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-        String line = reader.readLine();
-        if (line != null && !line.trim().isEmpty()) {
-          Path path = Paths.get(line.trim());
-          if (Files.exists(path)) {
-            return Optional.of(path);
+      Process tmpP = new ProcessBuilder(tmpCmd, name).start();
+      try (BufferedReader tmpReader = new BufferedReader(new InputStreamReader(tmpP.getInputStream()))) {
+        String tmpLine = tmpReader.readLine();
+        if (tmpLine != null && !tmpLine.trim().isEmpty()) {
+          Path tmpPath = Paths.get(tmpLine.trim());
+          if (Files.exists(tmpPath)) {
+            return Optional.of(tmpPath);
           }
         }
       }
-      p.waitFor();
-    } catch (Exception ignored) {
+      tmpP.waitFor();
+    } catch (Exception tmpIgnored) {
     }
     return Optional.empty();
   }

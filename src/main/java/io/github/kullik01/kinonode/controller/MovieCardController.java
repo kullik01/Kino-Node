@@ -70,10 +70,10 @@ public class MovieCardController {
     lblTitle.setText(movie.getTitle());
     lblYear.setText(movie.getYear() != null ? String.valueOf(movie.getYear()) : "—");
 
-    String cinematographer = movie.getCinematographer();
+    String tmpCinematographer = movie.getCinematographer();
     // Expose or collapse the cinematographer label depending on whether info exists
-    if (cinematographer != null && !cinematographer.isBlank()) {
-      lblCinematographer.setText(cinematographer);
+    if (tmpCinematographer != null && !tmpCinematographer.isBlank()) {
+      lblCinematographer.setText(tmpCinematographer);
       lblCinematographer.setManaged(true);
       lblCinematographer.setVisible(true);
     } else {
@@ -86,39 +86,39 @@ public class MovieCardController {
   }
 
   private void loadPoster() {
-    String path = movie.getCoverImagePath();
-    Image image = null;
-    if (path != null && !path.isBlank()) {
-      File f = new File(path);
-      if (f.exists()) {
+    String tmpPath = movie.getCoverImagePath();
+    Image tmpImage = null;
+    if (tmpPath != null && !tmpPath.isBlank()) {
+      File tmpF = new File(tmpPath);
+      if (tmpF.exists()) {
         try {
           // Construct URL and load image with backgroundLoading set to true (6th argument)
           // to avoid freezing the JavaFX application UI thread.
-          image = new Image(f.toURI().toURL().toExternalForm(), 130, 190, false, true, true);
-        } catch (MalformedURLException e) {
-          LOGGER.log(Level.WARNING, "Failed to load poster image: " + path, e);
+          tmpImage = new Image(tmpF.toURI().toURL().toExternalForm(), 130, 190, false, true, true);
+        } catch (MalformedURLException tmpE) {
+          LOGGER.log(Level.WARNING, "Failed to load poster image: " + tmpPath, tmpE);
         }
       }
     }
 
     // Lazily load and cache the default placeholder poster image if no valid cover is present
-    if (image == null) {
+    if (tmpImage == null) {
       if (PLACEHOLDER_IMAGE == null) {
         try {
-          var resource =
+          var tmpResource =
               getClass().getResource("/io/github/kullik01/kinonode/images/placeholder_cover.jpg");
-          if (resource != null) {
-            PLACEHOLDER_IMAGE = new Image(resource.toExternalForm(), 130, 190, false, true, true);
+          if (tmpResource != null) {
+            PLACEHOLDER_IMAGE = new Image(tmpResource.toExternalForm(), 130, 190, false, true, true);
           }
-        } catch (Exception e) {
-          LOGGER.log(Level.WARNING, "Failed to load placeholder cover resource", e);
+        } catch (Exception tmpE) {
+          LOGGER.log(Level.WARNING, "Failed to load placeholder cover resource", tmpE);
         }
       }
-      image = PLACEHOLDER_IMAGE;
+      tmpImage = PLACEHOLDER_IMAGE;
     }
 
-    if (image != null) {
-      imgPoster.setImage(image);
+    if (tmpImage != null) {
+      imgPoster.setImage(tmpImage);
     }
   }
 

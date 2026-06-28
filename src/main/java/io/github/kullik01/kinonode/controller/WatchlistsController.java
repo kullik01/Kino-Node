@@ -150,28 +150,28 @@ public class WatchlistsController implements Refreshable {
                 if (empty || item == null) {
                   setGraphic(null);
                 } else {
-                  String text =
+                  String tmpText =
                       item.getTitle() + (item.getYear() != null ? " (" + item.getYear() + ")" : "");
                   if (item.getCinematographer() != null && !item.getCinematographer().isBlank()) {
-                    text += " - " + item.getCinematographer();
+                    tmpText += " - " + item.getCinematographer();
                   }
-                  titleLabel.setText(text);
+                  titleLabel.setText(tmpText);
 
                   // Render movie rating film reel icons dynamically in the cell
                   ratingBox.getChildren().clear();
                   for (int i = 1; i <= 10; i++) {
-                    Label reel = new Label("🎥");
-                    reel.setMinSize(
+                    Label tmpReel = new Label("🎥");
+                    tmpReel.setMinSize(
                         javafx.scene.control.Label.USE_PREF_SIZE,
                         javafx.scene.control.Label.USE_PREF_SIZE);
                     if (item.getRating() != null && i <= item.getRating()) {
-                      reel.setStyle(
+                      tmpReel.setStyle(
                           "-fx-font-size: 13px; -fx-text-fill: #ED8B00; -fx-opacity: 1.0;");
                     } else {
-                      reel.setStyle(
+                      tmpReel.setStyle(
                           "-fx-font-size: 13px; -fx-text-fill: #444444; -fx-opacity: 0.3;");
                     }
-                    ratingBox.getChildren().add(reel);
+                    ratingBox.getChildren().add(tmpReel);
                   }
                   if (item.getRating() != null) {
                     ratingTextLabel.setText(item.getRating() + "/10");
@@ -182,36 +182,36 @@ public class WatchlistsController implements Refreshable {
                   }
 
                   // Retrieve and load cover art image in the ListView cells
-                  Image img = null;
+                  Image tmpImg = null;
                   if (item.getCoverImagePath() != null) {
-                    File f = new File(item.getCoverImagePath());
-                    if (f.exists()) {
+                    File tmpF = new File(item.getCoverImagePath());
+                    if (tmpF.exists()) {
                       try {
-                        img =
+                        tmpImg =
                             new Image(
-                                f.toURI().toURL().toExternalForm(), 30, 45, false, true, true);
-                      } catch (MalformedURLException ignored) {
+                                tmpF.toURI().toURL().toExternalForm(), 30, 45, false, true, true);
+                      } catch (MalformedURLException tmpIgnored) {
                       }
                     }
                   }
-                  if (img == null) {
+                  if (tmpImg == null) {
                     if (PLACEHOLDER_IMAGE == null) {
                       try {
-                        var resource =
+                        var tmpResource =
                             getClass()
                                 .getResource(
                                     "/io/github/kullik01/kinonode/images/placeholder_cover.jpg");
-                        if (resource != null) {
+                        if (tmpResource != null) {
                           PLACEHOLDER_IMAGE =
-                              new Image(resource.toExternalForm(), 30, 45, false, true, true);
+                              new Image(tmpResource.toExternalForm(), 30, 45, false, true, true);
                         }
-                      } catch (Exception ignored) {
+                      } catch (Exception tmpIgnored) {
                       }
                     }
-                    img = PLACEHOLDER_IMAGE;
+                    tmpImg = PLACEHOLDER_IMAGE;
                   }
-                  if (img != null) {
-                    thumbnail.setImage(img);
+                  if (tmpImg != null) {
+                    thumbnail.setImage(tmpImg);
                   }
                   setGraphic(content);
                 }
@@ -222,9 +222,9 @@ public class WatchlistsController implements Refreshable {
     lstMovies.setOnMouseClicked(
         event -> {
           if (event.getClickCount() == 2) {
-            Movie selectedMovie = lstMovies.getSelectionModel().getSelectedItem();
-            if (selectedMovie != null) {
-              playMovie(selectedMovie);
+            Movie tmpSelectedMovie = lstMovies.getSelectionModel().getSelectedItem();
+            if (tmpSelectedMovie != null) {
+              playMovie(tmpSelectedMovie);
             }
           }
         });
@@ -248,16 +248,16 @@ public class WatchlistsController implements Refreshable {
    */
   @Override
   public void refresh() {
-    int selectedIdx = lstWatchlists.getSelectionModel().getSelectedIndex();
-    List<Watchlist> watchlists = watchlistRepository.findAll();
-    lstWatchlists.getItems().setAll(watchlists);
+    int tmpSelectedIdx = lstWatchlists.getSelectionModel().getSelectedIndex();
+    List<Watchlist> tmpWatchlists = watchlistRepository.findAll();
+    lstWatchlists.getItems().setAll(tmpWatchlists);
 
     // Keep active selection focus when resetting/updating lists
-    if (selectedIdx >= 0 && selectedIdx < watchlists.size()) {
-      lstWatchlists.getSelectionModel().select(selectedIdx);
+    if (tmpSelectedIdx >= 0 && tmpSelectedIdx < tmpWatchlists.size()) {
+      lstWatchlists.getSelectionModel().select(tmpSelectedIdx);
       selectedWatchlist = lstWatchlists.getSelectionModel().getSelectedItem();
       loadWatchlistMovies();
-    } else if (!watchlists.isEmpty()) {
+    } else if (!tmpWatchlists.isEmpty()) {
       lstWatchlists.getSelectionModel().selectFirst();
       selectedWatchlist = lstWatchlists.getSelectionModel().getSelectedItem();
       loadWatchlistMovies();
@@ -275,15 +275,15 @@ public class WatchlistsController implements Refreshable {
       paneDetails.setDisable(true);
     } else {
       // Re-fetch latest from db to avoid stale data
-      Watchlist refreshed = watchlistRepository.findById(selectedWatchlist.getId());
-      if (refreshed != null) {
-        selectedWatchlist = refreshed;
+      Watchlist tmpRefreshed = watchlistRepository.findById(selectedWatchlist.getId());
+      if (tmpRefreshed != null) {
+        selectedWatchlist = tmpRefreshed;
       }
 
       lblWatchlistName.setText(selectedWatchlist.getName());
-      List<Movie> movies = selectedWatchlist.getMovies();
-      lblMovieCount.setText(movies.size() + (movies.size() == 1 ? " movie" : " movies"));
-      lstMovies.getItems().setAll(movies);
+      List<Movie> tmpMovies = selectedWatchlist.getMovies();
+      lblMovieCount.setText(tmpMovies.size() + (tmpMovies.size() == 1 ? " movie" : " movies"));
+      lstMovies.getItems().setAll(tmpMovies);
       paneDetails.setDisable(false);
     }
     updateButtonStates();
@@ -301,115 +301,115 @@ public class WatchlistsController implements Refreshable {
 
   private Optional<String> showWatchlistDialog(
       String title, String header, String defaultText, int currentId) {
-    Dialog<String> dialog = new Dialog<>();
-    dialog.setTitle(title);
-    dialog.setHeaderText(header);
+    Dialog<String> tmpDialog = new Dialog<>();
+    tmpDialog.setTitle(title);
+    tmpDialog.setHeaderText(header);
 
-    dialog.getDialogPane().setPrefSize(480, 280);
-    dialog.getDialogPane().setMinSize(480, 280);
+    tmpDialog.getDialogPane().setPrefSize(480, 280);
+    tmpDialog.getDialogPane().setMinSize(480, 280);
 
-    javafx.stage.Stage stage = (javafx.stage.Stage) dialog.getDialogPane().getScene().getWindow();
-    stage
+    javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpDialog.getDialogPane().getScene().getWindow();
+    tmpStage
         .getIcons()
         .add(
             new javafx.scene.image.Image(
                 getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
 
-    ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-    dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
+    ButtonType tmpOkButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+    tmpDialog.getDialogPane().getButtonTypes().addAll(tmpOkButtonType, ButtonType.CANCEL);
 
-    VBox vbox = new VBox(5);
-    Label errorLabel = new Label();
-    errorLabel.setWrapText(true);
-    errorLabel.setPrefWidth(430);
-    errorLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-    errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
-    errorLabel.setVisible(false);
+    VBox tmpVbox = new VBox(5);
+    Label tmpErrorLabel = new Label();
+    tmpErrorLabel.setWrapText(true);
+    tmpErrorLabel.setPrefWidth(430);
+    tmpErrorLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+    tmpErrorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+    tmpErrorLabel.setVisible(false);
 
-    TextField textField = new TextField(defaultText);
-    textField.setPromptText("Watchlist Name");
+    TextField tmpTextField = new TextField(defaultText);
+    tmpTextField.setPromptText("Watchlist Name");
 
-    vbox.getChildren().addAll(errorLabel, textField);
-    dialog.getDialogPane().setContent(vbox);
+    tmpVbox.getChildren().addAll(tmpErrorLabel, tmpTextField);
+    tmpDialog.getDialogPane().setContent(tmpVbox);
 
-    javafx.scene.Node okButton = dialog.getDialogPane().lookupButton(okButtonType);
-    okButton.setDisable(true); // Always disable initially; user must type or change the name
+    javafx.scene.Node tmpOkButton = tmpDialog.getDialogPane().lookupButton(tmpOkButtonType);
+    tmpOkButton.setDisable(true); // Always disable initially; user must type or change the name
 
     if (currentId != -1) {
-      errorLabel.setText(
+      tmpErrorLabel.setText(
           "A watchlist with this name already exists. Please choose a different name.");
-      errorLabel.setVisible(true);
+      tmpErrorLabel.setVisible(true);
     }
 
-    textField
+    tmpTextField
         .textProperty()
         .addListener(
             (observable, oldValue, newValue) -> {
               if (newValue.length() > 30) {
-                textField.setText(oldValue);
+                tmpTextField.setText(oldValue);
                 return;
               }
               // Restrict input watchlist names to standard ASCII chars only
               if (!newValue.matches("\\A\\p{ASCII}*\\z")) {
-                errorLabel.setText(
+                tmpErrorLabel.setText(
                     "The text you entered is not ASCII code. Only standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space) can be used.");
-                errorLabel.setVisible(true);
-                okButton.setDisable(true);
+                tmpErrorLabel.setVisible(true);
+                tmpOkButton.setDisable(true);
               } else {
-                boolean duplicate = false;
-                List<Watchlist> watchlists = watchlistRepository.findAll();
-                for (Watchlist w : watchlists) {
-                  if (w.getName().equalsIgnoreCase(newValue.trim())) {
-                    if (w.getId() != null && w.getId() != currentId) {
-                      duplicate = true;
+                boolean tmpDuplicate = false;
+                List<Watchlist> tmpWatchlists = watchlistRepository.findAll();
+                for (Watchlist tmpW : tmpWatchlists) {
+                  if (tmpW.getName().equalsIgnoreCase(newValue.trim())) {
+                    if (tmpW.getId() != null && tmpW.getId() != currentId) {
+                      tmpDuplicate = true;
                       break;
                     }
                   }
                 }
 
-                if (duplicate) {
-                  errorLabel.setText(
+                if (tmpDuplicate) {
+                  tmpErrorLabel.setText(
                       "A watchlist with this name already exists. Please choose a different name.");
-                  errorLabel.setVisible(true);
-                  okButton.setDisable(true);
+                  tmpErrorLabel.setVisible(true);
+                  tmpOkButton.setDisable(true);
                 } else {
-                  boolean isUnchanged =
+                  boolean tmpIsUnchanged =
                       currentId != -1 && newValue.trim().equalsIgnoreCase(defaultText.trim());
-                  if (isUnchanged) {
-                    errorLabel.setText(
+                  if (tmpIsUnchanged) {
+                    tmpErrorLabel.setText(
                         "A watchlist with this name already exists. Please choose a different name.");
-                    errorLabel.setVisible(true);
-                    okButton.setDisable(true);
+                    tmpErrorLabel.setVisible(true);
+                    tmpOkButton.setDisable(true);
                   } else {
-                    errorLabel.setVisible(false);
-                    okButton.setDisable(newValue.trim().isEmpty());
+                    tmpErrorLabel.setVisible(false);
+                    tmpOkButton.setDisable(newValue.trim().isEmpty());
                   }
                 }
               }
             });
 
-    dialog.setResultConverter(
+    tmpDialog.setResultConverter(
         dialogButton -> {
-          if (dialogButton == okButtonType) {
-            return textField.getText();
+          if (dialogButton == tmpOkButtonType) {
+            return tmpTextField.getText();
           }
           return null;
         });
 
-    return dialog.showAndWait();
+    return tmpDialog.showAndWait();
   }
 
   @FXML
   private void createWatchlist() {
-    Optional<String> result =
+    Optional<String> tmpResult =
         showWatchlistDialog("New Watchlist", "Create a new watchlist", "", -1);
 
-    result.ifPresent(
+    tmpResult.ifPresent(
         name -> {
-          String cleanName = name.trim();
-          if (!cleanName.isEmpty()) {
-            if (validateWatchlistName(cleanName, -1)) {
-              watchlistRepository.insert(new Watchlist(cleanName));
+          String tmpCleanName = name.trim();
+          if (!tmpCleanName.isEmpty()) {
+            if (validateWatchlistName(tmpCleanName, -1)) {
+              watchlistRepository.insert(new Watchlist(tmpCleanName));
               refresh();
             }
           }
@@ -420,20 +420,20 @@ public class WatchlistsController implements Refreshable {
   private void renameWatchlist() {
     if (selectedWatchlist == null) return;
 
-    Optional<String> result =
+    Optional<String> tmpResult =
         showWatchlistDialog(
             "Rename Watchlist",
             "Rename watchlist: " + selectedWatchlist.getName(),
             selectedWatchlist.getName(),
             selectedWatchlist.getId() == null ? -1 : selectedWatchlist.getId());
 
-    result.ifPresent(
+    tmpResult.ifPresent(
         name -> {
-          String cleanName = name.trim();
-          if (!cleanName.isEmpty() && !cleanName.equals(selectedWatchlist.getName())) {
+          String tmpCleanName = name.trim();
+          if (!tmpCleanName.isEmpty() && !tmpCleanName.equals(selectedWatchlist.getName())) {
             if (validateWatchlistName(
-                cleanName, selectedWatchlist.getId() == null ? -1 : selectedWatchlist.getId())) {
-              selectedWatchlist.setName(cleanName);
+                tmpCleanName, selectedWatchlist.getId() == null ? -1 : selectedWatchlist.getId())) {
+              selectedWatchlist.setName(tmpCleanName);
               watchlistRepository.update(selectedWatchlist);
               refresh();
             }
@@ -442,36 +442,36 @@ public class WatchlistsController implements Refreshable {
   }
 
   private boolean validateWatchlistName(String cleanName, int currentId) {
-    List<Watchlist> watchlists = watchlistRepository.findAll();
-    for (Watchlist w : watchlists) {
-      if (w.getName().equalsIgnoreCase(cleanName)) {
-        if (w.getId() != null && w.getId() != currentId) {
-          Alert alert = new Alert(Alert.AlertType.ERROR);
-          javafx.stage.Stage stage =
-              (javafx.stage.Stage) alert.getDialogPane().getScene().getWindow();
-          stage
+    List<Watchlist> tmpWatchlists = watchlistRepository.findAll();
+    for (Watchlist tmpW : tmpWatchlists) {
+      if (tmpW.getName().equalsIgnoreCase(cleanName)) {
+        if (tmpW.getId() != null && tmpW.getId() != currentId) {
+          Alert tmpAlert = new Alert(Alert.AlertType.ERROR);
+          javafx.stage.Stage tmpStage =
+              (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
+          tmpStage
               .getIcons()
               .add(
                   new javafx.scene.image.Image(
                       getClass()
                           .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
-          alert.setTitle("Validation Error");
-          alert.setHeaderText("Duplicate Watchlist");
-          alert.setContentText(
+          tmpAlert.setTitle("Validation Error");
+          tmpAlert.setHeaderText("Duplicate Watchlist");
+          tmpAlert.setContentText(
               "A watchlist with this name already exists. Please choose a different name.");
 
-          javafx.scene.image.ImageView customIcon =
+          javafx.scene.image.ImageView tmpCustomIcon =
               new javafx.scene.image.ImageView(
                   new javafx.scene.image.Image(
                       getClass()
                           .getResourceAsStream(
                               "/io/github/kullik01/kinonode/images/error_icon.png")));
-          customIcon.setFitHeight(48);
-          customIcon.setFitWidth(48);
-          alert.getDialogPane().setGraphic(customIcon);
+          tmpCustomIcon.setFitHeight(48);
+          tmpCustomIcon.setFitWidth(48);
+          tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
 
-          alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-          alert.showAndWait();
+          tmpAlert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+          tmpAlert.showAndWait();
           return false;
         }
       }
@@ -483,31 +483,31 @@ public class WatchlistsController implements Refreshable {
   private void deleteWatchlist() {
     if (selectedWatchlist == null) return;
 
-    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-    javafx.stage.Stage stage = (javafx.stage.Stage) alert.getDialogPane().getScene().getWindow();
-    stage
+    Alert tmpAlert = new Alert(Alert.AlertType.CONFIRMATION);
+    javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
+    tmpStage
         .getIcons()
         .add(
             new javafx.scene.image.Image(
                 getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
-    alert.setTitle("Delete Watchlist");
-    alert.setHeaderText("Delete watchlist: " + selectedWatchlist.getName());
-    alert.setContentText(
+    tmpAlert.setTitle("Delete Watchlist");
+    tmpAlert.setHeaderText("Delete watchlist: " + selectedWatchlist.getName());
+    tmpAlert.setContentText(
         "Are you sure you want to delete this watchlist? Movies will not be deleted from your disk or library.");
 
-    javafx.scene.image.ImageView customIcon =
+    javafx.scene.image.ImageView tmpCustomIcon =
         new javafx.scene.image.ImageView(
             new javafx.scene.image.Image(
                 getClass()
                     .getResourceAsStream("/io/github/kullik01/kinonode/images/removal_icon.png")));
-    customIcon.setFitHeight(48);
-    customIcon.setFitWidth(48);
-    alert.getDialogPane().setGraphic(customIcon);
+    tmpCustomIcon.setFitHeight(48);
+    tmpCustomIcon.setFitWidth(48);
+    tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
 
-    alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+    tmpAlert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
 
-    Optional<ButtonType> result = alert.showAndWait();
-    if (result.isPresent() && result.get() == ButtonType.OK) {
+    Optional<ButtonType> tmpResult = tmpAlert.showAndWait();
+    if (tmpResult.isPresent() && tmpResult.get() == ButtonType.OK) {
       watchlistRepository.delete(selectedWatchlist.getId());
       refresh();
     }
@@ -515,36 +515,36 @@ public class WatchlistsController implements Refreshable {
 
   @FXML
   private void removeMovie() {
-    Movie selectedMovie = lstMovies.getSelectionModel().getSelectedItem();
-    if (selectedMovie == null || selectedWatchlist == null) return;
+    Movie tmpSelectedMovie = lstMovies.getSelectionModel().getSelectedItem();
+    if (tmpSelectedMovie == null || selectedWatchlist == null) return;
 
-    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-    javafx.stage.Stage stage = (javafx.stage.Stage) alert.getDialogPane().getScene().getWindow();
-    stage
+    Alert tmpAlert = new Alert(Alert.AlertType.CONFIRMATION);
+    javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
+    tmpStage
         .getIcons()
         .add(
             new javafx.scene.image.Image(
                 getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
-    alert.setTitle("Remove Movie");
-    alert.setHeaderText("Remove from Watchlist");
-    alert.setContentText(
+    tmpAlert.setTitle("Remove Movie");
+    tmpAlert.setHeaderText("Remove from Watchlist");
+    tmpAlert.setContentText(
         "Are you sure you want to remove this movie from " + selectedWatchlist.getName() + "?");
 
-    javafx.scene.image.ImageView customIcon =
+    javafx.scene.image.ImageView tmpCustomIcon =
         new javafx.scene.image.ImageView(
             new javafx.scene.image.Image(
                 getClass()
                     .getResourceAsStream("/io/github/kullik01/kinonode/images/removal_icon.png")));
-    customIcon.setFitHeight(48);
-    customIcon.setFitWidth(48);
-    alert.getDialogPane().setGraphic(customIcon);
+    tmpCustomIcon.setFitHeight(48);
+    tmpCustomIcon.setFitWidth(48);
+    tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
 
-    alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-    Optional<ButtonType> result = alert.showAndWait();
+    tmpAlert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+    Optional<ButtonType> tmpResult = tmpAlert.showAndWait();
 
-    if (result.isPresent() && result.get() == ButtonType.OK) {
+    if (tmpResult.isPresent() && tmpResult.get() == ButtonType.OK) {
       watchlistRepository.removeMovieFromWatchlist(
-          selectedWatchlist.getId(), selectedMovie.getId());
+          selectedWatchlist.getId(), tmpSelectedMovie.getId());
       refresh();
     }
   }
@@ -552,30 +552,30 @@ public class WatchlistsController implements Refreshable {
   private void playMovie(Movie movie) {
     try {
       AppContext.getInstance().getPlaybackService().play(movie.getFilePath());
-    } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Failed to play movie from watchlist", e);
-      Alert alert = new Alert(Alert.AlertType.ERROR);
-      javafx.stage.Stage stage = (javafx.stage.Stage) alert.getDialogPane().getScene().getWindow();
-      stage
+    } catch (Exception tmpE) {
+      LOGGER.log(Level.SEVERE, "Failed to play movie from watchlist", tmpE);
+      Alert tmpAlert = new Alert(Alert.AlertType.ERROR);
+      javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
+      tmpStage
           .getIcons()
           .add(
               new javafx.scene.image.Image(
                   getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
-      alert.setTitle("Playback Failed");
-      alert.setHeaderText("Cannot open media player");
-      alert.setContentText(e.getMessage());
+      tmpAlert.setTitle("Playback Failed");
+      tmpAlert.setHeaderText("Cannot open media player");
+      tmpAlert.setContentText(tmpE.getMessage());
 
-      javafx.scene.image.ImageView customIcon =
+      javafx.scene.image.ImageView tmpCustomIcon =
           new javafx.scene.image.ImageView(
               new javafx.scene.image.Image(
                   getClass()
                       .getResourceAsStream("/io/github/kullik01/kinonode/images/error_icon.png")));
-      customIcon.setFitHeight(48);
-      customIcon.setFitWidth(48);
-      alert.getDialogPane().setGraphic(customIcon);
+      tmpCustomIcon.setFitHeight(48);
+      tmpCustomIcon.setFitWidth(48);
+      tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
 
-      alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-      alert.showAndWait();
+      tmpAlert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+      tmpAlert.showAndWait();
     }
   }
 }

@@ -82,45 +82,45 @@ public class LibraryScanService {
         updateMessage("Reading workspace settings...");
 
         // Load configured workspace folders and allowed video file extensions from settings
-        String foldersSetting = settingsRepository.get("workspace_folders", "");
-        String extensionsSetting =
+        String tmpFoldersSetting = settingsRepository.get("workspace_folders", "");
+        String tmpExtensionsSetting =
             settingsRepository.get(
                 "video_extensions", "3gp,avi,flv,m4v,mkv,mov,mp4,mpeg,mpg,mts,ogg,ogv,ts,webm,wmv");
 
-        if (foldersSetting.isBlank()) {
+        if (tmpFoldersSetting.isBlank()) {
           return new ScanResult(
               0,
               0,
               List.of("No workspace folders configured. Please configure folders in Settings."));
         }
 
-        String[] folders = foldersSetting.split(";");
-        Set<String> extensions = new HashSet<>();
-        for (String ext : extensionsSetting.split(",")) {
-          if (!ext.isBlank()) {
-            extensions.add(ext.trim().toLowerCase());
+        String[] tmpFolders = tmpFoldersSetting.split(";");
+        Set<String> tmpExtensions = new HashSet<>();
+        for (String tmpExt : tmpExtensionsSetting.split(",")) {
+          if (!tmpExt.isBlank()) {
+            tmpExtensions.add(tmpExt.trim().toLowerCase());
           }
         }
 
-        List<Path> filesToScan = new ArrayList<>();
+        List<Path> tmpFilesToScan = new ArrayList<>();
         updateMessage("Scanning directories...");
 
         // Walk through the file tree for each configured workspace directory
-        for (String folderPath : folders) {
+        for (String tmpFolderPath : tmpFolders) {
           if (isCancelled()) break;
-          if (folderPath.isBlank()) continue;
-          Path path = Paths.get(folderPath.trim());
-          if (Files.exists(path) && Files.isDirectory(path)) {
+          if (tmpFolderPath.isBlank()) continue;
+          Path tmpPath = Paths.get(tmpFolderPath.trim());
+          if (Files.exists(tmpPath) && Files.isDirectory(tmpPath)) {
             Files.walkFileTree(
-                path,
+                tmpPath,
                 new SimpleFileVisitor<>() {
                   @Override
                   public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
                       throws IOException {
                     if (isCancelled()) return FileVisitResult.TERMINATE;
-                    String ext = PathUtils.getFileExtension(file.toFile());
-                    if (extensions.contains(ext)) {
-                      filesToScan.add(file);
+                    String tmpExt = PathUtils.getFileExtension(file.toFile());
+                    if (tmpExtensions.contains(tmpExt)) {
+                      tmpFilesToScan.add(file);
                     }
                     return FileVisitResult.CONTINUE;
                   }
@@ -128,84 +128,84 @@ public class LibraryScanService {
           }
         }
 
-        int totalFiles = filesToScan.size();
-        int newMoviesAdded = 0;
-        List<String> logs = new ArrayList<>();
-        LOGGER.log(Level.INFO, "Found {0} potential video files to scan.", totalFiles);
+        int tmpTotalFiles = tmpFilesToScan.size();
+        int tmpNewMoviesAdded = 0;
+        List<String> tmpLogs = new ArrayList<>();
+        LOGGER.log(Level.INFO, "Found {0} potential video files to scan.", tmpTotalFiles);
 
         // Process each discovered video file
-        for (int i = 0; i < totalFiles; i++) {
+        for (int tmpI = 0; tmpI < tmpTotalFiles; tmpI++) {
           if (isCancelled()) {
             updateMessage("Scan cancelled.");
             break;
           }
-          Path file = filesToScan.get(i);
-          String absolutePath = file.toAbsolutePath().toString().replace("\\", "/");
+          Path tmpFile = tmpFilesToScan.get(tmpI);
+          String tmpAbsolutePath = tmpFile.toAbsolutePath().toString().replace("\\", "/");
 
-          updateProgress(i, totalFiles);
+          updateProgress(tmpI, tmpTotalFiles);
           updateMessage(
-              "Processing file (" + (i + 1) + "/" + totalFiles + "): " + file.getFileName());
+              "Processing file (" + (tmpI + 1) + "/" + tmpTotalFiles + "): " + tmpFile.getFileName());
 
           // Case 1: The movie file is not yet registered in the repository
-          if (!movieRepository.existsByFilePath(absolutePath)) {
-            Movie movie = parseMovieFromFile(file.toFile());
+          if (!movieRepository.existsByFilePath(tmpAbsolutePath)) {
+            Movie tmpMovie = parseMovieFromFile(tmpFile.toFile());
 
             // Check and enrich movie details using IMDb suggestion and Wikidata APIs
-            updateMessage("Checking IMDB for: " + movie.getTitle());
-            ImdbService.enrichMovieData(movie);
+            updateMessage("Checking IMDB for: " + tmpMovie.getTitle());
+            ImdbService.enrichMovieData(tmpMovie);
 
             // Fetch and set a trailer URL from YouTube
-            updateMessage("Checking YouTube for trailer: " + movie.getTitle());
-            YoutubeService.fetchYoutubeTrailer(movie);
+            updateMessage("Checking YouTube for trailer: " + tmpMovie.getTitle());
+            YoutubeService.fetchYoutubeTrailer(tmpMovie);
 
-            movieRepository.insert(movie);
-            newMoviesAdded++;
-            logs.add("Added: " + movie.getTitle());
-            LOGGER.log(Level.INFO, "Imported movie: {0}", movie.getTitle());
+            movieRepository.insert(tmpMovie);
+            tmpNewMoviesAdded++;
+            tmpLogs.add("Added: " + tmpMovie.getTitle());
+            LOGGER.log(Level.INFO, "Imported movie: {0}", tmpMovie.getTitle());
           } else {
             // Case 2: The movie is already registered, but we check if it is missing metadata that
             // can be enriched
-            Movie existingMovie = movieRepository.findByFilePath(absolutePath);
-            boolean needsEnrichment =
-                existingMovie != null
-                    && (existingMovie.getCoverImagePath() == null
-                        || existingMovie.getCoverImagePath().isBlank()
-                        || existingMovie.getDirector() == null
-                        || existingMovie.getDirector().isBlank()
-                        || existingMovie.getWriter() == null
-                        || existingMovie.getWriter().isBlank()
-                        || existingMovie.getTrailerUrl() == null
-                        || existingMovie.getTrailerUrl().isBlank());
+            Movie tmpExistingMovie = movieRepository.findByFilePath(tmpAbsolutePath);
+            boolean tmpNeedsEnrichment =
+                tmpExistingMovie != null
+                    && (tmpExistingMovie.getCoverImagePath() == null
+                        || tmpExistingMovie.getCoverImagePath().isBlank()
+                        || tmpExistingMovie.getDirector() == null
+                        || tmpExistingMovie.getDirector().isBlank()
+                        || tmpExistingMovie.getWriter() == null
+                        || tmpExistingMovie.getWriter().isBlank()
+                        || tmpExistingMovie.getTrailerUrl() == null
+                        || tmpExistingMovie.getTrailerUrl().isBlank());
 
-            if (needsEnrichment) {
-              updateMessage("Checking IMDB for existing movie: " + existingMovie.getTitle());
-              String originalTitle = existingMovie.getTitle();
+            if (tmpNeedsEnrichment) {
+              updateMessage("Checking IMDB for existing movie: " + tmpExistingMovie.getTitle());
+              String tmpOriginalTitle = tmpExistingMovie.getTitle();
 
               // Re-parse the title from the filename just in case the stored title is full of
               // garbage tags
-              Movie freshlyParsed = parseMovieFromFile(file.toFile());
-              existingMovie.setTitle(freshlyParsed.getTitle());
+              Movie tmpFreshlyParsed = parseMovieFromFile(tmpFile.toFile());
+              tmpExistingMovie.setTitle(tmpFreshlyParsed.getTitle());
 
-              ImdbService.enrichMovieData(existingMovie);
+              ImdbService.enrichMovieData(tmpExistingMovie);
 
-              if (existingMovie.getTrailerUrl() == null
-                  || existingMovie.getTrailerUrl().isBlank()) {
-                updateMessage("Checking YouTube for trailer: " + existingMovie.getTitle());
-                YoutubeService.fetchYoutubeTrailer(existingMovie);
+              if (tmpExistingMovie.getTrailerUrl() == null
+                  || tmpExistingMovie.getTrailerUrl().isBlank()) {
+                updateMessage("Checking YouTube for trailer: " + tmpExistingMovie.getTitle());
+                YoutubeService.fetchYoutubeTrailer(tmpExistingMovie);
               }
 
               // Always update after attempting enrichment to save new fields (Director, Writer,
               // etc)
-              movieRepository.update(existingMovie);
-              logs.add("Enriched: " + existingMovie.getTitle());
-              LOGGER.log(Level.INFO, "Enriched existing movie: {0}", existingMovie.getTitle());
+              movieRepository.update(tmpExistingMovie);
+              tmpLogs.add("Enriched: " + tmpExistingMovie.getTitle());
+              LOGGER.log(Level.INFO, "Enriched existing movie: {0}", tmpExistingMovie.getTitle());
             }
           }
         }
 
-        updateProgress(totalFiles, totalFiles);
-        updateMessage("Scan complete. Added " + newMoviesAdded + " new movies.");
-        return new ScanResult(totalFiles, newMoviesAdded, logs);
+        updateProgress(tmpTotalFiles, tmpTotalFiles);
+        updateMessage("Scan complete. Added " + tmpNewMoviesAdded + " new movies.");
+        return new ScanResult(tmpTotalFiles, tmpNewMoviesAdded, tmpLogs);
       }
     };
   }
@@ -218,13 +218,13 @@ public class LibraryScanService {
    * @return a {@link Movie} entity populated with parsed title, year, and path properties
    */
   private Movie parseMovieFromFile(File file) {
-    String filename = PathUtils.getFileNameWithoutExtension(file);
+    String tmpFilename = PathUtils.getFileNameWithoutExtension(file);
 
     // Clean up name: replace dots and underscores with spaces
-    String cleanName = filename.replace(".", " ").replace("_", " ");
+    String tmpCleanName = tmpFilename.replace(".", " ").replace("_", " ");
 
     // Remove common garbage tags from release names to get a clean search query
-    String[] garbageTags = {
+    String[] tmpGarbageTags = {
       "1080p",
       "720p",
       "480p",
@@ -256,38 +256,38 @@ public class LibraryScanService {
       "directors cut"
     };
 
-    for (String tag : garbageTags) {
-      cleanName = cleanName.replaceAll("(?i)\\b" + tag + "\\b", "");
+    for (String tmpTag : tmpGarbageTags) {
+      tmpCleanName = tmpCleanName.replaceAll("(?i)\\b" + tmpTag + "\\b", "");
     }
 
     // Match year: matches space and 4-digit numbers in optional parentheses or brackets
-    Pattern yearPattern = Pattern.compile("^(.*?)\\s*[\\(\\[]?(19\\d{2}|20\\d{2})[\\)\\]]?(.*)$");
-    Matcher matcher = yearPattern.matcher(cleanName);
+    Pattern tmpYearPattern = Pattern.compile("^(.*?)\\s*[\\(\\[]?(19\\d{2}|20\\d{2})[\\)\\]]?(.*)$");
+    Matcher tmpMatcher = tmpYearPattern.matcher(tmpCleanName);
 
-    String title = cleanName;
-    Integer year = null;
+    String tmpTitle = tmpCleanName;
+    Integer tmpYear = null;
 
-    if (matcher.find()) {
-      String tempTitle = matcher.group(1).trim();
-      if (!tempTitle.isEmpty()) {
-        title = tempTitle;
+    if (tmpMatcher.find()) {
+      String tmpTempTitle = tmpMatcher.group(1).trim();
+      if (!tmpTempTitle.isEmpty()) {
+        tmpTitle = tmpTempTitle;
       }
       try {
-        year = Integer.parseInt(matcher.group(2));
-      } catch (NumberFormatException ignored) {
+        tmpYear = Integer.parseInt(tmpMatcher.group(2));
+      } catch (NumberFormatException tmpIgnored) {
       }
     }
 
     // Remove multiple consecutive spaces and trailing hyphens
-    title = title.replaceAll("\\s+", " ").replaceAll("-\\s*$", "").trim();
-    if (title.isEmpty()) {
-      title = filename;
+    tmpTitle = tmpTitle.replaceAll("\\s+", " ").replaceAll("-\\s*$", "").trim();
+    if (tmpTitle.isEmpty()) {
+      tmpTitle = tmpFilename;
     }
 
-    Movie movie = new Movie(file.getAbsolutePath().replace("\\", "/"), title);
-    movie.setYear(year);
-    movie.setDateAdded(Instant.now());
-    return movie;
+    Movie tmpMovie = new Movie(file.getAbsolutePath().replace("\\", "/"), tmpTitle);
+    tmpMovie.setYear(tmpYear);
+    tmpMovie.setDateAdded(Instant.now());
+    return tmpMovie;
   }
 
   /**

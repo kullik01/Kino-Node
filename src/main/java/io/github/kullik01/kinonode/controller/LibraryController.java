@@ -103,11 +103,11 @@ public class LibraryController implements Refreshable {
             "Title (Z-A)",
             "Writer");
 
-    String savedSortFilter =
+    String tmpSavedSortFilter =
         AppContext.getInstance()
             .getSettingsRepository()
             .get("library_sort_filter", "Recently Added");
-    cmbSort.setValue(savedSortFilter);
+    cmbSort.setValue(tmpSavedSortFilter);
 
     // Real-time filters and sorts
     txtSearch.textProperty().addListener((obs, oldVal, newVal) -> filterAndDisplayMovies());
@@ -140,64 +140,64 @@ public class LibraryController implements Refreshable {
   }
 
   private void filterAndDisplayMovies() {
-    String query = txtSearch.getText().toLowerCase().trim();
-    String sortOption = cmbSort.getValue() != null ? cmbSort.getValue() : "Recently Added";
+    String tmpQuery = txtSearch.getText().toLowerCase().trim();
+    String tmpSortOption = cmbSort.getValue() != null ? cmbSort.getValue() : "Recently Added";
 
-    List<Movie> filtered =
+    List<Movie> tmpFiltered =
         allMovies.stream()
             .filter(
                 m -> {
-                  if (query.isEmpty()) return true;
+                  if (tmpQuery.isEmpty()) return true;
 
-                  return switch (sortOption) {
+                  return switch (tmpSortOption) {
                     case "Title" ->
-                        m.getTitle() != null && m.getTitle().toLowerCase().contains(query);
+                        m.getTitle() != null && m.getTitle().toLowerCase().contains(tmpQuery);
                     case "Genre" ->
-                        m.getGenre() != null && m.getGenre().toLowerCase().contains(query);
+                        m.getGenre() != null && m.getGenre().toLowerCase().contains(tmpQuery);
                     case "Director" ->
-                        m.getDirector() != null && m.getDirector().toLowerCase().contains(query);
+                        m.getDirector() != null && m.getDirector().toLowerCase().contains(tmpQuery);
                     case "Writer" ->
-                        m.getWriter() != null && m.getWriter().toLowerCase().contains(query);
+                        m.getWriter() != null && m.getWriter().toLowerCase().contains(tmpQuery);
                     case "Producer" ->
-                        m.getProducer() != null && m.getProducer().toLowerCase().contains(query);
+                        m.getProducer() != null && m.getProducer().toLowerCase().contains(tmpQuery);
                     case "Cinematographer" ->
                         m.getCinematographer() != null
-                            && m.getCinematographer().toLowerCase().contains(query);
+                            && m.getCinematographer().toLowerCase().contains(tmpQuery);
                     case "Composer" ->
-                        m.getComposer() != null && m.getComposer().toLowerCase().contains(query);
+                        m.getComposer() != null && m.getComposer().toLowerCase().contains(tmpQuery);
                     default ->
-                        (m.getTitle() != null && m.getTitle().toLowerCase().contains(query))
-                            || (m.getGenre() != null && m.getGenre().toLowerCase().contains(query))
+                        (m.getTitle() != null && m.getTitle().toLowerCase().contains(tmpQuery))
+                            || (m.getGenre() != null && m.getGenre().toLowerCase().contains(tmpQuery))
                             || (m.getDescription() != null
-                                && m.getDescription().toLowerCase().contains(query))
+                                && m.getDescription().toLowerCase().contains(tmpQuery))
                             || (m.getDirector() != null
-                                && m.getDirector().toLowerCase().contains(query))
+                                && m.getDirector().toLowerCase().contains(tmpQuery))
                             || (m.getWriter() != null
-                                && m.getWriter().toLowerCase().contains(query))
+                                && m.getWriter().toLowerCase().contains(tmpQuery))
                             || (m.getProducer() != null
-                                && m.getProducer().toLowerCase().contains(query))
+                                && m.getProducer().toLowerCase().contains(tmpQuery))
                             || (m.getCinematographer() != null
-                                && m.getCinematographer().toLowerCase().contains(query))
+                                && m.getCinematographer().toLowerCase().contains(tmpQuery))
                             || (m.getComposer() != null
-                                && m.getComposer().toLowerCase().contains(query));
+                                && m.getComposer().toLowerCase().contains(tmpQuery));
                   };
                 })
             .collect(Collectors.toList());
 
     // Sort movies according to selected sorting criteria
-    if (sortOption != null) {
-      switch (sortOption) {
+    if (tmpSortOption != null) {
+      switch (tmpSortOption) {
         case "Title (A-Z)" ->
-            filtered.sort(
+            tmpFiltered.sort(
                 Comparator.comparing(
                     Movie::getTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)));
         case "Title (Z-A)" ->
-            filtered.sort(
+            tmpFiltered.sort(
                 Comparator.comparing(
                         Movie::getTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
                     .reversed());
         case "Release Year" ->
-            filtered.sort(
+            tmpFiltered.sort(
                 (m1, m2) -> {
                   // Safe sorting of year that places null-valued release years at the bottom
                   if (m1.getYear() == null && m2.getYear() == null) return 0;
@@ -206,7 +206,7 @@ public class LibraryController implements Refreshable {
                   return Integer.compare(m1.getYear(), m2.getYear());
                 });
         case "Rating (Highest)" ->
-            filtered.sort(
+            tmpFiltered.sort(
                 (m1, m2) -> {
                   // Safe sorting of ratings in descending order, putting nulls at the end
                   if (m1.getRating() == null && m2.getRating() == null) return 0;
@@ -215,64 +215,64 @@ public class LibraryController implements Refreshable {
                   return Integer.compare(m2.getRating(), m1.getRating()); // Descending
                 });
         default ->
-            filtered.sort(
+            tmpFiltered.sort(
                 Comparator.comparing(
                         Movie::getDateAdded, Comparator.nullsLast(Comparator.naturalOrder()))
                     .reversed()); // Default sort for Filters and Recently Added
       }
     }
 
-    java.util.List<javafx.scene.Node> newCards = new java.util.ArrayList<>();
-    for (Movie m : filtered) {
+    java.util.List<javafx.scene.Node> tmpNewCards = new java.util.ArrayList<>();
+    for (Movie tmpM : tmpFiltered) {
       // Retrieve from cache first to avoid slow FXML loading cycles
-      Parent card = cardCache.get(m.getId());
-      MovieCardController controller = controllerCache.get(m.getId());
-      if (card == null) {
+      Parent tmpCard = cardCache.get(tmpM.getId());
+      MovieCardController tmpController = controllerCache.get(tmpM.getId());
+      if (tmpCard == null) {
         try {
-          URL url = getClass().getResource("/io/github/kullik01/kinonode/fxml/MovieCard.fxml");
-          FXMLLoader loader = new FXMLLoader(url);
-          card = loader.load();
-          controller = loader.getController();
+          URL tmpUrl = getClass().getResource("/io/github/kullik01/kinonode/fxml/MovieCard.fxml");
+          FXMLLoader tmpLoader = new FXMLLoader(tmpUrl);
+          tmpCard = tmpLoader.load();
+          tmpController = tmpLoader.getController();
 
-          cardCache.put(m.getId(), card);
-          controllerCache.put(m.getId(), controller);
-        } catch (IOException e) {
-          LOGGER.log(Level.SEVERE, "Failed to load MovieCard FXML", e);
+          cardCache.put(tmpM.getId(), tmpCard);
+          controllerCache.put(tmpM.getId(), tmpController);
+        } catch (IOException tmpE) {
+          LOGGER.log(Level.SEVERE, "Failed to load MovieCard FXML", tmpE);
           continue;
         }
       }
 
-      if (controller != null) {
-        controller.setMovie(m, this::openMovieDetail);
+      if (tmpController != null) {
+        tmpController.setMovie(tmpM, this::openMovieDetail);
       }
-      newCards.add(card);
+      tmpNewCards.add(tmpCard);
     }
-    gridPane.getChildren().setAll(newCards);
+    gridPane.getChildren().setAll(tmpNewCards);
   }
 
   private void openMovieDetail(Movie movie) {
     try {
-      URL url = getClass().getResource("/io/github/kullik01/kinonode/fxml/MovieDetailView.fxml");
-      FXMLLoader loader = new FXMLLoader(url);
-      Parent detailView = loader.load();
+      URL tmpUrl = getClass().getResource("/io/github/kullik01/kinonode/fxml/MovieDetailView.fxml");
+      FXMLLoader tmpLoader = new FXMLLoader(tmpUrl);
+      Parent tmpDetailView = tmpLoader.load();
 
-      MovieDetailController controller = loader.getController();
-      currentMovieDetailController = controller;
-      controller.setMovie(movie);
+      MovieDetailController tmpController = tmpLoader.getController();
+      currentMovieDetailController = tmpController;
+      tmpController.setMovie(movie);
 
       // Replaces library root with the detail view dynamically in StackPane
-      StackPane rootPane = (StackPane) libraryRoot.getParent();
-      if (rootPane != null) {
-        controller.setOnBack(
+      StackPane tmpRootPane = (StackPane) libraryRoot.getParent();
+      if (tmpRootPane != null) {
+        tmpController.setOnBack(
             () -> {
               currentMovieDetailController = null;
-              rootPane.getChildren().setAll(libraryRoot);
+              tmpRootPane.getChildren().setAll(libraryRoot);
               refresh();
             });
-        rootPane.getChildren().setAll(detailView);
+        tmpRootPane.getChildren().setAll(tmpDetailView);
       }
-    } catch (IOException e) {
-      LOGGER.log(Level.SEVERE, "Failed to load MovieDetailView FXML", e);
+    } catch (IOException tmpE) {
+      LOGGER.log(Level.SEVERE, "Failed to load MovieDetailView FXML", tmpE);
     }
   }
 
@@ -290,7 +290,7 @@ public class LibraryController implements Refreshable {
 
     activeScanTask.setOnSucceeded(
         event -> {
-          LibraryScanService.ScanResult result = activeScanTask.getValue();
+          LibraryScanService.ScanResult tmpResult = activeScanTask.getValue();
           progressBar.progressProperty().unbind();
           progressBar.setProgress(0);
           progressArea.setVisible(false);
@@ -301,9 +301,9 @@ public class LibraryController implements Refreshable {
               "Sync Completed",
               "Sync Completed Successfully",
               "Total files scanned: "
-                  + result.totalScanned()
+                  + tmpResult.totalScanned()
                   + "\nNew movies added: "
-                  + result.newAdded());
+                  + tmpResult.newAdded());
         });
 
     activeScanTask.setOnFailed(
@@ -311,12 +311,12 @@ public class LibraryController implements Refreshable {
           progressBar.progressProperty().unbind();
           progressBar.setProgress(0);
           progressArea.setVisible(false);
-          Throwable e = activeScanTask.getException();
+          Throwable tmpE = activeScanTask.getException();
           CustomAlert.showInformation(
               gridPane.getScene().getWindow(),
               "Sync Failed",
               "An error occurred during search",
-              e != null ? e.getMessage() : "Unknown database or file error");
+              tmpE != null ? tmpE.getMessage() : "Unknown database or file error");
         });
 
     activeScanTask.setOnCancelled(
@@ -327,9 +327,9 @@ public class LibraryController implements Refreshable {
         });
 
     // Run sync task in a daemon thread so it doesn't block JavaFX application exit
-    Thread th = new Thread(activeScanTask);
-    th.setDaemon(true);
-    th.start();
+    Thread tmpTh = new Thread(activeScanTask);
+    tmpTh.setDaemon(true);
+    tmpTh.start();
   }
 
   @FXML

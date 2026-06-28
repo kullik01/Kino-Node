@@ -60,19 +60,19 @@ public class SettingsRepository {
    * @return the configuration value, or defaultValue if key is missing or database error occurs
    */
   public String get(String key, String defaultValue) {
-    String query = "SELECT value FROM settings WHERE key = ?";
-    try (PreparedStatement stmt = databaseService.getConnection().prepareStatement(query)) {
-      stmt.setString(1, key);
-      try (ResultSet rs = stmt.executeQuery()) {
+    String tmpQuery = "SELECT value FROM settings WHERE key = ?";
+    try (PreparedStatement tmpStmt = databaseService.getConnection().prepareStatement(tmpQuery)) {
+      tmpStmt.setString(1, key);
+      try (ResultSet tmpRs = tmpStmt.executeQuery()) {
         // Check if a record exists for the given key
-        if (rs.next()) {
-          String val = rs.getString("value");
+        if (tmpRs.next()) {
+          String tmpVal = tmpRs.getString("value");
           // Fallback to default if the retrieved column value is null
-          return val != null ? val : defaultValue;
+          return tmpVal != null ? tmpVal : defaultValue;
         }
       }
-    } catch (SQLException e) {
-      LOGGER.log(Level.SEVERE, "Failed to load setting: " + key, e);
+    } catch (SQLException tmpE) {
+      LOGGER.log(Level.SEVERE, "Failed to load setting: " + key, tmpE);
     }
     return defaultValue;
   }
@@ -86,17 +86,17 @@ public class SettingsRepository {
    */
   public void set(String key, String value) {
     // SQL query that attempts an INSERT and updates the value on key conflict
-    String upsert =
+    String tmpUpsert =
         """
             INSERT INTO settings (key, value) VALUES (?, ?)
             ON CONFLICT(key) DO UPDATE SET value = excluded.value;
             """;
-    try (PreparedStatement stmt = databaseService.getConnection().prepareStatement(upsert)) {
-      stmt.setString(1, key);
-      stmt.setString(2, value);
-      stmt.executeUpdate();
-    } catch (SQLException e) {
-      LOGGER.log(Level.SEVERE, "Failed to save setting: " + key, e);
+    try (PreparedStatement tmpStmt = databaseService.getConnection().prepareStatement(tmpUpsert)) {
+      tmpStmt.setString(1, key);
+      tmpStmt.setString(2, value);
+      tmpStmt.executeUpdate();
+    } catch (SQLException tmpE) {
+      LOGGER.log(Level.SEVERE, "Failed to save setting: " + key, tmpE);
     }
   }
 }

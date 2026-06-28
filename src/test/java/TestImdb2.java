@@ -30,10 +30,10 @@ import io.github.kullik01.kinonode.service.ImdbService;
 
 public class TestImdb2 {
   public static void main(String[] args) {
-    Movie movie = new Movie("C:/test/Halloween 5.mp4", "Halloween 5");
-    ImdbService.enrichMovieData(movie);
-    System.out.println("Title: " + movie.getTitle());
-    System.out.println("Year: " + movie.getYear());
-    System.out.println("Cover: " + movie.getCoverImagePath());
+    Movie tmpMovie = new Movie("C:/test/Halloween 5.mp4", "Halloween 5");
+    ImdbService.enrichMovieData(tmpMovie);
+    System.out.println("Title: " + tmpMovie.getTitle());
+    System.out.println("Year: " + tmpMovie.getYear());
+    System.out.println("Cover: " + tmpMovie.getCoverImagePath());
   }
 }

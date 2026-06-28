@@ -35,12 +35,12 @@ import org.junit.jupiter.api.Test;
 public class ImdbServiceTest {
   @Test
   public void testEnrich() {
-    Movie movie = new Movie("C:/test/Halloween 5.mp4", "Halloween 5");
-    ImdbService.enrichMovieData(movie);
-    System.out.println("Title: " + movie.getTitle());
-    System.out.println("Year: " + movie.getYear());
-    System.out.println("Cover: " + movie.getCoverImagePath());
+    Movie tmpMovie = new Movie("C:/test/Halloween 5.mp4", "Halloween 5");
+    ImdbService.enrichMovieData(tmpMovie);
+    System.out.println("Title: " + tmpMovie.getTitle());
+    System.out.println("Year: " + tmpMovie.getYear());
+    System.out.println("Cover: " + tmpMovie.getCoverImagePath());
 
-    assertNotNull(movie.getYear(), "Year should not be null");
+    assertNotNull(tmpMovie.getYear(), "Year should not be null");
   }
 }

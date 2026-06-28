@@ -77,12 +77,12 @@ public class MainController {
   public void initialize() {
 
     // Load initial theme button state from settings (Default is light)
-    var settingsRepo = AppContext.getInstance().getSettingsRepository();
-    String theme = settingsRepo.get("theme_mode", "light");
+    var tmpSettingsRepo = AppContext.getInstance().getSettingsRepository();
+    String tmpTheme = tmpSettingsRepo.get("theme_mode", "light");
 
     // Unselected (false) = Light Mode (Default)
     // Selected (true) = Dark Mode
-    if (theme != null && theme.equals("dark")) {
+    if (tmpTheme != null && tmpTheme.equals("dark")) {
       btnThemeToggle.setSelected(true);
       btnThemeToggle.setText("🌙");
       if (btnThemeToggle.getTooltip() != null) {
@@ -112,8 +112,8 @@ public class MainController {
     // Query and listen to the window stage once it is rendered to apply maximized styling
     javafx.application.Platform.runLater(
         () -> {
-          Stage stage = (Stage) rootPane.getScene().getWindow();
-          stage
+          Stage tmpStage = (Stage) rootPane.getScene().getWindow();
+          tmpStage
               .maximizedProperty()
               .addListener(
                   (obs, oldVal, newVal) -> {
@@ -156,19 +156,19 @@ public class MainController {
   }
 
   private void toggleTheme(boolean dark) {
-    var settingsRepo = AppContext.getInstance().getSettingsRepository();
+    var tmpSettingsRepo = AppContext.getInstance().getSettingsRepository();
 
     // Set AtlantaFX stylesheet globally depending on selected theme option
     if (dark) {
       btnThemeToggle.setText("🌙");
       if (btnThemeToggle.getTooltip() != null) btnThemeToggle.getTooltip().setText("Dark Mode");
       Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
-      settingsRepo.set("theme_mode", "dark");
+      tmpSettingsRepo.set("theme_mode", "dark");
     } else {
       btnThemeToggle.setText("☀");
       if (btnThemeToggle.getTooltip() != null) btnThemeToggle.getTooltip().setText("Light Mode");
       Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
-      settingsRepo.set("theme_mode", "light");
+      tmpSettingsRepo.set("theme_mode", "light");
     }
   }
 
@@ -184,28 +184,28 @@ public class MainController {
 
   private void loadView(String name, String fxmlPath) {
     try {
-      Parent view = views.get(name);
+      Parent tmpView = views.get(name);
       // FXML file is loaded lazily and cached locally to avoid loading overhead on tab switches
-      if (view == null) {
-        URL url = getClass().getResource(fxmlPath);
-        if (url == null) {
+      if (tmpView == null) {
+        URL tmpUrl = getClass().getResource(fxmlPath);
+        if (tmpUrl == null) {
           throw new IOException("Cannot find FXML: " + fxmlPath);
         }
-        FXMLLoader loader = new FXMLLoader(url);
-        view = loader.load();
-        views.put(name, view);
-        controllers.put(name, loader.getController());
+        FXMLLoader tmpLoader = new FXMLLoader(tmpUrl);
+        tmpView = tmpLoader.load();
+        views.put(name, tmpView);
+        controllers.put(name, tmpLoader.getController());
       }
 
-      contentArea.getChildren().setAll(view);
+      contentArea.getChildren().setAll(tmpView);
 
       // Refresh content if controller is refreshable
-      Object controller = controllers.get(name);
-      if (controller instanceof Refreshable refreshable) {
+      Object tmpController = controllers.get(name);
+      if (tmpController instanceof Refreshable refreshable) {
         refreshable.refresh();
       }
-    } catch (IOException e) {
-      LOGGER.log(Level.SEVERE, "Failed to load view " + name, e);
+    } catch (IOException tmpE) {
+      LOGGER.log(Level.SEVERE, "Failed to load view " + name, tmpE);
     }
   }
 }

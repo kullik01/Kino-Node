@@ -47,14 +47,14 @@ public final class PathUtils {
    *     found
    */
   public static String getFileExtension(File file) {
-    String name = file.getName();
-    int lastIndexOf = name.lastIndexOf(".");
+    String tmpName = file.getName();
+    int tmpLastIndexOf = tmpName.lastIndexOf(".");
     // If there is no dot in the filename, return an empty string
-    if (lastIndexOf == -1) {
+    if (tmpLastIndexOf == -1) {
       return "";
     }
     // Substring from the index after the last dot to the end, then convert to lowercase
-    return name.substring(lastIndexOf + 1).toLowerCase();
+    return tmpName.substring(tmpLastIndexOf + 1).toLowerCase();
   }
 
   /**
@@ -65,13 +65,13 @@ public final class PathUtils {
    *     exists
    */
   public static String getFileNameWithoutExtension(File file) {
-    String name = file.getName();
-    int lastIndexOf = name.lastIndexOf(".");
+    String tmpName = file.getName();
+    int tmpLastIndexOf = tmpName.lastIndexOf(".");
     // If there is no dot in the filename, the entire name is returned
-    if (lastIndexOf == -1) {
-      return name;
+    if (tmpLastIndexOf == -1) {
+      return tmpName;
     }
     // Substring from the start of the filename up to (but not including) the last dot
-    return name.substring(0, lastIndexOf);
+    return tmpName.substring(0, tmpLastIndexOf);
   }
 }

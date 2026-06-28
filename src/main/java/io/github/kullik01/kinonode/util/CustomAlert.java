@@ -60,103 +60,103 @@ public class CustomAlert {
    * @param content the detailed message content for the dialog
    */
   public static void showInformation(Window owner, String title, String header, String content) {
-    Stage stage = new Stage();
+    Stage tmpStage = new Stage();
 
     // Inherit the owner stage characteristics if available
     if (owner instanceof Stage ownerStage) {
-      stage.initOwner(ownerStage);
-      stage.getIcons().addAll(ownerStage.getIcons());
+      tmpStage.initOwner(ownerStage);
+      tmpStage.getIcons().addAll(ownerStage.getIcons());
     }
 
     // Configure stage modality and remove default OS decorations
-    stage.initModality(Modality.WINDOW_MODAL);
-    stage.initStyle(StageStyle.UNDECORATED);
+    tmpStage.initModality(Modality.WINDOW_MODAL);
+    tmpStage.initStyle(StageStyle.UNDECORATED);
 
-    BorderPane root = new BorderPane();
-    root.setStyle(
+    BorderPane tmpRoot = new BorderPane();
+    tmpRoot.setStyle(
         "-fx-background-color: -color-bg-default; -fx-border-color: -color-border-default; -fx-border-width: 1px; -fx-border-radius: 8px; -fx-background-radius: 8px;");
-    root.getStylesheets()
+    tmpRoot.getStylesheets()
         .add(
             CustomAlert.class
                 .getResource("/io/github/kullik01/kinonode/css/theme.css")
                 .toExternalForm());
 
     // Build the Title Bar
-    HBox titleBar = new HBox();
-    titleBar.getStyleClass().add("title-bar");
-    titleBar.setAlignment(Pos.CENTER_LEFT);
+    HBox tmpTitleBar = new HBox();
+    tmpTitleBar.getStyleClass().add("title-bar");
+    tmpTitleBar.setAlignment(Pos.CENTER_LEFT);
 
-    Label titleLabel = new Label(title);
-    titleLabel.getStyleClass().add("title-bar-label");
+    Label tmpTitleLabel = new Label(title);
+    tmpTitleLabel.getStyleClass().add("title-bar-label");
 
-    javafx.scene.image.ImageView logoView =
+    javafx.scene.image.ImageView tmpLogoView =
         new javafx.scene.image.ImageView(
             new javafx.scene.image.Image(
                 CustomAlert.class.getResourceAsStream(
                     "/io/github/kullik01/kinonode/images/logo.png")));
-    logoView.setFitHeight(16);
-    logoView.setFitWidth(16);
+    tmpLogoView.setFitHeight(16);
+    tmpLogoView.setFitWidth(16);
 
-    titleBar.getChildren().add(logoView);
-    titleBar.setSpacing(5);
+    tmpTitleBar.getChildren().add(tmpLogoView);
+    tmpTitleBar.setSpacing(5);
 
-    Region spacer = new Region();
-    HBox.setHgrow(spacer, Priority.ALWAYS);
+    Region tmpSpacer = new Region();
+    HBox.setHgrow(tmpSpacer, Priority.ALWAYS);
 
-    Button closeBtn = new Button("✕");
-    closeBtn.getStyleClass().addAll("window-button", "close-button");
-    closeBtn.setOnAction(e -> stage.close());
+    Button tmpCloseBtn = new Button("✕");
+    tmpCloseBtn.getStyleClass().addAll("window-button", "close-button");
+    tmpCloseBtn.setOnAction(e -> tmpStage.close());
 
-    titleBar.getChildren().addAll(titleLabel, spacer, closeBtn);
+    tmpTitleBar.getChildren().addAll(tmpTitleLabel, tmpSpacer, tmpCloseBtn);
 
     // Build the Content Area
-    VBox contentBox = new VBox(15);
-    contentBox.setPadding(new Insets(20));
-    contentBox.setStyle("-fx-background-radius: 0 0 8px 8px;");
+    VBox tmpContentBox = new VBox(15);
+    tmpContentBox.setPadding(new Insets(20));
+    tmpContentBox.setStyle("-fx-background-radius: 0 0 8px 8px;");
 
-    Label headerLabel = new Label(header);
-    headerLabel.setStyle(
+    Label tmpHeaderLabel = new Label(header);
+    tmpHeaderLabel.setStyle(
         "-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
 
-    Label textLabel = new Label(content);
-    textLabel.setWrapText(true);
-    textLabel.setStyle("-fx-text-fill: -color-fg-muted;");
+    Label tmpTextLabel = new Label(content);
+    tmpTextLabel.setWrapText(true);
+    tmpTextLabel.setStyle("-fx-text-fill: -color-fg-muted;");
 
-    Button okBtn = new Button("OK");
-    okBtn.getStyleClass().add("button-primary");
-    okBtn.setOnAction(e -> stage.close());
-    HBox btnBox = new HBox(okBtn);
-    btnBox.setAlignment(Pos.CENTER_RIGHT);
+    Button tmpOkBtn = new Button("OK");
+    tmpOkBtn.getStyleClass().add("button-primary");
+    tmpOkBtn.setOnAction(e -> tmpStage.close());
+    HBox tmpBtnBox = new HBox(tmpOkBtn);
+    tmpBtnBox.setAlignment(Pos.CENTER_RIGHT);
 
-    contentBox.getChildren().addAll(headerLabel, textLabel, btnBox);
+    tmpContentBox.getChildren().addAll(tmpHeaderLabel, tmpTextLabel, tmpBtnBox);
 
-    root.setTop(titleBar);
-    root.setCenter(contentBox);
+    tmpRoot.setTop(tmpTitleBar);
+    tmpRoot.setCenter(tmpContentBox);
 
     // Implement custom window dragging logic for undecorated stages
-    final double[] xOffset = {0};
-    final double[] yOffset = {0};
-    titleBar.setOnMousePressed(
+    final double[] tmpXOffset = {0};
+    final double[] tmpYOffset = {0};
+    tmpTitleBar.setOnMousePressed(
         event -> {
-          xOffset[0] = stage.getX() - event.getScreenX();
-          yOffset[0] = stage.getY() - event.getScreenY();
+          tmpXOffset[0] = tmpStage.getX() - event.getScreenX();
+          tmpYOffset[0] = tmpStage.getY() - event.getScreenY();
         });
-    titleBar.setOnMouseDragged(
+    tmpTitleBar.setOnMouseDragged(
         event -> {
-          stage.setX(event.getScreenX() + xOffset[0]);
-          stage.setY(event.getScreenY() + yOffset[0]);
+          tmpStage.setX(event.getScreenX() + tmpXOffset[0]);
+          tmpStage.setY(event.getScreenY() + tmpYOffset[0]);
         });
 
-    StackPane wrapper = new StackPane(root);
-    wrapper.setStyle("-fx-background-color: transparent; -fx-padding: 0px;");
+    StackPane tmpWrapper = new StackPane(tmpRoot);
+    tmpWrapper.setStyle("-fx-background-color: transparent; -fx-padding: 0px;");
 
-    Scene scene = new Scene(wrapper);
-    scene.setFill(Color.TRANSPARENT);
-    stage.setScene(scene);
+    Scene tmpScene = new Scene(tmpWrapper);
+    tmpScene.setFill(Color.TRANSPARENT);
+    tmpStage.setScene(tmpScene);
 
-    stage.setWidth(450);
-    stage.setHeight(250);
+    tmpStage.setWidth(450);
+    tmpStage.setHeight(250);
 
-    stage.showAndWait();
+    tmpStage.showAndWait();
   }
 }

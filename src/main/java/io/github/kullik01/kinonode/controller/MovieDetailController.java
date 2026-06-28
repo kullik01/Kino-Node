@@ -146,9 +146,9 @@ public class MovieDetailController {
 
     btnTrailer.setDisable(txtTrailerUrl.getText().trim().isEmpty());
 
-    String filePath = movie.getFilePath();
+    String tmpFilePath = movie.getFilePath();
     btnPlay.setDisable(
-        filePath == null || filePath.trim().isEmpty() || !new File(filePath).exists());
+        tmpFilePath == null || tmpFilePath.trim().isEmpty() || !new File(tmpFilePath).exists());
 
     loadPoster();
     buildRatingWidget();
@@ -168,36 +168,36 @@ public class MovieDetailController {
   }
 
   private void loadPoster() {
-    String path = movie.getCoverImagePath();
-    Image image = null;
-    if (path != null && !path.isBlank()) {
-      File f = new File(path);
-      if (f.exists()) {
+    String tmpPath = movie.getCoverImagePath();
+    Image tmpImage = null;
+    if (tmpPath != null && !tmpPath.isBlank()) {
+      File tmpF = new File(tmpPath);
+      if (tmpF.exists()) {
         try {
-          image = new Image(f.toURI().toURL().toExternalForm(), 240, 360, false, true, true);
-        } catch (MalformedURLException e) {
-          LOGGER.log(Level.WARNING, "Failed to load poster in details: " + path, e);
+          tmpImage = new Image(tmpF.toURI().toURL().toExternalForm(), 240, 360, false, true, true);
+        } catch (MalformedURLException tmpE) {
+          LOGGER.log(Level.WARNING, "Failed to load poster in details: " + tmpPath, tmpE);
         }
       }
     }
 
-    if (image == null) {
+    if (tmpImage == null) {
       if (PLACEHOLDER_IMAGE == null) {
         try {
-          var resource =
+          var tmpResource =
               getClass().getResource("/io/github/kullik01/kinonode/images/placeholder_cover.jpg");
-          if (resource != null) {
-            PLACEHOLDER_IMAGE = new Image(resource.toExternalForm(), 240, 360, false, true, true);
+          if (tmpResource != null) {
+            PLACEHOLDER_IMAGE = new Image(tmpResource.toExternalForm(), 240, 360, false, true, true);
           }
-        } catch (Exception e) {
-          LOGGER.log(Level.WARNING, "Failed to load details placeholder cover", e);
+        } catch (Exception tmpE) {
+          LOGGER.log(Level.WARNING, "Failed to load details placeholder cover", tmpE);
         }
       }
-      image = PLACEHOLDER_IMAGE;
+      tmpImage = PLACEHOLDER_IMAGE;
     }
 
-    if (image != null) {
-      imgPoster.setImage(image);
+    if (tmpImage != null) {
+      imgPoster.setImage(tmpImage);
     }
   }
 
@@ -205,171 +205,171 @@ public class MovieDetailController {
     ratingContainer.getChildren().clear();
 
     // Clear Rating button (Reset to unrated)
-    Button btnClear = new Button("❌");
-    btnClear.setMinSize(
+    Button tmpBtnClear = new Button("❌");
+    tmpBtnClear.setMinSize(
         javafx.scene.control.Button.USE_PREF_SIZE, javafx.scene.control.Button.USE_PREF_SIZE);
-    btnClear.setStyle(
+    tmpBtnClear.setStyle(
         "-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 2px; -fx-font-size: 11px;");
-    Tooltip clearTooltip = new Tooltip("Clear rating (unrated)");
-    clearTooltip.setShowDelay(javafx.util.Duration.millis(250));
-    btnClear.setTooltip(clearTooltip);
-    btnClear.setOnAction(
+    Tooltip tmpClearTooltip = new Tooltip("Clear rating (unrated)");
+    tmpClearTooltip.setShowDelay(javafx.util.Duration.millis(250));
+    tmpBtnClear.setTooltip(tmpClearTooltip);
+    tmpBtnClear.setOnAction(
         e -> {
           currentRating = null;
           updateRatingUI();
         });
-    ratingContainer.getChildren().add(btnClear);
+    ratingContainer.getChildren().add(tmpBtnClear);
 
     // 10 Movie Camera icons (1 to 10) representing the rating value
-    List<Label> reels = new ArrayList<>();
+    List<Label> tmpReels = new ArrayList<>();
     for (int i = 1; i <= 10; i++) {
-      final int score = i;
-      Label reel = new Label("🎥");
-      reel.setMinSize(
+      final int tmpScore = i;
+      Label tmpReel = new Label("🎥");
+      tmpReel.setMinSize(
           javafx.scene.control.Label.USE_PREF_SIZE, javafx.scene.control.Label.USE_PREF_SIZE);
-      reel.getStyleClass().add("rating-reel");
-      reel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-padding: 0 1px;");
-      Tooltip reelTooltip = new Tooltip("Rate " + score + "/10");
-      reelTooltip.setShowDelay(javafx.util.Duration.millis(250));
-      reel.setTooltip(reelTooltip);
-      reel.setOnMouseClicked(
+      tmpReel.getStyleClass().add("rating-reel");
+      tmpReel.setStyle("-fx-cursor: hand; -fx-font-size: 15px; -fx-padding: 0 1px;");
+      Tooltip tmpReelTooltip = new Tooltip("Rate " + tmpScore + "/10");
+      tmpReelTooltip.setShowDelay(javafx.util.Duration.millis(250));
+      tmpReel.setTooltip(tmpReelTooltip);
+      tmpReel.setOnMouseClicked(
           e -> {
-            currentRating = score;
+            currentRating = tmpScore;
             updateRatingUI();
           });
-      reels.add(reel);
-      ratingContainer.getChildren().add(reel);
+      tmpReels.add(tmpReel);
+      ratingContainer.getChildren().add(tmpReel);
     }
 
     // Numerical display label positioned at the end of the rating container
-    Label lblRatingVal = new Label();
-    lblRatingVal.setMinSize(
+    Label tmpLblRatingVal = new Label();
+    tmpLblRatingVal.setMinSize(
         javafx.scene.layout.Region.USE_PREF_SIZE, javafx.scene.layout.Region.USE_PREF_SIZE);
-    lblRatingVal.setStyle(
+    tmpLblRatingVal.setStyle(
         "-fx-text-fill: #ED8B00; -fx-font-weight: bold; -fx-padding: 0 0 0 10px;");
-    ratingContainer.getChildren().add(lblRatingVal);
+    ratingContainer.getChildren().add(tmpLblRatingVal);
 
     updateRatingUI();
   }
 
   private void updateRatingUI() {
     // Get the numerical label node at the very end
-    Label lblRatingVal =
+    Label tmpLblRatingVal =
         (Label) ratingContainer.getChildren().get(ratingContainer.getChildren().size() - 1);
 
-    Button btnClear = (Button) ratingContainer.getChildren().get(0);
+    Button tmpBtnClear = (Button) ratingContainer.getChildren().get(0);
 
     if (currentRating == null) {
-      btnClear.setVisible(false);
+      tmpBtnClear.setVisible(false);
       // Gray out all film reels when unrated
       for (int i = 1; i <= 10; i++) {
-        Label reel = (Label) ratingContainer.getChildren().get(i);
-        reel.setStyle(
+        Label tmpReel = (Label) ratingContainer.getChildren().get(i);
+        tmpReel.setStyle(
             "-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #444444; -fx-opacity: 0.3;");
       }
-      lblRatingVal.setText("");
+      tmpLblRatingVal.setText("");
     } else {
-      btnClear.setVisible(true);
+      tmpBtnClear.setVisible(true);
       // Highlight rating reels up to the current selected rating level
       for (int i = 1; i <= 10; i++) {
-        Label reel = (Label) ratingContainer.getChildren().get(i);
+        Label tmpReel = (Label) ratingContainer.getChildren().get(i);
         if (i <= currentRating) {
-          reel.setStyle(
+          tmpReel.setStyle(
               "-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #ED8B00; -fx-opacity: 1.0;");
         } else {
-          reel.setStyle(
+          tmpReel.setStyle(
               "-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #444444; -fx-opacity: 0.3;");
         }
       }
-      lblRatingVal.setText(currentRating + "/10");
-      lblRatingVal.setStyle(
+      tmpLblRatingVal.setText(currentRating + "/10");
+      tmpLblRatingVal.setStyle(
           "-fx-text-fill: #ED8B00; -fx-font-weight: bold; -fx-padding: 0 0 0 10px;");
     }
   }
 
   private void refreshWatchlistStatus() {
-    List<Watchlist> all = watchlistRepository.findAll();
-    List<String> inWatchlists =
-        all.stream()
+    List<Watchlist> tmpAll = watchlistRepository.findAll();
+    List<String> tmpInWatchlists =
+        tmpAll.stream()
             .filter(w -> w.getMovies().stream().anyMatch(m -> m.getId().equals(movie.getId())))
             .map(Watchlist::getName)
             .collect(Collectors.toList());
 
-    if (inWatchlists.isEmpty()) {
+    if (tmpInWatchlists.isEmpty()) {
       lblWatchlistsList.setText("None");
     } else {
-      lblWatchlistsList.setText(String.join(", ", inWatchlists));
+      lblWatchlistsList.setText(String.join(", ", tmpInWatchlists));
     }
 
     // Rebuild Watchlists Context Menu
     menuWatchlists.getItems().clear();
-    for (Watchlist w : all) {
-      boolean alreadyIn = w.getMovies().stream().anyMatch(m -> m.getId().equals(movie.getId()));
-      if (!alreadyIn) {
-        MenuItem item = new MenuItem("Add to: " + w.getName());
-        item.setOnAction(
+    for (Watchlist tmpW : tmpAll) {
+      boolean tmpAlreadyIn = tmpW.getMovies().stream().anyMatch(m -> m.getId().equals(movie.getId()));
+      if (!tmpAlreadyIn) {
+        MenuItem tmpItem = new MenuItem("Add to: " + tmpW.getName());
+        tmpItem.setOnAction(
             e -> {
-              watchlistRepository.addMovieToWatchlist(w.getId(), movie.getId());
+              watchlistRepository.addMovieToWatchlist(tmpW.getId(), movie.getId());
               refreshWatchlistStatus();
-              showStatus("Added to watchlist " + w.getName());
+              showStatus("Added to watchlist " + tmpW.getName());
             });
-        menuWatchlists.getItems().add(item);
+        menuWatchlists.getItems().add(tmpItem);
       } else {
-        MenuItem item = new MenuItem("➖ Remove from: " + w.getName());
-        item.setOnAction(
+        MenuItem tmpItem = new MenuItem("➖ Remove from: " + tmpW.getName());
+        tmpItem.setOnAction(
             e -> {
               // Confirm removal with warning dialog
-              Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-              javafx.stage.Stage stage =
-                  (javafx.stage.Stage) alert.getDialogPane().getScene().getWindow();
-              stage
+              Alert tmpAlert = new Alert(Alert.AlertType.CONFIRMATION);
+              javafx.stage.Stage tmpStage =
+                  (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
+              tmpStage
                   .getIcons()
                   .add(
                       new javafx.scene.image.Image(
                           getClass()
                               .getResourceAsStream(
                                   "/io/github/kullik01/kinonode/images/logo.png")));
-              alert.setTitle("Remove Movie");
-              alert.setHeaderText("Remove from Watchlist");
-              alert.setContentText(
-                  "Are you sure you want to remove this movie from " + w.getName() + "?");
+              tmpAlert.setTitle("Remove Movie");
+              tmpAlert.setHeaderText("Remove from Watchlist");
+              tmpAlert.setContentText(
+                  "Are you sure you want to remove this movie from " + tmpW.getName() + "?");
 
-              javafx.scene.image.ImageView customIcon =
+              javafx.scene.image.ImageView tmpCustomIcon =
                   new javafx.scene.image.ImageView(
                       new javafx.scene.image.Image(
                           getClass()
                               .getResourceAsStream(
                                   "/io/github/kullik01/kinonode/images/removal_icon.png")));
-              customIcon.setFitHeight(48);
-              customIcon.setFitWidth(48);
-              alert.getDialogPane().setGraphic(customIcon);
+              tmpCustomIcon.setFitHeight(48);
+              tmpCustomIcon.setFitWidth(48);
+              tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
 
-              alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-              Optional<ButtonType> alertResult = alert.showAndWait();
-              if (alertResult.isPresent() && alertResult.get() == ButtonType.OK) {
-                watchlistRepository.removeMovieFromWatchlist(w.getId(), movie.getId());
+              tmpAlert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+              Optional<ButtonType> tmpAlertResult = tmpAlert.showAndWait();
+              if (tmpAlertResult.isPresent() && tmpAlertResult.get() == ButtonType.OK) {
+                watchlistRepository.removeMovieFromWatchlist(tmpW.getId(), movie.getId());
                 refreshWatchlistStatus();
-                showStatus("Removed from watchlist " + w.getName());
+                showStatus("Removed from watchlist " + tmpW.getName());
               }
             });
-        menuWatchlists.getItems().add(item);
+        menuWatchlists.getItems().add(tmpItem);
       }
     }
 
     // Option to create new watchlist on the fly
-    MenuItem createNew = new MenuItem("➕ Create New Watchlist...");
-    createNew.setOnAction(
+    MenuItem tmpCreateNew = new MenuItem("➕ Create New Watchlist...");
+    tmpCreateNew.setOnAction(
         e -> {
-          Optional<String> result =
+          Optional<String> tmpResult =
               showWatchlistDialog("New Watchlist", "Create a new watchlist", "", -1);
-          result.ifPresent(
+          tmpResult.ifPresent(
               name -> {
-                String cleanName = name.trim();
-                if (!cleanName.isEmpty()) {
-                  if (validateWatchlistName(cleanName, -1)) {
-                    Watchlist nw = watchlistRepository.insert(new Watchlist(cleanName));
-                    if (nw.getId() != null) {
-                      watchlistRepository.addMovieToWatchlist(nw.getId(), movie.getId());
+                String tmpCleanName = name.trim();
+                if (!tmpCleanName.isEmpty()) {
+                  if (validateWatchlistName(tmpCleanName, -1)) {
+                    Watchlist tmpNw = watchlistRepository.insert(new Watchlist(tmpCleanName));
+                    if (tmpNw.getId() != null) {
+                      watchlistRepository.addMovieToWatchlist(tmpNw.getId(), movie.getId());
                       refreshWatchlistStatus();
                       showStatus("Created watchlist and added movie.");
                     }
@@ -377,125 +377,125 @@ public class MovieDetailController {
                 }
               });
         });
-    menuWatchlists.getItems().add(createNew);
+    menuWatchlists.getItems().add(tmpCreateNew);
   }
 
   private Optional<String> showWatchlistDialog(
       String title, String header, String defaultText, int currentId) {
-    Dialog<String> dialog = new Dialog<>();
-    dialog.setTitle(title);
-    dialog.setHeaderText(header);
+    Dialog<String> tmpDialog = new Dialog<>();
+    tmpDialog.setTitle(title);
+    tmpDialog.setHeaderText(header);
 
-    dialog.getDialogPane().setPrefSize(480, 280);
-    dialog.getDialogPane().setMinSize(480, 280);
+    tmpDialog.getDialogPane().setPrefSize(480, 280);
+    tmpDialog.getDialogPane().setMinSize(480, 280);
 
-    javafx.stage.Stage stage = (javafx.stage.Stage) dialog.getDialogPane().getScene().getWindow();
-    stage
+    javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpDialog.getDialogPane().getScene().getWindow();
+    tmpStage
         .getIcons()
         .add(
             new javafx.scene.image.Image(
                 getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
 
-    ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-    dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
+    ButtonType tmpOkButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+    tmpDialog.getDialogPane().getButtonTypes().addAll(tmpOkButtonType, ButtonType.CANCEL);
 
-    VBox vbox = new VBox(5);
-    Label errorLabel = new Label();
-    errorLabel.setWrapText(true);
-    errorLabel.setPrefWidth(430);
-    errorLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-    errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
-    errorLabel.setVisible(false);
+    VBox tmpVbox = new VBox(5);
+    Label tmpErrorLabel = new Label();
+    tmpErrorLabel.setWrapText(true);
+    tmpErrorLabel.setPrefWidth(430);
+    tmpErrorLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+    tmpErrorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+    tmpErrorLabel.setVisible(false);
 
-    TextField textField = new TextField(defaultText);
-    textField.setPromptText("Watchlist Name");
+    TextField tmpTextField = new TextField(defaultText);
+    tmpTextField.setPromptText("Watchlist Name");
 
-    vbox.getChildren().addAll(errorLabel, textField);
-    dialog.getDialogPane().setContent(vbox);
+    tmpVbox.getChildren().addAll(tmpErrorLabel, tmpTextField);
+    tmpDialog.getDialogPane().setContent(tmpVbox);
 
-    javafx.scene.Node okButton = dialog.getDialogPane().lookupButton(okButtonType);
-    okButton.setDisable(defaultText.trim().isEmpty() || defaultText.length() > 30);
+    javafx.scene.Node tmpOkButton = tmpDialog.getDialogPane().lookupButton(tmpOkButtonType);
+    tmpOkButton.setDisable(defaultText.trim().isEmpty() || defaultText.length() > 30);
 
-    textField
+    tmpTextField
         .textProperty()
         .addListener(
             (observable, oldValue, newValue) -> {
               if (newValue.length() > 30) {
-                textField.setText(oldValue);
+                tmpTextField.setText(oldValue);
                 return;
               }
               // Enforce ASCII-only characters in watchlist names
               if (!newValue.matches("\\A\\p{ASCII}*\\z")) {
-                errorLabel.setText(
+                tmpErrorLabel.setText(
                     "The text you entered is not ASCII code. Only standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space) can be used.");
-                errorLabel.setVisible(true);
-                okButton.setDisable(true);
+                tmpErrorLabel.setVisible(true);
+                tmpOkButton.setDisable(true);
               } else {
-                boolean duplicate = false;
-                List<Watchlist> watchlists = watchlistRepository.findAll();
-                for (Watchlist w : watchlists) {
-                  if (w.getName().equalsIgnoreCase(newValue.trim())) {
-                    if (w.getId() != null && w.getId() != currentId) {
-                      duplicate = true;
+                boolean tmpDuplicate = false;
+                List<Watchlist> tmpWatchlists = watchlistRepository.findAll();
+                for (Watchlist tmpW : tmpWatchlists) {
+                  if (tmpW.getName().equalsIgnoreCase(newValue.trim())) {
+                    if (tmpW.getId() != null && tmpW.getId() != currentId) {
+                      tmpDuplicate = true;
                       break;
                     }
                   }
                 }
 
-                if (duplicate) {
-                  errorLabel.setText(
+                if (tmpDuplicate) {
+                  tmpErrorLabel.setText(
                       "A watchlist with this name already exists. Please choose a different name.");
-                  errorLabel.setVisible(true);
-                  okButton.setDisable(true);
+                  tmpErrorLabel.setVisible(true);
+                  tmpOkButton.setDisable(true);
                 } else {
-                  errorLabel.setVisible(false);
-                  okButton.setDisable(newValue.trim().isEmpty());
+                  tmpErrorLabel.setVisible(false);
+                  tmpOkButton.setDisable(newValue.trim().isEmpty());
                 }
               }
             });
 
-    dialog.setResultConverter(
+    tmpDialog.setResultConverter(
         dialogButton -> {
-          if (dialogButton == okButtonType) {
-            return textField.getText();
+          if (dialogButton == tmpOkButtonType) {
+            return tmpTextField.getText();
           }
           return null;
         });
 
-    return dialog.showAndWait();
+    return tmpDialog.showAndWait();
   }
 
   private boolean validateWatchlistName(String cleanName, int currentId) {
-    List<Watchlist> watchlists = watchlistRepository.findAll();
-    for (Watchlist w : watchlists) {
-      if (w.getName().equalsIgnoreCase(cleanName)) {
-        if (w.getId() != null && w.getId() != currentId) {
-          Alert alert = new Alert(Alert.AlertType.ERROR);
-          javafx.stage.Stage stage =
-              (javafx.stage.Stage) alert.getDialogPane().getScene().getWindow();
-          stage
+    List<Watchlist> tmpWatchlists = watchlistRepository.findAll();
+    for (Watchlist tmpW : tmpWatchlists) {
+      if (tmpW.getName().equalsIgnoreCase(cleanName)) {
+        if (tmpW.getId() != null && tmpW.getId() != currentId) {
+          Alert tmpAlert = new Alert(Alert.AlertType.ERROR);
+          javafx.stage.Stage tmpStage =
+              (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
+          tmpStage
               .getIcons()
               .add(
                   new javafx.scene.image.Image(
                       getClass()
                           .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
-          alert.setTitle("Validation Error");
-          alert.setHeaderText("Duplicate Watchlist");
-          alert.setContentText(
+          tmpAlert.setTitle("Validation Error");
+          tmpAlert.setHeaderText("Duplicate Watchlist");
+          tmpAlert.setContentText(
               "A watchlist with this name already exists. Please choose a different name.");
 
-          javafx.scene.image.ImageView customIcon =
+          javafx.scene.image.ImageView tmpCustomIcon =
               new javafx.scene.image.ImageView(
                   new javafx.scene.image.Image(
                       getClass()
                           .getResourceAsStream(
                               "/io/github/kullik01/kinonode/images/error_icon.png")));
-          customIcon.setFitHeight(48);
-          customIcon.setFitWidth(48);
-          alert.getDialogPane().setGraphic(customIcon);
+          tmpCustomIcon.setFitHeight(48);
+          tmpCustomIcon.setFitWidth(48);
+          tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
 
-          alert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-          alert.showAndWait();
+          tmpAlert.getDialogPane().setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+          tmpAlert.showAndWait();
           return false;
         }
       }
@@ -505,41 +505,41 @@ public class MovieDetailController {
 
   @FXML
   private void changePoster() {
-    FileChooser chooser = new FileChooser();
-    chooser.setTitle("Choose Poster Image");
-    chooser
+    FileChooser tmpChooser = new FileChooser();
+    tmpChooser.setTitle("Choose Poster Image");
+    tmpChooser
         .getExtensionFilters()
         .add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif"));
 
-    File selected = chooser.showOpenDialog(imgPoster.getScene().getWindow());
-    if (selected != null) {
+    File tmpSelected = tmpChooser.showOpenDialog(imgPoster.getScene().getWindow());
+    if (tmpSelected != null) {
       try {
-        Path dbPath = AppContext.getInstance().getDatabaseService().getDbPath();
-        Path coversDir = dbPath.getParent().resolve("covers");
+        Path tmpDbPath = AppContext.getInstance().getDatabaseService().getDbPath();
+        Path tmpCoversDir = tmpDbPath.getParent().resolve("covers");
         // Ensure covers folder directory is present beside the database file
-        if (!Files.exists(coversDir)) {
-          Files.createDirectories(coversDir);
+        if (!Files.exists(tmpCoversDir)) {
+          Files.createDirectories(tmpCoversDir);
         }
 
-        String ext = PathUtils.getFileExtension(selected);
-        if (ext.isEmpty()) ext = "jpg";
+        String tmpExt = PathUtils.getFileExtension(tmpSelected);
+        if (tmpExt.isEmpty()) tmpExt = "jpg";
 
         // Generate unique filename with timestamp to bypass cover art browser caching issues
-        String filename = "cover_" + movie.getId() + "_" + System.currentTimeMillis() + "." + ext;
-        Path destPath = coversDir.resolve(filename);
+        String tmpFilename = "cover_" + movie.getId() + "_" + System.currentTimeMillis() + "." + tmpExt;
+        Path tmpDestPath = tmpCoversDir.resolve(tmpFilename);
 
-        Files.copy(selected.toPath(), destPath, StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(tmpSelected.toPath(), tmpDestPath, StandardCopyOption.REPLACE_EXISTING);
 
-        String newPath = destPath.toAbsolutePath().toString().replace("\\", "/");
-        movie.setCoverImagePath(newPath);
+        String tmpNewPath = tmpDestPath.toAbsolutePath().toString().replace("\\", "/");
+        movie.setCoverImagePath(tmpNewPath);
 
         // Reload image directly in details screen
         imgPoster.setImage(
-            new Image(destPath.toUri().toURL().toExternalForm(), 240, 360, false, true, true));
+            new Image(tmpDestPath.toUri().toURL().toExternalForm(), 240, 360, false, true, true));
         showStatus("Poster image updated.");
-      } catch (IOException e) {
-        LOGGER.log(Level.SEVERE, "Failed to copy cover poster file", e);
-        showStatus("Error saving poster: " + e.getMessage());
+      } catch (IOException tmpE) {
+        LOGGER.log(Level.SEVERE, "Failed to copy cover poster file", tmpE);
+        showStatus("Error saving poster: " + tmpE.getMessage());
       }
     }
   }
@@ -551,52 +551,52 @@ public class MovieDetailController {
       // process
       AppContext.getInstance().getPlaybackService().play(movie.getFilePath());
       showStatus("Opening external player...");
-    } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Failed to launch external media player", e);
-      Alert alert = new Alert(Alert.AlertType.ERROR);
-      javafx.stage.Stage stage = (javafx.stage.Stage) alert.getDialogPane().getScene().getWindow();
-      stage
+    } catch (Exception tmpE) {
+      LOGGER.log(Level.SEVERE, "Failed to launch external media player", tmpE);
+      Alert tmpAlert = new Alert(Alert.AlertType.ERROR);
+      javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
+      tmpStage
           .getIcons()
           .add(
               new javafx.scene.image.Image(
                   getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
-      alert.setTitle("Playback Failed");
-      alert.setHeaderText("Could not launch external media player");
-      alert.setContentText(e.getMessage());
+      tmpAlert.setTitle("Playback Failed");
+      tmpAlert.setHeaderText("Could not launch external media player");
+      tmpAlert.setContentText(tmpE.getMessage());
 
-      javafx.scene.image.ImageView customIcon =
+      javafx.scene.image.ImageView tmpCustomIcon =
           new javafx.scene.image.ImageView(
               new javafx.scene.image.Image(
                   getClass()
                       .getResourceAsStream("/io/github/kullik01/kinonode/images/error_icon.png")));
-      customIcon.setFitHeight(48);
-      customIcon.setFitWidth(48);
-      alert.getDialogPane().setGraphic(customIcon);
+      tmpCustomIcon.setFitHeight(48);
+      tmpCustomIcon.setFitWidth(48);
+      tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
 
-      alert.showAndWait();
+      tmpAlert.showAndWait();
     }
   }
 
   @FXML
   private void watchTrailer() {
-    String url = txtTrailerUrl.getText().trim();
-    if (url.isEmpty()) return;
+    String tmpUrl = txtTrailerUrl.getText().trim();
+    if (tmpUrl.isEmpty()) return;
 
-    if (!url.startsWith("http://") && !url.startsWith("https://")) {
-      url = "https://" + url;
+    if (!tmpUrl.startsWith("http://") && !tmpUrl.startsWith("https://")) {
+      tmpUrl = "https://" + tmpUrl;
     }
 
     try {
       // Open default web browser pointing to trailer link
       if (java.awt.Desktop.isDesktopSupported()
           && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
-        java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
+        java.awt.Desktop.getDesktop().browse(new java.net.URI(tmpUrl));
         showStatus("Opening trailer link in browser...");
       } else {
         showStatus("System web browser action not supported on this platform.");
       }
-    } catch (Exception e) {
-      LOGGER.log(Level.WARNING, "Failed to open browser trailer link", e);
+    } catch (Exception tmpE) {
+      LOGGER.log(Level.WARNING, "Failed to open browser trailer link", tmpE);
       showStatus("Failed to open browser.");
     }
   }
@@ -613,61 +613,61 @@ public class MovieDetailController {
       TextInputControl control,
       InputConstraint constraint,
       java.util.function.Consumer<String> updater) {
-    Dialog<String> dialog = new Dialog<>();
-    dialog.setTitle("Edit " + title);
-    dialog.setHeaderText("Edit " + fieldName);
+    Dialog<String> tmpDialog = new Dialog<>();
+    tmpDialog.setTitle("Edit " + title);
+    tmpDialog.setHeaderText("Edit " + fieldName);
 
-    dialog.getDialogPane().setPrefSize(480, 280);
-    dialog.getDialogPane().setMinSize(480, 280);
+    tmpDialog.getDialogPane().setPrefSize(480, 280);
+    tmpDialog.getDialogPane().setMinSize(480, 280);
 
-    javafx.stage.Stage stage = (javafx.stage.Stage) dialog.getDialogPane().getScene().getWindow();
-    stage
+    javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpDialog.getDialogPane().getScene().getWindow();
+    tmpStage
         .getIcons()
         .add(
             new javafx.scene.image.Image(
                 getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
 
-    javafx.scene.image.ImageView customIcon =
+    javafx.scene.image.ImageView tmpCustomIcon =
         new javafx.scene.image.ImageView(
             new javafx.scene.image.Image(
                 getClass()
                     .getResourceAsStream("/io/github/kullik01/kinonode/images/question_mark.png")));
-    customIcon.setFitHeight(48);
-    customIcon.setFitWidth(48);
-    dialog.getDialogPane().setGraphic(customIcon);
+    tmpCustomIcon.setFitHeight(48);
+    tmpCustomIcon.setFitWidth(48);
+    tmpDialog.getDialogPane().setGraphic(tmpCustomIcon);
 
-    ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-    dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
+    ButtonType tmpOkButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+    tmpDialog.getDialogPane().getButtonTypes().addAll(tmpOkButtonType, ButtonType.CANCEL);
 
-    VBox vbox = new VBox(5);
-    Label errorLabel = new Label();
-    errorLabel.setWrapText(true);
-    errorLabel.setPrefWidth(430);
-    errorLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-    errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+    VBox tmpVbox = new VBox(5);
+    Label tmpErrorLabel = new Label();
+    tmpErrorLabel.setWrapText(true);
+    tmpErrorLabel.setPrefWidth(430);
+    tmpErrorLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+    tmpErrorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
 
-    String defaultText = control.getText() != null ? control.getText().trim() : "";
+    String tmpDefaultText = control.getText() != null ? control.getText().trim() : "";
 
-    if (!defaultText.isEmpty()) {
-      errorLabel.setText("This is the current " + fieldName + " and must be updated by a new one.");
-      errorLabel.setVisible(true);
+    if (!tmpDefaultText.isEmpty()) {
+      tmpErrorLabel.setText("This is the current " + fieldName + " and must be updated by a new one.");
+      tmpErrorLabel.setVisible(true);
     } else {
-      errorLabel.setVisible(false);
+      tmpErrorLabel.setVisible(false);
     }
 
-    TextInputControl inputField;
+    TextInputControl tmpInputField;
     if (control instanceof TextArea) {
-      TextArea ta = new TextArea(defaultText);
-      ta.setWrapText(true);
-      ta.setPrefHeight(100);
-      inputField = ta;
+      TextArea tmpTa = new TextArea(tmpDefaultText);
+      tmpTa.setWrapText(true);
+      tmpTa.setPrefHeight(100);
+      tmpInputField = tmpTa;
     } else {
-      inputField = new TextField(defaultText);
+      tmpInputField = new TextField(tmpDefaultText);
     }
 
     // Set formatting constraints on user input
     if (constraint == InputConstraint.NUMBERS_ONLY) {
-      inputField.setTextFormatter(
+      tmpInputField.setTextFormatter(
           new TextFormatter<>(
               change -> {
                 if (change.getText().matches("\\d*")) {
@@ -676,7 +676,7 @@ public class MovieDetailController {
                 return null;
               }));
     } else if (constraint == InputConstraint.NO_NUMBERS) {
-      inputField.setTextFormatter(
+      tmpInputField.setTextFormatter(
           new TextFormatter<>(
               change -> {
                 if (change.getText().matches("[^0-9]*")) {
@@ -686,49 +686,49 @@ public class MovieDetailController {
               }));
     }
 
-    vbox.getChildren()
-        .addAll(new Label("Enter the new " + fieldName + ":"), errorLabel, inputField);
-    dialog.getDialogPane().setContent(vbox);
+    tmpVbox.getChildren()
+        .addAll(new Label("Enter the new " + fieldName + ":"), tmpErrorLabel, tmpInputField);
+    tmpDialog.getDialogPane().setContent(tmpVbox);
 
-    javafx.scene.Node okButton = dialog.getDialogPane().lookupButton(okButtonType);
-    okButton.setDisable(true);
+    javafx.scene.Node tmpOkButton = tmpDialog.getDialogPane().lookupButton(tmpOkButtonType);
+    tmpOkButton.setDisable(true);
 
-    inputField
+    tmpInputField
         .textProperty()
         .addListener(
             (observable, oldValue, newValue) -> {
-              String val = newValue.trim();
-              boolean isUnchanged = val.equals(defaultText);
+              String tmpVal = newValue.trim();
+              boolean tmpIsUnchanged = tmpVal.equals(tmpDefaultText);
 
               // Require input content to be ASCII only
               if (!newValue.matches("\\A\\p{ASCII}*\\z")) {
-                errorLabel.setText(
+                tmpErrorLabel.setText(
                     "The text you entered is not ASCII code. Only standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space) can be used.");
-                errorLabel.setVisible(true);
-                okButton.setDisable(true);
-              } else if (isUnchanged) {
-                if (!defaultText.isEmpty()) {
-                  errorLabel.setText(
+                tmpErrorLabel.setVisible(true);
+                tmpOkButton.setDisable(true);
+              } else if (tmpIsUnchanged) {
+                if (!tmpDefaultText.isEmpty()) {
+                  tmpErrorLabel.setText(
                       "This is the current " + fieldName + " and must be updated by a new one.");
-                  errorLabel.setVisible(true);
+                  tmpErrorLabel.setVisible(true);
                 }
-                okButton.setDisable(true);
+                tmpOkButton.setDisable(true);
               } else {
-                errorLabel.setVisible(false);
-                okButton.setDisable(false);
+                tmpErrorLabel.setVisible(false);
+                tmpOkButton.setDisable(false);
               }
             });
 
-    dialog.setResultConverter(
+    tmpDialog.setResultConverter(
         dialogButton -> {
-          if (dialogButton == okButtonType) {
-            return inputField.getText();
+          if (dialogButton == tmpOkButtonType) {
+            return tmpInputField.getText();
           }
           return null;
         });
 
-    java.util.Optional<String> result = dialog.showAndWait();
-    result.ifPresent(
+    java.util.Optional<String> tmpResult = tmpDialog.showAndWait();
+    tmpResult.ifPresent(
         val -> {
           String newVal = val.trim();
           control.setText(newVal);
@@ -758,7 +758,7 @@ public class MovieDetailController {
         val -> {
           try {
             movie.setYear(val.isEmpty() ? null : Integer.parseInt(val));
-          } catch (NumberFormatException e) {
+          } catch (NumberFormatException tmpE) {
             showStatus("Year must be a number!");
           }
         });
@@ -836,97 +836,97 @@ public class MovieDetailController {
 
   @FXML
   private void editTrailerUrl() {
-    Dialog<String> dialog = new Dialog<>();
-    dialog.setTitle("Edit Trailer Link");
-    dialog.setHeaderText("YouTube Trailer URL");
+    Dialog<String> tmpDialog = new Dialog<>();
+    tmpDialog.setTitle("Edit Trailer Link");
+    tmpDialog.setHeaderText("YouTube Trailer URL");
 
-    dialog.getDialogPane().setPrefSize(480, 280);
-    dialog.getDialogPane().setMinSize(480, 280);
+    tmpDialog.getDialogPane().setPrefSize(480, 280);
+    tmpDialog.getDialogPane().setMinSize(480, 280);
 
-    javafx.stage.Stage stage = (javafx.stage.Stage) dialog.getDialogPane().getScene().getWindow();
-    stage
+    javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpDialog.getDialogPane().getScene().getWindow();
+    tmpStage
         .getIcons()
         .add(
             new javafx.scene.image.Image(
                 getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
 
-    javafx.scene.image.ImageView customIcon =
+    javafx.scene.image.ImageView tmpCustomIcon =
         new javafx.scene.image.ImageView(
             new javafx.scene.image.Image(
                 getClass()
                     .getResourceAsStream("/io/github/kullik01/kinonode/images/question_mark.png")));
-    customIcon.setFitHeight(48);
-    customIcon.setFitWidth(48);
-    dialog.getDialogPane().setGraphic(customIcon);
+    tmpCustomIcon.setFitHeight(48);
+    tmpCustomIcon.setFitWidth(48);
+    tmpDialog.getDialogPane().setGraphic(tmpCustomIcon);
 
-    ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-    dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
+    ButtonType tmpOkButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+    tmpDialog.getDialogPane().getButtonTypes().addAll(tmpOkButtonType, ButtonType.CANCEL);
 
-    VBox vbox = new VBox(5);
-    Label errorLabel = new Label();
-    errorLabel.setWrapText(true);
-    errorLabel.setPrefWidth(430);
-    errorLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-    errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+    VBox tmpVbox = new VBox(5);
+    Label tmpErrorLabel = new Label();
+    tmpErrorLabel.setWrapText(true);
+    tmpErrorLabel.setPrefWidth(430);
+    tmpErrorLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+    tmpErrorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
 
-    String defaultText = txtTrailerUrl.getText().trim();
+    String tmpDefaultText = txtTrailerUrl.getText().trim();
 
-    if (!defaultText.isEmpty()) {
-      errorLabel.setText("This is the current YouTube link and must be updated by a new one.");
-      errorLabel.setVisible(true);
+    if (!tmpDefaultText.isEmpty()) {
+      tmpErrorLabel.setText("This is the current YouTube link and must be updated by a new one.");
+      tmpErrorLabel.setVisible(true);
     } else {
-      errorLabel.setVisible(false);
+      tmpErrorLabel.setVisible(false);
     }
 
-    TextField textField = new TextField(defaultText);
-    textField.setPromptText("https://www.youtube.com/watch?v=...");
+    TextField tmpTextField = new TextField(tmpDefaultText);
+    tmpTextField.setPromptText("https://www.youtube.com/watch?v=...");
 
-    vbox.getChildren()
-        .addAll(new Label("Enter the new YouTube Trailer Link:"), errorLabel, textField);
-    dialog.getDialogPane().setContent(vbox);
+    tmpVbox.getChildren()
+        .addAll(new Label("Enter the new YouTube Trailer Link:"), tmpErrorLabel, tmpTextField);
+    tmpDialog.getDialogPane().setContent(tmpVbox);
 
-    javafx.scene.Node okButton = dialog.getDialogPane().lookupButton(okButtonType);
-    okButton.setDisable(true);
+    javafx.scene.Node tmpOkButton = tmpDialog.getDialogPane().lookupButton(tmpOkButtonType);
+    tmpOkButton.setDisable(true);
 
-    textField
+    tmpTextField
         .textProperty()
         .addListener(
             (observable, oldValue, newValue) -> {
-              String url = newValue.trim();
-              boolean isUnchanged = url.equalsIgnoreCase(defaultText);
+              String tmpUrl = newValue.trim();
+              boolean tmpIsUnchanged = tmpUrl.equalsIgnoreCase(tmpDefaultText);
 
               if (!newValue.matches("\\A\\p{ASCII}*\\z")) {
-                errorLabel.setText(
+                tmpErrorLabel.setText(
                     "The text you entered is not ASCII code. Only standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space) can be used.");
-                errorLabel.setVisible(true);
-                okButton.setDisable(true);
-              } else if (isUnchanged && !defaultText.isEmpty()) {
-                errorLabel.setText(
+                tmpErrorLabel.setVisible(true);
+                tmpOkButton.setDisable(true);
+              } else if (tmpIsUnchanged && !tmpDefaultText.isEmpty()) {
+                tmpErrorLabel.setText(
                     "This is the current YouTube link and must be updated by a new one.");
-                errorLabel.setVisible(true);
-                okButton.setDisable(true);
-              } else if (!url.isEmpty()
-                  && !url.contains("youtube.com")
-                  && !url.contains("youtu.be")) {
-                errorLabel.setText("Trailer Link must be a valid YouTube URL.");
-                errorLabel.setVisible(true);
-                okButton.setDisable(true);
+                tmpErrorLabel.setVisible(true);
+                tmpOkButton.setDisable(true);
+              } else if (!tmpUrl.isEmpty()
+                  && !tmpUrl.contains("youtube.com")
+                  && !tmpUrl.contains("youtu.be")) {
+                tmpErrorLabel.setText("Trailer Link must be a valid YouTube URL.");
+                tmpErrorLabel.setVisible(true);
+                tmpOkButton.setDisable(true);
               } else {
-                errorLabel.setVisible(false);
-                okButton.setDisable(url.isEmpty());
+                tmpErrorLabel.setVisible(false);
+                tmpOkButton.setDisable(tmpUrl.isEmpty());
               }
             });
 
-    dialog.setResultConverter(
+    tmpDialog.setResultConverter(
         dialogButton -> {
-          if (dialogButton == okButtonType) {
-            return textField.getText();
+          if (dialogButton == tmpOkButtonType) {
+            return tmpTextField.getText();
           }
           return null;
         });
 
-    java.util.Optional<String> result = dialog.showAndWait();
-    result.ifPresent(
+    java.util.Optional<String> tmpResult = tmpDialog.showAndWait();
+    tmpResult.ifPresent(
         url -> {
           String newUrl = url.trim();
           txtTrailerUrl.setText(newUrl);
@@ -945,34 +945,34 @@ public class MovieDetailController {
     if (movie == null) return false;
     if (!java.util.Objects.equals(movie.getTitle(), txtTitle.getText().trim())) return true;
 
-    String movieYear = movie.getYear() != null ? String.valueOf(movie.getYear()) : "";
-    if (!java.util.Objects.equals(movieYear, txtYear.getText().trim())) return true;
+    String tmpMovieYear = movie.getYear() != null ? String.valueOf(movie.getYear()) : "";
+    if (!java.util.Objects.equals(tmpMovieYear, txtYear.getText().trim())) return true;
 
-    String movieGenre = movie.getGenre() != null ? movie.getGenre() : "";
-    if (!java.util.Objects.equals(movieGenre, txtGenre.getText().trim())) return true;
+    String tmpMovieGenre = movie.getGenre() != null ? movie.getGenre() : "";
+    if (!java.util.Objects.equals(tmpMovieGenre, txtGenre.getText().trim())) return true;
 
-    String movieDirector = movie.getDirector() != null ? movie.getDirector() : "";
-    if (!java.util.Objects.equals(movieDirector, txtDirector.getText().trim())) return true;
+    String tmpMovieDirector = movie.getDirector() != null ? movie.getDirector() : "";
+    if (!java.util.Objects.equals(tmpMovieDirector, txtDirector.getText().trim())) return true;
 
-    String movieWriter = movie.getWriter() != null ? movie.getWriter() : "";
-    if (!java.util.Objects.equals(movieWriter, txtWriter.getText().trim())) return true;
+    String tmpMovieWriter = movie.getWriter() != null ? movie.getWriter() : "";
+    if (!java.util.Objects.equals(tmpMovieWriter, txtWriter.getText().trim())) return true;
 
-    String movieProducer = movie.getProducer() != null ? movie.getProducer() : "";
-    if (!java.util.Objects.equals(movieProducer, txtProducer.getText().trim())) return true;
+    String tmpMovieProducer = movie.getProducer() != null ? movie.getProducer() : "";
+    if (!java.util.Objects.equals(tmpMovieProducer, txtProducer.getText().trim())) return true;
 
-    String movieCinematographer =
+    String tmpMovieCinematographer =
         movie.getCinematographer() != null ? movie.getCinematographer() : "";
-    if (!java.util.Objects.equals(movieCinematographer, txtCinematographer.getText().trim()))
+    if (!java.util.Objects.equals(tmpMovieCinematographer, txtCinematographer.getText().trim()))
       return true;
 
-    String movieComposer = movie.getComposer() != null ? movie.getComposer() : "";
-    if (!java.util.Objects.equals(movieComposer, txtComposer.getText().trim())) return true;
+    String tmpMovieComposer = movie.getComposer() != null ? movie.getComposer() : "";
+    if (!java.util.Objects.equals(tmpMovieComposer, txtComposer.getText().trim())) return true;
 
-    String movieDesc = movie.getDescription() != null ? movie.getDescription() : "";
-    if (!java.util.Objects.equals(movieDesc, txtDescription.getText().trim())) return true;
+    String tmpMovieDesc = movie.getDescription() != null ? movie.getDescription() : "";
+    if (!java.util.Objects.equals(tmpMovieDesc, txtDescription.getText().trim())) return true;
 
-    String movieTrailer = movie.getTrailerUrl() != null ? movie.getTrailerUrl() : "";
-    if (!java.util.Objects.equals(movieTrailer, txtTrailerUrl.getText().trim())) return true;
+    String tmpMovieTrailer = movie.getTrailerUrl() != null ? movie.getTrailerUrl() : "";
+    if (!java.util.Objects.equals(tmpMovieTrailer, txtTrailerUrl.getText().trim())) return true;
 
     if (!java.util.Objects.equals(movie.getRating(), currentRating)) return true;
 
@@ -986,32 +986,32 @@ public class MovieDetailController {
    * @return {@code true} if save is completed successfully; {@code false} if validation failed
    */
   public boolean performSave() {
-    String title = txtTitle.getText().trim();
-    if (title.isEmpty()) {
+    String tmpTitle = txtTitle.getText().trim();
+    if (tmpTitle.isEmpty()) {
       showStatus("Title cannot be empty.");
       return false;
     }
 
-    Integer year = null;
+    Integer tmpYear = null;
     if (!txtYear.getText().trim().isEmpty()) {
       try {
-        year = Integer.parseInt(txtYear.getText().trim());
-      } catch (NumberFormatException e) {
+        tmpYear = Integer.parseInt(txtYear.getText().trim());
+      } catch (NumberFormatException tmpE) {
         showStatus("Release year must be a valid integer number.");
         return false;
       }
     }
 
-    String trailer = txtTrailerUrl.getText().trim();
-    if (!trailer.isEmpty()) {
-      if (!trailer.contains("youtube.com") && !trailer.contains("youtu.be")) {
+    String tmpTrailer = txtTrailerUrl.getText().trim();
+    if (!tmpTrailer.isEmpty()) {
+      if (!tmpTrailer.contains("youtube.com") && !tmpTrailer.contains("youtu.be")) {
         showStatus("Trailer Link must be a valid YouTube URL.");
         return false;
       }
     }
 
-    movie.setTitle(title);
-    movie.setYear(year);
+    movie.setTitle(tmpTitle);
+    movie.setYear(tmpYear);
     movie.setGenre(txtGenre.getText().trim().isEmpty() ? null : txtGenre.getText().trim());
     movie.setDirector(txtDirector.getText().trim().isEmpty() ? null : txtDirector.getText().trim());
     movie.setWriter(txtWriter.getText().trim().isEmpty() ? null : txtWriter.getText().trim());
@@ -1021,7 +1021,7 @@ public class MovieDetailController {
     movie.setComposer(txtComposer.getText().trim().isEmpty() ? null : txtComposer.getText().trim());
     movie.setDescription(
         txtDescription.getText().trim().isEmpty() ? null : txtDescription.getText().trim());
-    movie.setTrailerUrl(trailer.isEmpty() ? null : trailer);
+    movie.setTrailerUrl(tmpTrailer.isEmpty() ? null : tmpTrailer);
     movie.setRating(currentRating);
 
     movieRepository.update(movie);
@@ -1054,16 +1054,16 @@ public class MovieDetailController {
     } else {
       // Fallback just in case
       try {
-        URL url = getClass().getResource("/io/github/kullik01/kinonode/fxml/LibraryView.fxml");
-        FXMLLoader loader = new FXMLLoader(url);
-        Parent libraryView = loader.load();
+        URL tmpUrl = getClass().getResource("/io/github/kullik01/kinonode/fxml/LibraryView.fxml");
+        FXMLLoader tmpLoader = new FXMLLoader(tmpUrl);
+        Parent tmpLibraryView = tmpLoader.load();
 
-        StackPane contentArea = (StackPane) lblHeaderTitle.getScene().lookup("#contentArea");
-        if (contentArea != null) {
-          contentArea.getChildren().setAll(libraryView);
+        StackPane tmpContentArea = (StackPane) lblHeaderTitle.getScene().lookup("#contentArea");
+        if (tmpContentArea != null) {
+          tmpContentArea.getChildren().setAll(tmpLibraryView);
         }
-      } catch (IOException e) {
-        LOGGER.log(Level.SEVERE, "Failed to load LibraryView FXML", e);
+      } catch (IOException tmpE) {
+        LOGGER.log(Level.SEVERE, "Failed to load LibraryView FXML", tmpE);
       }
     }
   }

@@ -60,9 +60,9 @@ public class KinoNodeApp extends Application {
     AppContext.getInstance();
 
     // Retrieve user's configured theme and apply the corresponding stylesheet
-    var settingsRepo = AppContext.getInstance().getSettingsRepository();
-    String theme = settingsRepo.get("theme_mode", "light");
-    if ("dark".equals(theme)) {
+    var tmpSettingsRepo = AppContext.getInstance().getSettingsRepository();
+    String tmpTheme = tmpSettingsRepo.get("theme_mode", "light");
+    if ("dark".equals(tmpTheme)) {
       // Use AtlantaFX PrimerDark theme for dark mode
       Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
     } else {
@@ -71,14 +71,14 @@ public class KinoNodeApp extends Application {
     }
 
     // Locate the main view FXML resource
-    URL fxmlLocation = getClass().getResource("/io/github/kullik01/kinonode/fxml/MainView.fxml");
-    if (fxmlLocation == null) {
+    URL tmpFxmlLocation = getClass().getResource("/io/github/kullik01/kinonode/fxml/MainView.fxml");
+    if (tmpFxmlLocation == null) {
       throw new IOException("FXML file not found: MainView.fxml");
     }
 
     // Load and build the JavaFX node tree from FXML layout
-    FXMLLoader loader = new FXMLLoader(fxmlLocation);
-    Parent root = loader.load();
+    FXMLLoader tmpLoader = new FXMLLoader(tmpFxmlLocation);
+    Parent tmpRoot = tmpLoader.load();
 
     // Set the application logo and title
     primaryStage
@@ -93,8 +93,8 @@ public class KinoNodeApp extends Application {
     primaryStage.setMinHeight(600);
 
     // Initialize the main scene, associate it with the stage, and display the window
-    Scene scene = new Scene(root, 1024, 768);
-    primaryStage.setScene(scene);
+    Scene tmpScene = new Scene(tmpRoot, 1024, 768);
+    primaryStage.setScene(tmpScene);
     primaryStage.show();
   }
 

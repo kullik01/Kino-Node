@@ -75,72 +75,72 @@ public class AboutController implements Refreshable {
     lblVersion.setText("1.0.0");
 
     // 1. Extensions
-    String extensions =
+    String tmpExtensions =
         AppContext.getInstance()
             .getSettingsRepository()
             .get(
                 "video_extensions", "3gp,avi,flv,m4v,mkv,mov,mp4,mpeg,mpg,mts,ogg,ogv,ts,webm,wmv");
-    lblExtensions.setText(extensions);
+    lblExtensions.setText(tmpExtensions);
 
     // 2. Database path & size
     try {
-      Path dbPath = AppContext.getInstance().getDatabaseService().getDbPath();
+      Path tmpDbPath = AppContext.getInstance().getDatabaseService().getDbPath();
       // Display path with forward slashes for cross-platform consistency
-      lblDbPath.setText(dbPath.toAbsolutePath().toString().replace("\\", "/"));
+      lblDbPath.setText(tmpDbPath.toAbsolutePath().toString().replace("\\", "/"));
 
-      if (Files.exists(dbPath)) {
+      if (Files.exists(tmpDbPath)) {
         // Calculate file size in MB
-        long sizeBytes = Files.size(dbPath);
-        double sizeMB = sizeBytes / (1024.0 * 1024.0);
+        long tmpSizeBytes = Files.size(tmpDbPath);
+        double tmpSizeMB = tmpSizeBytes / (1024.0 * 1024.0);
         if (lblDbSize != null) {
-          lblDbSize.setText(String.format("%.2f MB", sizeMB));
+          lblDbSize.setText(String.format("%.2f MB", tmpSizeMB));
         }
       } else {
         if (lblDbSize != null) {
           lblDbSize.setText("Unknown");
         }
       }
-    } catch (Exception e) {
+    } catch (Exception tmpE) {
       lblDbPath.setText("Unknown database path");
     }
 
     // 3. System properties
     try {
-      String javaVer = System.getProperty("java.version");
-      String javaVendor = System.getProperty("java.vendor");
-      lblJavaRuntime.setText(javaVer + " (" + javaVendor + ")");
+      String tmpJavaVer = System.getProperty("java.version");
+      String tmpJavaVendor = System.getProperty("java.vendor");
+      lblJavaRuntime.setText(tmpJavaVer + " (" + tmpJavaVendor + ")");
 
-      String osName = System.getProperty("os.name");
-      String osArch = System.getProperty("os.arch");
-      String osVer = System.getProperty("os.version");
-      lblOsDetails.setText(osName + " " + osVer + " (" + osArch + ")");
-    } catch (Exception e) {
+      String tmpOsName = System.getProperty("os.name");
+      String tmpOsArch = System.getProperty("os.arch");
+      String tmpOsVer = System.getProperty("os.version");
+      lblOsDetails.setText(tmpOsName + " " + tmpOsVer + " (" + tmpOsArch + ")");
+    } catch (Exception tmpE) {
       lblJavaRuntime.setText("Unknown");
       lblOsDetails.setText("Unknown");
     }
 
     // 4. Statistics (Movies and Watchlists)
     try {
-      int movieCount = AppContext.getInstance().getMovieRepository().findAll().size();
-      lblMovieCount.setText(movieCount + (movieCount == 1 ? " movie" : " movies"));
+      int tmpMovieCount = AppContext.getInstance().getMovieRepository().findAll().size();
+      lblMovieCount.setText(tmpMovieCount + (tmpMovieCount == 1 ? " movie" : " movies"));
 
-      int watchlistCount = AppContext.getInstance().getWatchlistRepository().findAll().size();
+      int tmpWatchlistCount = AppContext.getInstance().getWatchlistRepository().findAll().size();
       lblWatchlistCount.setText(
-          watchlistCount + (watchlistCount == 1 ? " watchlist" : " watchlists"));
-    } catch (Exception e) {
+          tmpWatchlistCount + (tmpWatchlistCount == 1 ? " watchlist" : " watchlists"));
+    } catch (Exception tmpE) {
       lblMovieCount.setText("Unknown");
       lblWatchlistCount.setText("Unknown");
     }
 
     // 5. Media Player Executable
     try {
-      Optional<Path> playerPathOpt = AppContext.getInstance().getPlaybackService().getPlayerPath();
-      if (playerPathOpt.isPresent()) {
-        lblPlayerPath.setText(playerPathOpt.get().toAbsolutePath().toString().replace("\\", "/"));
+      Optional<Path> tmpPlayerPathOpt = AppContext.getInstance().getPlaybackService().getPlayerPath();
+      if (tmpPlayerPathOpt.isPresent()) {
+        lblPlayerPath.setText(tmpPlayerPathOpt.get().toAbsolutePath().toString().replace("\\", "/"));
       } else {
         lblPlayerPath.setText("No player configured (using auto-detect/none)");
       }
-    } catch (Exception e) {
+    } catch (Exception tmpE) {
       lblPlayerPath.setText("Unknown");
     }
   }
@@ -148,16 +148,16 @@ public class AboutController implements Refreshable {
   @FXML
   private void openPlayerLocation() {
     try {
-      Optional<Path> playerPathOpt = AppContext.getInstance().getPlaybackService().getPlayerPath();
+      Optional<Path> tmpPlayerPathOpt = AppContext.getInstance().getPlaybackService().getPlayerPath();
       // Check if player is configured and its parent directory exists
-      if (playerPathOpt.isPresent() && Files.exists(playerPathOpt.get().getParent())) {
+      if (tmpPlayerPathOpt.isPresent() && Files.exists(tmpPlayerPathOpt.get().getParent())) {
         // Ensure Desktop API is supported on the current platform before opening the explorer
         if (java.awt.Desktop.isDesktopSupported()
             && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.OPEN)) {
-          java.awt.Desktop.getDesktop().open(playerPathOpt.get().getParent().toFile());
+          java.awt.Desktop.getDesktop().open(tmpPlayerPathOpt.get().getParent().toFile());
         }
       }
-    } catch (Exception e) {
+    } catch (Exception tmpE) {
       // Ignore if it cannot be opened
     }
   }
@@ -165,16 +165,16 @@ public class AboutController implements Refreshable {
   @FXML
   private void openDatabaseLocation() {
     try {
-      Path dbPath = AppContext.getInstance().getDatabaseService().getDbPath();
+      Path tmpDbPath = AppContext.getInstance().getDatabaseService().getDbPath();
       // Verify that the database path and its parent folder exist
-      if (dbPath != null && Files.exists(dbPath.getParent())) {
+      if (tmpDbPath != null && Files.exists(tmpDbPath.getParent())) {
         // Open the database folder using system's default file browser
         if (java.awt.Desktop.isDesktopSupported()
             && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.OPEN)) {
-          java.awt.Desktop.getDesktop().open(dbPath.getParent().toFile());
+          java.awt.Desktop.getDesktop().open(tmpDbPath.getParent().toFile());
         }
       }
-    } catch (Exception e) {
+    } catch (Exception tmpE) {
       // Ignore if it cannot be opened
     }
   }

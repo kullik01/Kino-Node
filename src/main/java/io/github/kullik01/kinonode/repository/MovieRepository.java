@@ -60,19 +60,19 @@ public class MovieRepository {
    * @return a list of all {@link Movie} objects found, or an empty list if none exist or on error
    */
   public List<Movie> findAll() {
-    List<Movie> movies = new ArrayList<>();
-    String sql = "SELECT * FROM movies ORDER BY date_added DESC";
+    List<Movie> tmpMovies = new ArrayList<>();
+    String tmpSql = "SELECT * FROM movies ORDER BY date_added DESC";
     // Query the database using a simple statement since no parameters are needed
-    try (Statement stmt = databaseService.getConnection().createStatement();
-        ResultSet rs = stmt.executeQuery(sql)) {
+    try (Statement tmpStmt = databaseService.getConnection().createStatement();
+        ResultSet tmpRs = tmpStmt.executeQuery(tmpSql)) {
       // Loop through each row of the result set and map it to a Movie object
-      while (rs.next()) {
-        movies.add(mapRowToMovie(rs));
+      while (tmpRs.next()) {
+        tmpMovies.add(mapRowToMovie(tmpRs));
       }
-    } catch (SQLException e) {
-      LOGGER.log(Level.SEVERE, "Failed to find all movies", e);
+    } catch (SQLException tmpE) {
+      LOGGER.log(Level.SEVERE, "Failed to find all movies", tmpE);
     }
-    return movies;
+    return tmpMovies;
   }
 
   /**
@@ -82,18 +82,18 @@ public class MovieRepository {
    * @return the {@link Movie} with the specified ID, or null if not found or on error
    */
   public Movie findById(int id) {
-    String sql = "SELECT * FROM movies WHERE id = ?";
+    String tmpSql = "SELECT * FROM movies WHERE id = ?";
     // Use a prepared statement to prevent SQL injection and specify the ID parameter
-    try (PreparedStatement stmt = databaseService.getConnection().prepareStatement(sql)) {
-      stmt.setInt(1, id);
-      try (ResultSet rs = stmt.executeQuery()) {
+    try (PreparedStatement tmpStmt = databaseService.getConnection().prepareStatement(tmpSql)) {
+      tmpStmt.setInt(1, id);
+      try (ResultSet tmpRs = tmpStmt.executeQuery()) {
         // If a matching record is found, map it to a Movie object and return it
-        if (rs.next()) {
-          return mapRowToMovie(rs);
+        if (tmpRs.next()) {
+          return mapRowToMovie(tmpRs);
         }
       }
-    } catch (SQLException e) {
-      LOGGER.log(Level.SEVERE, "Failed to find movie by ID: " + id, e);
+    } catch (SQLException tmpE) {
+      LOGGER.log(Level.SEVERE, "Failed to find movie by ID: " + id, tmpE);
     }
     return null;
   }
@@ -105,18 +105,18 @@ public class MovieRepository {
    * @return the {@link Movie} with the specified file path, or null if not found or on error
    */
   public Movie findByFilePath(String filePath) {
-    String sql = "SELECT * FROM movies WHERE file_path = ?";
+    String tmpSql = "SELECT * FROM movies WHERE file_path = ?";
     // Locate movie based on the unique filePath parameter
-    try (PreparedStatement stmt = databaseService.getConnection().prepareStatement(sql)) {
-      stmt.setString(1, filePath);
-      try (ResultSet rs = stmt.executeQuery()) {
+    try (PreparedStatement tmpStmt = databaseService.getConnection().prepareStatement(tmpSql)) {
+      tmpStmt.setString(1, filePath);
+      try (ResultSet tmpRs = tmpStmt.executeQuery()) {
         // Return the mapped Movie object if found
-        if (rs.next()) {
-          return mapRowToMovie(rs);
+        if (tmpRs.next()) {
+          return mapRowToMovie(tmpRs);
         }
       }
-    } catch (SQLException e) {
-      LOGGER.log(Level.SEVERE, "Failed to find movie by file path: " + filePath, e);
+    } catch (SQLException tmpE) {
+      LOGGER.log(Level.SEVERE, "Failed to find movie by file path: " + filePath, tmpE);
     }
     return null;
   }
@@ -128,16 +128,16 @@ public class MovieRepository {
    * @return true if a movie with the given file path exists; false otherwise
    */
   public boolean existsByFilePath(String filePath) {
-    String sql = "SELECT 1 FROM movies WHERE file_path = ?";
+    String tmpSql = "SELECT 1 FROM movies WHERE file_path = ?";
     // Execute a lightweight query to check for existence of the file path
-    try (PreparedStatement stmt = databaseService.getConnection().prepareStatement(sql)) {
-      stmt.setString(1, filePath);
-      try (ResultSet rs = stmt.executeQuery()) {
+    try (PreparedStatement tmpStmt = databaseService.getConnection().prepareStatement(tmpSql)) {
+      tmpStmt.setString(1, filePath);
+      try (ResultSet tmpRs = tmpStmt.executeQuery()) {
         // rs.next() will return true if at least one row matches
-        return rs.next();
+        return tmpRs.next();
       }
-    } catch (SQLException e) {
-      LOGGER.log(Level.SEVERE, "Failed to check movie existence by file path: " + filePath, e);
+    } catch (SQLException tmpE) {
+      LOGGER.log(Level.SEVERE, "Failed to check movie existence by file path: " + filePath, tmpE);
     }
     return false;
   }
@@ -150,49 +150,49 @@ public class MovieRepository {
    * @return the inserted {@link Movie} entity, potentially containing the generated ID
    */
   public Movie insert(Movie movie) {
-    String sql =
+    String tmpSql =
         """
             INSERT INTO movies (file_path, title, year, genre, description, rating, cover_image_path, trailer_url, director, writer, producer, cinematographer, composer, date_added)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """;
     // Prepare statement requesting generated keys to retrieve the auto-incremented ID
-    try (PreparedStatement stmt =
-        databaseService.getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-      stmt.setString(1, movie.getFilePath());
-      stmt.setString(2, movie.getTitle());
+    try (PreparedStatement tmpStmt =
+        databaseService.getConnection().prepareStatement(tmpSql, Statement.RETURN_GENERATED_KEYS)) {
+      tmpStmt.setString(1, movie.getFilePath());
+      tmpStmt.setString(2, movie.getTitle());
 
       // Year can be null, so check and handle using Types.INTEGER if null
-      if (movie.getYear() != null) stmt.setInt(3, movie.getYear());
-      else stmt.setNull(3, Types.INTEGER);
+      if (movie.getYear() != null) tmpStmt.setInt(3, movie.getYear());
+      else tmpStmt.setNull(3, Types.INTEGER);
 
-      stmt.setString(4, movie.getGenre());
-      stmt.setString(5, movie.getDescription());
+      tmpStmt.setString(4, movie.getGenre());
+      tmpStmt.setString(5, movie.getDescription());
 
       // Rating can be null, so check and handle using Types.INTEGER if null
-      if (movie.getRating() != null) stmt.setInt(6, movie.getRating());
-      else stmt.setNull(6, Types.INTEGER);
+      if (movie.getRating() != null) tmpStmt.setInt(6, movie.getRating());
+      else tmpStmt.setNull(6, Types.INTEGER);
 
-      stmt.setString(7, movie.getCoverImagePath());
-      stmt.setString(8, movie.getTrailerUrl());
-      stmt.setString(9, movie.getDirector());
-      stmt.setString(10, movie.getWriter());
-      stmt.setString(11, movie.getProducer());
-      stmt.setString(12, movie.getCinematographer());
-      stmt.setString(13, movie.getComposer());
+      tmpStmt.setString(7, movie.getCoverImagePath());
+      tmpStmt.setString(8, movie.getTrailerUrl());
+      tmpStmt.setString(9, movie.getDirector());
+      tmpStmt.setString(10, movie.getWriter());
+      tmpStmt.setString(11, movie.getProducer());
+      tmpStmt.setString(12, movie.getCinematographer());
+      tmpStmt.setString(13, movie.getComposer());
       // Store Instant timestamp as epoch seconds in the database
-      stmt.setLong(14, movie.getDateAdded().getEpochSecond());
+      tmpStmt.setLong(14, movie.getDateAdded().getEpochSecond());
 
-      int affectedRows = stmt.executeUpdate();
+      int tmpAffectedRows = tmpStmt.executeUpdate();
       // If the row was successfully inserted, fetch the auto-generated ID
-      if (affectedRows > 0) {
-        try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-          if (generatedKeys.next()) {
-            movie.setId(generatedKeys.getInt(1));
+      if (tmpAffectedRows > 0) {
+        try (ResultSet tmpGeneratedKeys = tmpStmt.getGeneratedKeys()) {
+          if (tmpGeneratedKeys.next()) {
+            movie.setId(tmpGeneratedKeys.getInt(1));
           }
         }
       }
-    } catch (SQLException e) {
-      LOGGER.log(Level.SEVERE, "Failed to insert movie: " + movie, e);
+    } catch (SQLException tmpE) {
+      LOGGER.log(Level.SEVERE, "Failed to insert movie: " + movie, tmpE);
     }
     return movie;
   }
@@ -203,40 +203,40 @@ public class MovieRepository {
    * @param movie the {@link Movie} entity with updated values to save
    */
   public void update(Movie movie) {
-    String sql =
+    String tmpSql =
         """
             UPDATE movies SET file_path = ?, title = ?, year = ?, genre = ?, description = ?, rating = ?, cover_image_path = ?, trailer_url = ?, director = ?, writer = ?, producer = ?, cinematographer = ?, composer = ?, date_added = ?
             WHERE id = ?;
             """;
-    try (PreparedStatement stmt = databaseService.getConnection().prepareStatement(sql)) {
-      stmt.setString(1, movie.getFilePath());
-      stmt.setString(2, movie.getTitle());
+    try (PreparedStatement tmpStmt = databaseService.getConnection().prepareStatement(tmpSql)) {
+      tmpStmt.setString(1, movie.getFilePath());
+      tmpStmt.setString(2, movie.getTitle());
 
       // Year can be null, check and handle using Types.INTEGER if null
-      if (movie.getYear() != null) stmt.setInt(3, movie.getYear());
-      else stmt.setNull(3, Types.INTEGER);
+      if (movie.getYear() != null) tmpStmt.setInt(3, movie.getYear());
+      else tmpStmt.setNull(3, Types.INTEGER);
 
-      stmt.setString(4, movie.getGenre());
-      stmt.setString(5, movie.getDescription());
+      tmpStmt.setString(4, movie.getGenre());
+      tmpStmt.setString(5, movie.getDescription());
 
       // Rating can be null, check and handle using Types.INTEGER if null
-      if (movie.getRating() != null) stmt.setInt(6, movie.getRating());
-      else stmt.setNull(6, Types.INTEGER);
+      if (movie.getRating() != null) tmpStmt.setInt(6, movie.getRating());
+      else tmpStmt.setNull(6, Types.INTEGER);
 
-      stmt.setString(7, movie.getCoverImagePath());
-      stmt.setString(8, movie.getTrailerUrl());
-      stmt.setString(9, movie.getDirector());
-      stmt.setString(10, movie.getWriter());
-      stmt.setString(11, movie.getProducer());
-      stmt.setString(12, movie.getCinematographer());
-      stmt.setString(13, movie.getComposer());
+      tmpStmt.setString(7, movie.getCoverImagePath());
+      tmpStmt.setString(8, movie.getTrailerUrl());
+      tmpStmt.setString(9, movie.getDirector());
+      tmpStmt.setString(10, movie.getWriter());
+      tmpStmt.setString(11, movie.getProducer());
+      tmpStmt.setString(12, movie.getCinematographer());
+      tmpStmt.setString(13, movie.getComposer());
       // Store Instant timestamp as epoch seconds in the database
-      stmt.setLong(14, movie.getDateAdded().getEpochSecond());
-      stmt.setInt(15, movie.getId());
+      tmpStmt.setLong(14, movie.getDateAdded().getEpochSecond());
+      tmpStmt.setInt(15, movie.getId());
 
-      stmt.executeUpdate();
-    } catch (SQLException e) {
-      LOGGER.log(Level.SEVERE, "Failed to update movie: " + movie, e);
+      tmpStmt.executeUpdate();
+    } catch (SQLException tmpE) {
+      LOGGER.log(Level.SEVERE, "Failed to update movie: " + movie, tmpE);
     }
   }
 
@@ -246,12 +246,12 @@ public class MovieRepository {
    * @param id the database ID of the movie to delete
    */
   public void delete(int id) {
-    String sql = "DELETE FROM movies WHERE id = ?";
-    try (PreparedStatement stmt = databaseService.getConnection().prepareStatement(sql)) {
-      stmt.setInt(1, id);
-      stmt.executeUpdate();
-    } catch (SQLException e) {
-      LOGGER.log(Level.SEVERE, "Failed to delete movie by id: " + id, e);
+    String tmpSql = "DELETE FROM movies WHERE id = ?";
+    try (PreparedStatement tmpStmt = databaseService.getConnection().prepareStatement(tmpSql)) {
+      tmpStmt.setInt(1, id);
+      tmpStmt.executeUpdate();
+    } catch (SQLException tmpE) {
+      LOGGER.log(Level.SEVERE, "Failed to delete movie by id: " + id, tmpE);
     }
   }
 
@@ -262,13 +262,13 @@ public class MovieRepository {
    * @param prefix the file path prefix to match
    */
   public void deleteByFilePathPrefix(String prefix) {
-    String sql = "DELETE FROM movies WHERE file_path LIKE ?";
-    try (PreparedStatement stmt = databaseService.getConnection().prepareStatement(sql)) {
+    String tmpSql = "DELETE FROM movies WHERE file_path LIKE ?";
+    try (PreparedStatement tmpStmt = databaseService.getConnection().prepareStatement(tmpSql)) {
       // Append wildcard % to check for any files starting with the prefix
-      stmt.setString(1, prefix + "%");
-      stmt.executeUpdate();
-    } catch (SQLException e) {
-      LOGGER.log(Level.SEVERE, "Failed to delete movies by file path prefix: " + prefix, e);
+      tmpStmt.setString(1, prefix + "%");
+      tmpStmt.executeUpdate();
+    } catch (SQLException tmpE) {
+      LOGGER.log(Level.SEVERE, "Failed to delete movies by file path prefix: " + prefix, tmpE);
     }
   }
 
@@ -281,31 +281,31 @@ public class MovieRepository {
    * @throws SQLException if a database access error occurs
    */
   private Movie mapRowToMovie(ResultSet rs) throws SQLException {
-    Movie movie = new Movie();
-    movie.setId(rs.getInt("id"));
-    movie.setFilePath(rs.getString("file_path"));
-    movie.setTitle(rs.getString("title"));
+    Movie tmpMovie = new Movie();
+    tmpMovie.setId(rs.getInt("id"));
+    tmpMovie.setFilePath(rs.getString("file_path"));
+    tmpMovie.setTitle(rs.getString("title"));
 
     // Year is optional and can be null; rs.getInt returning 0 requires rs.wasNull check
-    int year = rs.getInt("year");
-    movie.setYear(rs.wasNull() ? null : year);
+    int tmpYear = rs.getInt("year");
+    tmpMovie.setYear(rs.wasNull() ? null : tmpYear);
 
-    movie.setGenre(rs.getString("genre"));
-    movie.setDescription(rs.getString("description"));
+    tmpMovie.setGenre(rs.getString("genre"));
+    tmpMovie.setDescription(rs.getString("description"));
 
     // Rating is optional and can be null; rs.getInt returning 0 requires rs.wasNull check
-    int rating = rs.getInt("rating");
-    movie.setRating(rs.wasNull() ? null : rating);
+    int tmpRating = rs.getInt("rating");
+    tmpMovie.setRating(rs.wasNull() ? null : tmpRating);
 
-    movie.setCoverImagePath(rs.getString("cover_image_path"));
-    movie.setTrailerUrl(rs.getString("trailer_url"));
-    movie.setDirector(rs.getString("director"));
-    movie.setWriter(rs.getString("writer"));
-    movie.setProducer(rs.getString("producer"));
-    movie.setCinematographer(rs.getString("cinematographer"));
-    movie.setComposer(rs.getString("composer"));
+    tmpMovie.setCoverImagePath(rs.getString("cover_image_path"));
+    tmpMovie.setTrailerUrl(rs.getString("trailer_url"));
+    tmpMovie.setDirector(rs.getString("director"));
+    tmpMovie.setWriter(rs.getString("writer"));
+    tmpMovie.setProducer(rs.getString("producer"));
+    tmpMovie.setCinematographer(rs.getString("cinematographer"));
+    tmpMovie.setComposer(rs.getString("composer"));
     // Re-construct the Instant object using the epoch second retrieved from the database
-    movie.setDateAdded(Instant.ofEpochSecond(rs.getLong("date_added")));
-    return movie;
+    tmpMovie.setDateAdded(Instant.ofEpochSecond(rs.getLong("date_added")));
+    return tmpMovie;
   }
 }

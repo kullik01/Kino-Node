@@ -48,8 +48,8 @@ public class RepositoryTest {
 
   @BeforeEach
   public void setUp(@TempDir Path tempDir) {
-    Path dbPath = tempDir.resolve("test_kinonode.db");
-    databaseService = new DatabaseService(dbPath);
+    Path tmpDbPath = tempDir.resolve("test_kinonode.db");
+    databaseService = new DatabaseService(tmpDbPath);
     movieRepository = new MovieRepository(databaseService);
     watchlistRepository = new WatchlistRepository(databaseService, movieRepository);
     settingsRepository = new SettingsRepository(databaseService);
@@ -64,83 +64,83 @@ public class RepositoryTest {
 
   @Test
   public void testMovieCrud() {
-    Movie movie = new Movie("C:/movies/inception.mp4", "Inception");
-    movie.setYear(2010);
-    movie.setGenre("Sci-Fi");
-    movie.setDescription("A thief who steals corporate secrets...");
-    movie.setRating(9);
+    Movie tmpMovie = new Movie("C:/movies/inception.mp4", "Inception");
+    tmpMovie.setYear(2010);
+    tmpMovie.setGenre("Sci-Fi");
+    tmpMovie.setDescription("A thief who steals corporate secrets...");
+    tmpMovie.setRating(9);
 
     // Insert
-    Movie inserted = movieRepository.insert(movie);
-    assertNotNull(inserted.getId());
-    assertEquals("Inception", inserted.getTitle());
+    Movie tmpInserted = movieRepository.insert(tmpMovie);
+    assertNotNull(tmpInserted.getId());
+    assertEquals("Inception", tmpInserted.getTitle());
 
     // Find by ID
-    Movie found = movieRepository.findById(inserted.getId());
-    assertNotNull(found);
-    assertEquals("Inception", found.getTitle());
-    assertEquals(2010, found.getYear());
-    assertEquals(9, found.getRating());
+    Movie tmpFound = movieRepository.findById(tmpInserted.getId());
+    assertNotNull(tmpFound);
+    assertEquals("Inception", tmpFound.getTitle());
+    assertEquals(2010, tmpFound.getYear());
+    assertEquals(9, tmpFound.getRating());
 
     // Check exists
     assertTrue(movieRepository.existsByFilePath("C:/movies/inception.mp4"));
 
     // Find by File Path
-    Movie foundByPath = movieRepository.findByFilePath("C:/movies/inception.mp4");
-    assertNotNull(foundByPath);
-    assertEquals(inserted.getId(), foundByPath.getId());
+    Movie tmpFoundByPath = movieRepository.findByFilePath("C:/movies/inception.mp4");
+    assertNotNull(tmpFoundByPath);
+    assertEquals(tmpInserted.getId(), tmpFoundByPath.getId());
 
     // Update
-    found.setTitle("Inception: Special Edition");
-    found.setRating(10);
-    movieRepository.update(found);
+    tmpFound.setTitle("Inception: Special Edition");
+    tmpFound.setRating(10);
+    movieRepository.update(tmpFound);
 
-    Movie updated = movieRepository.findById(inserted.getId());
-    assertEquals("Inception: Special Edition", updated.getTitle());
-    assertEquals(10, updated.getRating());
+    Movie tmpUpdated = movieRepository.findById(tmpInserted.getId());
+    assertEquals("Inception: Special Edition", tmpUpdated.getTitle());
+    assertEquals(10, tmpUpdated.getRating());
 
     // Delete
-    movieRepository.delete(inserted.getId());
-    assertNull(movieRepository.findById(inserted.getId()));
+    movieRepository.delete(tmpInserted.getId());
+    assertNull(movieRepository.findById(tmpInserted.getId()));
   }
 
   @Test
   public void testWatchlistCrud() {
-    Watchlist watchlist = new Watchlist("Action Movies");
-    Watchlist inserted = watchlistRepository.insert(watchlist);
-    assertNotNull(inserted.getId());
-    assertEquals("Action Movies", inserted.getName());
+    Watchlist tmpWatchlist = new Watchlist("Action Movies");
+    Watchlist tmpInserted = watchlistRepository.insert(tmpWatchlist);
+    assertNotNull(tmpInserted.getId());
+    assertEquals("Action Movies", tmpInserted.getName());
 
     // Insert movie
-    Movie movie1 = movieRepository.insert(new Movie("C:/movies/diehard.mp4", "Die Hard"));
-    Movie movie2 = movieRepository.insert(new Movie("C:/movies/matrix.mp4", "The Matrix"));
+    Movie tmpMovie1 = movieRepository.insert(new Movie("C:/movies/diehard.mp4", "Die Hard"));
+    Movie tmpMovie2 = movieRepository.insert(new Movie("C:/movies/matrix.mp4", "The Matrix"));
 
     // Add to watchlist
-    watchlistRepository.addMovieToWatchlist(inserted.getId(), movie1.getId());
-    watchlistRepository.addMovieToWatchlist(inserted.getId(), movie2.getId());
+    watchlistRepository.addMovieToWatchlist(tmpInserted.getId(), tmpMovie1.getId());
+    watchlistRepository.addMovieToWatchlist(tmpInserted.getId(), tmpMovie2.getId());
 
     // Check movies in watchlist
-    List<Movie> movies = watchlistRepository.findMoviesInWatchlist(inserted.getId());
-    assertEquals(2, movies.size());
-    assertEquals("Die Hard", movies.get(0).getTitle());
-    assertEquals("The Matrix", movies.get(1).getTitle());
+    List<Movie> tmpMovies = watchlistRepository.findMoviesInWatchlist(tmpInserted.getId());
+    assertEquals(2, tmpMovies.size());
+    assertEquals("Die Hard", tmpMovies.get(0).getTitle());
+    assertEquals("The Matrix", tmpMovies.get(1).getTitle());
 
     // Reorder
     watchlistRepository.updateMoviePositionsInWatchlist(
-        inserted.getId(), List.of(movie2.getId(), movie1.getId()));
-    List<Movie> reordered = watchlistRepository.findMoviesInWatchlist(inserted.getId());
-    assertEquals("The Matrix", reordered.get(0).getTitle());
-    assertEquals("Die Hard", reordered.get(1).getTitle());
+        tmpInserted.getId(), List.of(tmpMovie2.getId(), tmpMovie1.getId()));
+    List<Movie> tmpReordered = watchlistRepository.findMoviesInWatchlist(tmpInserted.getId());
+    assertEquals("The Matrix", tmpReordered.get(0).getTitle());
+    assertEquals("Die Hard", tmpReordered.get(1).getTitle());
 
     // Remove movie
-    watchlistRepository.removeMovieFromWatchlist(inserted.getId(), movie2.getId());
-    List<Movie> afterRemoval = watchlistRepository.findMoviesInWatchlist(inserted.getId());
-    assertEquals(1, afterRemoval.size());
-    assertEquals("Die Hard", afterRemoval.get(0).getTitle());
+    watchlistRepository.removeMovieFromWatchlist(tmpInserted.getId(), tmpMovie2.getId());
+    List<Movie> tmpAfterRemoval = watchlistRepository.findMoviesInWatchlist(tmpInserted.getId());
+    assertEquals(1, tmpAfterRemoval.size());
+    assertEquals("Die Hard", tmpAfterRemoval.get(0).getTitle());
 
     // Delete watchlist
-    watchlistRepository.delete(inserted.getId());
-    assertNull(watchlistRepository.findById(inserted.getId()));
+    watchlistRepository.delete(tmpInserted.getId());
+    assertNull(watchlistRepository.findById(tmpInserted.getId()));
   }
 
   @Test

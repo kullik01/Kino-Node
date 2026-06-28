@@ -65,49 +65,49 @@ public class ImdbService {
    * @param movie the {@link Movie} object to enrich with fetched IMDb and Wikidata metadata
    */
   public static void enrichMovieData(Movie movie) {
-    String query = movie.getTitle();
-    if (query == null || query.isBlank()) {
+    String tmpQuery = movie.getTitle();
+    if (tmpQuery == null || tmpQuery.isBlank()) {
       return;
     }
 
     try {
       // Clean query to remove special characters and reduce multiple spaces, which improves search
       // API match success rate
-      String cleanedQuery =
-          query.replaceAll("[^a-zA-Z0-9 äöüÄÖÜß-]", " ").trim().replaceAll("\\s+", " ");
-      if (cleanedQuery.isEmpty()) return;
+      String tmpCleanedQuery =
+          tmpQuery.replaceAll("[^a-zA-Z0-9 äöüÄÖÜß-]", " ").trim().replaceAll("\\s+", " ");
+      if (tmpCleanedQuery.isEmpty()) return;
 
-      String encodedQuery =
-          URLEncoder.encode(cleanedQuery.toLowerCase(), StandardCharsets.UTF_8).replace("+", "%20");
-      String firstLetter = cleanedQuery.substring(0, 1).toLowerCase();
+      String tmpEncodedQuery =
+          URLEncoder.encode(tmpCleanedQuery.toLowerCase(), StandardCharsets.UTF_8).replace("+", "%20");
+      String tmpFirstLetter = tmpCleanedQuery.substring(0, 1).toLowerCase();
 
       // IMDb suggestion API format: suggestion/x/query.json where 'x' is the first letter of query
-      String urlStr =
-          "https://v3.sg.media-imdb.com/suggestion/" + firstLetter + "/" + encodedQuery + ".json";
+      String tmpUrlStr =
+          "https://v3.sg.media-imdb.com/suggestion/" + tmpFirstLetter + "/" + tmpEncodedQuery + ".json";
 
-      HttpRequest request =
+      HttpRequest tmpRequest =
           HttpRequest.newBuilder()
               // Use standard browser headers to bypass simple bot detection blocks
-              .uri(URI.create(urlStr))
+              .uri(URI.create(tmpUrlStr))
               .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
               .header("Accept", "application/json")
               .header("Accept-Language", "en-US,en;q=0.5")
               .GET()
               .build();
 
-      HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      HttpResponse<String> tmpResponse = client.send(tmpRequest, HttpResponse.BodyHandlers.ofString());
 
-      if (response.statusCode() == 200) {
-        JsonObject jsonObject = JsonParser.parseString(response.body()).getAsJsonObject();
-        if (jsonObject.has("d") && jsonObject.get("d").isJsonArray()) {
-          JsonArray results = jsonObject.getAsJsonArray("d");
-          for (JsonElement element : results) {
-            JsonObject result = element.getAsJsonObject();
+      if (tmpResponse.statusCode() == 200) {
+        JsonObject tmpJsonObject = JsonParser.parseString(tmpResponse.body()).getAsJsonObject();
+        if (tmpJsonObject.has("d") && tmpJsonObject.get("d").isJsonArray()) {
+          JsonArray tmpResults = tmpJsonObject.getAsJsonArray("d");
+          for (JsonElement tmpElement : tmpResults) {
+            JsonObject tmpResult = tmpElement.getAsJsonObject();
 
             // Filter results to only keep movies/series (IMDb IDs starting with 'tt')
-            if (result.has("id")) {
-              String id = result.get("id").getAsString();
-              if (!id.startsWith("tt")) {
+            if (tmpResult.has("id")) {
+              String tmpId = tmpResult.get("id").getAsString();
+              if (!tmpId.startsWith("tt")) {
                 continue;
               }
             } else {
@@ -115,41 +115,41 @@ public class ImdbService {
             }
 
             // Found a matching movie entry, start mapping metadata fields
-            if (result.has("l")) {
-              movie.setTitle(result.get("l").getAsString());
+            if (tmpResult.has("l")) {
+              movie.setTitle(tmpResult.get("l").getAsString());
             }
 
-            if (result.has("y")) {
-              movie.setYear(result.get("y").getAsInt());
+            if (tmpResult.has("y")) {
+              movie.setYear(tmpResult.get("y").getAsInt());
             }
 
             // Extract and download poster image if available
-            if (result.has("i")) {
-              JsonObject imageObj = result.getAsJsonObject("i");
-              if (imageObj.has("imageUrl")) {
-                String imageUrl = imageObj.get("imageUrl").getAsString();
-                String localImagePath = downloadPoster(imageUrl, result.get("id").getAsString());
-                if (localImagePath != null) {
-                  movie.setCoverImagePath(localImagePath);
+            if (tmpResult.has("i")) {
+              JsonObject tmpImageObj = tmpResult.getAsJsonObject("i");
+              if (tmpImageObj.has("imageUrl")) {
+                String tmpImageUrl = tmpImageObj.get("imageUrl").getAsString();
+                String tmpLocalImagePath = downloadPoster(tmpImageUrl, tmpResult.get("id").getAsString());
+                if (tmpLocalImagePath != null) {
+                  movie.setCoverImagePath(tmpLocalImagePath);
                 }
               }
             }
 
             // Fetch additional details from Wikidata (director, writer, etc.) using the IMDb ID
             // ('tt...')
-            String imdbIdStr = result.get("id").getAsString();
-            fetchWikidataDetails(imdbIdStr, movie);
+            String tmpImdbIdStr = tmpResult.get("id").getAsString();
+            fetchWikidataDetails(tmpImdbIdStr, movie);
 
             LOGGER.info("Successfully fetched IMDb data for: " + movie.getTitle());
             break; // Stop after processing the first matching, highly-relevant result
           }
         }
       } else {
-        LOGGER.warning("Failed to fetch IMDb data. HTTP " + response.statusCode());
+        LOGGER.warning("Failed to fetch IMDb data. HTTP " + tmpResponse.statusCode());
       }
 
-    } catch (Exception e) {
-      LOGGER.log(Level.WARNING, "Error enriching movie data from IMDb for query: " + query, e);
+    } catch (Exception tmpE) {
+      LOGGER.log(Level.WARNING, "Error enriching movie data from IMDb for query: " + tmpQuery, tmpE);
     }
   }
 
@@ -164,7 +164,7 @@ public class ImdbService {
     try {
       // Build a SPARQL query searching for a movie containing the specified IMDb ID (P345)
       // and optionally fetch directors, writers, producers, cinematographers, and composers.
-      String sparqlQuery =
+      String tmpSparqlQuery =
           "SELECT ?directorLabel ?writerLabel ?producerLabel ?cinematographerLabel ?composerLabel WHERE { "
               + "?movie wdt:P345 '"
               + imdbId
@@ -177,63 +177,63 @@ public class ImdbService {
               + "SERVICE wikibase:label { bd:serviceParam wikibase:language 'en'. } "
               + "}";
 
-      String urlStr =
+      String tmpUrlStr =
           "https://query.wikidata.org/sparql?query="
-              + URLEncoder.encode(sparqlQuery, StandardCharsets.UTF_8).replace("+", "%20")
+              + URLEncoder.encode(tmpSparqlQuery, StandardCharsets.UTF_8).replace("+", "%20")
               + "&format=json";
 
-      HttpRequest request =
+      HttpRequest tmpRequest =
           HttpRequest.newBuilder()
-              .uri(URI.create(urlStr))
+              .uri(URI.create(tmpUrlStr))
               .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) KinoNode/1.0")
               .header("Accept", "application/json")
               .GET()
               .build();
 
-      HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      HttpResponse<String> tmpResponse = client.send(tmpRequest, HttpResponse.BodyHandlers.ofString());
 
-      if (response.statusCode() == 200) {
-        JsonObject jsonObject = JsonParser.parseString(response.body()).getAsJsonObject();
-        if (jsonObject.has("results")) {
-          JsonArray bindings = jsonObject.getAsJsonObject("results").getAsJsonArray("bindings");
+      if (tmpResponse.statusCode() == 200) {
+        JsonObject tmpJsonObject = JsonParser.parseString(tmpResponse.body()).getAsJsonObject();
+        if (tmpJsonObject.has("results")) {
+          JsonArray tmpBindings = tmpJsonObject.getAsJsonObject("results").getAsJsonArray("bindings");
 
           // Maintain insertion order to display crew members in order of returned relevance
-          Set<String> directors = new LinkedHashSet<>();
-          Set<String> writers = new LinkedHashSet<>();
-          Set<String> producers = new LinkedHashSet<>();
-          Set<String> cinematographers = new LinkedHashSet<>();
-          Set<String> composers = new LinkedHashSet<>();
+          Set<String> tmpDirectors = new LinkedHashSet<>();
+          Set<String> tmpWriters = new LinkedHashSet<>();
+          Set<String> tmpProducers = new LinkedHashSet<>();
+          Set<String> tmpCinematographers = new LinkedHashSet<>();
+          Set<String> tmpComposers = new LinkedHashSet<>();
 
-          for (JsonElement element : bindings) {
-            JsonObject row = element.getAsJsonObject();
-            if (row.has("directorLabel"))
-              directors.add(row.getAsJsonObject("directorLabel").get("value").getAsString());
-            if (row.has("writerLabel"))
-              writers.add(row.getAsJsonObject("writerLabel").get("value").getAsString());
-            if (row.has("producerLabel"))
-              producers.add(row.getAsJsonObject("producerLabel").get("value").getAsString());
-            if (row.has("cinematographerLabel"))
-              cinematographers.add(
-                  row.getAsJsonObject("cinematographerLabel").get("value").getAsString());
-            if (row.has("composerLabel"))
-              composers.add(row.getAsJsonObject("composerLabel").get("value").getAsString());
+          for (JsonElement tmpElement : tmpBindings) {
+            JsonObject tmpRow = tmpElement.getAsJsonObject();
+            if (tmpRow.has("directorLabel"))
+              tmpDirectors.add(tmpRow.getAsJsonObject("directorLabel").get("value").getAsString());
+            if (tmpRow.has("writerLabel"))
+              tmpWriters.add(tmpRow.getAsJsonObject("writerLabel").get("value").getAsString());
+            if (tmpRow.has("producerLabel"))
+              tmpProducers.add(tmpRow.getAsJsonObject("producerLabel").get("value").getAsString());
+            if (tmpRow.has("cinematographerLabel"))
+              tmpCinematographers.add(
+                  tmpRow.getAsJsonObject("cinematographerLabel").get("value").getAsString());
+            if (tmpRow.has("composerLabel"))
+              tmpComposers.add(tmpRow.getAsJsonObject("composerLabel").get("value").getAsString());
           }
 
           // Format multiple values as comma-separated strings
-          if (!directors.isEmpty()) movie.setDirector(String.join(", ", directors));
-          if (!writers.isEmpty()) movie.setWriter(String.join(", ", writers));
-          if (!producers.isEmpty()) movie.setProducer(String.join(", ", producers));
-          if (!cinematographers.isEmpty())
-            movie.setCinematographer(String.join(", ", cinematographers));
-          if (!composers.isEmpty()) movie.setComposer(String.join(", ", composers));
+          if (!tmpDirectors.isEmpty()) movie.setDirector(String.join(", ", tmpDirectors));
+          if (!tmpWriters.isEmpty()) movie.setWriter(String.join(", ", tmpWriters));
+          if (!tmpProducers.isEmpty()) movie.setProducer(String.join(", ", tmpProducers));
+          if (!tmpCinematographers.isEmpty())
+            movie.setCinematographer(String.join(", ", tmpCinematographers));
+          if (!tmpComposers.isEmpty()) movie.setComposer(String.join(", ", tmpComposers));
 
           LOGGER.info("Successfully fetched Wikidata for IMDb ID: " + imdbId);
         }
       } else {
-        LOGGER.warning("Failed to fetch Wikidata. HTTP " + response.statusCode());
+        LOGGER.warning("Failed to fetch Wikidata. HTTP " + tmpResponse.statusCode());
       }
-    } catch (Exception e) {
-      LOGGER.log(Level.WARNING, "Error fetching Wikidata for IMDb ID: " + imdbId, e);
+    } catch (Exception tmpE) {
+      LOGGER.log(Level.WARNING, "Error fetching Wikidata for IMDb ID: " + imdbId, tmpE);
     }
   }
 
@@ -247,39 +247,39 @@ public class ImdbService {
    */
   private static String downloadPoster(String imageUrl, String imdbId) {
     try {
-      Path appDataPath = AppContext.getInstance().getDatabaseService().getDbPath().getParent();
-      if (appDataPath == null) return null;
+      Path tmpAppDataPath = AppContext.getInstance().getDatabaseService().getDbPath().getParent();
+      if (tmpAppDataPath == null) return null;
 
       // Ensure directory exists
-      Path coversDir = appDataPath.resolve("covers");
-      if (!Files.exists(coversDir)) {
-        Files.createDirectories(coversDir);
+      Path tmpCoversDir = tmpAppDataPath.resolve("covers");
+      if (!Files.exists(tmpCoversDir)) {
+        Files.createDirectories(tmpCoversDir);
       }
 
       // Check if cover image already exists locally to prevent redundant downloads
-      Path imagePath = coversDir.resolve(imdbId + ".jpg");
-      if (Files.exists(imagePath)) {
-        return imagePath.toAbsolutePath().toString().replace("\\", "/");
+      Path tmpImagePath = tmpCoversDir.resolve(imdbId + ".jpg");
+      if (Files.exists(tmpImagePath)) {
+        return tmpImagePath.toAbsolutePath().toString().replace("\\", "/");
       }
 
-      HttpRequest request =
+      HttpRequest tmpRequest =
           HttpRequest.newBuilder()
               .uri(URI.create(imageUrl))
               .header("User-Agent", "Mozilla/5.0")
               .GET()
               .build();
 
-      HttpResponse<InputStream> response =
-          client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+      HttpResponse<InputStream> tmpResponse =
+          client.send(tmpRequest, HttpResponse.BodyHandlers.ofInputStream());
 
-      if (response.statusCode() == 200) {
+      if (tmpResponse.statusCode() == 200) {
         // Stream and save image file to disk
-        Files.copy(response.body(), imagePath, StandardCopyOption.REPLACE_EXISTING);
-        return imagePath.toAbsolutePath().toString().replace("\\", "/");
+        Files.copy(tmpResponse.body(), tmpImagePath, StandardCopyOption.REPLACE_EXISTING);
+        return tmpImagePath.toAbsolutePath().toString().replace("\\", "/");
       }
 
-    } catch (Exception e) {
-      LOGGER.log(Level.WARNING, "Failed to download poster image: " + imageUrl, e);
+    } catch (Exception tmpE) {
+      LOGGER.log(Level.WARNING, "Failed to download poster image: " + imageUrl, tmpE);
     }
     return null;
   }
