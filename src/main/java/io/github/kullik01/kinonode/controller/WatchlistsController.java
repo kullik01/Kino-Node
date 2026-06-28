@@ -78,7 +78,7 @@ public class WatchlistsController implements Refreshable {
 
     // Custom Cell Factory for Watchlists
     lstWatchlists.setCellFactory(
-        lv ->
+        tmpListView ->
             new ListCell<>() {
               @Override
               protected void updateItem(Watchlist item, boolean empty) {
@@ -96,10 +96,10 @@ public class WatchlistsController implements Refreshable {
         .getSelectionModel()
         .selectedItemProperty()
         .addListener(
-            (obs, oldVal, newVal) -> {
-              selectedWatchlist = newVal;
+            (observable, oldValue, newValue) -> {
+              selectedWatchlist = newValue;
               loadWatchlistMovies();
-              updateWatchlistButtonStates(newVal != null);
+              updateWatchlistButtonStates(newValue != null);
             });
 
     updateWatchlistButtonStates(false);
@@ -107,7 +107,7 @@ public class WatchlistsController implements Refreshable {
     // Custom Cell Factory for Movies inside Watchlist (displays cover thumbnail and star rating
     // row)
     lstMovies.setCellFactory(
-        lv ->
+        tmpListView ->
             new ListCell<>() {
               private final HBox content = new HBox(15);
               private final ImageView thumbnail = new ImageView();
@@ -139,7 +139,7 @@ public class WatchlistsController implements Refreshable {
                     javafx.scene.layout.Region.USE_PREF_SIZE,
                     javafx.scene.layout.Region.USE_PREF_SIZE);
 
-                content.maxWidthProperty().bind(lv.widthProperty().subtract(40));
+                content.maxWidthProperty().bind(tmpListView.widthProperty().subtract(40));
 
                 content.getChildren().addAll(thumbnail, titleLabel, ratingBox, ratingTextLabel);
               }
@@ -184,13 +184,13 @@ public class WatchlistsController implements Refreshable {
                   // Retrieve and load cover art image in the ListView cells
                   Image tmpImg = null;
                   if (item.getCoverImagePath() != null) {
-                    File tmpF = new File(item.getCoverImagePath());
-                    if (tmpF.exists()) {
+                    File tmpFile = new File(item.getCoverImagePath());
+                    if (tmpFile.exists()) {
                       try {
                         tmpImg =
                             new Image(
-                                tmpF.toURI().toURL().toExternalForm(), 30, 45, false, true, true);
-                      } catch (MalformedURLException tmpIgnored) {
+                                tmpFile.toURI().toURL().toExternalForm(), 30, 45, false, true, true);
+                      } catch (MalformedURLException tmpIgnoredException) {
                       }
                     }
                   }
@@ -205,7 +205,7 @@ public class WatchlistsController implements Refreshable {
                           PLACEHOLDER_IMAGE =
                               new Image(tmpResource.toExternalForm(), 30, 45, false, true, true);
                         }
-                      } catch (Exception tmpIgnored) {
+                      } catch (Exception tmpIgnoredException) {
                       }
                     }
                     tmpImg = PLACEHOLDER_IMAGE;
@@ -234,7 +234,7 @@ public class WatchlistsController implements Refreshable {
         .getSelectionModel()
         .selectedItemProperty()
         .addListener(
-            (obs, oldVal, newVal) -> {
+            (observable, oldValue, newValue) -> {
               updateButtonStates();
             });
 
@@ -358,9 +358,9 @@ public class WatchlistsController implements Refreshable {
               } else {
                 boolean tmpDuplicate = false;
                 List<Watchlist> tmpWatchlists = watchlistRepository.findAll();
-                for (Watchlist tmpW : tmpWatchlists) {
-                  if (tmpW.getName().equalsIgnoreCase(newValue.trim())) {
-                    if (tmpW.getId() != null && tmpW.getId() != currentId) {
+                for (Watchlist tmpWatchlist : tmpWatchlists) {
+                  if (tmpWatchlist.getName().equalsIgnoreCase(newValue.trim())) {
+                    if (tmpWatchlist.getId() != null && tmpWatchlist.getId() != currentId) {
                       tmpDuplicate = true;
                       break;
                     }
@@ -443,9 +443,9 @@ public class WatchlistsController implements Refreshable {
 
   private boolean validateWatchlistName(String cleanName, int currentId) {
     List<Watchlist> tmpWatchlists = watchlistRepository.findAll();
-    for (Watchlist tmpW : tmpWatchlists) {
-      if (tmpW.getName().equalsIgnoreCase(cleanName)) {
-        if (tmpW.getId() != null && tmpW.getId() != currentId) {
+    for (Watchlist tmpWatchlist : tmpWatchlists) {
+      if (tmpWatchlist.getName().equalsIgnoreCase(cleanName)) {
+        if (tmpWatchlist.getId() != null && tmpWatchlist.getId() != currentId) {
           Alert tmpAlert = new Alert(Alert.AlertType.ERROR);
           javafx.stage.Stage tmpStage =
               (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
@@ -552,8 +552,8 @@ public class WatchlistsController implements Refreshable {
   private void playMovie(Movie movie) {
     try {
       AppContext.getInstance().getPlaybackService().play(movie.getFilePath());
-    } catch (Exception tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to play movie from watchlist", tmpE);
+    } catch (Exception tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to play movie from watchlist", tmpException);
       Alert tmpAlert = new Alert(Alert.AlertType.ERROR);
       javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
       tmpStage
@@ -563,7 +563,7 @@ public class WatchlistsController implements Refreshable {
                   getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
       tmpAlert.setTitle("Playback Failed");
       tmpAlert.setHeaderText("Cannot open media player");
-      tmpAlert.setContentText(tmpE.getMessage());
+      tmpAlert.setContentText(tmpException.getMessage());
 
       javafx.scene.image.ImageView tmpCustomIcon =
           new javafx.scene.image.ImageView(

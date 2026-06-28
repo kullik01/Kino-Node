@@ -67,20 +67,20 @@ public class WatchlistRepository {
   public List<Watchlist> findAll() {
     List<Watchlist> tmpWatchlists = new ArrayList<>();
     String tmpSql = "SELECT * FROM watchlists ORDER BY name ASC";
-    try (Statement tmpStmt = databaseService.getConnection().createStatement();
-        ResultSet tmpRs = tmpStmt.executeQuery(tmpSql)) {
-      while (tmpRs.next()) {
-        Watchlist tmpW = new Watchlist();
-        tmpW.setId(tmpRs.getInt("id"));
-        tmpW.setName(tmpRs.getString("name"));
+    try (Statement tmpStatement = databaseService.getConnection().createStatement();
+        ResultSet tmpResultSet = tmpStatement.executeQuery(tmpSql)) {
+      while (tmpResultSet.next()) {
+        Watchlist tmpWatchlist = new Watchlist();
+        tmpWatchlist.setId(tmpResultSet.getInt("id"));
+        tmpWatchlist.setName(tmpResultSet.getString("name"));
         // Retrieve the timestamp as epoch seconds and map to Instant
-        tmpW.setCreatedAt(Instant.ofEpochSecond(tmpRs.getLong("created_at")));
+        tmpWatchlist.setCreatedAt(Instant.ofEpochSecond(tmpResultSet.getLong("created_at")));
         // Eagerly fetch and associate movies belonging to this watchlist
-        tmpW.setMovies(findMoviesInWatchlist(tmpW.getId()));
-        tmpWatchlists.add(tmpW);
+        tmpWatchlist.setMovies(findMoviesInWatchlist(tmpWatchlist.getId()));
+        tmpWatchlists.add(tmpWatchlist);
       }
-    } catch (SQLException tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to find all watchlists", tmpE);
+    } catch (SQLException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to find all watchlists", tmpException);
     }
     return tmpWatchlists;
   }
@@ -94,22 +94,22 @@ public class WatchlistRepository {
    */
   public Watchlist findById(int id) {
     String tmpSql = "SELECT * FROM watchlists WHERE id = ?";
-    try (PreparedStatement tmpStmt = databaseService.getConnection().prepareStatement(tmpSql)) {
-      tmpStmt.setInt(1, id);
-      try (ResultSet tmpRs = tmpStmt.executeQuery()) {
-        if (tmpRs.next()) {
-          Watchlist tmpW = new Watchlist();
-          tmpW.setId(tmpRs.getInt("id"));
-          tmpW.setName(tmpRs.getString("name"));
+    try (PreparedStatement tmpPreparedStatement = databaseService.getConnection().prepareStatement(tmpSql)) {
+      tmpPreparedStatement.setInt(1, id);
+      try (ResultSet tmpResultSet = tmpPreparedStatement.executeQuery()) {
+        if (tmpResultSet.next()) {
+          Watchlist tmpWatchlist = new Watchlist();
+          tmpWatchlist.setId(tmpResultSet.getInt("id"));
+          tmpWatchlist.setName(tmpResultSet.getString("name"));
           // Retrieve the timestamp as epoch seconds and map to Instant
-          tmpW.setCreatedAt(Instant.ofEpochSecond(tmpRs.getLong("created_at")));
+          tmpWatchlist.setCreatedAt(Instant.ofEpochSecond(tmpResultSet.getLong("created_at")));
           // Eagerly fetch and associate movies belonging to this watchlist
-          tmpW.setMovies(findMoviesInWatchlist(id));
-          return tmpW;
+          tmpWatchlist.setMovies(findMoviesInWatchlist(id));
+          return tmpWatchlist;
         }
       }
-    } catch (SQLException tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to find watchlist by ID: " + id, tmpE);
+    } catch (SQLException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to find watchlist by ID: " + id, tmpException);
     }
     return null;
   }
@@ -123,21 +123,21 @@ public class WatchlistRepository {
    */
   public Watchlist insert(Watchlist watchlist) {
     String tmpSql = "INSERT INTO watchlists (name, created_at) VALUES (?, ?)";
-    try (PreparedStatement tmpStmt =
+    try (PreparedStatement tmpPreparedStatement =
         databaseService.getConnection().prepareStatement(tmpSql, Statement.RETURN_GENERATED_KEYS)) {
-      tmpStmt.setString(1, watchlist.getName());
-      tmpStmt.setLong(2, watchlist.getCreatedAt().getEpochSecond());
-      int tmpAffected = tmpStmt.executeUpdate();
+      tmpPreparedStatement.setString(1, watchlist.getName());
+      tmpPreparedStatement.setLong(2, watchlist.getCreatedAt().getEpochSecond());
+      int tmpAffected = tmpPreparedStatement.executeUpdate();
       // Fetch and set generated database key back on the entity if insertion succeeded
       if (tmpAffected > 0) {
-        try (ResultSet tmpGeneratedKeys = tmpStmt.getGeneratedKeys()) {
+        try (ResultSet tmpGeneratedKeys = tmpPreparedStatement.getGeneratedKeys()) {
           if (tmpGeneratedKeys.next()) {
             watchlist.setId(tmpGeneratedKeys.getInt(1));
           }
         }
       }
-    } catch (SQLException tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to insert watchlist: " + watchlist.getName(), tmpE);
+    } catch (SQLException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to insert watchlist: " + watchlist.getName(), tmpException);
     }
     return watchlist;
   }
@@ -149,12 +149,12 @@ public class WatchlistRepository {
    */
   public void update(Watchlist watchlist) {
     String tmpSql = "UPDATE watchlists SET name = ? WHERE id = ?";
-    try (PreparedStatement tmpStmt = databaseService.getConnection().prepareStatement(tmpSql)) {
-      tmpStmt.setString(1, watchlist.getName());
-      tmpStmt.setInt(2, watchlist.getId());
-      tmpStmt.executeUpdate();
-    } catch (SQLException tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to update watchlist: " + watchlist.getId(), tmpE);
+    try (PreparedStatement tmpPreparedStatement = databaseService.getConnection().prepareStatement(tmpSql)) {
+      tmpPreparedStatement.setString(1, watchlist.getName());
+      tmpPreparedStatement.setInt(2, watchlist.getId());
+      tmpPreparedStatement.executeUpdate();
+    } catch (SQLException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to update watchlist: " + watchlist.getId(), tmpException);
     }
   }
 
@@ -166,11 +166,11 @@ public class WatchlistRepository {
    */
   public void delete(int id) {
     String tmpSql = "DELETE FROM watchlists WHERE id = ?";
-    try (PreparedStatement tmpStmt = databaseService.getConnection().prepareStatement(tmpSql)) {
-      tmpStmt.setInt(1, id);
-      tmpStmt.executeUpdate();
-    } catch (SQLException tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to delete watchlist: " + id, tmpE);
+    try (PreparedStatement tmpPreparedStatement = databaseService.getConnection().prepareStatement(tmpSql)) {
+      tmpPreparedStatement.setInt(1, id);
+      tmpPreparedStatement.executeUpdate();
+    } catch (SQLException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to delete watchlist: " + id, tmpException);
     }
   }
 
@@ -190,33 +190,33 @@ public class WatchlistRepository {
             WHERE wm.watchlist_id = ?
             ORDER BY wm.position ASC
             """;
-    try (PreparedStatement tmpStmt = databaseService.getConnection().prepareStatement(tmpSql)) {
-      tmpStmt.setInt(1, watchlistId);
-      try (ResultSet tmpRs = tmpStmt.executeQuery()) {
-        while (tmpRs.next()) {
+    try (PreparedStatement tmpPreparedStatement = databaseService.getConnection().prepareStatement(tmpSql)) {
+      tmpPreparedStatement.setInt(1, watchlistId);
+      try (ResultSet tmpResultSet = tmpPreparedStatement.executeQuery()) {
+        while (tmpResultSet.next()) {
           // Map the ResultSet row to a new Movie instance locally
           Movie tmpMovie = new Movie();
-          tmpMovie.setId(tmpRs.getInt("id"));
-          tmpMovie.setFilePath(tmpRs.getString("file_path"));
-          tmpMovie.setTitle(tmpRs.getString("title"));
+          tmpMovie.setId(tmpResultSet.getInt("id"));
+          tmpMovie.setFilePath(tmpResultSet.getString("file_path"));
+          tmpMovie.setTitle(tmpResultSet.getString("title"));
 
-          int tmpYear = tmpRs.getInt("year");
-          tmpMovie.setYear(tmpRs.wasNull() ? null : tmpYear);
+          int tmpYear = tmpResultSet.getInt("year");
+          tmpMovie.setYear(tmpResultSet.wasNull() ? null : tmpYear);
 
-          tmpMovie.setGenre(tmpRs.getString("genre"));
-          tmpMovie.setDescription(tmpRs.getString("description"));
+          tmpMovie.setGenre(tmpResultSet.getString("genre"));
+          tmpMovie.setDescription(tmpResultSet.getString("description"));
 
-          int tmpRating = tmpRs.getInt("rating");
-          tmpMovie.setRating(tmpRs.wasNull() ? null : tmpRating);
+          int tmpRating = tmpResultSet.getInt("rating");
+          tmpMovie.setRating(tmpResultSet.wasNull() ? null : tmpRating);
 
-          tmpMovie.setCoverImagePath(tmpRs.getString("cover_image_path"));
-          tmpMovie.setTrailerUrl(tmpRs.getString("trailer_url"));
-          tmpMovie.setDateAdded(Instant.ofEpochSecond(tmpRs.getLong("date_added")));
+          tmpMovie.setCoverImagePath(tmpResultSet.getString("cover_image_path"));
+          tmpMovie.setTrailerUrl(tmpResultSet.getString("trailer_url"));
+          tmpMovie.setDateAdded(Instant.ofEpochSecond(tmpResultSet.getLong("date_added")));
           tmpMovies.add(tmpMovie);
         }
       }
-    } catch (SQLException tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to find movies in watchlist: " + watchlistId, tmpE);
+    } catch (SQLException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to find movies in watchlist: " + watchlistId, tmpException);
     }
     return tmpMovies;
   }
@@ -232,16 +232,17 @@ public class WatchlistRepository {
   public void addMovieToWatchlist(int watchlistId, int movieId) {
     // Step 1: Check if the relationship already exists to prevent duplicate entries
     String tmpCheckSql = "SELECT 1 FROM watchlist_movies WHERE watchlist_id = ? AND movie_id = ?";
-    try (PreparedStatement tmpCheckStmt = databaseService.getConnection().prepareStatement(tmpCheckSql)) {
-      tmpCheckStmt.setInt(1, watchlistId);
-      tmpCheckStmt.setInt(2, movieId);
-      try (ResultSet tmpRs = tmpCheckStmt.executeQuery()) {
-        if (tmpRs.next()) {
-          return; // Association already exists, exit early
+    try (PreparedStatement tmpCheckStatement = databaseService.getConnection().prepareStatement(tmpCheckSql)) {
+      tmpCheckStatement.setInt(1, watchlistId);
+      tmpCheckStatement.setInt(2, movieId);
+      try (ResultSet tmpResultSet = tmpCheckStatement.executeQuery()) {
+        if (tmpResultSet.next()) {
+          return // Association already exists, exit early
+          ;
         }
       }
-    } catch (SQLException tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to check watchlist relation", tmpE);
+    } catch (SQLException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to check watchlist relation", tmpException);
     }
 
     // Step 2: Determine the next position value by finding the maximum current position plus one.
@@ -249,26 +250,26 @@ public class WatchlistRepository {
     int tmpNextPosition = 0;
     String tmpMaxSql =
         "SELECT IFNULL(MAX(position), -1) + 1 FROM watchlist_movies WHERE watchlist_id = ?";
-    try (PreparedStatement tmpMaxStmt = databaseService.getConnection().prepareStatement(tmpMaxSql)) {
-      tmpMaxStmt.setInt(1, watchlistId);
-      try (ResultSet tmpRs = tmpMaxStmt.executeQuery()) {
-        if (tmpRs.next()) {
-          tmpNextPosition = tmpRs.getInt(1);
+    try (PreparedStatement tmpMaxStatement = databaseService.getConnection().prepareStatement(tmpMaxSql)) {
+      tmpMaxStatement.setInt(1, watchlistId);
+      try (ResultSet tmpResultSet = tmpMaxStatement.executeQuery()) {
+        if (tmpResultSet.next()) {
+          tmpNextPosition = tmpResultSet.getInt(1);
         }
       }
-    } catch (SQLException tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to get max position", tmpE);
+    } catch (SQLException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to get max position", tmpException);
     }
 
     // Step 3: Insert the new association with the calculated next position index
     String tmpSql = "INSERT INTO watchlist_movies (watchlist_id, movie_id, position) VALUES (?, ?, ?)";
-    try (PreparedStatement tmpStmt = databaseService.getConnection().prepareStatement(tmpSql)) {
-      tmpStmt.setInt(1, watchlistId);
-      tmpStmt.setInt(2, movieId);
-      tmpStmt.setInt(3, tmpNextPosition);
-      tmpStmt.executeUpdate();
-    } catch (SQLException tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to add movie to watchlist", tmpE);
+    try (PreparedStatement tmpPreparedStatement = databaseService.getConnection().prepareStatement(tmpSql)) {
+      tmpPreparedStatement.setInt(1, watchlistId);
+      tmpPreparedStatement.setInt(2, movieId);
+      tmpPreparedStatement.setInt(3, tmpNextPosition);
+      tmpPreparedStatement.executeUpdate();
+    } catch (SQLException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to add movie to watchlist", tmpException);
     }
   }
 
@@ -282,10 +283,10 @@ public class WatchlistRepository {
    */
   public void removeMovieFromWatchlist(int watchlistId, int movieId) {
     String tmpSql = "DELETE FROM watchlist_movies WHERE watchlist_id = ? AND movie_id = ?";
-    try (PreparedStatement tmpStmt = databaseService.getConnection().prepareStatement(tmpSql)) {
-      tmpStmt.setInt(1, watchlistId);
-      tmpStmt.setInt(2, movieId);
-      tmpStmt.executeUpdate();
+    try (PreparedStatement tmpPreparedStatement = databaseService.getConnection().prepareStatement(tmpSql)) {
+      tmpPreparedStatement.setInt(1, watchlistId);
+      tmpPreparedStatement.setInt(2, movieId);
+      tmpPreparedStatement.executeUpdate();
 
       // Fetch remaining movies in the watchlist to check if it's empty
       List<Movie> tmpRemaining = findMoviesInWatchlist(watchlistId);
@@ -297,8 +298,8 @@ public class WatchlistRepository {
         List<Integer> tmpIds = tmpRemaining.stream().map(Movie::getId).toList();
         updateMoviePositionsInWatchlist(watchlistId, tmpIds);
       }
-    } catch (SQLException tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to remove movie from watchlist", tmpE);
+    } catch (SQLException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to remove movie from watchlist", tmpException);
     }
   }
 
@@ -311,29 +312,29 @@ public class WatchlistRepository {
    */
   public void updateMoviePositionsInWatchlist(int watchlistId, List<Integer> movieIdsInOrder) {
     String tmpSql = "UPDATE watchlist_movies SET position = ? WHERE watchlist_id = ? AND movie_id = ?";
-    Connection tmpConn = databaseService.getConnection();
+    Connection tmpConnection = databaseService.getConnection();
     try {
       // Disable auto-commit to begin a new transaction manually
-      tmpConn.setAutoCommit(false);
-      try (PreparedStatement tmpStmt = tmpConn.prepareStatement(tmpSql)) {
+      tmpConnection.setAutoCommit(false);
+      try (PreparedStatement tmpPreparedStatement = tmpConnection.prepareStatement(tmpSql)) {
         // Add update operations to the batch sequentially based on the list index
         for (int i = 0; i < movieIdsInOrder.size(); i++) {
-          tmpStmt.setInt(1, i);
-          tmpStmt.setInt(2, watchlistId);
-          tmpStmt.setInt(3, movieIdsInOrder.get(i));
-          tmpStmt.addBatch();
+          tmpPreparedStatement.setInt(1, i);
+          tmpPreparedStatement.setInt(2, watchlistId);
+          tmpPreparedStatement.setInt(3, movieIdsInOrder.get(i));
+          tmpPreparedStatement.addBatch();
         }
-        tmpStmt.executeBatch();
-        tmpConn.commit(); // Commit transaction if all updates succeed
-      } catch (SQLException tmpE) {
-        tmpConn.rollback(); // Rollback transaction on failure to ensure state integrity
-        throw tmpE;
+        tmpPreparedStatement.executeBatch();
+        tmpConnection.commit(); // Commit transaction if all updates succeed
+      } catch (SQLException tmpException) {
+        tmpConnection.rollback(); // Rollback transaction on failure to ensure state integrity
+        throw tmpException;
       } finally {
         // Restore auto-commit configuration to default behavior
-        tmpConn.setAutoCommit(true);
+        tmpConnection.setAutoCommit(true);
       }
-    } catch (SQLException tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to update movie positions in watchlist: " + watchlistId, tmpE);
+    } catch (SQLException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to update movie positions in watchlist: " + watchlistId, tmpException);
     }
   }
 }

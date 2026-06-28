@@ -60,8 +60,8 @@ public class KinoNodeApp extends Application {
     AppContext.getInstance();
 
     // Retrieve user's configured theme and apply the corresponding stylesheet
-    var tmpSettingsRepo = AppContext.getInstance().getSettingsRepository();
-    String tmpTheme = tmpSettingsRepo.get("theme_mode", "light");
+    var tmpSettingsRepository = AppContext.getInstance().getSettingsRepository();
+    String tmpTheme = tmpSettingsRepository.get("theme_mode", "light");
     if ("dark".equals(tmpTheme)) {
       // Use AtlantaFX PrimerDark theme for dark mode
       Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
@@ -114,9 +114,9 @@ public class KinoNodeApp extends Application {
   /**
    * Main entry point for the application. Launches the JavaFX application framework.
    *
-   * @param args the command-line arguments
+   * @param arguments the command-line arguments
    */
-  public static void main(String[] args) {
-    launch(args);
+  public static void main(String[] arguments) {
+    launch(arguments);
   }
 }

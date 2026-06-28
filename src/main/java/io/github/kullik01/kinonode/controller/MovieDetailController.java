@@ -171,12 +171,12 @@ public class MovieDetailController {
     String tmpPath = movie.getCoverImagePath();
     Image tmpImage = null;
     if (tmpPath != null && !tmpPath.isBlank()) {
-      File tmpF = new File(tmpPath);
-      if (tmpF.exists()) {
+      File tmpFile = new File(tmpPath);
+      if (tmpFile.exists()) {
         try {
-          tmpImage = new Image(tmpF.toURI().toURL().toExternalForm(), 240, 360, false, true, true);
-        } catch (MalformedURLException tmpE) {
-          LOGGER.log(Level.WARNING, "Failed to load poster in details: " + tmpPath, tmpE);
+          tmpImage = new Image(tmpFile.toURI().toURL().toExternalForm(), 240, 360, false, true, true);
+        } catch (MalformedURLException tmpException) {
+          LOGGER.log(Level.WARNING, "Failed to load poster in details: " + tmpPath, tmpException);
         }
       }
     }
@@ -189,8 +189,8 @@ public class MovieDetailController {
           if (tmpResource != null) {
             PLACEHOLDER_IMAGE = new Image(tmpResource.toExternalForm(), 240, 360, false, true, true);
           }
-        } catch (Exception tmpE) {
-          LOGGER.log(Level.WARNING, "Failed to load details placeholder cover", tmpE);
+        } catch (Exception tmpException) {
+          LOGGER.log(Level.WARNING, "Failed to load details placeholder cover", tmpException);
         }
       }
       tmpImage = PLACEHOLDER_IMAGE;
@@ -521,11 +521,11 @@ public class MovieDetailController {
           Files.createDirectories(tmpCoversDir);
         }
 
-        String tmpExt = PathUtils.getFileExtension(tmpSelected);
-        if (tmpExt.isEmpty()) tmpExt = "jpg";
+        String tmpExtension = PathUtils.getFileExtension(tmpSelected);
+        if (tmpExtension.isEmpty()) tmpExtension = "jpg";
 
         // Generate unique filename with timestamp to bypass cover art browser caching issues
-        String tmpFilename = "cover_" + movie.getId() + "_" + System.currentTimeMillis() + "." + tmpExt;
+        String tmpFilename = "cover_" + movie.getId() + "_" + System.currentTimeMillis() + "." + tmpExtension;
         Path tmpDestPath = tmpCoversDir.resolve(tmpFilename);
 
         Files.copy(tmpSelected.toPath(), tmpDestPath, StandardCopyOption.REPLACE_EXISTING);
@@ -537,9 +537,9 @@ public class MovieDetailController {
         imgPoster.setImage(
             new Image(tmpDestPath.toUri().toURL().toExternalForm(), 240, 360, false, true, true));
         showStatus("Poster image updated.");
-      } catch (IOException tmpE) {
-        LOGGER.log(Level.SEVERE, "Failed to copy cover poster file", tmpE);
-        showStatus("Error saving poster: " + tmpE.getMessage());
+      } catch (IOException tmpException) {
+        LOGGER.log(Level.SEVERE, "Failed to copy cover poster file", tmpException);
+        showStatus("Error saving poster: " + tmpException.getMessage());
       }
     }
   }
@@ -551,8 +551,8 @@ public class MovieDetailController {
       // process
       AppContext.getInstance().getPlaybackService().play(movie.getFilePath());
       showStatus("Opening external player...");
-    } catch (Exception tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to launch external media player", tmpE);
+    } catch (Exception tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to launch external media player", tmpException);
       Alert tmpAlert = new Alert(Alert.AlertType.ERROR);
       javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
       tmpStage
@@ -562,7 +562,7 @@ public class MovieDetailController {
                   getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
       tmpAlert.setTitle("Playback Failed");
       tmpAlert.setHeaderText("Could not launch external media player");
-      tmpAlert.setContentText(tmpE.getMessage());
+      tmpAlert.setContentText(tmpException.getMessage());
 
       javafx.scene.image.ImageView tmpCustomIcon =
           new javafx.scene.image.ImageView(
@@ -595,8 +595,8 @@ public class MovieDetailController {
       } else {
         showStatus("System web browser action not supported on this platform.");
       }
-    } catch (Exception tmpE) {
-      LOGGER.log(Level.WARNING, "Failed to open browser trailer link", tmpE);
+    } catch (Exception tmpException) {
+      LOGGER.log(Level.WARNING, "Failed to open browser trailer link", tmpException);
       showStatus("Failed to open browser.");
     }
   }
@@ -758,7 +758,7 @@ public class MovieDetailController {
         val -> {
           try {
             movie.setYear(val.isEmpty() ? null : Integer.parseInt(val));
-          } catch (NumberFormatException tmpE) {
+          } catch (NumberFormatException tmpException) {
             showStatus("Year must be a number!");
           }
         });

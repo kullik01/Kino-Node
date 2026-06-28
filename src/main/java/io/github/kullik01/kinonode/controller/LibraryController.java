@@ -110,13 +110,13 @@ public class LibraryController implements Refreshable {
     cmbSort.setValue(tmpSavedSortFilter);
 
     // Real-time filters and sorts
-    txtSearch.textProperty().addListener((obs, oldVal, newVal) -> filterAndDisplayMovies());
+    txtSearch.textProperty().addListener((observable, oldValue, newValue) -> filterAndDisplayMovies());
     cmbSort
         .valueProperty()
         .addListener(
-            (obs, oldVal, newVal) -> {
-              if (newVal != null) {
-                AppContext.getInstance().getSettingsRepository().set("library_sort_filter", newVal);
+            (observable, oldValue, newValue) -> {
+              if (newValue != null) {
+                AppContext.getInstance().getSettingsRepository().set("library_sort_filter", newValue);
               }
               filterAndDisplayMovies();
             });
@@ -146,40 +146,40 @@ public class LibraryController implements Refreshable {
     List<Movie> tmpFiltered =
         allMovies.stream()
             .filter(
-                m -> {
+                movie -> {
                   if (tmpQuery.isEmpty()) return true;
 
                   return switch (tmpSortOption) {
                     case "Title" ->
-                        m.getTitle() != null && m.getTitle().toLowerCase().contains(tmpQuery);
+                        movie.getTitle() != null && movie.getTitle().toLowerCase().contains(tmpQuery);
                     case "Genre" ->
-                        m.getGenre() != null && m.getGenre().toLowerCase().contains(tmpQuery);
+                        movie.getGenre() != null && movie.getGenre().toLowerCase().contains(tmpQuery);
                     case "Director" ->
-                        m.getDirector() != null && m.getDirector().toLowerCase().contains(tmpQuery);
+                        movie.getDirector() != null && movie.getDirector().toLowerCase().contains(tmpQuery);
                     case "Writer" ->
-                        m.getWriter() != null && m.getWriter().toLowerCase().contains(tmpQuery);
+                        movie.getWriter() != null && movie.getWriter().toLowerCase().contains(tmpQuery);
                     case "Producer" ->
-                        m.getProducer() != null && m.getProducer().toLowerCase().contains(tmpQuery);
+                        movie.getProducer() != null && movie.getProducer().toLowerCase().contains(tmpQuery);
                     case "Cinematographer" ->
-                        m.getCinematographer() != null
-                            && m.getCinematographer().toLowerCase().contains(tmpQuery);
+                        movie.getCinematographer() != null
+                            && movie.getCinematographer().toLowerCase().contains(tmpQuery);
                     case "Composer" ->
-                        m.getComposer() != null && m.getComposer().toLowerCase().contains(tmpQuery);
+                        movie.getComposer() != null && movie.getComposer().toLowerCase().contains(tmpQuery);
                     default ->
-                        (m.getTitle() != null && m.getTitle().toLowerCase().contains(tmpQuery))
-                            || (m.getGenre() != null && m.getGenre().toLowerCase().contains(tmpQuery))
-                            || (m.getDescription() != null
-                                && m.getDescription().toLowerCase().contains(tmpQuery))
-                            || (m.getDirector() != null
-                                && m.getDirector().toLowerCase().contains(tmpQuery))
-                            || (m.getWriter() != null
-                                && m.getWriter().toLowerCase().contains(tmpQuery))
-                            || (m.getProducer() != null
-                                && m.getProducer().toLowerCase().contains(tmpQuery))
-                            || (m.getCinematographer() != null
-                                && m.getCinematographer().toLowerCase().contains(tmpQuery))
-                            || (m.getComposer() != null
-                                && m.getComposer().toLowerCase().contains(tmpQuery));
+                        (movie.getTitle() != null && movie.getTitle().toLowerCase().contains(tmpQuery))
+                            || (movie.getGenre() != null && movie.getGenre().toLowerCase().contains(tmpQuery))
+                            || (movie.getDescription() != null
+                                && movie.getDescription().toLowerCase().contains(tmpQuery))
+                            || (movie.getDirector() != null
+                                && movie.getDirector().toLowerCase().contains(tmpQuery))
+                            || (movie.getWriter() != null
+                                && movie.getWriter().toLowerCase().contains(tmpQuery))
+                            || (movie.getProducer() != null
+                                && movie.getProducer().toLowerCase().contains(tmpQuery))
+                            || (movie.getCinematographer() != null
+                                && movie.getCinematographer().toLowerCase().contains(tmpQuery))
+                            || (movie.getComposer() != null
+                                && movie.getComposer().toLowerCase().contains(tmpQuery));
                   };
                 })
             .collect(Collectors.toList());
@@ -198,21 +198,21 @@ public class LibraryController implements Refreshable {
                     .reversed());
         case "Release Year" ->
             tmpFiltered.sort(
-                (m1, m2) -> {
+                (movie1, movie2) -> {
                   // Safe sorting of year that places null-valued release years at the bottom
-                  if (m1.getYear() == null && m2.getYear() == null) return 0;
-                  if (m1.getYear() == null) return 1;
-                  if (m2.getYear() == null) return -1;
-                  return Integer.compare(m1.getYear(), m2.getYear());
+                  if (movie1.getYear() == null && movie2.getYear() == null) return 0;
+                  if (movie1.getYear() == null) return 1;
+                  if (movie2.getYear() == null) return -1;
+                  return Integer.compare(movie1.getYear(), movie2.getYear());
                 });
         case "Rating (Highest)" ->
             tmpFiltered.sort(
-                (m1, m2) -> {
+                (movie1, movie2) -> {
                   // Safe sorting of ratings in descending order, putting nulls at the end
-                  if (m1.getRating() == null && m2.getRating() == null) return 0;
-                  if (m1.getRating() == null) return 1;
-                  if (m2.getRating() == null) return -1;
-                  return Integer.compare(m2.getRating(), m1.getRating()); // Descending
+                  if (movie1.getRating() == null && movie2.getRating() == null) return 0;
+                  if (movie1.getRating() == null) return 1;
+                  if (movie2.getRating() == null) return -1;
+                  return Integer.compare(movie2.getRating(), movie1.getRating()); // Descending
                 });
         default ->
             tmpFiltered.sort(
@@ -223,10 +223,10 @@ public class LibraryController implements Refreshable {
     }
 
     java.util.List<javafx.scene.Node> tmpNewCards = new java.util.ArrayList<>();
-    for (Movie tmpM : tmpFiltered) {
+    for (Movie tmpMovie : tmpFiltered) {
       // Retrieve from cache first to avoid slow FXML loading cycles
-      Parent tmpCard = cardCache.get(tmpM.getId());
-      MovieCardController tmpController = controllerCache.get(tmpM.getId());
+      Parent tmpCard = cardCache.get(tmpMovie.getId());
+      MovieCardController tmpController = controllerCache.get(tmpMovie.getId());
       if (tmpCard == null) {
         try {
           URL tmpUrl = getClass().getResource("/io/github/kullik01/kinonode/fxml/MovieCard.fxml");
@@ -234,16 +234,16 @@ public class LibraryController implements Refreshable {
           tmpCard = tmpLoader.load();
           tmpController = tmpLoader.getController();
 
-          cardCache.put(tmpM.getId(), tmpCard);
-          controllerCache.put(tmpM.getId(), tmpController);
-        } catch (IOException tmpE) {
-          LOGGER.log(Level.SEVERE, "Failed to load MovieCard FXML", tmpE);
+          cardCache.put(tmpMovie.getId(), tmpCard);
+          controllerCache.put(tmpMovie.getId(), tmpController);
+        } catch (IOException tmpException) {
+          LOGGER.log(Level.SEVERE, "Failed to load MovieCard FXML", tmpException);
           continue;
         }
       }
 
       if (tmpController != null) {
-        tmpController.setMovie(tmpM, this::openMovieDetail);
+        tmpController.setMovie(tmpMovie, this::openMovieDetail);
       }
       tmpNewCards.add(tmpCard);
     }
@@ -271,8 +271,8 @@ public class LibraryController implements Refreshable {
             });
         tmpRootPane.getChildren().setAll(tmpDetailView);
       }
-    } catch (IOException tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to load MovieDetailView FXML", tmpE);
+    } catch (IOException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to load MovieDetailView FXML", tmpException);
     }
   }
 
@@ -311,12 +311,12 @@ public class LibraryController implements Refreshable {
           progressBar.progressProperty().unbind();
           progressBar.setProgress(0);
           progressArea.setVisible(false);
-          Throwable tmpE = activeScanTask.getException();
+          Throwable tmpException = activeScanTask.getException();
           CustomAlert.showInformation(
               gridPane.getScene().getWindow(),
               "Sync Failed",
               "An error occurred during search",
-              tmpE != null ? tmpE.getMessage() : "Unknown database or file error");
+              tmpException != null ? tmpException.getMessage() : "Unknown database or file error");
         });
 
     activeScanTask.setOnCancelled(
@@ -327,9 +327,9 @@ public class LibraryController implements Refreshable {
         });
 
     // Run sync task in a daemon thread so it doesn't block JavaFX application exit
-    Thread tmpTh = new Thread(activeScanTask);
-    tmpTh.setDaemon(true);
-    tmpTh.start();
+    Thread tmpThread = new Thread(activeScanTask);
+    tmpThread.setDaemon(true);
+    tmpThread.start();
   }
 
   @FXML

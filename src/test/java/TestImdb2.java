@@ -29,7 +29,7 @@ import io.github.kullik01.kinonode.model.Movie;
 import io.github.kullik01.kinonode.service.ImdbService;
 
 public class TestImdb2 {
-  public static void main(String[] args) {
+  public static void main(String[] arguments) {
     Movie tmpMovie = new Movie("C:/test/Halloween 5.mp4", "Halloween 5");
     ImdbService.enrichMovieData(tmpMovie);
     System.out.println("Title: " + tmpMovie.getTitle());

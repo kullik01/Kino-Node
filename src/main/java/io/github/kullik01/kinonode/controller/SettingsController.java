@@ -95,8 +95,8 @@ public class SettingsController implements Refreshable {
         .getSelectionModel()
         .selectedItemProperty()
         .addListener(
-            (obs, oldVal, newVal) -> {
-              btnRemoveFolder.setDisable(newVal == null);
+            (observable, oldValue, newValue) -> {
+              btnRemoveFolder.setDisable(newValue == null);
             });
 
     setupValidationListeners();
@@ -107,8 +107,8 @@ public class SettingsController implements Refreshable {
     lstWorkspaces
         .sceneProperty()
         .addListener(
-            (obs, oldVal, newVal) -> {
-              if (oldVal != null && newVal == null) {
+            (observable, oldValue, newValue) -> {
+              if (oldValue != null && newValue == null) {
                 if (hasUnsavedChanges() && !hasValidationErrors()) {
                   saveSettings();
                 }
@@ -200,9 +200,9 @@ public class SettingsController implements Refreshable {
         showStatus("Workspace folder removed.");
 
         // Clear movies belonging to the removed workspace from local database records
-        io.github.kullik01.kinonode.repository.MovieRepository tmpMovieRepo =
+        io.github.kullik01.kinonode.repository.MovieRepository tmpMovieRepository =
             AppContext.getInstance().getMovieRepository();
-        tmpMovieRepo.deleteByFilePathPrefix(tmpSelected);
+        tmpMovieRepository.deleteByFilePathPrefix(tmpSelected);
       }
     }
   }
@@ -213,8 +213,8 @@ public class SettingsController implements Refreshable {
     tmpChooser.setTitle("Select External Media Player Executable");
 
     // Add extension filters for executables based on the operating system
-    String tmpOs = System.getProperty("os.name").toLowerCase();
-    if (tmpOs.contains("win")) {
+    String tmpOperatingSystem = System.getProperty("os.name").toLowerCase();
+    if (tmpOperatingSystem.contains("win")) {
       tmpChooser
           .getExtensionFilters()
           .add(new FileChooser.ExtensionFilter("Executable Files", "*.exe", "*.bat", "*.cmd"));
@@ -253,14 +253,14 @@ public class SettingsController implements Refreshable {
     txtPlayerPath
         .textProperty()
         .addListener(
-            (obs, oldVal, newVal) -> {
-              validatePlayerPath(newVal);
+            (observable, oldValue, newValue) -> {
+              validatePlayerPath(newValue);
             });
 
     lstWorkspaces
         .getItems()
         .addListener(
-            (javafx.collections.ListChangeListener.Change<? extends String> c) -> {
+            (javafx.collections.ListChangeListener.Change<? extends String> tmpChange) -> {
               // Unsaved changes detected
             });
   }
@@ -349,7 +349,7 @@ public class SettingsController implements Refreshable {
 
   private void setupWorkspaceCellFactory() {
     lstWorkspaces.setCellFactory(
-        lv ->
+        tmpListView ->
             new javafx.scene.control.ListCell<String>() {
               @Override
               protected void updateItem(String item, boolean empty) {
@@ -369,9 +369,9 @@ public class SettingsController implements Refreshable {
                   tmpFolderIcon.setScaleX(0.95);
                   tmpFolderIcon.setScaleY(0.95);
 
-                  Label tmpLblPath = new Label(item);
-                  tmpLblPath.setMaxWidth(400);
-                  tmpLblPath.setWrapText(false);
+                  Label tmpLabelPath = new Label(item);
+                  tmpLabelPath.setMaxWidth(400);
+                  tmpLabelPath.setWrapText(false);
 
                   Region tmpSpacer = new Region();
                   HBox.setHgrow(tmpSpacer, Priority.ALWAYS);
@@ -379,8 +379,8 @@ public class SettingsController implements Refreshable {
                   // Validate directory folder existence and show a warning SVG if missing
                   File tmpDir = new File(item);
                   if (tmpDir.exists() && tmpDir.isDirectory()) {
-                    tmpLblPath.setStyle("");
-                    tmpBox.getChildren().addAll(tmpFolderIcon, tmpLblPath);
+                    tmpLabelPath.setStyle("");
+                    tmpBox.getChildren().addAll(tmpFolderIcon, tmpLabelPath);
                   } else {
                     SVGPath tmpStatusIcon = new SVGPath();
                     tmpStatusIcon.setContent(
@@ -388,9 +388,9 @@ public class SettingsController implements Refreshable {
                     tmpStatusIcon.setStyle("-fx-fill: -color-danger-fg;");
                     tmpStatusIcon.setScaleX(0.8);
                     tmpStatusIcon.setScaleY(0.8);
-                    tmpLblPath.setStyle("-fx-text-fill: -color-danger-fg;");
+                    tmpLabelPath.setStyle("-fx-text-fill: -color-danger-fg;");
 
-                    tmpBox.getChildren().addAll(tmpFolderIcon, tmpLblPath, tmpSpacer, tmpStatusIcon);
+                    tmpBox.getChildren().addAll(tmpFolderIcon, tmpLabelPath, tmpSpacer, tmpStatusIcon);
                   }
                   setGraphic(tmpBox);
                 }

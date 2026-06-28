@@ -96,9 +96,9 @@ public class LibraryScanService {
 
         String[] tmpFolders = tmpFoldersSetting.split(";");
         Set<String> tmpExtensions = new HashSet<>();
-        for (String tmpExt : tmpExtensionsSetting.split(",")) {
-          if (!tmpExt.isBlank()) {
-            tmpExtensions.add(tmpExt.trim().toLowerCase());
+        for (String tmpExtension : tmpExtensionsSetting.split(",")) {
+          if (!tmpExtension.isBlank()) {
+            tmpExtensions.add(tmpExtension.trim().toLowerCase());
           }
         }
 
@@ -118,8 +118,8 @@ public class LibraryScanService {
                   public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
                       throws IOException {
                     if (isCancelled()) return FileVisitResult.TERMINATE;
-                    String tmpExt = PathUtils.getFileExtension(file.toFile());
-                    if (tmpExtensions.contains(tmpExt)) {
+                    String tmpExtension = PathUtils.getFileExtension(file.toFile());
+                    if (tmpExtensions.contains(tmpExtension)) {
                       tmpFilesToScan.add(file);
                     }
                     return FileVisitResult.CONTINUE;
@@ -134,17 +134,17 @@ public class LibraryScanService {
         LOGGER.log(Level.INFO, "Found {0} potential video files to scan.", tmpTotalFiles);
 
         // Process each discovered video file
-        for (int tmpI = 0; tmpI < tmpTotalFiles; tmpI++) {
+        for (int tmpIndex = 0; tmpIndex < tmpTotalFiles; tmpIndex++) {
           if (isCancelled()) {
             updateMessage("Scan cancelled.");
             break;
           }
-          Path tmpFile = tmpFilesToScan.get(tmpI);
+          Path tmpFile = tmpFilesToScan.get(tmpIndex);
           String tmpAbsolutePath = tmpFile.toAbsolutePath().toString().replace("\\", "/");
 
-          updateProgress(tmpI, tmpTotalFiles);
+          updateProgress(tmpIndex, tmpTotalFiles);
           updateMessage(
-              "Processing file (" + (tmpI + 1) + "/" + tmpTotalFiles + "): " + tmpFile.getFileName());
+              "Processing file (" + (tmpIndex + 1) + "/" + tmpTotalFiles + "): " + tmpFile.getFileName());
 
           // Case 1: The movie file is not yet registered in the repository
           if (!movieRepository.existsByFilePath(tmpAbsolutePath)) {
@@ -274,7 +274,7 @@ public class LibraryScanService {
       }
       try {
         tmpYear = Integer.parseInt(tmpMatcher.group(2));
-      } catch (NumberFormatException tmpIgnored) {
+      } catch (NumberFormatException tmpIgnoredException) {
       }
     }
 

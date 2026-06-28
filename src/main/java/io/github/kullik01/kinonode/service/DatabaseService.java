@@ -87,14 +87,14 @@ public class DatabaseService {
       LOGGER.info("Connected to SQLite database at: " + dbPath.toAbsolutePath());
 
       // Enable Foreign Keys in SQLite
-      try (Statement tmpStmt = connection.createStatement()) {
-        tmpStmt.execute("PRAGMA foreign_keys = ON;");
+      try (Statement tmpStatement = connection.createStatement()) {
+        tmpStatement.execute("PRAGMA foreign_keys = ON;");
       }
 
       createTables();
-    } catch (IOException | SQLException tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to initialize database", tmpE);
-      throw new RuntimeException("Database initialization failed", tmpE);
+    } catch (IOException | SQLException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to initialize database", tmpException);
+      throw new RuntimeException("Database initialization failed", tmpException);
     }
   }
 
@@ -155,23 +155,23 @@ public class DatabaseService {
             );
             """;
 
-    try (Statement tmpStmt = connection.createStatement()) {
-      tmpStmt.execute(tmpCreateMoviesTable);
-      tmpStmt.execute(tmpCreateWatchlistsTable);
-      tmpStmt.execute(tmpCreateWatchlistMoviesTable);
-      tmpStmt.execute(tmpCreateSettingsTable);
+    try (Statement tmpStatement = connection.createStatement()) {
+      tmpStatement.execute(tmpCreateMoviesTable);
+      tmpStatement.execute(tmpCreateWatchlistsTable);
+      tmpStatement.execute(tmpCreateWatchlistMoviesTable);
+      tmpStatement.execute(tmpCreateSettingsTable);
 
       // Populate/update default video extensions structured alphabetically
-      tmpStmt.execute(
+      tmpStatement.execute(
           "INSERT INTO settings (key, value) VALUES ('video_extensions', '3gp,avi,flv,m4v,mkv,mov,mp4,mpeg,mpg,mts,ogg,ogv,ts,webm,wmv') ON CONFLICT(key) DO UPDATE SET value = excluded.value;");
 
       // Schema migration for new columns
       String[] tmpNewColumns = {"director", "writer", "producer", "cinematographer", "composer"};
-      for (String tmpCol : tmpNewColumns) {
+      for (String tmpColumn : tmpNewColumns) {
         try {
-          tmpStmt.execute("ALTER TABLE movies ADD COLUMN " + tmpCol + " TEXT;");
-          LOGGER.info("Added new column to movies: " + tmpCol);
-        } catch (SQLException tmpE) {
+          tmpStatement.execute("ALTER TABLE movies ADD COLUMN " + tmpColumn + " TEXT;");
+          LOGGER.info("Added new column to movies: " + tmpColumn);
+        } catch (SQLException tmpException) {
           // Ignore, column likely already exists. This avoids failure during runtime if schema is
           // already upgraded.
         }
@@ -193,12 +193,12 @@ public class DatabaseService {
       if (connection == null || connection.isClosed()) {
         String tmpUrl = "jdbc:sqlite:" + dbPath.toAbsolutePath().toString().replace("\\", "/");
         connection = DriverManager.getConnection(tmpUrl);
-        try (Statement tmpStmt = connection.createStatement()) {
-          tmpStmt.execute("PRAGMA foreign_keys = ON;");
+        try (Statement tmpStatement = connection.createStatement()) {
+          tmpStatement.execute("PRAGMA foreign_keys = ON;");
         }
       }
-    } catch (SQLException tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to reopen database connection", tmpE);
+    } catch (SQLException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to reopen database connection", tmpException);
     }
     return connection;
   }
@@ -218,8 +218,8 @@ public class DatabaseService {
       try {
         connection.close();
         LOGGER.info("Database connection closed.");
-      } catch (SQLException tmpE) {
-        LOGGER.log(Level.WARNING, "Failed to close database connection", tmpE);
+      } catch (SQLException tmpException) {
+        LOGGER.log(Level.WARNING, "Failed to close database connection", tmpException);
       }
     }
   }
@@ -231,17 +231,17 @@ public class DatabaseService {
    * @return the resolved {@link Path} to the database file
    */
   private static Path resolveDefaultDbPath() {
-    String tmpOsName = System.getProperty("os.name").toLowerCase();
+    String tmpOperatingSystemName = System.getProperty("os.name").toLowerCase();
     Path tmpAppDataDir;
 
     // Differentiate path generation strategy based on the platform OS
-    if (tmpOsName.contains("win")) {
+    if (tmpOperatingSystemName.contains("win")) {
       String tmpAppData = System.getenv("APPDATA");
       if (tmpAppData == null || tmpAppData.isBlank()) {
         tmpAppData = System.getProperty("user.home");
       }
       tmpAppDataDir = Paths.get(tmpAppData, "KinoNode");
-    } else if (tmpOsName.contains("mac")) {
+    } else if (tmpOperatingSystemName.contains("mac")) {
       tmpAppDataDir =
           Paths.get(System.getProperty("user.home"), "Library", "Application Support", "KinoNode");
     } else {

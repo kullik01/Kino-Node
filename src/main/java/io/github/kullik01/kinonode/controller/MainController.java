@@ -77,8 +77,8 @@ public class MainController {
   public void initialize() {
 
     // Load initial theme button state from settings (Default is light)
-    var tmpSettingsRepo = AppContext.getInstance().getSettingsRepository();
-    String tmpTheme = tmpSettingsRepo.get("theme_mode", "light");
+    var tmpSettingsRepository = AppContext.getInstance().getSettingsRepository();
+    String tmpTheme = tmpSettingsRepository.get("theme_mode", "light");
 
     // Unselected (false) = Light Mode (Default)
     // Selected (true) = Dark Mode
@@ -102,8 +102,8 @@ public class MainController {
     btnThemeToggle
         .selectedProperty()
         .addListener(
-            (obs, oldVal, newVal) -> {
-              toggleTheme(newVal);
+            (observable, oldValue, newValue) -> {
+              toggleTheme(newValue);
             });
 
     // Show Library by default
@@ -116,8 +116,8 @@ public class MainController {
           tmpStage
               .maximizedProperty()
               .addListener(
-                  (obs, oldVal, newVal) -> {
-                    if (newVal) {
+                  (observable, oldValue, newValue) -> {
+                    if (newValue) {
                       rootPane.getStyleClass().add("maximized");
                     } else {
                       rootPane.getStyleClass().remove("maximized");
@@ -156,19 +156,19 @@ public class MainController {
   }
 
   private void toggleTheme(boolean dark) {
-    var tmpSettingsRepo = AppContext.getInstance().getSettingsRepository();
+    var tmpSettingsRepository = AppContext.getInstance().getSettingsRepository();
 
     // Set AtlantaFX stylesheet globally depending on selected theme option
     if (dark) {
       btnThemeToggle.setText("🌙");
       if (btnThemeToggle.getTooltip() != null) btnThemeToggle.getTooltip().setText("Dark Mode");
       Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
-      tmpSettingsRepo.set("theme_mode", "dark");
+      tmpSettingsRepository.set("theme_mode", "dark");
     } else {
       btnThemeToggle.setText("☀");
       if (btnThemeToggle.getTooltip() != null) btnThemeToggle.getTooltip().setText("Light Mode");
       Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
-      tmpSettingsRepo.set("theme_mode", "light");
+      tmpSettingsRepository.set("theme_mode", "light");
     }
   }
 
@@ -204,8 +204,8 @@ public class MainController {
       if (tmpController instanceof Refreshable refreshable) {
         refreshable.refresh();
       }
-    } catch (IOException tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to load view " + name, tmpE);
+    } catch (IOException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to load view " + name, tmpException);
     }
   }
 }

@@ -89,14 +89,14 @@ public class MovieCardController {
     String tmpPath = movie.getCoverImagePath();
     Image tmpImage = null;
     if (tmpPath != null && !tmpPath.isBlank()) {
-      File tmpF = new File(tmpPath);
-      if (tmpF.exists()) {
+      File tmpFile = new File(tmpPath);
+      if (tmpFile.exists()) {
         try {
           // Construct URL and load image with backgroundLoading set to true (6th argument)
           // to avoid freezing the JavaFX application UI thread.
-          tmpImage = new Image(tmpF.toURI().toURL().toExternalForm(), 130, 190, false, true, true);
-        } catch (MalformedURLException tmpE) {
-          LOGGER.log(Level.WARNING, "Failed to load poster image: " + tmpPath, tmpE);
+          tmpImage = new Image(tmpFile.toURI().toURL().toExternalForm(), 130, 190, false, true, true);
+        } catch (MalformedURLException tmpException) {
+          LOGGER.log(Level.WARNING, "Failed to load poster image: " + tmpPath, tmpException);
         }
       }
     }
@@ -110,8 +110,8 @@ public class MovieCardController {
           if (tmpResource != null) {
             PLACEHOLDER_IMAGE = new Image(tmpResource.toExternalForm(), 130, 190, false, true, true);
           }
-        } catch (Exception tmpE) {
-          LOGGER.log(Level.WARNING, "Failed to load placeholder cover resource", tmpE);
+        } catch (Exception tmpException) {
+          LOGGER.log(Level.WARNING, "Failed to load placeholder cover resource", tmpException);
         }
       }
       tmpImage = PLACEHOLDER_IMAGE;

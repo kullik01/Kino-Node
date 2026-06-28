@@ -60,17 +60,17 @@ public class YoutubeService {
     if (movie.getTitle() == null || movie.getTitle().isBlank()) return;
 
     // Append year to query only if it's a valid year, to refine search accuracy
-    String tmpYearStr =
+    String tmpYearString =
         movie.getYear() != null && movie.getYear() > 0 ? String.valueOf(movie.getYear()) : "";
-    String tmpQuery = movie.getTitle() + " " + tmpYearStr + " english trailer";
+    String tmpQuery = movie.getTitle() + " " + tmpYearString + " english trailer";
 
     try {
       String tmpEncodedQuery = URLEncoder.encode(tmpQuery, StandardCharsets.UTF_8).replace("+", "%20");
-      String tmpUrlStr = "https://www.youtube.com/results?search_query=" + tmpEncodedQuery;
+      String tmpUrlString = "https://www.youtube.com/results?search_query=" + tmpEncodedQuery;
 
       HttpRequest tmpRequest =
           HttpRequest.newBuilder()
-              .uri(URI.create(tmpUrlStr))
+              .uri(URI.create(tmpUrlString))
               // Set headers and a pre-configured consent cookie to bypass Google's redirect screens
               // and scrape directly
               .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
@@ -94,8 +94,8 @@ public class YoutubeService {
               "Found YouTube trailer for " + movie.getTitle() + ": " + movie.getTrailerUrl());
         }
       }
-    } catch (Exception tmpE) {
-      LOGGER.log(Level.WARNING, "Failed to fetch YouTube trailer for " + movie.getTitle(), tmpE);
+    } catch (Exception tmpException) {
+      LOGGER.log(Level.WARNING, "Failed to fetch YouTube trailer for " + movie.getTitle(), tmpException);
     }
   }
 }

@@ -86,8 +86,8 @@ public class PlaybackService {
     }
 
     // Try common installation directories for VLC depending on OS platforms
-    String tmpOsName = System.getProperty("os.name").toLowerCase();
-    if (tmpOsName.contains("win")) {
+    String tmpOperatingSystemName = System.getProperty("os.name").toLowerCase();
+    if (tmpOperatingSystemName.contains("win")) {
       Path tmpVlcDefault64 = Paths.get("C:\\Program Files\\VideoLAN\\VLC\\vlc.exe");
       if (Files.exists(tmpVlcDefault64)) {
         return Optional.of(tmpVlcDefault64);
@@ -96,7 +96,7 @@ public class PlaybackService {
       if (Files.exists(tmpVlcDefault32)) {
         return Optional.of(tmpVlcDefault32);
       }
-    } else if (tmpOsName.contains("mac")) {
+    } else if (tmpOperatingSystemName.contains("mac")) {
       Path tmpVlcMac = Paths.get("/Applications/VLC.app/Contents/MacOS/VLC");
       if (Files.exists(tmpVlcMac)) {
         return Optional.of(tmpVlcMac);
@@ -115,13 +115,13 @@ public class PlaybackService {
    *     process fails
    */
   public void play(String movieFilePath) throws Exception {
-    Optional<Path> tmpPlayerPathOpt = getPlayerPath();
-    if (tmpPlayerPathOpt.isEmpty()) {
+    Optional<Path> tmpPlayerPathOptional = getPlayerPath();
+    if (tmpPlayerPathOptional.isEmpty()) {
       throw new IllegalStateException(
           "No external media player executable configured or auto-detected.");
     }
 
-    Path tmpPlayerPath = tmpPlayerPathOpt.get();
+    Path tmpPlayerPath = tmpPlayerPathOptional.get();
     File tmpMovieFile = new File(movieFilePath);
     if (!tmpMovieFile.exists()) {
       throw new IllegalArgumentException("Movie file does not exist: " + movieFilePath);
@@ -132,11 +132,11 @@ public class PlaybackService {
         "Launching movie playback: {0} using player {1}",
         new Object[] {movieFilePath, tmpPlayerPath.toAbsolutePath()});
 
-    ProcessBuilder tmpPb;
+    ProcessBuilder tmpProcessBuilder;
     // Windows requires starting process asynchronously via cmd start command to prevent
     // blocking/freezing the parent UI
     if (System.getProperty("os.name").toLowerCase().contains("win")) {
-      tmpPb =
+      tmpProcessBuilder =
           new ProcessBuilder(
               "cmd",
               "/c",
@@ -147,11 +147,11 @@ public class PlaybackService {
     } else {
       // Unix-based systems execute the binary directly and discard std outputs to decouple process
       // lifecycle
-      tmpPb = new ProcessBuilder(tmpPlayerPath.toAbsolutePath().toString(), tmpMovieFile.getAbsolutePath());
-      tmpPb.redirectError(ProcessBuilder.Redirect.DISCARD);
-      tmpPb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+      tmpProcessBuilder = new ProcessBuilder(tmpPlayerPath.toAbsolutePath().toString(), tmpMovieFile.getAbsolutePath());
+      tmpProcessBuilder.redirectError(ProcessBuilder.Redirect.DISCARD);
+      tmpProcessBuilder.redirectOutput(ProcessBuilder.Redirect.DISCARD);
     }
-    tmpPb.start();
+    tmpProcessBuilder.start();
   }
 
   /**
@@ -162,10 +162,10 @@ public class PlaybackService {
    * @return an {@link Optional} containing the resolved path, or {@link Optional#empty()}
    */
   private Optional<Path> findExecutableOnPath(String name) {
-    String tmpCmd = System.getProperty("os.name").toLowerCase().contains("win") ? "where" : "which";
+    String tmpCommand = System.getProperty("os.name").toLowerCase().contains("win") ? "where" : "which";
     try {
-      Process tmpP = new ProcessBuilder(tmpCmd, name).start();
-      try (BufferedReader tmpReader = new BufferedReader(new InputStreamReader(tmpP.getInputStream()))) {
+      Process tmpProcess = new ProcessBuilder(tmpCommand, name).start();
+      try (BufferedReader tmpReader = new BufferedReader(new InputStreamReader(tmpProcess.getInputStream()))) {
         String tmpLine = tmpReader.readLine();
         if (tmpLine != null && !tmpLine.trim().isEmpty()) {
           Path tmpPath = Paths.get(tmpLine.trim());
@@ -174,8 +174,8 @@ public class PlaybackService {
           }
         }
       }
-      tmpP.waitFor();
-    } catch (Exception tmpIgnored) {
+      tmpProcess.waitFor();
+    } catch (Exception tmpIgnoredException) {
     }
     return Optional.empty();
   }

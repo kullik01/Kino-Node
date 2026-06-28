@@ -106,8 +106,8 @@ public class ImdbService {
 
             // Filter results to only keep movies/series (IMDb IDs starting with 'tt')
             if (tmpResult.has("id")) {
-              String tmpId = tmpResult.get("id").getAsString();
-              if (!tmpId.startsWith("tt")) {
+              String tmpIdentifier = tmpResult.get("id").getAsString();
+              if (!tmpIdentifier.startsWith("tt")) {
                 continue;
               }
             } else {
@@ -137,8 +137,8 @@ public class ImdbService {
 
             // Fetch additional details from Wikidata (director, writer, etc.) using the IMDb ID
             // ('tt...')
-            String tmpImdbIdStr = tmpResult.get("id").getAsString();
-            fetchWikidataDetails(tmpImdbIdStr, movie);
+            String tmpImdbIdentifierString = tmpResult.get("id").getAsString();
+            fetchWikidataDetails(tmpImdbIdentifierString, movie);
 
             LOGGER.info("Successfully fetched IMDb data for: " + movie.getTitle());
             break; // Stop after processing the first matching, highly-relevant result
@@ -148,13 +148,13 @@ public class ImdbService {
         LOGGER.warning("Failed to fetch IMDb data. HTTP " + tmpResponse.statusCode());
       }
 
-    } catch (Exception tmpE) {
-      LOGGER.log(Level.WARNING, "Error enriching movie data from IMDb for query: " + tmpQuery, tmpE);
+    } catch (Exception tmpException) {
+      LOGGER.log(Level.WARNING, "Error enriching movie data from IMDb for query: " + tmpQuery, tmpException);
     }
   }
 
   /**
-   * Fetches extended details (crew information like directors, composers, etc.) from Wikidata using
+   * Extends details (crew information like directors, composers, etc.) from Wikidata using
    * a SPARQL query matching the IMDb identifier (P345).
    *
    * @param imdbId the IMDb identifier of the movie (starting with 'tt')
@@ -232,8 +232,8 @@ public class ImdbService {
       } else {
         LOGGER.warning("Failed to fetch Wikidata. HTTP " + tmpResponse.statusCode());
       }
-    } catch (Exception tmpE) {
-      LOGGER.log(Level.WARNING, "Error fetching Wikidata for IMDb ID: " + imdbId, tmpE);
+    } catch (Exception tmpException) {
+      LOGGER.log(Level.WARNING, "Error fetching Wikidata for IMDb ID: " + imdbId, tmpException);
     }
   }
 
@@ -278,8 +278,8 @@ public class ImdbService {
         return tmpImagePath.toAbsolutePath().toString().replace("\\", "/");
       }
 
-    } catch (Exception tmpE) {
-      LOGGER.log(Level.WARNING, "Failed to download poster image: " + imageUrl, tmpE);
+    } catch (Exception tmpException) {
+      LOGGER.log(Level.WARNING, "Failed to download poster image: " + imageUrl, tmpException);
     }
     return null;
   }

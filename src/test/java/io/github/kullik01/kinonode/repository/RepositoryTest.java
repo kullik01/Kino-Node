@@ -48,8 +48,8 @@ public class RepositoryTest {
 
   @BeforeEach
   public void setUp(@TempDir Path tempDir) {
-    Path tmpDbPath = tempDir.resolve("test_kinonode.db");
-    databaseService = new DatabaseService(tmpDbPath);
+    Path tmpDatabasePath = tempDir.resolve("test_kinonode.db");
+    databaseService = new DatabaseService(tmpDatabasePath);
     movieRepository = new MovieRepository(databaseService);
     watchlistRepository = new WatchlistRepository(databaseService, movieRepository);
     settingsRepository = new SettingsRepository(databaseService);

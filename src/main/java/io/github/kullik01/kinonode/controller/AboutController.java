@@ -84,37 +84,37 @@ public class AboutController implements Refreshable {
 
     // 2. Database path & size
     try {
-      Path tmpDbPath = AppContext.getInstance().getDatabaseService().getDbPath();
+      Path tmpDatabasePath = AppContext.getInstance().getDatabaseService().getDbPath();
       // Display path with forward slashes for cross-platform consistency
-      lblDbPath.setText(tmpDbPath.toAbsolutePath().toString().replace("\\", "/"));
+      lblDbPath.setText(tmpDatabasePath.toAbsolutePath().toString().replace("\\", "/"));
 
-      if (Files.exists(tmpDbPath)) {
+      if (Files.exists(tmpDatabasePath)) {
         // Calculate file size in MB
-        long tmpSizeBytes = Files.size(tmpDbPath);
-        double tmpSizeMB = tmpSizeBytes / (1024.0 * 1024.0);
+        long tmpSizeBytes = Files.size(tmpDatabasePath);
+        double tmpSizeMegabytes = tmpSizeBytes / (1024.0 * 1024.0);
         if (lblDbSize != null) {
-          lblDbSize.setText(String.format("%.2f MB", tmpSizeMB));
+          lblDbSize.setText(String.format("%.2f MB", tmpSizeMegabytes));
         }
       } else {
         if (lblDbSize != null) {
           lblDbSize.setText("Unknown");
         }
       }
-    } catch (Exception tmpE) {
+    } catch (Exception tmpException) {
       lblDbPath.setText("Unknown database path");
     }
 
     // 3. System properties
     try {
-      String tmpJavaVer = System.getProperty("java.version");
+      String tmpJavaVersion = System.getProperty("java.version");
       String tmpJavaVendor = System.getProperty("java.vendor");
-      lblJavaRuntime.setText(tmpJavaVer + " (" + tmpJavaVendor + ")");
+      lblJavaRuntime.setText(tmpJavaVersion + " (" + tmpJavaVendor + ")");
 
-      String tmpOsName = System.getProperty("os.name");
-      String tmpOsArch = System.getProperty("os.arch");
-      String tmpOsVer = System.getProperty("os.version");
-      lblOsDetails.setText(tmpOsName + " " + tmpOsVer + " (" + tmpOsArch + ")");
-    } catch (Exception tmpE) {
+      String tmpOperatingSystemName = System.getProperty("os.name");
+      String tmpOperatingSystemArchitecture = System.getProperty("os.arch");
+      String tmpOperatingSystemVersion = System.getProperty("os.version");
+      lblOsDetails.setText(tmpOperatingSystemName + " " + tmpOperatingSystemVersion + " (" + tmpOperatingSystemArchitecture + ")");
+    } catch (Exception tmpException) {
       lblJavaRuntime.setText("Unknown");
       lblOsDetails.setText("Unknown");
     }
@@ -127,20 +127,20 @@ public class AboutController implements Refreshable {
       int tmpWatchlistCount = AppContext.getInstance().getWatchlistRepository().findAll().size();
       lblWatchlistCount.setText(
           tmpWatchlistCount + (tmpWatchlistCount == 1 ? " watchlist" : " watchlists"));
-    } catch (Exception tmpE) {
+    } catch (Exception tmpException) {
       lblMovieCount.setText("Unknown");
       lblWatchlistCount.setText("Unknown");
     }
 
     // 5. Media Player Executable
     try {
-      Optional<Path> tmpPlayerPathOpt = AppContext.getInstance().getPlaybackService().getPlayerPath();
-      if (tmpPlayerPathOpt.isPresent()) {
-        lblPlayerPath.setText(tmpPlayerPathOpt.get().toAbsolutePath().toString().replace("\\", "/"));
+      Optional<Path> tmpPlayerPathOptional = AppContext.getInstance().getPlaybackService().getPlayerPath();
+      if (tmpPlayerPathOptional.isPresent()) {
+        lblPlayerPath.setText(tmpPlayerPathOptional.get().toAbsolutePath().toString().replace("\\", "/"));
       } else {
         lblPlayerPath.setText("No player configured (using auto-detect/none)");
       }
-    } catch (Exception tmpE) {
+    } catch (Exception tmpException) {
       lblPlayerPath.setText("Unknown");
     }
   }
@@ -148,16 +148,16 @@ public class AboutController implements Refreshable {
   @FXML
   private void openPlayerLocation() {
     try {
-      Optional<Path> tmpPlayerPathOpt = AppContext.getInstance().getPlaybackService().getPlayerPath();
+      Optional<Path> tmpPlayerPathOptional = AppContext.getInstance().getPlaybackService().getPlayerPath();
       // Check if player is configured and its parent directory exists
-      if (tmpPlayerPathOpt.isPresent() && Files.exists(tmpPlayerPathOpt.get().getParent())) {
+      if (tmpPlayerPathOptional.isPresent() && Files.exists(tmpPlayerPathOptional.get().getParent())) {
         // Ensure Desktop API is supported on the current platform before opening the explorer
         if (java.awt.Desktop.isDesktopSupported()
-            && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.OPEN)) {
-          java.awt.Desktop.getDesktop().open(tmpPlayerPathOpt.get().getParent().toFile());
+             && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.OPEN)) {
+          java.awt.Desktop.getDesktop().open(tmpPlayerPathOptional.get().getParent().toFile());
         }
       }
-    } catch (Exception tmpE) {
+    } catch (Exception tmpException) {
       // Ignore if it cannot be opened
     }
   }
@@ -165,16 +165,16 @@ public class AboutController implements Refreshable {
   @FXML
   private void openDatabaseLocation() {
     try {
-      Path tmpDbPath = AppContext.getInstance().getDatabaseService().getDbPath();
+      Path tmpDatabasePath = AppContext.getInstance().getDatabaseService().getDbPath();
       // Verify that the database path and its parent folder exist
-      if (tmpDbPath != null && Files.exists(tmpDbPath.getParent())) {
+      if (tmpDatabasePath != null && Files.exists(tmpDatabasePath.getParent())) {
         // Open the database folder using system's default file browser
         if (java.awt.Desktop.isDesktopSupported()
             && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.OPEN)) {
-          java.awt.Desktop.getDesktop().open(tmpDbPath.getParent().toFile());
+          java.awt.Desktop.getDesktop().open(tmpDatabasePath.getParent().toFile());
         }
       }
-    } catch (Exception tmpE) {
+    } catch (Exception tmpException) {
       // Ignore if it cannot be opened
     }
   }

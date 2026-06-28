@@ -103,11 +103,11 @@ public class CustomAlert {
     Region tmpSpacer = new Region();
     HBox.setHgrow(tmpSpacer, Priority.ALWAYS);
 
-    Button tmpCloseBtn = new Button("✕");
-    tmpCloseBtn.getStyleClass().addAll("window-button", "close-button");
-    tmpCloseBtn.setOnAction(e -> tmpStage.close());
+    Button tmpCloseButton = new Button("✕");
+    tmpCloseButton.getStyleClass().addAll("window-button", "close-button");
+    tmpCloseButton.setOnAction(tmpEvent -> tmpStage.close());
 
-    tmpTitleBar.getChildren().addAll(tmpTitleLabel, tmpSpacer, tmpCloseBtn);
+    tmpTitleBar.getChildren().addAll(tmpTitleLabel, tmpSpacer, tmpCloseButton);
 
     // Build the Content Area
     VBox tmpContentBox = new VBox(15);
@@ -122,13 +122,13 @@ public class CustomAlert {
     tmpTextLabel.setWrapText(true);
     tmpTextLabel.setStyle("-fx-text-fill: -color-fg-muted;");
 
-    Button tmpOkBtn = new Button("OK");
-    tmpOkBtn.getStyleClass().add("button-primary");
-    tmpOkBtn.setOnAction(e -> tmpStage.close());
-    HBox tmpBtnBox = new HBox(tmpOkBtn);
-    tmpBtnBox.setAlignment(Pos.CENTER_RIGHT);
+    Button tmpOkButton = new Button("OK");
+    tmpOkButton.getStyleClass().add("button-primary");
+    tmpOkButton.setOnAction(tmpEvent -> tmpStage.close());
+    HBox tmpButtonBox = new HBox(tmpOkButton);
+    tmpButtonBox.setAlignment(Pos.CENTER_RIGHT);
 
-    tmpContentBox.getChildren().addAll(tmpHeaderLabel, tmpTextLabel, tmpBtnBox);
+    tmpContentBox.getChildren().addAll(tmpHeaderLabel, tmpTextLabel, tmpButtonBox);
 
     tmpRoot.setTop(tmpTitleBar);
     tmpRoot.setCenter(tmpContentBox);

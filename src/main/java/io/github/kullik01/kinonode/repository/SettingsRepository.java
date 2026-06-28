@@ -61,18 +61,18 @@ public class SettingsRepository {
    */
   public String get(String key, String defaultValue) {
     String tmpQuery = "SELECT value FROM settings WHERE key = ?";
-    try (PreparedStatement tmpStmt = databaseService.getConnection().prepareStatement(tmpQuery)) {
-      tmpStmt.setString(1, key);
-      try (ResultSet tmpRs = tmpStmt.executeQuery()) {
+    try (PreparedStatement tmpPreparedStatement = databaseService.getConnection().prepareStatement(tmpQuery)) {
+      tmpPreparedStatement.setString(1, key);
+      try (ResultSet tmpResultSet = tmpPreparedStatement.executeQuery()) {
         // Check if a record exists for the given key
-        if (tmpRs.next()) {
-          String tmpVal = tmpRs.getString("value");
+        if (tmpResultSet.next()) {
+          String tmpValue = tmpResultSet.getString("value");
           // Fallback to default if the retrieved column value is null
-          return tmpVal != null ? tmpVal : defaultValue;
+          return tmpValue != null ? tmpValue : defaultValue;
         }
       }
-    } catch (SQLException tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to load setting: " + key, tmpE);
+    } catch (SQLException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to load setting: " + key, tmpException);
     }
     return defaultValue;
   }
@@ -91,12 +91,12 @@ public class SettingsRepository {
             INSERT INTO settings (key, value) VALUES (?, ?)
             ON CONFLICT(key) DO UPDATE SET value = excluded.value;
             """;
-    try (PreparedStatement tmpStmt = databaseService.getConnection().prepareStatement(tmpUpsert)) {
-      tmpStmt.setString(1, key);
-      tmpStmt.setString(2, value);
-      tmpStmt.executeUpdate();
-    } catch (SQLException tmpE) {
-      LOGGER.log(Level.SEVERE, "Failed to save setting: " + key, tmpE);
+    try (PreparedStatement tmpPreparedStatement = databaseService.getConnection().prepareStatement(tmpUpsert)) {
+      tmpPreparedStatement.setString(1, key);
+      tmpPreparedStatement.setString(2, value);
+      tmpPreparedStatement.executeUpdate();
+    } catch (SQLException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to save setting: " + key, tmpException);
     }
   }
 }
