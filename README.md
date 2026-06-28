@@ -30,6 +30,7 @@ KinoNode is a modern, lightweight, personal movie library manager built on a sol
 | **Database** | SQLite via JDBC | Embedded, zero-configuration database stored in a single local file. |
 | **Build Tool** | Gradle (Kotlin DSL) | Modern build automation utilizing modular compilation pipelines. |
 | **Testing** | JUnit 5 | Comprehensive test suite targeting data layers and repositories. |
+| **Code Formatting** | Spotless & Google Java Format | Enforces consistent and clean code layout automatically. |
 
 ---
 
@@ -53,6 +54,29 @@ To run the automated JUnit 5 test suite:
 ```bash
 ./gradlew test
 ```
+
+### Code Formatting
+To check code formatting:
+```bash
+./gradlew spotlessCheck
+```
+
+To automatically apply Google Java Format to all source files:
+```bash
+./gradlew spotlessApply
+```
+
+---
+
+## 📂 Database & Data Storage
+
+KinoNode utilizes an embedded SQLite database (`kinonode.db`) for all library metadata, watchlists, and settings. By default, the database file is stored in your user application data directory depending on your operating system:
+
+* **Windows:** `%APPDATA%/KinoNode/kinonode.db`
+* **macOS:** `~/Library/Application Support/KinoNode/kinonode.db`
+* **Linux/Unix:** `~/.local/share/KinoNode/kinonode.db` (or `$XDG_DATA_HOME/KinoNode/kinonode.db`)
+
+You can view your active database path, check its file size, and open the database's parent directory directly from the **About** section within the application interface.
 
 ---
 
