@@ -43,6 +43,7 @@ import io.github.kullik01.kinonode.service.AppContext;
 import java.io.IOException;
 import java.net.URL;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -112,8 +113,11 @@ public class KinoNodeApp extends Application {
     Scene tmpScene = new Scene(tmpRoot, 1024, 768);
     primaryStage.setScene(tmpScene);
     primaryStage.show();
-    primaryStage.toFront();
-    primaryStage.requestFocus();
+    Platform.runLater(() -> {
+      primaryStage.setIconified(false);
+      primaryStage.toFront();
+      primaryStage.requestFocus();
+    });
   }
 
   /**

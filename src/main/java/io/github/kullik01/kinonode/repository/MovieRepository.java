@@ -42,7 +42,9 @@ import io.github.kullik01.kinonode.service.DatabaseService;
 import java.sql.*;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -175,8 +177,8 @@ public class MovieRepository {
    *
    * @return a set of all file path strings, or an empty set on error
    */
-  public java.util.Set<String> findAllFilePaths() {
-    java.util.Set<String> tmpPaths = new java.util.HashSet<>();
+  public Set<String> findAllFilePaths() {
+    Set<String> tmpPaths = new HashSet<>();
     String tmpSql = "SELECT file_path FROM movies";
     try (
         Statement tmpStatement =
