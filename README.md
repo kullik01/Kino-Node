@@ -1,90 +1,92 @@
-# KinoNode
+# 🎬 KinoNode
 
-KinoNode is a modern, lightweight, open-source personal movie library manager built with Java and JavaFX. It follows a clean MVC (Model-View-Controller) architecture, uses an embedded SQLite database for persistence, and offers a premium, media-center-style dark user interface.
+[![Java Version](https://img.shields.io/badge/Java-25-orange.svg?style=flat-square)](https://jdk.java.net/)
+[![JavaFX](https://img.shields.io/badge/JavaFX-25-blue.svg?style=flat-square)](https://openjfx.io/)
+[![License](https://img.shields.io/badge/License-BSD_3--Clause-green.svg?style=flat-square)](LICENSE)
 
-## Features
-
-- **Workspace Syncing**: Configure root movie directories and scan them recursively. KinoNode auto-registers movies, parses titles and years from filenames, and skips duplicate paths.
-- **Visual Library Grid**: A responsive grid focusing on cover art posters first. Set custom cover files at any time.
-- **Editable Metadata**: Edit Title, Release Year, Genre, Trailer URL, and Description (optional field) for each movie.
-- **0–10 Rating System**: Rate movies from 0 to 10 (11 states, including unrated) using custom clapperboard/film-reel icons.
-- **Multiple Watchlists**: Create, rename, delete, and manage named playlists for movies. Add a movie to multiple watchlists, and reorder titles manually.
-- **External Player Integration**: Launches videos directly in your preferred media player (auto-detects `mpv` and `VLC`, or accepts custom executable paths).
-- **YouTube Trailers**: Save YouTube trailer URLs and open them in the system web browser with a single click.
+KinoNode is a modern, lightweight, personal movie library manager built on a solid Java 25 and JavaFX 25 baseline. Featuring a clean MVC (Model-View-Controller) architecture, an embedded SQLite database for persistence, and a premium dark mode design, KinoNode brings a media-center feel to your desktop movie collection.
 
 ---
 
-## Technology Stack
+## 🌟 Key Features
 
-- **JDK Baseline**: Java 25 (LTS)
-- **UI Toolkit**: JavaFX (OpenJFX) 25
-- **Theming**: AtlantaFX (Primer Dark) + Custom media-center CSS
-- **Persistence**: Embedded SQLite via `sqlite-jdbc` (zero-setup single-file database)
-- **Build Tool**: Gradle (with Kotlin DSL)
-- **Unit Testing**: JUnit 5 for repositories
+* **Workspace Synchronization:** Recursively scan local folders to catalog your movies. Title, year, and metadata are automatically extracted from filenames and synchronized.
+* **Modern Media Hub:** A responsive, poster-centric library grid. Easily replace or custom-set movie cover art at any time.
+* **Smart Metadata Enrichment:** Automatically queries online directories (IMDb Suggestion API & Wikidata SPARQL) to populate missing directors, writers, producers, cinematographers, and composers.
+* **YouTube Trailer Integration:** Automatically scrapes and saves official YouTube trailer URLs, allowing you to watch them in your default web browser with a single click.
+* **Clapperboard Rating System:** Rate your favorite films on a sliding 0–10 scale using custom film-reel clapperboard graphics.
+* **Playlists & Watchlists:** Build, rename, and manage multiple watchlists. Drag, reorder, or organize movies exactly the way you want them.
+* **External Player Launch:** Seamlessly watch your movies. KinoNode auto-detects system media players (like `mpv` and `VLC`) or launches any custom player executable path.
 
 ---
 
-## Local Development & Running
+## 🛠️ Technology Stack
 
-KinoNode requires Java 25 or later. You can run the application locally using the Gradle wrapper:
+| Component | Technology | Description |
+| :--- | :--- | :--- |
+| **Language** | Java 25 (LTS) | Modern Java baseline exploiting modern switch patterns, records, and pattern matching. |
+| **UI Toolkit** | JavaFX 25 | Fully modular hardware-accelerated user interface framework. |
+| **Theming** | AtlantaFX (Primer Dark) | Modern CSS system styled after Github's Primer Dark design language. |
+| **Database** | SQLite via JDBC | Embedded, zero-configuration database stored in a single local file. |
+| **Build Tool** | Gradle (Kotlin DSL) | Modern build automation utilizing modular compilation pipelines. |
+| **Testing** | JUnit 5 | Comprehensive test suite targeting data layers and repositories. |
 
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+* **Java Development Kit (JDK) 25** or newer.
+
+### Clone and Run
 ```bash
 # Clone the repository
 git clone https://github.com/kullik01/Kino-Node.git
 cd Kino-Node
 
-# Build and run the app
+# Build and execute the application
 ./gradlew run
 ```
 
 ### Running Tests
-
-To run the repository and service unit tests:
-
+To run the automated JUnit 5 test suite:
 ```bash
 ./gradlew test
 ```
 
 ---
 
-## Native Packaging & Release
+## 📦 Native Distribution & Packaging
 
-KinoNode uses the `org.beryx.jlink` Gradle plugin to create lightweight custom runtime images and native OS installers via `jpackage`.
+KinoNode is fully modularized and supports native deployment packages using the `org.beryx.jlink` Gradle plugin.
 
-### Local Packaging
-
-To compile a modular runtime image locally:
-
+### Modular Runtime Image
+Create a minimal, platform-specific custom Java Runtime Image containing only the required modules:
 ```bash
 ./gradlew jlink
 ```
 
-To create a native installer (Windows `.exe`, macOS `.dmg`, or Linux `.deb`/`.rpm`) on your machine:
-
+### Native OS Installers
+Generate a native executable installer (Windows `.exe`, macOS `.dmg`, or Linux `.deb` / `.rpm`) configured for the current host system:
 ```bash
 ./gradlew jpackage
 ```
+> [!NOTE]
+> Cross-compilation is not supported by `jpackage`. You must run the build command on the target operating system.
 
-*Note: `jpackage` cannot cross-compile. Native installers must be built on their respective operating systems.*
+### Automated CI/CD Pipelines
+KinoNode features a GitHub Actions workflow (`.github/workflows/package.yml`) triggered on new release tags (e.g. `v1.0.0`). The workflow builds distribution assets across a multi-OS matrix:
+* **Windows:** Standard `.exe` installer and portable `.zip` archives.
+* **macOS:** Premium `.dmg` and `.pkg` installers.
+* **Linux:** Debian `.deb`, RedHat `.rpm`, and portable `.zip` packages.
 
-### CI Matrix (GitHub Actions)
-
-KinoNode includes a automated CI/CD workflow (`.github/workflows/package.yml`) that triggers on tag pushes (e.g. `v1.0.0`). It runs a multi-OS build matrix to generate native installers on Windows, Linux, and macOS:
-
-- **Windows**: Produces a native `.exe` installer and a portable app-image `.zip`.
-- **Linux**: Produces `.deb` and `.rpm` packages, plus a portable `.zip`.
-- **macOS**: Produces `.dmg` and `.pkg` installers.
-
-The workflow bundles these files and attaches them directly to a draft GitHub Release.
+Finished binaries are automatically bundled and uploaded directly as draft assets to the corresponding GitHub Release.
 
 ---
 
-## License
+## 📄 License
+This project is licensed under the **BSD 3-Clause License** - see the [LICENSE](LICENSE) file for details.
 
-This project is licensed under the BSD 3-Clause License - see the [LICENSE](LICENSE) file for details.
-
-## Credits
-
-- **Hannah Kullik** (Author)
-- **Martin Urban** (Logo Designer)
+## 👥 Contributors & Credits
+* **Hannah Kullik** - *Lead Developer*
+* **Martin Urban** - *Visual Brand & Logo Design*
