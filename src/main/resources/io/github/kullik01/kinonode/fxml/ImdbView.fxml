@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ BSD 3-Clause License
+  ~
+  ~ Copyright (c) 2026, Hannah Kullik
+  ~
+  ~ Redistribution and use in source and binary forms, with or without
+  ~ modification, are permitted provided that the following conditions are met:
+  ~
+  ~ 1. Redistributions of source code must retain the above copyright notice, this
+  ~    list of conditions and the following disclaimer.
+  ~
+  ~ 2. Redistributions in binary form must reproduce the above copyright notice,
+  ~    this list of conditions and the following disclaimer in the documentation
+  ~    and/or other materials provided with the distribution.
+  ~
+  ~ 3. Neither the name of the copyright holder nor the names of its
+  ~    contributors may be used to endorse or promote products derived from
+  ~    this software without specific prior written permission.
+  ~
+  ~ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  ~ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  ~ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  ~ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+  ~ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  ~ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  ~ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  ~ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  ~ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ~ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  -->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="io.github.kullik01.kinonode.controller.ImdbController"
+      stylesheets="@../css/theme.css"
+      style="-fx-background-color: -color-bg-default;">
+
+    <!-- Top Browser Navigation Bar -->
+    <HBox spacing="10.0" alignment="CENTER_LEFT" style="-fx-padding: 10px; -fx-background-color: -color-bg-subtle; -fx-border-color: -color-border-muted; -fx-border-width: 0 0 1 0;">
+        <Button fx:id="btnBack" onAction="#handleBack" text="◀" minWidth="-Infinity" styleClass="button-secondary">
+            <tooltip><Tooltip showDelay="250ms" text="Back"/></tooltip>
+        </Button>
+        <Button fx:id="btnForward" onAction="#handleForward" text="▶" minWidth="-Infinity" styleClass="button-secondary">
+            <tooltip><Tooltip showDelay="250ms" text="Forward"/></tooltip>
+        </Button>
+        <Button fx:id="btnReload" onAction="#handleReload" text="↻" minWidth="-Infinity" styleClass="button-secondary">
+            <tooltip><Tooltip showDelay="250ms" text="Reload"/></tooltip>
+        </Button>
+        <Button fx:id="btnHome" onAction="#handleHome" text="🏠" minWidth="-Infinity" styleClass="button-secondary">
+            <tooltip><Tooltip showDelay="250ms" text="IMDb Home"/></tooltip>
+        </Button>
+        
+        <TextField fx:id="txtUrl" editable="false" HBox.hgrow="ALWAYS" style="-fx-background-color: -color-bg-default;" />
+    </HBox>
+    <ProgressBar fx:id="progressLoad" minHeight="2.0" prefHeight="2.0" maxHeight="2.0" maxWidth="1.7976931348623157E308" visible="false" managed="${progressLoad.visible}" style="-fx-padding: 0; -fx-background-insets: 0;" />
+
+    <!-- Main Content Panel: WebView and Offline Overlay -->
+    <StackPane VBox.vgrow="ALWAYS">
+        <WebView fx:id="webView" />
+        
+        <!-- Offline / Error Overlay -->
+        <VBox fx:id="paneError" spacing="15.0" alignment="CENTER" visible="false" style="-fx-background-color: -color-bg-default; -fx-padding: 40px;">
+            <Label text="🌐" style="-fx-font-size: 48px;" />
+            <Label text="No Internet Connection" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: -color-fg-danger;" />
+            <Label text="IMDb requires an active internet connection to load." style="-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;" wrapText="true" alignment="CENTER" />
+            <Button onAction="#handleRetry" text="Retry Loading" styleClass="button-primary" />
+        </VBox>
+    </StackPane>
+</VBox>

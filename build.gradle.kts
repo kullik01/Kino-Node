@@ -82,6 +82,7 @@ dependencies {
     implementation("org.openjfx:javafx-media:${javafxVersion}:${platform}")
     implementation("org.openjfx:javafx-base:${javafxVersion}:${platform}")
     implementation("org.openjfx:javafx-fxml:${javafxVersion}:${platform}")
+    implementation("org.openjfx:javafx-web:${javafxVersion}:${platform}")
     
     // SQLite Persistence
     implementation("org.xerial:sqlite-jdbc:${sqliteVersion}")

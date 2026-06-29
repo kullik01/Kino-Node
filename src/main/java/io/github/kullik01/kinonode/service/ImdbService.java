@@ -190,15 +190,16 @@ public class ImdbService {
       // Build a SPARQL query searching for a movie containing the specified
       // IMDb ID (P345)
       // and optionally fetch directors, writers, producers, cinematographers,
-      // and composers.
+      // composers, and genres.
       String tmpSparqlQuery =
-          "SELECT ?directorLabel ?writerLabel ?producerLabel ?cinematographerLabel ?composerLabel WHERE { "
+          "SELECT ?directorLabel ?writerLabel ?producerLabel ?cinematographerLabel ?composerLabel ?genreLabel WHERE { "
               + "?movie wdt:P345 '" + imdbId + "'. "
               + "OPTIONAL { ?movie wdt:P57 ?director. } "
               + "OPTIONAL { ?movie wdt:P58 ?writer. } "
               + "OPTIONAL { ?movie wdt:P162 ?producer. } "
               + "OPTIONAL { ?movie wdt:P344 ?cinematographer. } "
               + "OPTIONAL { ?movie wdt:P86 ?composer. } "
+              + "OPTIONAL { ?movie wdt:P136 ?genre. } "
               + "SERVICE wikibase:label { bd:serviceParam wikibase:language 'en'. } "
               + "}";
 
@@ -222,13 +223,15 @@ public class ImdbService {
           JsonArray tmpBindings = tmpJsonObject.getAsJsonObject("results")
               .getAsJsonArray("bindings");
 
-          // Maintain insertion order to display crew members in order of
+          // Maintain insertion order to display crew members and genres in
+          // order of
           // returned relevance
           Set<String> tmpDirectors = new LinkedHashSet<>();
           Set<String> tmpWriters = new LinkedHashSet<>();
           Set<String> tmpProducers = new LinkedHashSet<>();
           Set<String> tmpCinematographers = new LinkedHashSet<>();
           Set<String> tmpComposers = new LinkedHashSet<>();
+          Set<String> tmpGenres = new LinkedHashSet<>();
 
           for (JsonElement tmpElement : tmpBindings) {
             JsonObject tmpRow = tmpElement.getAsJsonObject();
@@ -248,6 +251,9 @@ public class ImdbService {
             if (tmpRow.has("composerLabel"))
               tmpComposers.add(tmpRow.getAsJsonObject("composerLabel")
                   .get("value").getAsString());
+            if (tmpRow.has("genreLabel"))
+              tmpGenres.add(tmpRow.getAsJsonObject("genreLabel").get("value")
+                  .getAsString());
           }
 
           // Format multiple values as comma-separated strings
@@ -261,6 +267,8 @@ public class ImdbService {
             movie.setCinematographer(String.join(", ", tmpCinematographers));
           if (!tmpComposers.isEmpty())
             movie.setComposer(String.join(", ", tmpComposers));
+          if (!tmpGenres.isEmpty())
+            movie.setGenre(String.join(", ", tmpGenres));
 
           LOGGER.info("Successfully fetched Wikidata for IMDb ID: " + imdbId);
         }

@@ -30,6 +30,7 @@ module io.github.kullik01.kinonode {
   requires javafx.graphics;
   requires javafx.media;
   requires javafx.fxml;
+  requires javafx.web;
   requires java.sql;
   requires java.logging;
   requires java.desktop;

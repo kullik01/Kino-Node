@@ -195,6 +195,8 @@ public class LibraryScanService {
                     || tmpExistingMovie.getDirector().isBlank()
                     || tmpExistingMovie.getWriter() == null
                     || tmpExistingMovie.getWriter().isBlank()
+                    || tmpExistingMovie.getGenre() == null
+                    || tmpExistingMovie.getGenre().isBlank()
                     || tmpExistingMovie.getTrailerUrl() == null
                     || tmpExistingMovie.getTrailerUrl().isBlank());
 
