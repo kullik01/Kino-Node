@@ -74,7 +74,10 @@
                 <VBox style="-fx-pref-width: 240px; -fx-pref-height: 360px; -fx-background-radius: 8px;" styleClass="movie-poster-container">
                     <ImageView fx:id="imgPoster" fitHeight="360.0" fitWidth="240.0" styleClass="detail-cover" />
                 </VBox>
-                <Button onAction="#changePoster" styleClass="button-secondary" text="🖼" minWidth="-Infinity">
+                <Button onAction="#changePoster" styleClass="button-secondary" minWidth="-Infinity">
+                    <graphic>
+                        <SVGPath content="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6c-.55 0-1-.45-1-1V6c0-.55.45-1 1-1h12c.55 0 1 .45 1 1v12c0 .55-.45 1-1 1zm-4.44-6.23L11.2 15.4l-2.45-3.07c-.2-.25-.59-.25-.79 0l-2.71 3.39c-.26.33-.02.81.39.81h12.7c.41 0 .65-.48.39-.81l-3.84-4.8c-.2-.26-.6-.26-.8 0z" fill="white"/>
+                    </graphic>
                     <tooltip><Tooltip showDelay="250ms" text="Change Poster"/></tooltip>
                 </Button>
                 
