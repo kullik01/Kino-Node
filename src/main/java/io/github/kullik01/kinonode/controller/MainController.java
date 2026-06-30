@@ -132,6 +132,9 @@ public class MainController {
     // Show Library by default
     showLibrary();
 
+    // Eagerly preload the IMDb view on startup to begin background loading immediately
+    preloadView("IMDb", "/io/github/kullik01/kinonode/fxml/ImdbView.fxml");
+
     // Query and listen to the window stage once it is rendered to apply
     // maximized styling
     javafx.application.Platform.runLater(() -> {
@@ -260,6 +263,24 @@ public class MainController {
     Object tmpController = controllers.get("IMDb");
     if (tmpController instanceof ImdbController imdbController) {
       imdbController.loadPage(url);
+    }
+  }
+
+  private void preloadView(String name, String fxmlPath) {
+    try {
+      Parent tmpView = views.get(name);
+      if (tmpView == null) {
+        URL tmpUrl = getClass().getResource(fxmlPath);
+        if (tmpUrl == null) {
+          throw new IOException("Cannot find FXML: " + fxmlPath);
+        }
+        FXMLLoader tmpLoader = new FXMLLoader(tmpUrl);
+        tmpView = tmpLoader.load();
+        views.put(name, tmpView);
+        controllers.put(name, tmpLoader.getController());
+      }
+    } catch (IOException tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to preload view " + name, tmpException);
     }
   }
 }
