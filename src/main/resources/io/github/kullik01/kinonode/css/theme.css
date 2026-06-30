@@ -262,7 +262,8 @@
 }
 
 /* Accent and Global Buttons */
-.root .button.button-primary, .root .button.button-secondary {
+.root .button.button-primary, .root .button.button-secondary,
+.root .menu-button.button-primary, .root .menu-button.button-secondary {
     -fx-background-color: #2178dd;
     -fx-text-fill: white;
     -fx-font-weight: bold;
@@ -272,7 +273,10 @@
 }
 
 /* Force hover and pressed states to be identical to remove the effect entirely */
-.root .button.button-primary:hover, .root .button.button-secondary:hover {
+.root .button.button-primary:hover, .root .button.button-secondary:hover,
+.root .menu-button.button-primary:hover, .root .menu-button.button-secondary:hover,
+.root .menu-button.button-primary:showing, .root .menu-button.button-secondary:showing,
+.root .menu-button.button-primary:focused, .root .menu-button.button-secondary:focused {
     -fx-background-color: #2178dd;
     -fx-text-fill: white;
     -fx-opacity: 1.0;
@@ -280,7 +284,8 @@
     -fx-border-color: transparent;
 }
 
-.root .button.button-primary:pressed, .root .button.button-secondary:pressed {
+.root .button.button-primary:pressed, .root .button.button-secondary:pressed,
+.root .menu-button.button-primary:pressed, .root .menu-button.button-secondary:pressed {
     -fx-background-color: #2178dd;
     -fx-opacity: 1.0;
     -fx-effect: none;
