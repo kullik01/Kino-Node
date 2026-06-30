@@ -198,7 +198,9 @@ public class LibraryScanService {
                     || tmpExistingMovie.getGenre() == null
                     || tmpExistingMovie.getGenre().isBlank()
                     || tmpExistingMovie.getTrailerUrl() == null
-                    || tmpExistingMovie.getTrailerUrl().isBlank());
+                    || tmpExistingMovie.getTrailerUrl().isBlank()
+                    || tmpExistingMovie.getActors() == null
+                    || tmpExistingMovie.getActors().isBlank());
 
             if (tmpNeedsEnrichment) {
               updateMessage("Checking IMDB for existing movie: "

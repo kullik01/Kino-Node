@@ -141,6 +141,7 @@ public class DatabaseService {
             producer TEXT,
             cinematographer TEXT,
             composer TEXT,
+            actors TEXT,
             date_added INTEGER NOT NULL
         );
         """;
@@ -184,7 +185,7 @@ public class DatabaseService {
 
       // Schema migration for new columns
       String[] tmpNewColumns =
-          {"director", "writer", "producer", "cinematographer", "composer"};
+          {"director", "writer", "producer", "cinematographer", "composer", "actors"};
       for (String tmpColumn : tmpNewColumns) {
         try {
           tmpStatement

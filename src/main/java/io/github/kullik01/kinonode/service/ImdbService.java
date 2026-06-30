@@ -154,6 +154,27 @@ public class ImdbService {
               }
             }
 
+            if (tmpResult.has("s")) {
+              String tmpStarring = tmpResult.get("s").getAsString();
+              if (tmpStarring != null && !tmpStarring.isBlank()) {
+                String[] tmpActorArray = tmpStarring.split(",");
+                Set<String> tmpUniqueStarring = new java.util.LinkedHashSet<>();
+                for (String tmpActor : tmpActorArray) {
+                  if (tmpActor != null && !tmpActor.isBlank()) {
+                    tmpUniqueStarring.add(tmpActor.trim());
+                  }
+                }
+                java.util.List<String> tmpTopThree = new java.util.ArrayList<>();
+                java.util.Iterator<String> tmpIter = tmpUniqueStarring.iterator();
+                while (tmpIter.hasNext() && tmpTopThree.size() < 3) {
+                  tmpTopThree.add(tmpIter.next());
+                }
+                if (!tmpTopThree.isEmpty()) {
+                  movie.setActors(String.join(", ", tmpTopThree) + ", ...");
+                }
+              }
+            }
+
             // Fetch additional details from Wikidata (director, writer, etc.)
             // using the IMDb ID
             // ('tt...')
@@ -271,6 +292,7 @@ public class ImdbService {
             movie.setGenre(String.join(", ", tmpGenres));
 
           LOGGER.info("Successfully fetched Wikidata for IMDb ID: " + imdbId);
+          fetchWikidataActors(imdbId, movie);
         }
       } else {
         LOGGER.warning(
@@ -279,6 +301,89 @@ public class ImdbService {
     } catch (Exception tmpException) {
       LOGGER.log(Level.WARNING,
           "Error fetching Wikidata for IMDb ID: " + imdbId, tmpException);
+    }
+  }
+
+  /**
+   * Fetches cast members from Wikidata for the given IMDb ID and populates
+   * missing actors (actor1, actor2, actor3) on the movie.
+   *
+   * @param imdbId the IMDb ID (tt...)
+   * @param movie the Movie object to enrich
+   */
+  private static void fetchWikidataActors(String imdbId, Movie movie) {
+    try {
+      String tmpSparqlQuery =
+          "SELECT ?actorLabel WHERE { "
+              + "?movie wdt:P345 '" + imdbId + "'. "
+              + "?movie wdt:P161 ?actor. "
+              + "SERVICE wikibase:label { bd:serviceParam wikibase:language 'en'. } "
+              + "}";
+
+      String tmpUrlStr = "https://query.wikidata.org/sparql?query=" + URLEncoder
+          .encode(tmpSparqlQuery, StandardCharsets.UTF_8).replace("+", "%20")
+          + "&format=json";
+
+      HttpRequest tmpRequest =
+          HttpRequest.newBuilder().uri(URI.create(tmpUrlStr))
+              .header("User-Agent",
+                  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) KinoNode/1.0")
+              .header("Accept", "application/json").GET().build();
+
+      HttpResponse<String> tmpResponse =
+          client.send(tmpRequest, HttpResponse.BodyHandlers.ofString());
+
+      if (tmpResponse.statusCode() == 200) {
+        JsonObject tmpJsonObject =
+            JsonParser.parseString(tmpResponse.body()).getAsJsonObject();
+        if (tmpJsonObject.has("results")) {
+          JsonArray tmpBindings = tmpJsonObject.getAsJsonObject("results")
+              .getAsJsonArray("bindings");
+
+          Set<String> tmpActors = new java.util.LinkedHashSet<>();
+          for (JsonElement tmpElement : tmpBindings) {
+            JsonObject tmpRow = tmpElement.getAsJsonObject();
+            if (tmpRow.has("actorLabel")) {
+              tmpActors.add(tmpRow.getAsJsonObject("actorLabel")
+                  .get("value").getAsString());
+            }
+          }
+
+          java.util.List<String> tmpExistingList = new java.util.ArrayList<>();
+          if (movie.getActors() != null && !movie.getActors().isBlank()) {
+            for (String val : movie.getActors().split(",")) {
+              String trimmed = val.trim();
+              if (!trimmed.isEmpty() && !trimmed.equals("...")) {
+                tmpExistingList.add(trimmed);
+              }
+            }
+          }
+
+          for (String tmpActor : tmpActors) {
+            if (tmpActor == null || tmpActor.isBlank()) {
+              continue;
+            }
+            String tmpTrimmed = tmpActor.trim();
+            if (!tmpExistingList.contains(tmpTrimmed)) {
+              tmpExistingList.add(tmpTrimmed);
+            }
+            if (tmpExistingList.size() >= 3) {
+              break;
+            }
+          }
+
+          if (!tmpExistingList.isEmpty()) {
+            movie.setActors(String.join(", ", tmpExistingList) + ", ...");
+          }
+          LOGGER.info("Successfully fetched Wikidata actors for IMDb ID: " + imdbId);
+        }
+      } else {
+        LOGGER.warning(
+            "Failed to fetch Wikidata actors. HTTP " + tmpResponse.statusCode());
+      }
+    } catch (Exception tmpException) {
+      LOGGER.log(Level.WARNING,
+          "Error fetching Wikidata actors for IMDb ID: " + imdbId, tmpException);
     }
   }
 

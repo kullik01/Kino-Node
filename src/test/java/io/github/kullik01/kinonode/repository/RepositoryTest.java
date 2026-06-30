@@ -80,6 +80,7 @@ public class RepositoryTest {
     tmpMovie.setGenre("Sci-Fi");
     tmpMovie.setDescription("A thief who steals corporate secrets...");
     tmpMovie.setRating(9);
+    tmpMovie.setActors("Leonardo DiCaprio, Joseph Gordon-Levitt, Elliot Page");
 
     // Insert
     Movie tmpInserted = movieRepository.insert(tmpMovie);
@@ -92,6 +93,7 @@ public class RepositoryTest {
     assertEquals("Inception", tmpFound.getTitle());
     assertEquals(2010, tmpFound.getYear());
     assertEquals(9, tmpFound.getRating());
+    assertEquals("Leonardo DiCaprio, Joseph Gordon-Levitt, Elliot Page, ...", tmpFound.getActors());
 
     // Check exists
     assertTrue(movieRepository.existsByFilePath("C:/movies/inception.mp4"));
@@ -105,11 +107,13 @@ public class RepositoryTest {
     // Update
     tmpFound.setTitle("Inception: Special Edition");
     tmpFound.setRating(10);
+    tmpFound.setActors("Leo DiCaprio, Joseph Gordon-Levitt, Elliot Page");
     movieRepository.update(tmpFound);
 
     Movie tmpUpdated = movieRepository.findById(tmpInserted.getId());
     assertEquals("Inception: Special Edition", tmpUpdated.getTitle());
     assertEquals(10, tmpUpdated.getRating());
+    assertEquals("Leo DiCaprio, Joseph Gordon-Levitt, Elliot Page, ...", tmpUpdated.getActors());
 
     // Delete
     movieRepository.delete(tmpInserted.getId());

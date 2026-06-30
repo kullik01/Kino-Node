@@ -109,6 +109,7 @@
                     <RowConstraints minHeight="30.0" />
                     <RowConstraints minHeight="30.0" />
                     <RowConstraints minHeight="30.0" />
+                    <RowConstraints minHeight="30.0" />
                     <RowConstraints minHeight="100.0" prefHeight="120.0" valignment="TOP" />
                     <RowConstraints minHeight="30.0" />
                     <RowConstraints minHeight="30.0" />
@@ -171,16 +172,23 @@
                     <Button onAction="#editComposer" styleClass="button-secondary" text="📝" minWidth="-Infinity"><tooltip><Tooltip showDelay="250ms" text="Edit Composer"/></tooltip></Button>
                 </HBox>
 
-                <!-- Description -->
-                <Label style="-fx-font-weight: bold;" text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="8" />
+                <!-- Actors -->
+                <Label style="-fx-font-weight: bold;" text="Actor(s):" GridPane.columnIndex="0" GridPane.rowIndex="8" />
                 <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="8">
+                    <TextField fx:id="txtActors" style="-fx-text-fill: -color-fg-default;" editable="false" mouseTransparent="true" focusTraversable="false" HBox.hgrow="ALWAYS" />
+                    <Button onAction="#editActors" styleClass="button-secondary" text="📝" minWidth="-Infinity"><tooltip><Tooltip showDelay="250ms" text="Edit Actor(s)"/></tooltip></Button>
+                </HBox>
+
+                <!-- Description -->
+                <Label style="-fx-font-weight: bold;" text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="9" />
+                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="9">
                     <TextArea fx:id="txtDescription" style="-fx-text-fill: -color-fg-default;" editable="false" mouseTransparent="true" focusTraversable="false" prefHeight="100.0" wrapText="true" HBox.hgrow="ALWAYS" />
                     <Button onAction="#editDescription" styleClass="button-secondary" text="📝" minWidth="-Infinity" alignment="TOP_CENTER"><tooltip><Tooltip showDelay="250ms" text="Edit Description"/></tooltip></Button>
                 </HBox>
 
                 <!-- Trailer URL -->
-                <Label style="-fx-font-weight: bold;" text="Trailer Link:" GridPane.columnIndex="0" GridPane.rowIndex="9" />
-                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="9">
+                <Label style="-fx-font-weight: bold;" text="Trailer Link:" GridPane.columnIndex="0" GridPane.rowIndex="10" />
+                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="10">
                     <TextField fx:id="txtTrailerUrl" style="-fx-text-fill: -color-fg-default;" editable="false" mouseTransparent="true" focusTraversable="false" promptText="https://www.youtube.com/watch?v=..." HBox.hgrow="ALWAYS" />
                     <Button fx:id="btnEditTrailer" onAction="#editTrailerUrl" styleClass="button-secondary" text="📝" minWidth="-Infinity">
                         <tooltip><Tooltip showDelay="250ms" text="Edit Trailer Link"/></tooltip>
@@ -188,14 +196,14 @@
                 </HBox>
                 
                 <!-- Rating -->
-                <Label style="-fx-font-weight: bold;" text="Rating:" GridPane.columnIndex="0" GridPane.rowIndex="10" />
-                <HBox fx:id="ratingContainer" alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="1" GridPane.rowIndex="10">
+                <Label style="-fx-font-weight: bold;" text="Rating:" GridPane.columnIndex="0" GridPane.rowIndex="11" />
+                <HBox fx:id="ratingContainer" alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="1" GridPane.rowIndex="11">
                     <!-- Rating buttons and text will be populated dynamically -->
                 </HBox>
 
                 <!-- Watchlist association -->
-                <Label style="-fx-font-weight: bold;" text="Watchlists:" GridPane.columnIndex="0" GridPane.rowIndex="11" />
-                <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="11">
+                <Label style="-fx-font-weight: bold;" text="Watchlists:" GridPane.columnIndex="0" GridPane.rowIndex="12" />
+                <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="12">
                     <Label fx:id="lblWatchlistsList" style="-fx-text-fill: -color-fg-muted;" text="None" HBox.hgrow="ALWAYS" />
                     <MenuButton fx:id="menuWatchlists" styleClass="button-secondary" text="➕" minWidth="-Infinity">
                         <tooltip><Tooltip showDelay="250ms" text="Add to Watchlist"/></tooltip>

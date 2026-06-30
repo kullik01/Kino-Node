@@ -183,7 +183,9 @@ public class LibraryController implements Refreshable {
             || (movie.getCinematographer() != null
                 && movie.getCinematographer().toLowerCase().contains(tmpQuery))
             || (movie.getComposer() != null
-                && movie.getComposer().toLowerCase().contains(tmpQuery));
+                && movie.getComposer().toLowerCase().contains(tmpQuery))
+            || (movie.getActors() != null
+                && movie.getActors().toLowerCase().contains(tmpQuery));
       };
     }).collect(Collectors.toList());
 

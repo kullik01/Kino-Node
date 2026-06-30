@@ -104,6 +104,8 @@ public class MovieDetailController {
   @FXML
   private TextField txtComposer;
   @FXML
+  private TextField txtActors;
+  @FXML
   private TextArea txtDescription;
   @FXML
   private TextField txtTrailerUrl;
@@ -171,6 +173,7 @@ public class MovieDetailController {
     txtCinematographer.setText(
         movie.getCinematographer() != null ? movie.getCinematographer() : "");
     txtComposer.setText(movie.getComposer() != null ? movie.getComposer() : "");
+    txtActors.setText(movie.getActors() != null ? movie.getActors() : "");
     txtDescription
         .setText(movie.getDescription() != null ? movie.getDescription() : "");
     txtTrailerUrl
@@ -819,6 +822,13 @@ public class MovieDetailController {
   }
 
   @FXML
+  private void editActors() {
+    showEditDialog("Actors", "Actor(s)", txtActors,
+        InputConstraint.NO_NUMBERS,
+        val -> movie.setActors(val.isEmpty() ? null : val));
+  }
+
+  @FXML
   private void editDescription() {
     showEditDialog("Description", "Description", txtDescription,
         InputConstraint.NO_NUMBERS,
@@ -973,6 +983,12 @@ public class MovieDetailController {
         txtComposer.getText().trim()))
       return true;
 
+    String tmpMovieActors =
+        movie.getActors() != null ? movie.getActors() : "";
+    if (!java.util.Objects.equals(tmpMovieActors,
+        txtActors.getText().trim()))
+      return true;
+
     String tmpMovieDesc =
         movie.getDescription() != null ? movie.getDescription() : "";
     if (!java.util.Objects.equals(tmpMovieDesc,
@@ -1039,6 +1055,8 @@ public class MovieDetailController {
             : txtCinematographer.getText().trim());
     movie.setComposer(txtComposer.getText().trim().isEmpty() ? null
         : txtComposer.getText().trim());
+    movie.setActors(txtActors.getText().trim().isEmpty() ? null
+        : txtActors.getText().trim());
     movie.setDescription(txtDescription.getText().trim().isEmpty() ? null
         : txtDescription.getText().trim());
     movie.setTrailerUrl(tmpTrailer.isEmpty() ? null : tmpTrailer);

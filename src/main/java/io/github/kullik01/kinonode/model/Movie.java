@@ -60,6 +60,7 @@ public class Movie {
   private String producer;
   private String cinematographer;
   private String composer;
+  private String actors;
   private Instant dateAdded;
 
   /** Constructs a new Movie with the current timestamp as the date added. */
@@ -350,6 +351,38 @@ public class Movie {
    */
   public void setComposer(String composer) {
     this.composer = composer;
+  }
+
+  /**
+   * Gets the actors of the movie.
+   *
+   * @return the actors names, typically comma-separated
+   */
+  public String getActors() {
+    if (actors != null && !actors.isBlank()) {
+      String trimmed = actors.trim();
+      if (!trimmed.endsWith(", ...")) {
+        return trimmed + ", ...";
+      }
+    }
+    return actors;
+  }
+
+  /**
+   * Sets the actors of the movie.
+   *
+   * @param actors the actors names to set
+   */
+  public void setActors(String actors) {
+    if (actors != null) {
+      String trimmed = actors.trim();
+      if (trimmed.endsWith(", ...")) {
+        trimmed = trimmed.substring(0, trimmed.length() - 5).trim();
+      }
+      this.actors = trimmed.isEmpty() ? null : trimmed;
+    } else {
+      this.actors = null;
+    }
   }
 
   /**
