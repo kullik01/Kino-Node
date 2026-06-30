@@ -132,7 +132,8 @@ public class MainController {
     // Show Library by default
     showLibrary();
 
-    // Eagerly preload the IMDb view on startup to begin background loading immediately
+    // Eagerly preload the IMDb view on startup to begin background loading
+    // immediately
     preloadView("IMDb", "/io/github/kullik01/kinonode/fxml/ImdbView.fxml");
 
     // Query and listen to the window stage once it is rendered to apply
@@ -258,7 +259,8 @@ public class MainController {
 
   public void showImdbWithUrl(String url) {
     if (activeButton != btnImdb) {
-      navigate("IMDb", "/io/github/kullik01/kinonode/fxml/ImdbView.fxml", btnImdb);
+      navigate("IMDb", "/io/github/kullik01/kinonode/fxml/ImdbView.fxml",
+          btnImdb);
     }
     Object tmpController = controllers.get("IMDb");
     if (tmpController instanceof ImdbController imdbController) {

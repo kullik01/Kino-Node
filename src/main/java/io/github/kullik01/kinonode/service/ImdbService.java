@@ -165,7 +165,8 @@ public class ImdbService {
                   }
                 }
                 if (!tmpUniqueStarring.isEmpty()) {
-                  movie.setActors(String.join(", ", tmpUniqueStarring) + ", ...");
+                  movie.setActors(
+                      String.join(", ", tmpUniqueStarring) + ", ...");
                 }
               }
             }
@@ -268,9 +269,12 @@ public class ImdbService {
               tmpComposers.add(tmpRow.getAsJsonObject("composerLabel")
                   .get("value").getAsString());
             if (tmpRow.has("genreLabel")) {
-              String tmpGenreVal = tmpRow.getAsJsonObject("genreLabel").get("value").getAsString();
+              String tmpGenreVal = tmpRow.getAsJsonObject("genreLabel")
+                  .get("value").getAsString();
               if (tmpGenreVal != null && !tmpGenreVal.isBlank()) {
-                String tmpCleaned = tmpGenreVal.replaceAll("(?i)\\b(film|movie)s?\\b", "").replaceAll("\\s+", " ").trim();
+                String tmpCleaned =
+                    tmpGenreVal.replaceAll("(?i)\\b(film|movie)s?\\b", "")
+                        .replaceAll("\\s+", " ").trim();
                 if (!tmpCleaned.isEmpty()) {
                   String[] tmpWords = tmpCleaned.split("\\s+");
                   StringBuilder tmpSb = new StringBuilder();
@@ -331,14 +335,12 @@ public class ImdbService {
    */
   private static void fetchWikidataActors(String imdbId, Movie movie) {
     try {
-      String tmpSparqlQuery =
-          "SELECT ?actorLabel ?ordinal WHERE { "
-              + "?movie wdt:P345 '" + imdbId + "'. "
-              + "?movie p:P161 ?statement. "
-              + "?statement ps:P161 ?actor. "
-              + "OPTIONAL { ?statement pq:P1545 ?ordinal. } "
-              + "SERVICE wikibase:label { bd:serviceParam wikibase:language 'en'. } "
-              + "} ORDER BY ASC(xsd:integer(?ordinal))";
+      String tmpSparqlQuery = "SELECT ?actorLabel ?ordinal WHERE { "
+          + "?movie wdt:P345 '" + imdbId + "'. " + "?movie p:P161 ?statement. "
+          + "?statement ps:P161 ?actor. "
+          + "OPTIONAL { ?statement pq:P1545 ?ordinal. } "
+          + "SERVICE wikibase:label { bd:serviceParam wikibase:language 'en'. } "
+          + "} ORDER BY ASC(xsd:integer(?ordinal))";
 
       String tmpUrlStr = "https://query.wikidata.org/sparql?query=" + URLEncoder
           .encode(tmpSparqlQuery, StandardCharsets.UTF_8).replace("+", "%20")
@@ -364,8 +366,8 @@ public class ImdbService {
           for (JsonElement tmpElement : tmpBindings) {
             JsonObject tmpRow = tmpElement.getAsJsonObject();
             if (tmpRow.has("actorLabel")) {
-              tmpActors.add(tmpRow.getAsJsonObject("actorLabel")
-                  .get("value").getAsString());
+              tmpActors.add(tmpRow.getAsJsonObject("actorLabel").get("value")
+                  .getAsString());
             }
           }
 
@@ -392,15 +394,17 @@ public class ImdbService {
           if (!tmpExistingList.isEmpty()) {
             movie.setActors(String.join(", ", tmpExistingList) + ", ...");
           }
-          LOGGER.info("Successfully fetched Wikidata actors for IMDb ID: " + imdbId);
+          LOGGER.info(
+              "Successfully fetched Wikidata actors for IMDb ID: " + imdbId);
         }
       } else {
-        LOGGER.warning(
-            "Failed to fetch Wikidata actors. HTTP " + tmpResponse.statusCode());
+        LOGGER.warning("Failed to fetch Wikidata actors. HTTP "
+            + tmpResponse.statusCode());
       }
     } catch (Exception tmpException) {
       LOGGER.log(Level.WARNING,
-          "Error fetching Wikidata actors for IMDb ID: " + imdbId, tmpException);
+          "Error fetching Wikidata actors for IMDb ID: " + imdbId,
+          tmpException);
     }
   }
 

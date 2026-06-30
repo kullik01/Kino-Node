@@ -93,7 +93,8 @@ public class RepositoryTest {
     assertEquals("Inception", tmpFound.getTitle());
     assertEquals(2010, tmpFound.getYear());
     assertEquals(9, tmpFound.getRating());
-    assertEquals("Leonardo DiCaprio, Joseph Gordon-Levitt, Elliot Page, ...", tmpFound.getActors());
+    assertEquals("Leonardo DiCaprio, Joseph Gordon-Levitt, Elliot Page, ...",
+        tmpFound.getActors());
 
     // Check exists
     assertTrue(movieRepository.existsByFilePath("C:/movies/inception.mp4"));
@@ -113,7 +114,8 @@ public class RepositoryTest {
     Movie tmpUpdated = movieRepository.findById(tmpInserted.getId());
     assertEquals("Inception: Special Edition", tmpUpdated.getTitle());
     assertEquals(10, tmpUpdated.getRating());
-    assertEquals("Leo DiCaprio, Joseph Gordon-Levitt, Elliot Page, ...", tmpUpdated.getActors());
+    assertEquals("Leo DiCaprio, Joseph Gordon-Levitt, Elliot Page, ...",
+        tmpUpdated.getActors());
 
     // Delete
     movieRepository.delete(tmpInserted.getId());

@@ -184,7 +184,8 @@ public class MovieDetailController {
     setupMultiField(movie.getDirector(), txtDirector, comboDirector);
     setupMultiField(movie.getWriter(), txtWriter, comboWriter);
     setupMultiField(movie.getProducer(), txtProducer, comboProducer);
-    setupMultiField(movie.getCinematographer(), txtCinematographer, comboCinematographer);
+    setupMultiField(movie.getCinematographer(), txtCinematographer,
+        comboCinematographer);
     setupMultiField(movie.getComposer(), txtComposer, comboComposer);
     setupMultiField(movie.getActors(), txtActors, comboActors);
     txtDescription
@@ -659,7 +660,8 @@ public class MovieDetailController {
     String tmpUrl = null;
     String tmpCover = movie.getCoverImagePath();
     if (tmpCover != null) {
-      java.util.regex.Pattern tmpPattern = java.util.regex.Pattern.compile("tt\\d+");
+      java.util.regex.Pattern tmpPattern =
+          java.util.regex.Pattern.compile("tt\\d+");
       java.util.regex.Matcher tmpMatcher = tmpPattern.matcher(tmpCover);
       if (tmpMatcher.find()) {
         tmpUrl = "https://www.imdb.com/title/" + tmpMatcher.group() + "/";
@@ -671,10 +673,11 @@ public class MovieDetailController {
       String tmpTitle = movie.getTitle();
       if (tmpTitle != null && !tmpTitle.isBlank()) {
         try {
-          tmpUrl = "https://www.imdb.com/find/?q=" 
-              + java.net.URLEncoder.encode(tmpTitle.trim(), java.nio.charset.StandardCharsets.UTF_8);
+          tmpUrl = "https://www.imdb.com/find/?q=" + java.net.URLEncoder
+              .encode(tmpTitle.trim(), java.nio.charset.StandardCharsets.UTF_8);
         } catch (Exception tmpEx) {
-          LOGGER.log(Level.WARNING, "Failed to encode title for IMDb search", tmpEx);
+          LOGGER.log(Level.WARNING, "Failed to encode title for IMDb search",
+              tmpEx);
         }
       }
     }
@@ -845,8 +848,7 @@ public class MovieDetailController {
   @FXML
   private void editDirector() {
     showEditDialog("Director", "Director(s)", txtDirector,
-        InputConstraint.NO_NUMBERS,
-        val -> {
+        InputConstraint.NO_NUMBERS, val -> {
           movie.setDirector(val.isEmpty() ? null : val);
           setupMultiField(movie.getDirector(), txtDirector, comboDirector);
         });
@@ -864,8 +866,7 @@ public class MovieDetailController {
   @FXML
   private void editProducer() {
     showEditDialog("Producer", "Producer(s)", txtProducer,
-        InputConstraint.NO_NUMBERS,
-        val -> {
+        InputConstraint.NO_NUMBERS, val -> {
           movie.setProducer(val.isEmpty() ? null : val);
           setupMultiField(movie.getProducer(), txtProducer, comboProducer);
         });
@@ -874,18 +875,17 @@ public class MovieDetailController {
   @FXML
   private void editCinematographer() {
     showEditDialog("Cinematographer", "Cinematographer(s)", txtCinematographer,
-        InputConstraint.NO_NUMBERS,
-        val -> {
+        InputConstraint.NO_NUMBERS, val -> {
           movie.setCinematographer(val.isEmpty() ? null : val);
-          setupMultiField(movie.getCinematographer(), txtCinematographer, comboCinematographer);
+          setupMultiField(movie.getCinematographer(), txtCinematographer,
+              comboCinematographer);
         });
   }
 
   @FXML
   private void editComposer() {
     showEditDialog("Composer", "Composer(s)", txtComposer,
-        InputConstraint.NO_NUMBERS,
-        val -> {
+        InputConstraint.NO_NUMBERS, val -> {
           movie.setComposer(val.isEmpty() ? null : val);
           setupMultiField(movie.getComposer(), txtComposer, comboComposer);
         });
@@ -894,8 +894,7 @@ public class MovieDetailController {
   @FXML
   private void editActors() {
     showEditDialog("Actor(s)", "Actor(s)", txtActors,
-        InputConstraint.NO_NUMBERS,
-        val -> {
+        InputConstraint.NO_NUMBERS, val -> {
           movie.setActors(val.isEmpty() ? null : val);
           setupMultiField(movie.getActors(), txtActors, comboActors);
         });
@@ -1056,10 +1055,8 @@ public class MovieDetailController {
         txtComposer.getText().trim()))
       return true;
 
-    String tmpMovieActors =
-        movie.getActors() != null ? movie.getActors() : "";
-    if (!java.util.Objects.equals(tmpMovieActors,
-        txtActors.getText().trim()))
+    String tmpMovieActors = movie.getActors() != null ? movie.getActors() : "";
+    if (!java.util.Objects.equals(tmpMovieActors, txtActors.getText().trim()))
       return true;
 
     String tmpMovieDesc =
@@ -1242,39 +1239,40 @@ public class MovieDetailController {
 
     java.util.concurrent.CompletableFuture.supplyAsync(() -> {
       String imdbId = null;
-      
+
       // Step 1: Try to query person IMDb ID associated with this movie
       if (movieImdbId != null) {
         try {
-          String sparql = "SELECT ?imdbId WHERE { "
-              + "  ?movie wdt:P345 \"" + movieImdbId + "\". "
-              + "  { ?movie wdt:P57 ?person. } UNION "
+          String sparql = "SELECT ?imdbId WHERE { " + "  ?movie wdt:P345 \""
+              + movieImdbId + "\". " + "  { ?movie wdt:P57 ?person. } UNION "
               + "  { ?movie wdt:P58 ?person. } UNION "
               + "  { ?movie wdt:P162 ?person. } UNION "
               + "  { ?movie wdt:P344 ?person. } UNION "
               + "  { ?movie wdt:P86 ?person. } UNION "
-              + "  { ?movie wdt:P161 ?person. } "
-              + "  ?person rdfs:label \"" + finalName.replace("\"", "\\\"") + "\"@en. "
-              + "  ?person wdt:P345 ?imdbId. "
-              + "} LIMIT 1";
+              + "  { ?movie wdt:P161 ?person. } " + "  ?person rdfs:label \""
+              + finalName.replace("\"", "\\\"") + "\"@en. "
+              + "  ?person wdt:P345 ?imdbId. " + "} LIMIT 1";
 
           imdbId = executeSparql(sparql);
         } catch (Exception e) {
-          LOGGER.log(Level.FINE, "Failed to find movie-associated person IMDb ID for: " + finalName, e);
+          LOGGER.log(Level.FINE,
+              "Failed to find movie-associated person IMDb ID for: "
+                  + finalName,
+              e);
         }
       }
 
       // Step 2: Fallback to general search by name
       if (imdbId == null) {
         try {
-          String sparql = "SELECT ?imdbId WHERE { "
-              + "  ?person rdfs:label \"" + finalName.replace("\"", "\\\"") + "\"@en. "
-              + "  ?person wdt:P345 ?imdbId. "
-              + "} LIMIT 1";
+          String sparql = "SELECT ?imdbId WHERE { " + "  ?person rdfs:label \""
+              + finalName.replace("\"", "\\\"") + "\"@en. "
+              + "  ?person wdt:P345 ?imdbId. " + "} LIMIT 1";
 
           imdbId = executeSparql(sparql);
         } catch (Exception e) {
-          LOGGER.log(Level.FINE, "Failed to find general person IMDb ID for: " + finalName, e);
+          LOGGER.log(Level.FINE,
+              "Failed to find general person IMDb ID for: " + finalName, e);
         }
       }
 
@@ -1288,7 +1286,8 @@ public class MovieDetailController {
         } else {
           // Fallback to name search if no IMDb ID was found on Wikidata
           try {
-            String encoded = java.net.URLEncoder.encode(finalName, java.nio.charset.StandardCharsets.UTF_8);
+            String encoded = java.net.URLEncoder.encode(finalName,
+                java.nio.charset.StandardCharsets.UTF_8);
             targetUrl = "https://www.imdb.com/find/?q=" + encoded + "&s=nm";
             showStatus("Opened IMDb search for " + finalName);
           } catch (Exception e) {
@@ -1305,30 +1304,34 @@ public class MovieDetailController {
   }
 
   private String executeSparql(String sparql) throws Exception {
-    String urlStr = "https://query.wikidata.org/sparql?query=" 
-        + java.net.URLEncoder.encode(sparql, java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20")
-        + "&format=json";
+    String urlStr =
+        "https://query.wikidata.org/sparql?query=" + java.net.URLEncoder
+            .encode(sparql, java.nio.charset.StandardCharsets.UTF_8)
+            .replace("+", "%20") + "&format=json";
 
     java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
-    java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
-        .uri(java.net.URI.create(urlStr))
-        .header("User-Agent", "Mozilla/5.0 KinoNode/1.0")
-        .header("Accept", "application/json")
-        .GET()
-        .build();
+    java.net.http.HttpRequest request =
+        java.net.http.HttpRequest.newBuilder().uri(java.net.URI.create(urlStr))
+            .header("User-Agent", "Mozilla/5.0 KinoNode/1.0")
+            .header("Accept", "application/json").GET().build();
 
-    java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+    java.net.http.HttpResponse<String> response = client.send(request,
+        java.net.http.HttpResponse.BodyHandlers.ofString());
     if (response.statusCode() == 200) {
-      com.google.gson.JsonObject json = com.google.gson.JsonParser.parseString(response.body()).getAsJsonObject();
-      com.google.gson.JsonArray bindings = json.getAsJsonObject("results").getAsJsonArray("bindings");
+      com.google.gson.JsonObject json = com.google.gson.JsonParser
+          .parseString(response.body()).getAsJsonObject();
+      com.google.gson.JsonArray bindings =
+          json.getAsJsonObject("results").getAsJsonArray("bindings");
       if (bindings.size() > 0) {
-        return bindings.get(0).getAsJsonObject().getAsJsonObject("imdbId").get("value").getAsString();
+        return bindings.get(0).getAsJsonObject().getAsJsonObject("imdbId")
+            .get("value").getAsString();
       }
     }
     return null;
   }
 
-  private void setupMultiField(String value, TextField txt, ComboBox<String> combo) {
+  private void setupMultiField(String value, TextField txt,
+      ComboBox<String> combo) {
     java.util.List<String> names = parseNames(value);
     txt.setText(value != null ? value : "");
     if (names.size() <= 1) {

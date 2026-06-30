@@ -59,6 +59,7 @@ public class ImdbServiceTest {
         "Genre should contain 'horror'");
     assertNotNull(tmpMovie.getActors(), "Actors should not be null");
     assertFalse(tmpMovie.getActors().isBlank(), "Actors should not be blank");
-    assertTrue(tmpMovie.getActors().endsWith(", ..."), "Actors should end with ', ...'");
+    assertTrue(tmpMovie.getActors().endsWith(", ..."),
+        "Actors should end with ', ...'");
   }
 }

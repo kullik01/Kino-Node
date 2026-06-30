@@ -184,8 +184,8 @@ public class DatabaseService {
           "INSERT INTO settings (key, value) VALUES ('video_extensions', '3gp,avi,flv,m4v,mkv,mov,mp4,mpeg,mpg,mts,ogg,ogv,ts,webm,wmv') ON CONFLICT(key) DO UPDATE SET value = excluded.value;");
 
       // Schema migration for new columns
-      String[] tmpNewColumns =
-          {"director", "writer", "producer", "cinematographer", "composer", "actors"};
+      String[] tmpNewColumns = {"director", "writer", "producer",
+          "cinematographer", "composer", "actors"};
       for (String tmpColumn : tmpNewColumns) {
         try {
           tmpStatement

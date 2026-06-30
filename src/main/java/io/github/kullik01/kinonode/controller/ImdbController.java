@@ -126,7 +126,8 @@ public class ImdbController implements Refreshable {
   public void loadPage(String url) {
     String tmpCurrent = webEngine.getLocation();
     if (tmpCurrent != null && url != null) {
-      String tmpNormCurrent = tmpCurrent.endsWith("/") ? tmpCurrent : tmpCurrent + "/";
+      String tmpNormCurrent =
+          tmpCurrent.endsWith("/") ? tmpCurrent : tmpCurrent + "/";
       String tmpNormUrl = url.endsWith("/") ? url : url + "/";
       if (tmpNormCurrent.equals(tmpNormUrl)) {
         webEngine.reload();

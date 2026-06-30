@@ -12,7 +12,10 @@ KinoNode is a modern, lightweight, personal movie library manager built on a sol
 
 * **Workspace Synchronization:** Recursively scan local folders to catalog your movies. Title, year, and metadata are automatically extracted from filenames and synchronized.
 * **Modern Media Hub:** A responsive, poster-centric library grid. Easily replace or custom-set movie cover art at any time.
-* **Smart Metadata Enrichment:** Automatically queries online directories (IMDb Suggestion API & Wikidata SPARQL) to populate missing directors, writers, producers, cinematographers, and composers.
+* **Smart Metadata Enrichment:** Automatically queries online directories (IMDb Suggestion API & Wikidata SPARQL) to populate missing directors, writers, producers, cinematographers, composers, and all billing-ordered cast members.
+* **Crew & Actor Lookups:** Interactive dropdown controls (ComboBoxes) for multi-person metadata fields (Directors, Writers, Producers, Cinematographers, Composers, and Actors). Select any specific crew member or actor and view their dedicated IMDb profile.
+* **Wikidata-Powered Disambiguation:** Resolves the exact IMDb person ID (`nmXXXXXXX`) for crew and actors in the background via Wikidata SPARQL queries, linking directly to their official biography page instead of a generic name search.
+* **Embedded IMDb Web Browser:** A built-in, tab-integrated browser preloaded on startup, complete with custom back, forward, reload, and home buttons for seamless movie exploration.
 * **YouTube Trailer Integration:** Automatically scrapes and saves official YouTube trailer URLs, allowing you to watch them in your default web browser with a single click.
 * **Clapperboard Rating System:** Rate your favorite films on a sliding 0–10 scale using custom film-reel clapperboard graphics.
 * **Playlists & Watchlists:** Build, rename, and manage multiple watchlists. Drag, reorder, or organize movies exactly the way you want them.
@@ -113,4 +116,4 @@ This project is licensed under the **BSD 3-Clause License** - see the [LICENSE](
 
 ## 👥 Contributors & Credits
 * **Hannah Kullik** - *Lead Developer*
-* **Martin Urban** - *Visual Brand & Logo Design*
+* **Martin Urban** - * Logo Designer*
