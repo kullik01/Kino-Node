@@ -135,6 +135,26 @@ public class AppContext {
     return playbackService;
   }
 
+  private io.github.kullik01.kinonode.controller.MainController mainController;
+
+  /**
+   * Gets the main controller instance.
+   *
+   * @return the {@link io.github.kullik01.kinonode.controller.MainController} instance
+   */
+  public io.github.kullik01.kinonode.controller.MainController getMainController() {
+    return mainController;
+  }
+
+  /**
+   * Sets the main controller instance.
+   *
+   * @param mainController the {@link io.github.kullik01.kinonode.controller.MainController} to set
+   */
+  public void setMainController(io.github.kullik01.kinonode.controller.MainController mainController) {
+    this.mainController = mainController;
+  }
+
   /**
    * Closes the context and cleans up resources, specifically closing the
    * underlying database service.

@@ -123,7 +123,7 @@ public class ImdbController implements Refreshable {
     loadPage(IMDB_HOME);
   }
 
-  private void loadPage(String url) {
+  public void loadPage(String url) {
     webEngine.load(url);
   }
 

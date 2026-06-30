@@ -86,6 +86,8 @@ public class MovieDetailController {
   private Button btnPlay;
   @FXML
   private Button btnTrailer;
+  @FXML
+  private Button btnImdbPage;
 
   @FXML
   private TextField txtTitle;
@@ -634,6 +636,48 @@ public class MovieDetailController {
       LOGGER.log(Level.WARNING, "Failed to open browser trailer link",
           tmpException);
       showStatus("Failed to open browser.");
+    }
+  }
+
+  @FXML
+  private void openImdbPage() {
+    if (movie == null) {
+      return;
+    }
+
+    String tmpUrl = null;
+    String tmpCover = movie.getCoverImagePath();
+    if (tmpCover != null) {
+      java.util.regex.Pattern tmpPattern = java.util.regex.Pattern.compile("tt\\d+");
+      java.util.regex.Matcher tmpMatcher = tmpPattern.matcher(tmpCover);
+      if (tmpMatcher.find()) {
+        tmpUrl = "https://www.imdb.com/title/" + tmpMatcher.group() + "/";
+      }
+    }
+
+    if (tmpUrl == null) {
+      // Fallback to IMDb search by title
+      String tmpTitle = movie.getTitle();
+      if (tmpTitle != null && !tmpTitle.isBlank()) {
+        try {
+          tmpUrl = "https://www.imdb.com/find/?q=" 
+              + java.net.URLEncoder.encode(tmpTitle.trim(), java.nio.charset.StandardCharsets.UTF_8);
+        } catch (Exception tmpEx) {
+          LOGGER.log(Level.WARNING, "Failed to encode title for IMDb search", tmpEx);
+        }
+      }
+    }
+
+    if (tmpUrl == null) {
+      tmpUrl = "https://www.imdb.com/";
+    }
+
+    MainController tmpMain = AppContext.getInstance().getMainController();
+    if (tmpMain != null) {
+      tmpMain.showImdbWithUrl(tmpUrl);
+      showStatus("Switching to IMDb tab...");
+    } else {
+      showStatus("Could not switch to IMDb tab.");
     }
   }
 

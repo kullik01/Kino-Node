@@ -95,6 +95,7 @@ public class MainController {
    */
   @FXML
   public void initialize() {
+    AppContext.getInstance().setMainController(this);
 
     // Load initial theme button state from settings (Default is light)
     var tmpSettingsRepository =
@@ -249,6 +250,16 @@ public class MainController {
       }
     } catch (IOException tmpException) {
       LOGGER.log(Level.SEVERE, "Failed to load view " + name, tmpException);
+    }
+  }
+
+  public void showImdbWithUrl(String url) {
+    if (activeButton != btnImdb) {
+      navigate("IMDb", "/io/github/kullik01/kinonode/fxml/ImdbView.fxml", btnImdb);
+    }
+    Object tmpController = controllers.get("IMDb");
+    if (tmpController instanceof ImdbController imdbController) {
+      imdbController.loadPage(url);
     }
   }
 }

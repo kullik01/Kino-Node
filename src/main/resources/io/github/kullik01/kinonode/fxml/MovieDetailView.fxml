@@ -77,17 +77,23 @@
                 </Button>
                 
                 <VBox alignment="CENTER" spacing="10.0" style="-fx-padding: 15px 0 0 0;">
-                    <Button fx:id="btnPlay" onAction="#playMovie" styleClass="button-primary">
+                    <Button fx:id="btnPlay" onAction="#playMovie" styleClass="button-primary" minWidth="-Infinity">
                         <graphic>
                             <SVGPath content="M8 5v14l11-7z" fill="white"/>
                         </graphic>
                         <tooltip><Tooltip showDelay="250ms" text="Play Movie"/></tooltip>
                     </Button>
-                    <Button fx:id="btnTrailer" onAction="#watchTrailer" styleClass="button-secondary">
+                    <Button fx:id="btnTrailer" onAction="#watchTrailer" styleClass="button-secondary" minWidth="-Infinity">
                         <graphic>
                             <SVGPath content="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12zm-5-6l-7 4V7z" fill="white"/>
                         </graphic>
                         <tooltip><Tooltip showDelay="250ms" text="Watch Trailer"/></tooltip>
+                    </Button>
+                    <Button fx:id="btnImdbPage" onAction="#openImdbPage" styleClass="button-secondary" minWidth="-Infinity">
+                        <graphic>
+                            <SVGPath content="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="white"/>
+                        </graphic>
+                        <tooltip><Tooltip showDelay="250ms" text="Open in IMDb"/></tooltip>
                     </Button>
                 </VBox>
             </VBox>

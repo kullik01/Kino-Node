@@ -324,9 +324,10 @@
     -fx-min-width: 320px;
 }
 
-/* Remove tooltip shadow */
+/* Remove tooltip shadow and ensure no bold letters */
 .tooltip {
     -fx-effect: none;
+    -fx-font-weight: normal;
 }
 
 /* Custom Window Decorations */
