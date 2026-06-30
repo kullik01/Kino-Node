@@ -324,9 +324,15 @@
     -fx-min-width: 320px;
 }
 
-/* Remove tooltip shadow and ensure no bold letters */
+/* Remove extreme shadowing from tooltips, context menus, combo boxes, and popovers */
+.tooltip,
+.context-menu,
+.combo-box-popup > .list-view,
+.popover {
+    -fx-effect: none !important;
+}
+
 .tooltip {
-    -fx-effect: none;
     -fx-font-weight: normal;
 }
 
