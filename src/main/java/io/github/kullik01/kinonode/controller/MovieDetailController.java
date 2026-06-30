@@ -108,6 +108,18 @@ public class MovieDetailController {
   @FXML
   private TextField txtActors;
   @FXML
+  private ComboBox<String> comboDirector;
+  @FXML
+  private ComboBox<String> comboWriter;
+  @FXML
+  private ComboBox<String> comboProducer;
+  @FXML
+  private ComboBox<String> comboCinematographer;
+  @FXML
+  private ComboBox<String> comboComposer;
+  @FXML
+  private ComboBox<String> comboActors;
+  @FXML
   private TextArea txtDescription;
   @FXML
   private TextField txtTrailerUrl;
@@ -169,13 +181,12 @@ public class MovieDetailController {
     txtYear.setText(
         movie.getYear() != null ? String.valueOf(movie.getYear()) : "");
     txtGenre.setText(movie.getGenre() != null ? movie.getGenre() : "");
-    txtDirector.setText(movie.getDirector() != null ? movie.getDirector() : "");
-    txtWriter.setText(movie.getWriter() != null ? movie.getWriter() : "");
-    txtProducer.setText(movie.getProducer() != null ? movie.getProducer() : "");
-    txtCinematographer.setText(
-        movie.getCinematographer() != null ? movie.getCinematographer() : "");
-    txtComposer.setText(movie.getComposer() != null ? movie.getComposer() : "");
-    txtActors.setText(movie.getActors() != null ? movie.getActors() : "");
+    setupMultiField(movie.getDirector(), txtDirector, comboDirector);
+    setupMultiField(movie.getWriter(), txtWriter, comboWriter);
+    setupMultiField(movie.getProducer(), txtProducer, comboProducer);
+    setupMultiField(movie.getCinematographer(), txtCinematographer, comboCinematographer);
+    setupMultiField(movie.getComposer(), txtComposer, comboComposer);
+    setupMultiField(movie.getActors(), txtActors, comboActors);
     txtDescription
         .setText(movie.getDescription() != null ? movie.getDescription() : "");
     txtTrailerUrl
@@ -835,41 +846,59 @@ public class MovieDetailController {
   private void editDirector() {
     showEditDialog("Director", "Director(s)", txtDirector,
         InputConstraint.NO_NUMBERS,
-        val -> movie.setDirector(val.isEmpty() ? null : val));
+        val -> {
+          movie.setDirector(val.isEmpty() ? null : val);
+          setupMultiField(movie.getDirector(), txtDirector, comboDirector);
+        });
   }
 
   @FXML
   private void editWriter() {
     showEditDialog("Writer", "Writer(s)", txtWriter, InputConstraint.NO_NUMBERS,
-        val -> movie.setWriter(val.isEmpty() ? null : val));
+        val -> {
+          movie.setWriter(val.isEmpty() ? null : val);
+          setupMultiField(movie.getWriter(), txtWriter, comboWriter);
+        });
   }
 
   @FXML
   private void editProducer() {
     showEditDialog("Producer", "Producer(s)", txtProducer,
         InputConstraint.NO_NUMBERS,
-        val -> movie.setProducer(val.isEmpty() ? null : val));
+        val -> {
+          movie.setProducer(val.isEmpty() ? null : val);
+          setupMultiField(movie.getProducer(), txtProducer, comboProducer);
+        });
   }
 
   @FXML
   private void editCinematographer() {
     showEditDialog("Cinematographer", "Cinematographer(s)", txtCinematographer,
         InputConstraint.NO_NUMBERS,
-        val -> movie.setCinematographer(val.isEmpty() ? null : val));
+        val -> {
+          movie.setCinematographer(val.isEmpty() ? null : val);
+          setupMultiField(movie.getCinematographer(), txtCinematographer, comboCinematographer);
+        });
   }
 
   @FXML
   private void editComposer() {
     showEditDialog("Composer", "Composer(s)", txtComposer,
         InputConstraint.NO_NUMBERS,
-        val -> movie.setComposer(val.isEmpty() ? null : val));
+        val -> {
+          movie.setComposer(val.isEmpty() ? null : val);
+          setupMultiField(movie.getComposer(), txtComposer, comboComposer);
+        });
   }
 
   @FXML
   private void editActors() {
-    showEditDialog("Actors", "Actor(s)", txtActors,
+    showEditDialog("Actor(s)", "Actor(s)", txtActors,
         InputConstraint.NO_NUMBERS,
-        val -> movie.setActors(val.isEmpty() ? null : val));
+        val -> {
+          movie.setActors(val.isEmpty() ? null : val);
+          setupMultiField(movie.getActors(), txtActors, comboActors);
+        });
   }
 
   @FXML
@@ -1150,5 +1179,191 @@ public class MovieDetailController {
         LOGGER.log(Level.SEVERE, "Failed to load LibraryView FXML", tmpE);
       }
     }
+  }
+
+  @FXML
+  private void searchDirectorOnImdb() {
+    searchPersonOnImdb(comboDirector, txtDirector);
+  }
+
+  @FXML
+  private void searchWriterOnImdb() {
+    searchPersonOnImdb(comboWriter, txtWriter);
+  }
+
+  @FXML
+  private void searchProducerOnImdb() {
+    searchPersonOnImdb(comboProducer, txtProducer);
+  }
+
+  @FXML
+  private void searchCinematographerOnImdb() {
+    searchPersonOnImdb(comboCinematographer, txtCinematographer);
+  }
+
+  @FXML
+  private void searchComposerOnImdb() {
+    searchPersonOnImdb(comboComposer, txtComposer);
+  }
+
+  @FXML
+  private void searchActorsOnImdb() {
+    searchPersonOnImdb(comboActors, txtActors);
+  }
+
+  private void searchPersonOnImdb(ComboBox<String> combo, TextField txt) {
+    String name = null;
+    if (combo != null && combo.isVisible()) {
+      name = combo.getSelectionModel().getSelectedItem();
+    } else if (txt != null) {
+      name = txt.getText();
+    }
+
+    if (name == null || name.trim().isEmpty()) {
+      return;
+    }
+
+    final String finalName = name.trim();
+    showStatus("Searching IMDb ID for " + finalName + "...");
+
+    // Get movie IMDb ID if available
+    String tempMovieImdbId = null;
+    if (movie != null) {
+      String cover = movie.getCoverImagePath();
+      if (cover != null) {
+        java.util.regex.Pattern p = java.util.regex.Pattern.compile("tt\\d+");
+        java.util.regex.Matcher m = p.matcher(cover);
+        if (m.find()) {
+          tempMovieImdbId = m.group();
+        }
+      }
+    }
+    final String movieImdbId = tempMovieImdbId;
+
+    java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+      String imdbId = null;
+      
+      // Step 1: Try to query person IMDb ID associated with this movie
+      if (movieImdbId != null) {
+        try {
+          String sparql = "SELECT ?imdbId WHERE { "
+              + "  ?movie wdt:P345 \"" + movieImdbId + "\". "
+              + "  { ?movie wdt:P57 ?person. } UNION "
+              + "  { ?movie wdt:P58 ?person. } UNION "
+              + "  { ?movie wdt:P162 ?person. } UNION "
+              + "  { ?movie wdt:P344 ?person. } UNION "
+              + "  { ?movie wdt:P86 ?person. } UNION "
+              + "  { ?movie wdt:P161 ?person. } "
+              + "  ?person rdfs:label \"" + finalName.replace("\"", "\\\"") + "\"@en. "
+              + "  ?person wdt:P345 ?imdbId. "
+              + "} LIMIT 1";
+
+          imdbId = executeSparql(sparql);
+        } catch (Exception e) {
+          LOGGER.log(Level.FINE, "Failed to find movie-associated person IMDb ID for: " + finalName, e);
+        }
+      }
+
+      // Step 2: Fallback to general search by name
+      if (imdbId == null) {
+        try {
+          String sparql = "SELECT ?imdbId WHERE { "
+              + "  ?person rdfs:label \"" + finalName.replace("\"", "\\\"") + "\"@en. "
+              + "  ?person wdt:P345 ?imdbId. "
+              + "} LIMIT 1";
+
+          imdbId = executeSparql(sparql);
+        } catch (Exception e) {
+          LOGGER.log(Level.FINE, "Failed to find general person IMDb ID for: " + finalName, e);
+        }
+      }
+
+      return imdbId;
+    }).thenAccept(imdbId -> {
+      javafx.application.Platform.runLater(() -> {
+        String targetUrl;
+        if (imdbId != null && !imdbId.trim().isEmpty()) {
+          targetUrl = "https://www.imdb.com/name/" + imdbId.trim() + "/";
+          showStatus("Found " + finalName + " on IMDb!");
+        } else {
+          // Fallback to name search if no IMDb ID was found on Wikidata
+          try {
+            String encoded = java.net.URLEncoder.encode(finalName, java.nio.charset.StandardCharsets.UTF_8);
+            targetUrl = "https://www.imdb.com/find/?q=" + encoded + "&s=nm";
+            showStatus("Opened IMDb search for " + finalName);
+          } catch (Exception e) {
+            targetUrl = "https://www.imdb.com/";
+          }
+        }
+
+        MainController tmpMain = AppContext.getInstance().getMainController();
+        if (tmpMain != null) {
+          tmpMain.showImdbWithUrl(targetUrl);
+        }
+      });
+    });
+  }
+
+  private String executeSparql(String sparql) throws Exception {
+    String urlStr = "https://query.wikidata.org/sparql?query=" 
+        + java.net.URLEncoder.encode(sparql, java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20")
+        + "&format=json";
+
+    java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+    java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+        .uri(java.net.URI.create(urlStr))
+        .header("User-Agent", "Mozilla/5.0 KinoNode/1.0")
+        .header("Accept", "application/json")
+        .GET()
+        .build();
+
+    java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+    if (response.statusCode() == 200) {
+      com.google.gson.JsonObject json = com.google.gson.JsonParser.parseString(response.body()).getAsJsonObject();
+      com.google.gson.JsonArray bindings = json.getAsJsonObject("results").getAsJsonArray("bindings");
+      if (bindings.size() > 0) {
+        return bindings.get(0).getAsJsonObject().getAsJsonObject("imdbId").get("value").getAsString();
+      }
+    }
+    return null;
+  }
+
+  private void setupMultiField(String value, TextField txt, ComboBox<String> combo) {
+    java.util.List<String> names = parseNames(value);
+    txt.setText(value != null ? value : "");
+    if (names.size() <= 1) {
+      txt.setVisible(true);
+      txt.setManaged(true);
+      if (combo != null) {
+        combo.setVisible(false);
+        combo.setManaged(false);
+      }
+    } else {
+      txt.setVisible(false);
+      txt.setManaged(false);
+      if (combo != null) {
+        combo.setVisible(true);
+        combo.setManaged(true);
+        combo.getItems().setAll(names);
+        combo.getSelectionModel().selectFirst();
+      }
+    }
+  }
+
+  private java.util.List<String> parseNames(String value) {
+    java.util.List<String> list = new java.util.ArrayList<>();
+    if (value != null && !value.isBlank()) {
+      String clean = value.trim();
+      if (clean.endsWith(", ...")) {
+        clean = clean.substring(0, clean.length() - 5).trim();
+      }
+      for (String part : clean.split(",")) {
+        String trimmed = part.trim();
+        if (!trimmed.isEmpty()) {
+          list.add(trimmed);
+        }
+      }
+    }
+    return list;
   }
 }
