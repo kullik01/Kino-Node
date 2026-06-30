@@ -62,7 +62,7 @@
             <tooltip><Tooltip showDelay="250ms" text="IMDb Home"/></tooltip>
         </Button>
         
-        <TextField fx:id="txtUrl" editable="false" HBox.hgrow="ALWAYS" style="-fx-background-color: -color-bg-default;" />
+        <TextField fx:id="txtUrl" editable="false" mouseTransparent="true" focusTraversable="false" HBox.hgrow="ALWAYS" style="-fx-background-color: -color-bg-default;" />
     </HBox>
     <ProgressBar fx:id="progressLoad" minHeight="2.0" prefHeight="2.0" maxHeight="2.0" maxWidth="1.7976931348623157E308" visible="false" managed="${progressLoad.visible}" style="-fx-padding: 0; -fx-background-insets: 0;" />
 
