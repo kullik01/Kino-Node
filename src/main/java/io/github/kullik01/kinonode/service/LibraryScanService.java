@@ -200,7 +200,8 @@ public class LibraryScanService {
                     || tmpExistingMovie.getTrailerUrl() == null
                     || tmpExistingMovie.getTrailerUrl().isBlank()
                     || tmpExistingMovie.getActors() == null
-                    || tmpExistingMovie.getActors().isBlank());
+                    || tmpExistingMovie.getActors().isBlank()
+                    || hasOnlyThreeActors(tmpExistingMovie.getActors()));
 
             if (tmpNeedsEnrichment) {
               updateMessage("Checking IMDB for existing movie: "
@@ -311,4 +312,12 @@ public class LibraryScanService {
    *        processed
    */
   public record ScanResult(int totalScanned, int newAdded, List<String> logs) {}
+
+  private boolean hasOnlyThreeActors(String actors) {
+    if (actors == null || !actors.endsWith(", ...")) {
+      return false;
+    }
+    String clean = actors.substring(0, actors.length() - 5).trim();
+    return clean.split(",").length <= 3;
+  }
 }

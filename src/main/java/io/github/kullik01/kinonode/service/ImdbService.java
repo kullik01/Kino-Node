@@ -164,13 +164,8 @@ public class ImdbService {
                     tmpUniqueStarring.add(tmpActor.trim());
                   }
                 }
-                java.util.List<String> tmpTopThree = new java.util.ArrayList<>();
-                java.util.Iterator<String> tmpIter = tmpUniqueStarring.iterator();
-                while (tmpIter.hasNext() && tmpTopThree.size() < 3) {
-                  tmpTopThree.add(tmpIter.next());
-                }
-                if (!tmpTopThree.isEmpty()) {
-                  movie.setActors(String.join(", ", tmpTopThree) + ", ...");
+                if (!tmpUniqueStarring.isEmpty()) {
+                  movie.setActors(String.join(", ", tmpUniqueStarring) + ", ...");
                 }
               }
             }
@@ -337,11 +332,13 @@ public class ImdbService {
   private static void fetchWikidataActors(String imdbId, Movie movie) {
     try {
       String tmpSparqlQuery =
-          "SELECT ?actorLabel WHERE { "
+          "SELECT ?actorLabel ?ordinal WHERE { "
               + "?movie wdt:P345 '" + imdbId + "'. "
-              + "?movie wdt:P161 ?actor. "
+              + "?movie p:P161 ?statement. "
+              + "?statement ps:P161 ?actor. "
+              + "OPTIONAL { ?statement pq:P1545 ?ordinal. } "
               + "SERVICE wikibase:label { bd:serviceParam wikibase:language 'en'. } "
-              + "}";
+              + "} ORDER BY ASC(xsd:integer(?ordinal))";
 
       String tmpUrlStr = "https://query.wikidata.org/sparql?query=" + URLEncoder
           .encode(tmpSparqlQuery, StandardCharsets.UTF_8).replace("+", "%20")
@@ -389,9 +386,6 @@ public class ImdbService {
             String tmpTrimmed = tmpActor.trim();
             if (!tmpExistingList.contains(tmpTrimmed)) {
               tmpExistingList.add(tmpTrimmed);
-            }
-            if (tmpExistingList.size() >= 3) {
-              break;
             }
           }
 
