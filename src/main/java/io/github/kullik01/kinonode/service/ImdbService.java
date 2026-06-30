@@ -272,9 +272,32 @@ public class ImdbService {
             if (tmpRow.has("composerLabel"))
               tmpComposers.add(tmpRow.getAsJsonObject("composerLabel")
                   .get("value").getAsString());
-            if (tmpRow.has("genreLabel"))
-              tmpGenres.add(tmpRow.getAsJsonObject("genreLabel").get("value")
-                  .getAsString());
+            if (tmpRow.has("genreLabel")) {
+              String tmpGenreVal = tmpRow.getAsJsonObject("genreLabel").get("value").getAsString();
+              if (tmpGenreVal != null && !tmpGenreVal.isBlank()) {
+                String tmpCleaned = tmpGenreVal.replaceAll("(?i)\\b(film|movie)s?\\b", "").replaceAll("\\s+", " ").trim();
+                if (!tmpCleaned.isEmpty()) {
+                  String[] tmpWords = tmpCleaned.split("\\s+");
+                  StringBuilder tmpSb = new StringBuilder();
+                  for (int tmpI = 0; tmpI < tmpWords.length; tmpI++) {
+                    String tmpWord = tmpWords[tmpI];
+                    if (!tmpWord.isEmpty()) {
+                      tmpSb.append(Character.toUpperCase(tmpWord.charAt(0)));
+                      if (tmpWord.length() > 1) {
+                        tmpSb.append(tmpWord.substring(1).toLowerCase());
+                      }
+                      if (tmpI < tmpWords.length - 1) {
+                        tmpSb.append(" ");
+                      }
+                    }
+                  }
+                  String tmpFinalGenre = tmpSb.toString().trim();
+                  if (!tmpFinalGenre.isEmpty()) {
+                    tmpGenres.add(tmpFinalGenre);
+                  }
+                }
+              }
+            }
           }
 
           // Format multiple values as comma-separated strings
