@@ -47,8 +47,8 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
 /**
- * Controller for the embedded IMDb browser view. Allows searching films outside
- * the workspace using an internet connection.
+ * Controller for the embedded IMDb browser view. Allows searching for films
+ * outside the workspace using an internet connection.
  */
 public class ImdbController implements Refreshable {
 
@@ -70,6 +70,7 @@ public class ImdbController implements Refreshable {
   private VBox paneError;
 
   private WebEngine webEngine;
+  private String pendingTargetUrl = null;
   private static final String IMDB_HOME = "https://www.imdb.com/";
 
   /**
@@ -98,12 +99,27 @@ public class ImdbController implements Refreshable {
     webEngine.getLoadWorker().stateProperty()
         .addListener((obs, oldState, newState) -> {
           if (newState == Worker.State.SUCCEEDED) {
+            injectAdSuppression();
             progressLoad.setVisible(false);
             paneError.setVisible(false);
-            webView.setVisible(true);
+            if (pendingTargetUrl == null) {
+              webView.setVisible(true);
+            } else {
+              String tmpLoc = webEngine.getLocation();
+              String tmpNormLoc =
+                  tmpLoc != null && !tmpLoc.endsWith("/") ? tmpLoc + "/" : tmpLoc;
+              String tmpNormTarget = pendingTargetUrl.endsWith("/")
+                  ? pendingTargetUrl : pendingTargetUrl + "/";
+              if (tmpNormLoc != null && tmpNormLoc.equals(tmpNormTarget)) {
+                webView.setVisible(true);
+                pendingTargetUrl = null;
+              }
+              // else: intermediate redirect (e.g. consent page) — stay hidden
+            }
           } else if (newState == Worker.State.RUNNING) {
             progressLoad.setVisible(true);
             paneError.setVisible(false);
+            webView.setVisible(false);
           } else if (newState == Worker.State.FAILED
               || newState == Worker.State.CANCELLED) {
             progressLoad.setVisible(false);
@@ -130,11 +146,82 @@ public class ImdbController implements Refreshable {
           tmpCurrent.endsWith("/") ? tmpCurrent : tmpCurrent + "/";
       String tmpNormUrl = url.endsWith("/") ? url : url + "/";
       if (tmpNormCurrent.equals(tmpNormUrl)) {
+        pendingTargetUrl = null;
         webEngine.reload();
         return;
       }
     }
+    pendingTargetUrl = url;
     webEngine.load(url);
+  }
+
+  private void injectAdSuppression() {
+    // Step 1: inject CSS to hide ads, consent banners, and sign-in prompts
+    webEngine.executeScript(
+        "document.head.insertAdjacentHTML('beforeend',"
+        + "'<style id=\"kino-block\">"
+        // OneTrust cookie consent
+        + "#onetrust-banner-sdk{display:none!important}"
+        + "#onetrust-pc-sdk{display:none!important}"
+        + ".onetrust-pc-dark-filter{display:none!important}"
+        // IMDb ad slots (various patterns)
+        + ".ipc-ad-slot{display:none!important}"
+        + ".ipc-native-ad{display:none!important}"
+        + "[data-testid~=ad-slot]{display:none!important}"
+        + "[data-testid*=AdSlot]{display:none!important}"
+        + "[class*=AdSlot]{display:none!important}"
+        + "[class*=ad-unit]{display:none!important}"
+        + "[class*=AdUnit]{display:none!important}"
+        + "[id*=google_ads]{display:none!important}"
+        + "iframe[src*=googlesyndication]{display:none!important}"
+        + "iframe[src*=doubleclick]{display:none!important}"
+        // IMDb sign-in prompt / nag modal
+        + "[data-testid=promptable]{display:none!important}"
+        + "[class*=Promptable]{display:none!important}"
+        + "[class*=signin-modal]{display:none!important}"
+        + "[class*=SigninModal]{display:none!important}"
+        + "[id*=signin-modal]{display:none!important}"
+        + "[data-testid=signin-prompt]{display:none!important}"
+        + "[class*=user-notification]{display:none!important}"
+        + "</style>');"
+    );
+
+    // DIAGNOSTIC: after 4 s log the id/class of all iframes and any element
+    // whose id or class contains keywords associated with ads or sign-in prompts
+    webEngine.executeScript(
+        "setTimeout(function(){"
+        + "var kw=/ad|sign|login|modal|prompt|banner|consent|cookie/i;"
+        + "var all=document.querySelectorAll('*');"
+        + "for(var i=0;i<all.length;i++){"
+        + "var el=all[i];"
+        + "var id=el.id||'';"
+        + "var cl=el.className&&typeof el.className==='string'?el.className:'';"
+        + "var tag=el.tagName;"
+        + "if(tag==='IFRAME'||kw.test(id)||kw.test(cl)){"
+        + "console.log('KINO-DBG tag='+tag+' id='+id+' class='+cl.substring(0,120));"
+        + "}"
+        + "}"
+        + "},4000);"
+    );
+
+    // Step 2: attempt to click the reject/decline button at 1 s, 3 s, 6 s
+    // to cover banners that load at different times
+    String clickScript =
+        "(function(){"
+        + "function tryReject(){"
+        + "var b=document.getElementById('onetrust-reject-all-handler');"
+        + "if(!b)b=document.querySelector('[data-testid=\"reject-button-main\"]');"
+        + "if(!b){var els=document.querySelectorAll('button');"
+        + "for(var i=0;i<els.length;i++){"
+        + "var t=els[i].innerText;"
+        + "if(t&&/reject|decline/i.test(t)&&!/accept/i.test(t)){b=els[i];break;}}}"
+        + "if(b){b.click();return true;}return false;}"
+        + "tryReject();"
+        + "setTimeout(tryReject,1000);"
+        + "setTimeout(tryReject,3000);"
+        + "setTimeout(tryReject,6000);"
+        + "})();";
+    webEngine.executeScript(clickScript);
   }
 
   private void updateHistoryButtons() {
@@ -146,6 +233,7 @@ public class ImdbController implements Refreshable {
 
   @FXML
   private void handleBack() {
+    pendingTargetUrl = null;
     int currentIndex = webEngine.getHistory().getCurrentIndex();
     if (currentIndex > 0) {
       webEngine.getHistory().go(-1);
@@ -154,6 +242,7 @@ public class ImdbController implements Refreshable {
 
   @FXML
   private void handleForward() {
+    pendingTargetUrl = null;
     int currentIndex = webEngine.getHistory().getCurrentIndex();
     int historySize = webEngine.getHistory().getEntries().size();
     if (currentIndex < historySize - 1) {
@@ -163,6 +252,7 @@ public class ImdbController implements Refreshable {
 
   @FXML
   private void handleReload() {
+    pendingTargetUrl = null;
     webEngine.reload();
   }
 
