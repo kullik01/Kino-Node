@@ -31,6 +31,7 @@
 plugins {
     java
     application
+    id("org.openjfx.javafxplugin") version "0.1.0"
     id("org.beryx.jlink") version "3.2.0"
     id("com.diffplug.spotless") version "6.25.0"
 }
@@ -47,20 +48,21 @@ val javafxVersion = "25.0.2"
 val sqliteVersion = "3.45.1.0"
 val atlantafxVersion = "2.0.1"
 
-// Detect current OS for platform-specific JavaFX dependencies
 val osName = System.getProperty("os.name").lowercase()
-val platform = when {
-    osName.contains("win") -> "win"
-    osName.contains("mac") -> "mac"
-    osName.contains("linux") -> "linux"
-    else -> "linux"
-}
+val isWindows = osName.contains("win")
+val isMac = osName.contains("mac")
+val isLinux = osName.contains("linux") || osName.contains("unix")
 
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(25))
     }
     modularity.inferModulePath.set(true)
+}
+
+javafx {
+    version = javafxVersion
+    modules = listOf("javafx.controls", "javafx.graphics", "javafx.media", "javafx.base", "javafx.fxml", "javafx.web")
 }
 
 tasks.withType<JavaCompile> {
@@ -76,14 +78,6 @@ application {
 }
 
 dependencies {
-    // JavaFX dependencies (platform-specific)
-    implementation("org.openjfx:javafx-controls:${javafxVersion}:${platform}")
-    implementation("org.openjfx:javafx-graphics:${javafxVersion}:${platform}")
-    implementation("org.openjfx:javafx-media:${javafxVersion}:${platform}")
-    implementation("org.openjfx:javafx-base:${javafxVersion}:${platform}")
-    implementation("org.openjfx:javafx-fxml:${javafxVersion}:${platform}")
-    implementation("org.openjfx:javafx-web:${javafxVersion}:${platform}")
-    
     // SQLite Persistence
     implementation("org.xerial:sqlite-jdbc:${sqliteVersion}")
     
@@ -112,7 +106,11 @@ tasks.withType<Test> {
 
 jlink {
     imageDir.set(layout.buildDirectory.dir("KinoNode-${version}"))
-    val zipOsSuffix = if (osName.contains("win")) "Windows" else "Linux"
+    val zipOsSuffix = when {
+        isWindows -> "Windows"
+        isMac -> "macOS"
+        else -> "Linux"
+    }
     imageZip.set(layout.buildDirectory.file("distributions/KinoNode-${version}-${zipOsSuffix}.zip"))
     options.set(listOf(
         "--strip-debug",
@@ -127,33 +125,45 @@ jlink {
     
     jpackage {
         jpackageHome = System.getenv("JAVA_HOME") ?: ""
-        val isWindows = osName.contains("win")
         val typeProp = project.findProperty("installerType") as? String
-        installerType = typeProp ?: if (isWindows) "exe" else "app-image"
+        installerType = typeProp ?: when {
+            isWindows -> "exe"
+            isMac -> "dmg"
+            else -> "deb"
+        }
         
         installerName = "KinoNode"
         appVersion = "1.0.0"
         
-        imageOptions = listOf(
-            "--icon", if (isWindows) 
-                "src/main/resources/io/github/kullik01/kinonode/images/logo.ico"
-            else 
-                "src/main/resources/io/github/kullik01/kinonode/images/logo.png",
+        val iconPath = when {
+            isWindows -> "src/main/resources/io/github/kullik01/kinonode/images/logo.ico"
+            isMac -> "src/main/resources/io/github/kullik01/kinonode/images/logo.icns"
+            else -> "src/main/resources/io/github/kullik01/kinonode/images/logo.png"
+        }
+        val iconArgs = if (file(iconPath).exists()) listOf("--icon", iconPath) else emptyList()
+        
+        imageOptions = iconArgs + listOf(
             "--description", "KinoNode - Personal Movie Library Manager",
-            "--vendor", "Hannah Kullik",
+            "--vendor", "Hannah Kullik"
         )
         
-        installerOptions = if (isWindows) {
-            listOf(
+        installerOptions = when {
+            isWindows -> listOf(
                 "--win-dir-chooser",
                 "--win-menu",
                 "--win-shortcut",
                 "--win-upgrade-uuid", "k1n0n0d3-8f83-4a3d-82d8-5f2122650f92"
             )
-        } else {
-            listOf(
+            isMac -> listOf(
+                "--mac-package-identifier", "io.github.kullik01.kinonode",
+                "--mac-package-name", "KinoNode"
+            )
+            else -> listOf(
                 "--linux-menu-group", "Utility",
-                "--linux-shortcut"
+                "--linux-shortcut",
+                "--linux-package-name", "kinonode",
+                "--linux-deb-maintainer", "hannah@example.com",
+                "--linux-rpm-license-type", "BSD-3-Clause"
             )
         }
     }
@@ -161,8 +171,10 @@ jlink {
 
 // Custom task to create Windows zip with KinoNode.exe (using jpackage app-image)
 tasks.register<Zip>("windowsAppImageZip") {
+    group = "distribution"
+    description = "Bundles the portable Windows app image into a self-contained zip distribution."
     dependsOn("jpackageImage")
-    onlyIf { osName.contains("win") }
+    onlyIf { isWindows }
     
     from(layout.buildDirectory.dir("jpackage/KinoNode")) {
         into("KinoNode-${version}")
@@ -172,10 +184,27 @@ tasks.register<Zip>("windowsAppImageZip") {
     destinationDirectory.set(layout.buildDirectory.dir("distributions"))
 }
 
+// Custom task to create macOS zip with KinoNode.app (using jpackage app-image)
+tasks.register<Zip>("macAppImageZip") {
+    group = "distribution"
+    description = "Bundles the portable macOS app bundle into a self-contained zip distribution."
+    dependsOn("jpackageImage")
+    onlyIf { isMac }
+    
+    from(layout.buildDirectory.dir("jpackage/KinoNode.app")) {
+        into("KinoNode.app")
+    }
+    
+    archiveFileName.set("KinoNode-${version}-macOS.zip")
+    destinationDirectory.set(layout.buildDirectory.dir("distributions"))
+}
+
 // Custom task to create Linux zip with KinoNode (using jpackage app-image)
 tasks.register<Zip>("linuxAppImageZip") {
+    group = "distribution"
+    description = "Bundles the portable Linux app image into a self-contained zip distribution."
     dependsOn("jpackageImage")
-    onlyIf { osName.contains("linux") || osName.contains("unix") }
+    onlyIf { isLinux }
     
     from(layout.buildDirectory.dir("jpackage/KinoNode")) {
         into("KinoNode-${version}")
@@ -185,11 +214,25 @@ tasks.register<Zip>("linuxAppImageZip") {
     destinationDirectory.set(layout.buildDirectory.dir("distributions"))
 }
 
+// Custom task to create Linux tar.gz with KinoNode (using jpackage app-image)
+tasks.register<Tar>("linuxAppImageTar") {
+    group = "distribution"
+    description = "Bundles the portable Linux app image into a self-contained tar.gz distribution."
+    dependsOn("jpackageImage")
+    onlyIf { isLinux }
+    
+    compression = Compression.GZIP
+    from(layout.buildDirectory.dir("jpackage/KinoNode")) {
+        into("KinoNode-${version}")
+    }
+    
+    archiveFileName.set("KinoNode-${version}-Linux.tar.gz")
+    destinationDirectory.set(layout.buildDirectory.dir("distributions"))
+}
+
 configure<com.diffplug.gradle.spotless.SpotlessExtension> {
     java {
         target("src/main/java/**/*.java", "src/test/java/**/*.java")
         eclipse().configFile(rootProject.file("eclipse-java-google-style.xml"))
     }
 }
-
-

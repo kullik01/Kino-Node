@@ -1,34 +1,42 @@
-name: Package KinoNode
+name: Cross-Platform Build & Package
 
 on:
   push:
+    branches: [ main, master ]
     tags:
       - 'v*'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  build:
+  build-and-package:
     name: Package for ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
         include:
           - os: windows-latest
             artifact-path: |
               build/jpackage/*.exe
+              build/jpackage/*.msi
               build/distributions/*.zip
           - os: ubuntu-latest
             artifact-path: |
               build/jpackage/*.deb
               build/jpackage/*.rpm
               build/distributions/*.zip
+              build/distributions/*.tar.gz
           - os: macos-latest
             artifact-path: |
               build/jpackage/*.dmg
               build/jpackage/*.pkg
+              build/distributions/*.zip
 
     steps:
       - name: Checkout repository
@@ -45,34 +53,42 @@ jobs:
         if: matrix.os != 'windows-latest'
         run: chmod +x gradlew
 
+      - name: Add WiX Toolset to PATH (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          if (Test-Path "C:\Program Files (x86)\WiX Toolset v3.11\bin") {
+            echo "C:\Program Files (x86)\WiX Toolset v3.11\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          }
+
       - name: Build and Test
         run: ./gradlew test
 
-      # Platform-specific packaging
-      - name: Package Windows (.exe and .zip)
+      # Platform-specific native installer and portable packaging
+      - name: Package Windows (.exe, .msi, and portable .zip)
         if: matrix.os == 'windows-latest'
         run: |
-          ./gradlew jpackage
+          ./gradlew jpackage -PinstallerType=exe
+          ./gradlew jpackage -PinstallerType=msi
           ./gradlew windowsAppImageZip
 
-      - name: Package Linux (.deb, .rpm, and .zip)
+      - name: Package Linux (.deb, .rpm, portable .zip, and .tar.gz)
         if: matrix.os == 'ubuntu-latest'
         run: |
-          # Install dependencies for rpm building
           sudo apt-get update
-          sudo apt-get install -y rpm
-          # Build packages
+          sudo apt-get install -y fakeroot dpkg-dev rpm
           ./gradlew jpackage -PinstallerType=deb
           ./gradlew jpackage -PinstallerType=rpm
           ./gradlew linuxAppImageZip
+          ./gradlew linuxAppImageTar
 
-      - name: Package macOS (.dmg and .pkg)
+      - name: Package macOS (.dmg, .pkg, and portable .zip)
         if: matrix.os == 'macos-latest'
         run: |
           ./gradlew jpackage -PinstallerType=dmg
           ./gradlew jpackage -PinstallerType=pkg
+          ./gradlew macAppImageZip
 
-      - name: Upload Artifacts
+      - name: Upload Release Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: kinonode-release-${{ matrix.os }}
@@ -81,7 +97,8 @@ jobs:
 
   release:
     name: Create GitHub Release
-    needs: build
+    needs: build-and-package
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
@@ -90,10 +107,10 @@ jobs:
           path: artifacts
           merge-multiple: true
 
-      - name: List artifacts
-        run: ls -R artifacts
+      - name: Display downloaded artifacts
+        run: ls -laR artifacts/
 
-      - name: Create Release
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: artifacts/**/*
