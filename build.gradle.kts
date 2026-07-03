@@ -180,7 +180,7 @@ tasks.register<Zip>("windowsAppImageZip") {
         into("KinoNode-${version}")
     }
     
-    archiveFileName.set("KinoNode-${version}-Windows.zip")
+    archiveFileName.set("KinoNode-${version}-Windows-Portable.zip")
     destinationDirectory.set(layout.buildDirectory.dir("distributions"))
 }
 
@@ -195,7 +195,7 @@ tasks.register<Zip>("macAppImageZip") {
         into("KinoNode.app")
     }
     
-    archiveFileName.set("KinoNode-${version}-macOS.zip")
+    archiveFileName.set("KinoNode-${version}-macOS-Portable.zip")
     destinationDirectory.set(layout.buildDirectory.dir("distributions"))
 }
 
@@ -210,7 +210,7 @@ tasks.register<Zip>("linuxAppImageZip") {
         into("KinoNode-${version}")
     }
     
-    archiveFileName.set("KinoNode-${version}-Linux.zip")
+    archiveFileName.set("KinoNode-${version}-Linux-Portable.zip")
     destinationDirectory.set(layout.buildDirectory.dir("distributions"))
 }
 
@@ -226,7 +226,7 @@ tasks.register<Tar>("linuxAppImageTar") {
         into("KinoNode-${version}")
     }
     
-    archiveFileName.set("KinoNode-${version}-Linux.tar.gz")
+    archiveFileName.set("KinoNode-${version}-Linux-Portable.tar.gz")
     destinationDirectory.set(layout.buildDirectory.dir("distributions"))
 }
 
