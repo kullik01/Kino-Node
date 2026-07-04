@@ -85,28 +85,130 @@ public class ImdbController implements Refreshable {
   public void initialize() {
     webEngine = webView.getEngine();
 
-    // Browser-level user stylesheet — applied before the page paints, so
-    // cookie consent banners are never visible even for an instant.
+    // User stylesheet applied before any page paint. Per CSS cascade,
+    // user-stylesheet !important beats author inline !important, so OneTrust
+    // can never override these rules — even with inline style="…!important".
+    // file: URIs are reliably honoured by JavaFX WebKit; data: URIs are not.
     String tmpCss =
-        "#onetrust-banner-sdk,#onetrust-pc-sdk,.onetrust-pc-dark-filter,"
-        + "[id^=onetrust-]{display:none!important}";
-    webEngine.setUserStyleSheetLocation("data:text/css;base64,"
-        + java.util.Base64.getEncoder().encodeToString(
-            tmpCss.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        "#onetrust-banner-sdk,#onetrust-pc-sdk,#onetrust-consent-sdk,"
+        + ".onetrust-pc-dark-filter,[id^=onetrust]"
+        + "{display:none!important;visibility:hidden!important;"
+        + "opacity:0!important;pointer-events:none!important;"
+        + "position:fixed!important;top:-9999px!important;"
+        + "left:-9999px!important;width:0!important;"
+        + "height:0!important;overflow:hidden!important}";
+    try {
+      java.io.File tmpCssFile =
+          java.io.File.createTempFile("kino-ot-", ".css");
+      tmpCssFile.deleteOnExit();
+      java.nio.file.Files.write(tmpCssFile.toPath(),
+          tmpCss.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      webEngine.setUserStyleSheetLocation(tmpCssFile.toURI().toString());
+    } catch (Exception ignored) {
+      // Fallback to data: URI if temp file creation fails
+      webEngine.setUserStyleSheetLocation("data:text/css;base64,"
+          + java.util.Base64.getEncoder().encodeToString(
+              tmpCss.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+    }
 
-    // Early CSS injection: fires as soon as a new DOM document is created
-    // (before SUCCEEDED), so the hiding rule exists before OneTrust renders.
+    // Early cookie + CSS injection + MutationObserver: fires as soon as a
+    // new DOM document is created (before SUCCEEDED). The OneTrust opt-out
+    // cookie prevents the banner from ever being created; the CSS and
+    // MutationObserver are fallback defenses.
     webEngine.documentProperty().addListener((obs, oldDoc, newDoc) -> {
       if (newDoc != null) {
+        // Set OneTrust opt-out cookies so the banner is never shown.
+        // Must be a separate executeScript call so cookie setting succeeds
+        // even if the main injection below fails, and vice versa.
         try {
           webEngine.executeScript(
-              "if(document.head&&!document.getElementById('kino-early')){"
+              "try{document.cookie='OptanonAlertBoxClosed='"
+              + "+new Date().toISOString()"
+              + "+';path=/;domain=.imdb.com;max-age=31536000';}catch(e){}"
+              + "try{document.cookie='OptanonConsent="
+              + "isGpcEnabled=1&groups=C0001%3A1%2CC0002%3A0%2CC0003%3A0"
+              + "%2CC0004%3A0;path=/;domain=.imdb.com;max-age=31536000';"
+              + "}catch(e){}"
+          );
+        } catch (Exception ignored) {
+        }
+        try {
+          webEngine.executeScript(
+              // Always set stubs so other scripts never error on OneTrust calls.
+              "window.OneTrust={Init:function(){},ToggleInfoDisplay:"
+              + "function(){},LoadBanner:function(){},Close:function(){}};"
+              + "window.Optanon={};"
+              + "window.OptanonWrapper=function(){};"
+              + "window.OptanonActive=true;"
+              + "if(!window.__kinoEarlyObs){"
+              + "window.__kinoEarlyObs=true;"
+              // CSS-based hiding (synchronous fallback)
+              + "if(!document.getElementById('kino-early')){"
               + "var s=document.createElement('style');"
               + "s.id='kino-early';"
               + "s.textContent='#onetrust-banner-sdk,#onetrust-pc-sdk,"
-              + ".onetrust-pc-dark-filter,[id^=onetrust-]"
-              + "{display:none!important}';"
-              + "document.head.appendChild(s);}"
+              + "#onetrust-consent-sdk,.onetrust-pc-dark-filter,[id^=onetrust]"
+              + "{display:none!important;visibility:hidden!important;"
+              + "opacity:0!important;pointer-events:none!important;"
+              + "position:fixed!important;top:-9999px!important;"
+              + "left:-9999px!important;width:0!important;"
+              + "height:0!important;overflow:hidden!important}';"
+              + "(document.head||document.documentElement).appendChild(s);}"
+              // Script-block helper
+              + "window.__kinoBlockScript=function(el){el.type='text/blocked';el.src='';};"
+              + "window.__kinoIsOT=function(src){"
+              + "return src.indexOf('onetrust')>-1||src.indexOf('optanon')>-1"
+              + "||src.indexOf('cookielaw')>-1||src.indexOf('cookie-cdn')>-1;};"
+              // Hide helper — also watches element's style attribute so any
+              // re-show attempt by OneTrust is caught before the next paint.
+              + "window.__kinoHideOT=function(el){"
+              + "el.style.setProperty('display','none','important');"
+              + "el.style.setProperty('visibility','hidden','important');"
+              + "el.style.setProperty('opacity','0','important');"
+              + "el.style.setProperty('position','fixed','important');"
+              + "el.style.setProperty('top','-9999px','important');"
+              + "if(window.__kinoMutObs){"
+              + "window.__kinoMutObs.observe(el,"
+              + "{attributes:true,attributeFilter:['style','class']});}};"
+              // Named observer handles both childList and attribute mutations
+              + "window.__kinoMutObs=new MutationObserver(function(ml){"
+              + "for(var m=0;m<ml.length;m++){"
+              + "var mut=ml[m];"
+              // Attribute change on a known OneTrust element — re-hide it
+              + "if(mut.type==='attributes'){"
+              + "var t=mut.target;"
+              + "if(t.id&&t.id.indexOf('onetrust')===0){"
+              + "t.style.setProperty('display','none','important');"
+              + "t.style.setProperty('visibility','hidden','important');"
+              + "t.style.setProperty('opacity','0','important');"
+              + "t.style.setProperty('position','fixed','important');"
+              + "t.style.setProperty('top','-9999px','important');}"
+              + "continue;}"
+              // New node added to DOM
+              + "var added=mut.addedNodes;"
+              + "for(var n=0;n<added.length;n++){"
+              + "var nd=added[n];"
+              + "if(nd.nodeType!==1)continue;"
+              + "if(nd.tagName==='SCRIPT'&&window.__kinoIsOT(nd.src||''))"
+              + "{window.__kinoBlockScript(nd);continue;}"
+              + "if(nd.id&&nd.id.indexOf('onetrust')===0)"
+              + "{window.__kinoHideOT(nd);continue;}"
+              + "if(nd.classList&&nd.classList.contains('onetrust-pc-dark-filter'))"
+              + "{window.__kinoHideOT(nd);continue;}"
+              + "if(nd.querySelectorAll){"
+              + "nd.querySelectorAll('script[src*=onetrust],script[src*=optanon],"
+              + "script[src*=cookielaw],script[src*=cookie-cdn]')"
+              + ".forEach(window.__kinoBlockScript);"
+              + "nd.querySelectorAll('[id^=onetrust]').forEach(window.__kinoHideOT);"
+              + "nd.querySelectorAll('.onetrust-pc-dark-filter')"
+              + ".forEach(window.__kinoHideOT);}}}});"
+              + "window.__kinoMutObs.observe(document.documentElement,"
+              + "{childList:true,subtree:true});"
+              // Retroactive scan for any OneTrust scripts already in the DOM
+              + "document.querySelectorAll('script[src*=onetrust],script[src*=optanon],"
+              + "script[src*=cookielaw],script[src*=cookie-cdn]')"
+              + ".forEach(window.__kinoBlockScript);"
+              + "}"
           );
         } catch (Exception ignored) {
         }
@@ -130,7 +232,10 @@ public class ImdbController implements Refreshable {
     webEngine.getLoadWorker().stateProperty()
         .addListener((obs, oldState, newState) -> {
           if (newState == Worker.State.SUCCEEDED) {
-            injectAdSuppression();
+            try {
+              injectAdSuppression();
+            } catch (Exception ignored) {
+            }
             progressLoad.setVisible(false);
             paneError.setVisible(false);
             boolean tmpShow = false;
@@ -149,12 +254,10 @@ public class ImdbController implements Refreshable {
               // else: intermediate redirect (e.g. consent page) — stay hidden
             }
             if (tmpShow) {
-              // Short delay lets MutationObserver remove OneTrust banner
-              // before the WebView becomes visible
               if (showDelay != null) {
                 showDelay.stop();
               }
-              showDelay = new PauseTransition(Duration.millis(400));
+              showDelay = new PauseTransition(Duration.millis(100));
               showDelay.setOnFinished(e -> webView.setVisible(true));
               showDelay.play();
             }
@@ -205,6 +308,28 @@ public class ImdbController implements Refreshable {
         "(function(){"
         + "if(window.__kinoInit)return;"
         + "window.__kinoInit=true;"
+        // Re-set OneTrust opt-out cookies (backup for early injection)
+        + "try{document.cookie='OptanonAlertBoxClosed='"
+        + "+new Date().toISOString()"
+        + "+';path=/;domain=.imdb.com;max-age=31536000';}catch(e){}"
+        + "try{document.cookie='OptanonConsent="
+        + "isGpcEnabled=1&groups=C0001%3A1%2CC0002%3A0%2CC0003%3A0"
+        + "%2CC0004%3A0;path=/;domain=.imdb.com;max-age=31536000';"
+        + "}catch(e){}"
+        // Re-set stubs in case early injection was skipped
+        + "window.OneTrust={Init:function(){},ToggleInfoDisplay:"
+        + "function(){},LoadBanner:function(){},Close:function(){}};"
+        + "window.Optanon={};"
+        + "window.OptanonWrapper=function(){};"
+        + "window.OptanonActive=true;"
+        // Block any OneTrust scripts already in the DOM at SUCCEEDED time
+        + "(function(){"
+        + "function __b(el){el.type='text/blocked';el.src='';}"
+        + "document.querySelectorAll("
+        + "'script[src*=onetrust],script[src*=optanon],"
+        + "script[src*=cookielaw],script[src*=cookie-cdn]').forEach(__b);"
+        + "})()"
+        + ";"
         // CSS for stable selectors (ads, iframes)
         + "var s=document.createElement('style');"
         + "s.id='kino-block';"
@@ -219,14 +344,26 @@ public class ImdbController implements Refreshable {
         + ",iframe[src*=amazon-adsystem]"
         + "{display:none!important}"
         + "[data-testid=promptable]"
-        + "{display:none!important}';"
+        + "{display:none!important}"
+        + "#onetrust-banner-sdk,#onetrust-pc-sdk,#onetrust-consent-sdk,"
+        + ".onetrust-pc-dark-filter,[id^=onetrust]"
+        + "{display:none!important;visibility:hidden!important;"
+        + "opacity:0!important;pointer-events:none!important;"
+        + "position:fixed!important;top:-9999px!important;"
+        + "left:-9999px!important;width:0!important;"
+        + "height:0!important;overflow:hidden!important}';"
         + "document.head.appendChild(s);"
-        // Hide OneTrust off-screen (keeps Decline button clickable)
+        // Hide OneTrust; also delegate to early observer if available so
+        // attribute-watching keeps the element hidden if OneTrust re-shows it.
         + "function hideOT(el){"
+        + "el.style.setProperty('display','none','important');"
         + "el.style.setProperty('opacity','0','important');"
         + "el.style.setProperty('pointer-events','none','important');"
         + "el.style.setProperty('position','fixed','important');"
         + "el.style.setProperty('top','-9999px','important');"
+        + "if(window.__kinoMutObs){"
+        + "window.__kinoMutObs.observe(el,"
+        + "{attributes:true,attributeFilter:['style','class']});}"
         + "var b=el.querySelector('#onetrust-reject-all-handler');"
         + "if(!b){var bs=el.querySelectorAll('button');"
         + "for(var i=0;i<bs.length;i++){var t=(bs[i].innerText||'').trim();"
@@ -297,8 +434,9 @@ public class ImdbController implements Refreshable {
         + "setTimeout(function(){tryReject();hideMatching();},1500);"
         + "setTimeout(function(){tryReject();hideMatching();},3000);"
         + "setTimeout(function(){tryReject();hideMatching();},6000);"
-        // Lightweight MutationObserver: checks added nodes + their children
-        // for OneTrust IDs — fast because it only scans the added subtree
+        // Fallback MutationObserver: only installed if the early observer
+        // (from documentProperty listener) was not set up for this page.
+        + "if(!window.__kinoEarlyObs){"
         + "new MutationObserver(function(ml){"
         + "for(var m=0;m<ml.length;m++){"
         + "var added=ml[m].addedNodes;"
@@ -313,7 +451,7 @@ public class ImdbController implements Refreshable {
         + "nd.querySelectorAll('.onetrust-pc-dark-filter').forEach(function(el){"
         + "el.style.setProperty('display','none','important');});}"
         + "}}"
-        + "}).observe(document.documentElement,{childList:true,subtree:true});"
+        + "}).observe(document.documentElement,{childList:true,subtree:true});}"
         + "})();"
     );
   }
