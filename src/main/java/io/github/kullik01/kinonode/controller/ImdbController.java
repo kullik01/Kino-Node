@@ -156,22 +156,15 @@ public class ImdbController implements Refreshable {
   }
 
   private void injectAdSuppression() {
-    // CSS covers elements with stable IDs / data-testid values.
-    // JS hideMatching() covers dynamic React class names using case-insensitive
-    // substring checks, and runs again via MutationObserver + timed retries so
-    // elements injected after the initial render are also suppressed.
     webEngine.executeScript(
         "(function(){"
         + "if(window.__kinoInit)return;"
         + "window.__kinoInit=true;"
-        // Stable-selector CSS
+        // CSS for stable selectors (ads, iframes)
         + "var s=document.createElement('style');"
         + "s.id='kino-block';"
         + "s.textContent="
-        + "'#onetrust-banner-sdk,#onetrust-pc-sdk,.onetrust-pc-dark-filter"
-        + ",[id^=onetrust-]"
-        + "{display:none!important}"
-        + ".ipc-ad-slot,.ipc-native-ad"
+        + "'.ipc-ad-slot,.ipc-native-ad"
         + "{display:none!important}"
         + "[data-testid~=ad-slot],[data-testid*=AdSlot]"
         + "{display:none!important}"
@@ -183,8 +176,16 @@ public class ImdbController implements Refreshable {
         + "[data-testid=promptable]"
         + "{display:none!important}';"
         + "document.head.appendChild(s);"
-        // JS-based hiding: case-insensitive class/testid/aria-label scan
+        // --- JS hideMatching: hides OneTrust, ads, sign-in popup ---
         + "function hideMatching(){"
+        // OneTrust — direct JS overrides inline !important styles
+        + "['onetrust-banner-sdk','onetrust-pc-sdk'].forEach(function(oid){"
+        + "var o=document.getElementById(oid);"
+        + "if(o)o.style.setProperty('display','none','important');"
+        + "});"
+        + "var otBg=document.querySelector('.onetrust-pc-dark-filter');"
+        + "if(otBg)otBg.style.setProperty('display','none','important');"
+        // Scan elements for ads / cookie / consent class keywords
         + "var all=document.querySelectorAll('div,section,aside,article,ins');"
         + "for(var i=0;i<all.length;i++){"
         + "var el=all[i];"
@@ -192,7 +193,6 @@ public class ImdbController implements Refreshable {
         + "var tid=(el.getAttribute('data-testid')||'').toLowerCase();"
         + "var id=(el.id||'').toLowerCase();"
         + "var aria=(el.getAttribute('aria-label')||'').toLowerCase();"
-        // Ads
         + "if(cls.indexOf('adslot')>-1||cls.indexOf('ad-slot')>-1"
         + "||cls.indexOf('adunit')>-1||cls.indexOf('ad-unit')>-1"
         + "||cls.indexOf('sponsor')>-1"
@@ -202,19 +202,29 @@ public class ImdbController implements Refreshable {
         + "){"
         + "el.style.setProperty('display','none','important');continue;"
         + "}"
-        // Sign-in overlays (skip interactive nav elements)
-        + "if((cls.indexOf('signin')>-1||cls.indexOf('sign-in')>-1"
+        + "if((cls.indexOf('cookie')>-1||id.indexOf('cookie')>-1"
+        + "||cls.indexOf('consent')>-1||id.indexOf('consent')>-1"
+        + "||cls.indexOf('signin')>-1||cls.indexOf('sign-in')>-1"
         + "||tid.indexOf('signin')>-1||tid.indexOf('sign-in')>-1)"
         + "&&el.tagName!=='BUTTON'&&el.tagName!=='A'){"
-        + "el.style.setProperty('display','none','important');continue;"
-        + "}"
-        // Cookie / consent banners
-        + "if((cls.indexOf('cookie')>-1||id.indexOf('cookie')>-1"
-        + "||cls.indexOf('consent')>-1||id.indexOf('consent')>-1)"
-        + "&&el.tagName!=='BUTTON'&&el.tagName!=='A'){"
         + "el.style.setProperty('display','none','important');"
-        + "}"
         + "}}"
+        // Sign-in popup: find positioned ancestor of "Create account" text
+        + "var ds=document.querySelectorAll('div');"
+        + "for(var i=0;i<ds.length;i++){"
+        + "var txt=ds[i].innerText||'';"
+        + "if(txt.indexOf('Create account')>-1){"
+        + "var p=ds[i];"
+        + "while(p&&p!==document.body){"
+        + "var ps=window.getComputedStyle(p).position;"
+        + "if(ps==='absolute'||ps==='fixed'){"
+        + "var r=p.getBoundingClientRect();"
+        + "if(r.width<500&&r.height<500){"
+        + "p.style.setProperty('display','none','important');}"
+        + "break;}"
+        + "p=p.parentElement;"
+        + "}}}"
+        + "}"
         // Reject-button click
         + "function tryReject(){"
         + "var b=document.getElementById('onetrust-reject-all-handler');"
@@ -227,15 +237,18 @@ public class ImdbController implements Refreshable {
         + "}}"
         + "if(b)b.click();"
         + "}"
+        // Run immediately + timed retries
         + "hideMatching();tryReject();"
-        + "setTimeout(function(){hideMatching();tryReject();},1000);"
+        + "setTimeout(function(){hideMatching();tryReject();},500);"
+        + "setTimeout(function(){hideMatching();tryReject();},1500);"
         + "setTimeout(function(){hideMatching();tryReject();},3000);"
         + "setTimeout(function(){hideMatching();tryReject();},6000);"
-        + "new MutationObserver(function(ml){"
-        + "for(var i=0;i<ml.length;i++){"
-        + "if(ml[i].addedNodes.length){hideMatching();tryReject();return;}"
-        + "}"
-        + "}).observe(document.body,{childList:true});"
+        // MutationObserver with subtree + debounce for dynamic elements
+        + "var dt;"
+        + "new MutationObserver(function(){"
+        + "clearTimeout(dt);"
+        + "dt=setTimeout(function(){hideMatching();tryReject();},100);"
+        + "}).observe(document.body,{childList:true,subtree:true});"
         + "})();"
     );
   }
