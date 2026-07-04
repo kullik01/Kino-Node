@@ -37,6 +37,7 @@
  */
 package io.github.kullik01.kinonode.controller;
 
+import javafx.animation.PauseTransition;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -45,6 +46,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+import javafx.util.Duration;
 
 /**
  * Controller for the embedded IMDb browser view. Allows searching for films
@@ -71,6 +73,7 @@ public class ImdbController implements Refreshable {
 
   private WebEngine webEngine;
   private String pendingTargetUrl = null;
+  private PauseTransition showDelay;
   private static final String IMDB_HOME = "https://www.imdb.com/";
 
   /**
@@ -81,6 +84,34 @@ public class ImdbController implements Refreshable {
   @FXML
   public void initialize() {
     webEngine = webView.getEngine();
+
+    // Browser-level user stylesheet — applied before the page paints, so
+    // cookie consent banners are never visible even for an instant.
+    String tmpCss =
+        "#onetrust-banner-sdk,#onetrust-pc-sdk,.onetrust-pc-dark-filter,"
+        + "[id^=onetrust-]{display:none!important}";
+    webEngine.setUserStyleSheetLocation("data:text/css;base64,"
+        + java.util.Base64.getEncoder().encodeToString(
+            tmpCss.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+
+    // Early CSS injection: fires as soon as a new DOM document is created
+    // (before SUCCEEDED), so the hiding rule exists before OneTrust renders.
+    webEngine.documentProperty().addListener((obs, oldDoc, newDoc) -> {
+      if (newDoc != null) {
+        try {
+          webEngine.executeScript(
+              "if(document.head&&!document.getElementById('kino-early')){"
+              + "var s=document.createElement('style');"
+              + "s.id='kino-early';"
+              + "s.textContent='#onetrust-banner-sdk,#onetrust-pc-sdk,"
+              + ".onetrust-pc-dark-filter,[id^=onetrust-]"
+              + "{display:none!important}';"
+              + "document.head.appendChild(s);}"
+          );
+        } catch (Exception ignored) {
+        }
+      }
+    });
 
     // Set a modern/compatible User Agent to prevent rendering issues or
     // blocking
@@ -102,8 +133,9 @@ public class ImdbController implements Refreshable {
             injectAdSuppression();
             progressLoad.setVisible(false);
             paneError.setVisible(false);
+            boolean tmpShow = false;
             if (pendingTargetUrl == null) {
-              webView.setVisible(true);
+              tmpShow = true;
             } else {
               String tmpLoc = webEngine.getLocation();
               String tmpNormLoc =
@@ -111,12 +143,25 @@ public class ImdbController implements Refreshable {
               String tmpNormTarget = pendingTargetUrl.endsWith("/")
                   ? pendingTargetUrl : pendingTargetUrl + "/";
               if (tmpNormLoc != null && tmpNormLoc.equals(tmpNormTarget)) {
-                webView.setVisible(true);
+                tmpShow = true;
                 pendingTargetUrl = null;
               }
               // else: intermediate redirect (e.g. consent page) — stay hidden
             }
+            if (tmpShow) {
+              // Short delay lets MutationObserver remove OneTrust banner
+              // before the WebView becomes visible
+              if (showDelay != null) {
+                showDelay.stop();
+              }
+              showDelay = new PauseTransition(Duration.millis(400));
+              showDelay.setOnFinished(e -> webView.setVisible(true));
+              showDelay.play();
+            }
           } else if (newState == Worker.State.RUNNING) {
+            if (showDelay != null) {
+              showDelay.stop();
+            }
             progressLoad.setVisible(true);
             paneError.setVisible(false);
             webView.setVisible(false);
@@ -176,16 +221,15 @@ public class ImdbController implements Refreshable {
         + "[data-testid=promptable]"
         + "{display:none!important}';"
         + "document.head.appendChild(s);"
-        // --- JS hideMatching: hides OneTrust, ads, sign-in popup ---
+        // --- hideMatching: expensive scan for ads / sign-in (timed retries only) ---
         + "function hideMatching(){"
-        // OneTrust — direct JS overrides inline !important styles
+        // OneTrust — remove from DOM
         + "['onetrust-banner-sdk','onetrust-pc-sdk'].forEach(function(oid){"
         + "var o=document.getElementById(oid);"
-        + "if(o)o.style.setProperty('display','none','important');"
-        + "});"
+        + "if(o)o.remove();});"
         + "var otBg=document.querySelector('.onetrust-pc-dark-filter');"
-        + "if(otBg)otBg.style.setProperty('display','none','important');"
-        // Scan elements for ads / cookie / consent class keywords
+        + "if(otBg)otBg.remove();"
+        // Ads / cookie / consent / signin — class keyword scan
         + "var all=document.querySelectorAll('div,section,aside,article,ins');"
         + "for(var i=0;i<all.length;i++){"
         + "var el=all[i];"
@@ -200,8 +244,7 @@ public class ImdbController implements Refreshable {
         + "||tid.indexOf('native-ad')>-1"
         + "||aria==='advertisement'||aria.indexOf('sponsored')>-1"
         + "){"
-        + "el.style.setProperty('display','none','important');continue;"
-        + "}"
+        + "el.style.setProperty('display','none','important');continue;}"
         + "if((cls.indexOf('cookie')>-1||id.indexOf('cookie')>-1"
         + "||cls.indexOf('consent')>-1||id.indexOf('consent')>-1"
         + "||cls.indexOf('signin')>-1||cls.indexOf('sign-in')>-1"
@@ -209,7 +252,7 @@ public class ImdbController implements Refreshable {
         + "&&el.tagName!=='BUTTON'&&el.tagName!=='A'){"
         + "el.style.setProperty('display','none','important');"
         + "}}"
-        // Sign-in popup: find positioned ancestor of "Create account" text
+        // Sign-in popup: find positioned ancestor of "Create account"
         + "var ds=document.querySelectorAll('div');"
         + "for(var i=0;i<ds.length;i++){"
         + "var txt=ds[i].innerText||'';"
@@ -219,11 +262,9 @@ public class ImdbController implements Refreshable {
         + "var ps=window.getComputedStyle(p).position;"
         + "if(ps==='absolute'||ps==='fixed'){"
         + "var r=p.getBoundingClientRect();"
-        + "if(r.width<500&&r.height<500){"
-        + "p.style.setProperty('display','none','important');}"
-        + "break;}"
-        + "p=p.parentElement;"
-        + "}}}"
+        + "if(r.width<500&&r.height<500)"
+        + "p.style.setProperty('display','none','important');"
+        + "break;}p=p.parentElement;}}}"
         + "}"
         // Reject-button click
         + "function tryReject(){"
@@ -237,18 +278,28 @@ public class ImdbController implements Refreshable {
         + "}}"
         + "if(b)b.click();"
         + "}"
-        // Run immediately + timed retries
-        + "hideMatching();tryReject();"
-        + "setTimeout(function(){hideMatching();tryReject();},500);"
-        + "setTimeout(function(){hideMatching();tryReject();},1500);"
-        + "setTimeout(function(){hideMatching();tryReject();},3000);"
-        + "setTimeout(function(){hideMatching();tryReject();},6000);"
-        // MutationObserver with subtree + debounce for dynamic elements
-        + "var dt;"
-        + "new MutationObserver(function(){"
-        + "clearTimeout(dt);"
-        + "dt=setTimeout(function(){hideMatching();tryReject();},100);"
-        + "}).observe(document.body,{childList:true,subtree:true});"
+        // Run expensive scan on fixed schedule only (6 times total)
+        + "tryReject();hideMatching();"
+        + "setTimeout(function(){tryReject();hideMatching();},100);"
+        + "setTimeout(function(){tryReject();hideMatching();},500);"
+        + "setTimeout(function(){tryReject();hideMatching();},1500);"
+        + "setTimeout(function(){tryReject();hideMatching();},3000);"
+        + "setTimeout(function(){tryReject();hideMatching();},6000);"
+        // Lightweight MutationObserver: checks added nodes + their children
+        // for OneTrust IDs — fast because it only scans the added subtree
+        + "new MutationObserver(function(ml){"
+        + "for(var m=0;m<ml.length;m++){"
+        + "var added=ml[m].addedNodes;"
+        + "for(var n=0;n<added.length;n++){"
+        + "var nd=added[n];"
+        + "if(nd.nodeType!==1)continue;"
+        + "if(nd.id&&nd.id.indexOf('onetrust')===0){nd.remove();continue;}"
+        + "if(nd.classList&&nd.classList.contains('onetrust-pc-dark-filter')){nd.remove();continue;}"
+        + "if(nd.querySelectorAll){"
+        + "nd.querySelectorAll('[id^=onetrust],.onetrust-pc-dark-filter')"
+        + ".forEach(function(el){el.remove();});}"
+        + "}}"
+        + "}).observe(document.documentElement,{childList:true,subtree:true});"
         + "})();"
     );
   }
