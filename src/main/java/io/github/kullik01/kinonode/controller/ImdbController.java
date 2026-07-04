@@ -122,7 +122,9 @@ public class ImdbController implements Refreshable {
         // even if the main injection below fails, and vice versa.
         try {
           webEngine.executeScript(
-              "try{document.cookie='OptanonAlertBoxClosed='"
+              "try{document.documentElement.style.setProperty("
+              + "'opacity','0','important');}catch(e){}"
+              + "try{document.cookie='OptanonAlertBoxClosed='"
               + "+new Date().toISOString()"
               + "+';path=/;domain=.imdb.com;max-age=31536000';}catch(e){}"
               + "try{document.cookie='OptanonConsent="
@@ -257,8 +259,24 @@ public class ImdbController implements Refreshable {
               if (showDelay != null) {
                 showDelay.stop();
               }
-              showDelay = new PauseTransition(Duration.millis(100));
-              showDelay.setOnFinished(e -> webView.setVisible(true));
+              // Wait 800 ms after SUCCEEDED: the 500 ms suppression scan
+              // has run, the MutationObserver has caught any late elements,
+              // and the page is safe to show. Opacity is restored here
+              // (atomically with WebView visibility) so the banner never
+              // has a chance to appear between reveal and first paint.
+              showDelay = new PauseTransition(Duration.millis(800));
+              showDelay.setOnFinished(e -> {
+                try {
+                  webEngine.executeScript(
+                      "document.documentElement.style"
+                      + ".setProperty('opacity','1','important');"
+                      + "setTimeout(function(){"
+                      + "document.documentElement.style"
+                      + ".removeProperty('opacity');},50);");
+                } catch (Exception ignored) {
+                }
+                webView.setVisible(true);
+              });
               showDelay.play();
             }
           } else if (newState == Worker.State.RUNNING) {
