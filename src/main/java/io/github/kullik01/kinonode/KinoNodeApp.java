@@ -115,8 +115,10 @@ public class KinoNodeApp extends Application {
     primaryStage.show();
     Platform.runLater(() -> {
       primaryStage.setIconified(false);
+      primaryStage.setAlwaysOnTop(true);
       primaryStage.toFront();
       primaryStage.requestFocus();
+      primaryStage.setAlwaysOnTop(false);
     });
   }
 

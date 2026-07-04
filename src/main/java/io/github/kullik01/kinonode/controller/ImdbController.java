@@ -156,72 +156,88 @@ public class ImdbController implements Refreshable {
   }
 
   private void injectAdSuppression() {
-    // Step 1: inject CSS to hide ads, consent banners, and sign-in prompts
+    // CSS covers elements with stable IDs / data-testid values.
+    // JS hideMatching() covers dynamic React class names using case-insensitive
+    // substring checks, and runs again via MutationObserver + timed retries so
+    // elements injected after the initial render are also suppressed.
     webEngine.executeScript(
-        "document.head.insertAdjacentHTML('beforeend',"
-        + "'<style id=\"kino-block\">"
-        // OneTrust cookie consent
-        + "#onetrust-banner-sdk{display:none!important}"
-        + "#onetrust-pc-sdk{display:none!important}"
-        + ".onetrust-pc-dark-filter{display:none!important}"
-        // IMDb ad slots (various patterns)
-        + ".ipc-ad-slot{display:none!important}"
-        + ".ipc-native-ad{display:none!important}"
-        + "[data-testid~=ad-slot]{display:none!important}"
-        + "[data-testid*=AdSlot]{display:none!important}"
-        + "[class*=AdSlot]{display:none!important}"
-        + "[class*=ad-unit]{display:none!important}"
-        + "[class*=AdUnit]{display:none!important}"
-        + "[id*=google_ads]{display:none!important}"
-        + "iframe[src*=googlesyndication]{display:none!important}"
-        + "iframe[src*=doubleclick]{display:none!important}"
-        // IMDb sign-in prompt / nag modal
-        + "[data-testid=promptable]{display:none!important}"
-        + "[class*=Promptable]{display:none!important}"
-        + "[class*=signin-modal]{display:none!important}"
-        + "[class*=SigninModal]{display:none!important}"
-        + "[id*=signin-modal]{display:none!important}"
-        + "[data-testid=signin-prompt]{display:none!important}"
-        + "[class*=user-notification]{display:none!important}"
-        + "</style>');"
-    );
-
-    // DIAGNOSTIC: after 4 s log the id/class of all iframes and any element
-    // whose id or class contains keywords associated with ads or sign-in prompts
-    webEngine.executeScript(
-        "setTimeout(function(){"
-        + "var kw=/ad|sign|login|modal|prompt|banner|consent|cookie/i;"
-        + "var all=document.querySelectorAll('*');"
+        "(function(){"
+        + "if(window.__kinoInit)return;"
+        + "window.__kinoInit=true;"
+        // Stable-selector CSS
+        + "var s=document.createElement('style');"
+        + "s.id='kino-block';"
+        + "s.textContent="
+        + "'#onetrust-banner-sdk,#onetrust-pc-sdk,.onetrust-pc-dark-filter"
+        + ",[id^=onetrust-]"
+        + "{display:none!important}"
+        + ".ipc-ad-slot,.ipc-native-ad"
+        + "{display:none!important}"
+        + "[data-testid~=ad-slot],[data-testid*=AdSlot]"
+        + "{display:none!important}"
+        + "ins.adsbygoogle"
+        + "{display:none!important}"
+        + "iframe[src*=googlesyndication],iframe[src*=doubleclick]"
+        + ",iframe[src*=amazon-adsystem]"
+        + "{display:none!important}"
+        + "[data-testid=promptable]"
+        + "{display:none!important}';"
+        + "document.head.appendChild(s);"
+        // JS-based hiding: case-insensitive class/testid/aria-label scan
+        + "function hideMatching(){"
+        + "var all=document.querySelectorAll('div,section,aside,article,ins');"
         + "for(var i=0;i<all.length;i++){"
         + "var el=all[i];"
-        + "var id=el.id||'';"
-        + "var cl=el.className&&typeof el.className==='string'?el.className:'';"
-        + "var tag=el.tagName;"
-        + "if(tag==='IFRAME'||kw.test(id)||kw.test(cl)){"
-        + "console.log('KINO-DBG tag='+tag+' id='+id+' class='+cl.substring(0,120));"
+        + "var cls=(typeof el.className==='string'?el.className:'').toLowerCase();"
+        + "var tid=(el.getAttribute('data-testid')||'').toLowerCase();"
+        + "var id=(el.id||'').toLowerCase();"
+        + "var aria=(el.getAttribute('aria-label')||'').toLowerCase();"
+        // Ads
+        + "if(cls.indexOf('adslot')>-1||cls.indexOf('ad-slot')>-1"
+        + "||cls.indexOf('adunit')>-1||cls.indexOf('ad-unit')>-1"
+        + "||cls.indexOf('sponsor')>-1"
+        + "||tid.indexOf('ad-slot')>-1||tid.indexOf('adslot')>-1"
+        + "||tid.indexOf('native-ad')>-1"
+        + "||aria==='advertisement'||aria.indexOf('sponsored')>-1"
+        + "){"
+        + "el.style.setProperty('display','none','important');continue;"
         + "}"
+        // Sign-in overlays (skip interactive nav elements)
+        + "if((cls.indexOf('signin')>-1||cls.indexOf('sign-in')>-1"
+        + "||tid.indexOf('signin')>-1||tid.indexOf('sign-in')>-1)"
+        + "&&el.tagName!=='BUTTON'&&el.tagName!=='A'){"
+        + "el.style.setProperty('display','none','important');continue;"
         + "}"
-        + "},4000);"
-    );
-
-    // Step 2: attempt to click the reject/decline button at 1 s, 3 s, 6 s
-    // to cover banners that load at different times
-    String clickScript =
-        "(function(){"
+        // Cookie / consent banners
+        + "if((cls.indexOf('cookie')>-1||id.indexOf('cookie')>-1"
+        + "||cls.indexOf('consent')>-1||id.indexOf('consent')>-1)"
+        + "&&el.tagName!=='BUTTON'&&el.tagName!=='A'){"
+        + "el.style.setProperty('display','none','important');"
+        + "}"
+        + "}}"
+        // Reject-button click
         + "function tryReject(){"
         + "var b=document.getElementById('onetrust-reject-all-handler');"
         + "if(!b)b=document.querySelector('[data-testid=\"reject-button-main\"]');"
-        + "if(!b){var els=document.querySelectorAll('button');"
+        + "if(!b){"
+        + "var els=document.querySelectorAll('button,a');"
         + "for(var i=0;i<els.length;i++){"
-        + "var t=els[i].innerText;"
-        + "if(t&&/reject|decline/i.test(t)&&!/accept/i.test(t)){b=els[i];break;}}}"
-        + "if(b){b.click();return true;}return false;}"
-        + "tryReject();"
-        + "setTimeout(tryReject,1000);"
-        + "setTimeout(tryReject,3000);"
-        + "setTimeout(tryReject,6000);"
-        + "})();";
-    webEngine.executeScript(clickScript);
+        + "var t=(els[i].innerText||'').trim();"
+        + "if(/^(reject all|decline all|reject|decline)$/i.test(t)){b=els[i];break;}"
+        + "}}"
+        + "if(b)b.click();"
+        + "}"
+        + "hideMatching();tryReject();"
+        + "setTimeout(function(){hideMatching();tryReject();},1000);"
+        + "setTimeout(function(){hideMatching();tryReject();},3000);"
+        + "setTimeout(function(){hideMatching();tryReject();},6000);"
+        + "new MutationObserver(function(ml){"
+        + "for(var i=0;i<ml.length;i++){"
+        + "if(ml[i].addedNodes.length){hideMatching();tryReject();return;}"
+        + "}"
+        + "}).observe(document.body,{childList:true});"
+        + "})();"
+    );
   }
 
   private void updateHistoryButtons() {
