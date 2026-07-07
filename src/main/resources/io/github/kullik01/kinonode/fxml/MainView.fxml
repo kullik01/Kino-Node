@@ -49,7 +49,7 @@
            stylesheets="@../css/theme.css"
            style="-fx-background-color: transparent;">
     
-    <BorderPane fx:id="mainContainer" prefHeight="768.0" prefWidth="1024.0" styleClass="main-window">
+    <BorderPane fx:id="mainContainer" prefHeight="768.0" prefWidth="1280.0" styleClass="main-window">
     
     <!-- Sidebar on the Left -->
     <left>

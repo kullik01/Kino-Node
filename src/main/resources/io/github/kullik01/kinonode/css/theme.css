@@ -326,7 +326,7 @@
     -fx-border-width: 1px;
     -fx-padding: 20px;
     -fx-spacing: 15px;
-    -fx-min-width: 320px;
+    -fx-min-width: 200px;
 }
 
 /* Remove extreme shadowing from tooltips, context menus, combo boxes, and popovers */

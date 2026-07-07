@@ -66,7 +66,7 @@ public class MovieCardController {
   @FXML
   private Label lblYear;
   @FXML
-  private Label lblCinematographer;
+  private Label lblDirector;
 
   private Movie movie;
   private Consumer<Movie> clickHandler;
@@ -87,17 +87,16 @@ public class MovieCardController {
     lblYear.setText(
         movie.getYear() != null ? String.valueOf(movie.getYear()) : "—");
 
-    String tmpCinematographer = movie.getCinematographer();
-    // Expose or collapse the cinematographer label depending on whether info
-    // exists
-    if (tmpCinematographer != null && !tmpCinematographer.isBlank()) {
-      lblCinematographer.setText(tmpCinematographer);
-      lblCinematographer.setManaged(true);
-      lblCinematographer.setVisible(true);
+    String tmpDirector = movie.getDirector();
+    // Expose or collapse the director label depending on whether info exists
+    if (tmpDirector != null && !tmpDirector.isBlank()) {
+      lblDirector.setText(tmpDirector);
+      lblDirector.setManaged(true);
+      lblDirector.setVisible(true);
     } else {
-      lblCinematographer.setText("");
-      lblCinematographer.setManaged(false);
-      lblCinematographer.setVisible(false);
+      lblDirector.setText("");
+      lblDirector.setManaged(false);
+      lblDirector.setVisible(false);
     }
 
     loadPoster();

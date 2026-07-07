@@ -43,6 +43,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 
 /**
  * Controller for the "About" view of the application. This class displays
@@ -56,9 +57,9 @@ public class AboutController implements Refreshable {
   @FXML
   private Label lblVersion;
   @FXML
-  private Label lblExtensions;
+  private TextField lblExtensions;
   @FXML
-  private Label lblDbPath;
+  private TextField lblDbPath;
 
   @FXML
   private Label lblJavaRuntime;
@@ -71,7 +72,7 @@ public class AboutController implements Refreshable {
   @FXML
   private Label lblWatchlistCount;
   @FXML
-  private Label lblPlayerPath;
+  private TextField lblPlayerPath;
 
   /**
    * Initializes the About view. Automatically invoked by JavaFX after the FXML

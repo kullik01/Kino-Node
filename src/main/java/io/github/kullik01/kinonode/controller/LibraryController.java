@@ -109,11 +109,9 @@ public class LibraryController implements Refreshable {
     // Setup sort and filter options
     cmbSort.getItems().addAll("Cinematographer", "Composer", "Director",
         "Genre", "Producer", "Rating (Highest)", "Recently Added",
-        "Release Year", "Title", "Title (A-Z)", "Title (Z-A)", "Writer");
+        "Release Year", "Title (A-Z)", "Writer");
 
-    String tmpSavedSortFilter = AppContext.getInstance().getSettingsRepository()
-        .get("library_sort_filter", "Recently Added");
-    cmbSort.setValue(tmpSavedSortFilter);
+    cmbSort.setValue("Title (A-Z)");
 
     // Real-time filters and sorts
     txtSearch.textProperty().addListener(
