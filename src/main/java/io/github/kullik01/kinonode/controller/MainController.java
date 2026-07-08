@@ -74,6 +74,8 @@ public class MainController {
   @FXML
   private Button btnWatchlists;
   @FXML
+  private Button btnAnalytics;
+  @FXML
   private Button btnImdb;
   @FXML
   private Button btnSettings;
@@ -161,6 +163,12 @@ public class MainController {
   private void showWatchlists() {
     navigate("Watchlists",
         "/io/github/kullik01/kinonode/fxml/WatchlistsView.fxml", btnWatchlists);
+  }
+
+  @FXML
+  private void showAnalytics() {
+    navigate("Analytics",
+        "/io/github/kullik01/kinonode/fxml/AnalyticsView.fxml", btnAnalytics);
   }
 
   @FXML

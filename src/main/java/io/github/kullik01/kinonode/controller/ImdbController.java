@@ -91,15 +91,14 @@ public class ImdbController implements Refreshable {
     // file: URIs are reliably honoured by JavaFX WebKit; data: URIs are not.
     String tmpCss =
         "#onetrust-banner-sdk,#onetrust-pc-sdk,#onetrust-consent-sdk,"
-        + ".onetrust-pc-dark-filter,[id^=onetrust]"
-        + "{display:none!important;visibility:hidden!important;"
-        + "opacity:0!important;pointer-events:none!important;"
-        + "position:fixed!important;top:-9999px!important;"
-        + "left:-9999px!important;width:0!important;"
-        + "height:0!important;overflow:hidden!important}";
+            + ".onetrust-pc-dark-filter,[id^=onetrust]"
+            + "{display:none!important;visibility:hidden!important;"
+            + "opacity:0!important;pointer-events:none!important;"
+            + "position:fixed!important;top:-9999px!important;"
+            + "left:-9999px!important;width:0!important;"
+            + "height:0!important;overflow:hidden!important}";
     try {
-      java.io.File tmpCssFile =
-          java.io.File.createTempFile("kino-ot-", ".css");
+      java.io.File tmpCssFile = java.io.File.createTempFile("kino-ot-", ".css");
       tmpCssFile.deleteOnExit();
       java.nio.file.Files.write(tmpCssFile.toPath(),
           tmpCss.getBytes(java.nio.charset.StandardCharsets.UTF_8));
@@ -121,97 +120,90 @@ public class ImdbController implements Refreshable {
         // Must be a separate executeScript call so cookie setting succeeds
         // even if the main injection below fails, and vice versa.
         try {
-          webEngine.executeScript(
-              "try{document.documentElement.style.setProperty("
-              + "'opacity','0','important');}catch(e){}"
-              + "try{document.cookie='OptanonAlertBoxClosed='"
-              + "+new Date().toISOString()"
-              + "+';path=/;domain=.imdb.com;max-age=31536000';}catch(e){}"
-              + "try{document.cookie='OptanonConsent="
-              + "isGpcEnabled=1&groups=C0001%3A1%2CC0002%3A0%2CC0003%3A0"
-              + "%2CC0004%3A0;path=/;domain=.imdb.com;max-age=31536000';"
-              + "}catch(e){}"
-          );
+          webEngine
+              .executeScript("try{document.documentElement.style.setProperty("
+                  + "'opacity','0','important');}catch(e){}"
+                  + "try{document.cookie='OptanonAlertBoxClosed='"
+                  + "+new Date().toISOString()"
+                  + "+';path=/;domain=.imdb.com;max-age=31536000';}catch(e){}"
+                  + "try{document.cookie='OptanonConsent="
+                  + "isGpcEnabled=1&groups=C0001%3A1%2CC0002%3A0%2CC0003%3A0"
+                  + "%2CC0004%3A0;path=/;domain=.imdb.com;max-age=31536000';"
+                  + "}catch(e){}");
         } catch (Exception ignored) {
         }
         try {
           webEngine.executeScript(
-              // Always set stubs so other scripts never error on OneTrust calls.
+              // Always set stubs so other scripts never error on OneTrust
+              // calls.
               "window.OneTrust={Init:function(){},ToggleInfoDisplay:"
-              + "function(){},LoadBanner:function(){},Close:function(){}};"
-              + "window.Optanon={};"
-              + "window.OptanonWrapper=function(){};"
-              + "window.OptanonActive=true;"
-              + "if(!window.__kinoEarlyObs){"
-              + "window.__kinoEarlyObs=true;"
-              // CSS-based hiding (synchronous fallback)
-              + "if(!document.getElementById('kino-early')){"
-              + "var s=document.createElement('style');"
-              + "s.id='kino-early';"
-              + "s.textContent='#onetrust-banner-sdk,#onetrust-pc-sdk,"
-              + "#onetrust-consent-sdk,.onetrust-pc-dark-filter,[id^=onetrust]"
-              + "{display:none!important;visibility:hidden!important;"
-              + "opacity:0!important;pointer-events:none!important;"
-              + "position:fixed!important;top:-9999px!important;"
-              + "left:-9999px!important;width:0!important;"
-              + "height:0!important;overflow:hidden!important}';"
-              + "(document.head||document.documentElement).appendChild(s);}"
-              // Script-block helper
-              + "window.__kinoBlockScript=function(el){el.type='text/blocked';el.src='';};"
-              + "window.__kinoIsOT=function(src){"
-              + "return src.indexOf('onetrust')>-1||src.indexOf('optanon')>-1"
-              + "||src.indexOf('cookielaw')>-1||src.indexOf('cookie-cdn')>-1;};"
-              // Hide helper — also watches element's style attribute so any
-              // re-show attempt by OneTrust is caught before the next paint.
-              + "window.__kinoHideOT=function(el){"
-              + "el.style.setProperty('display','none','important');"
-              + "el.style.setProperty('visibility','hidden','important');"
-              + "el.style.setProperty('opacity','0','important');"
-              + "el.style.setProperty('position','fixed','important');"
-              + "el.style.setProperty('top','-9999px','important');"
-              + "if(window.__kinoMutObs){"
-              + "window.__kinoMutObs.observe(el,"
-              + "{attributes:true,attributeFilter:['style','class']});}};"
-              // Named observer handles both childList and attribute mutations
-              + "window.__kinoMutObs=new MutationObserver(function(ml){"
-              + "for(var m=0;m<ml.length;m++){"
-              + "var mut=ml[m];"
-              // Attribute change on a known OneTrust element — re-hide it
-              + "if(mut.type==='attributes'){"
-              + "var t=mut.target;"
-              + "if(t.id&&t.id.indexOf('onetrust')===0){"
-              + "t.style.setProperty('display','none','important');"
-              + "t.style.setProperty('visibility','hidden','important');"
-              + "t.style.setProperty('opacity','0','important');"
-              + "t.style.setProperty('position','fixed','important');"
-              + "t.style.setProperty('top','-9999px','important');}"
-              + "continue;}"
-              // New node added to DOM
-              + "var added=mut.addedNodes;"
-              + "for(var n=0;n<added.length;n++){"
-              + "var nd=added[n];"
-              + "if(nd.nodeType!==1)continue;"
-              + "if(nd.tagName==='SCRIPT'&&window.__kinoIsOT(nd.src||''))"
-              + "{window.__kinoBlockScript(nd);continue;}"
-              + "if(nd.id&&nd.id.indexOf('onetrust')===0)"
-              + "{window.__kinoHideOT(nd);continue;}"
-              + "if(nd.classList&&nd.classList.contains('onetrust-pc-dark-filter'))"
-              + "{window.__kinoHideOT(nd);continue;}"
-              + "if(nd.querySelectorAll){"
-              + "nd.querySelectorAll('script[src*=onetrust],script[src*=optanon],"
-              + "script[src*=cookielaw],script[src*=cookie-cdn]')"
-              + ".forEach(window.__kinoBlockScript);"
-              + "nd.querySelectorAll('[id^=onetrust]').forEach(window.__kinoHideOT);"
-              + "nd.querySelectorAll('.onetrust-pc-dark-filter')"
-              + ".forEach(window.__kinoHideOT);}}}});"
-              + "window.__kinoMutObs.observe(document.documentElement,"
-              + "{childList:true,subtree:true});"
-              // Retroactive scan for any OneTrust scripts already in the DOM
-              + "document.querySelectorAll('script[src*=onetrust],script[src*=optanon],"
-              + "script[src*=cookielaw],script[src*=cookie-cdn]')"
-              + ".forEach(window.__kinoBlockScript);"
-              + "}"
-          );
+                  + "function(){},LoadBanner:function(){},Close:function(){}};"
+                  + "window.Optanon={};" + "window.OptanonWrapper=function(){};"
+                  + "window.OptanonActive=true;" + "if(!window.__kinoEarlyObs){"
+                  + "window.__kinoEarlyObs=true;"
+          // CSS-based hiding (synchronous fallback)
+                  + "if(!document.getElementById('kino-early')){"
+                  + "var s=document.createElement('style');"
+                  + "s.id='kino-early';"
+                  + "s.textContent='#onetrust-banner-sdk,#onetrust-pc-sdk,"
+                  + "#onetrust-consent-sdk,.onetrust-pc-dark-filter,[id^=onetrust]"
+                  + "{display:none!important;visibility:hidden!important;"
+                  + "opacity:0!important;pointer-events:none!important;"
+                  + "position:fixed!important;top:-9999px!important;"
+                  + "left:-9999px!important;width:0!important;"
+                  + "height:0!important;overflow:hidden!important}';"
+                  + "(document.head||document.documentElement).appendChild(s);}"
+          // Script-block helper
+                  + "window.__kinoBlockScript=function(el){el.type='text/blocked';el.src='';};"
+                  + "window.__kinoIsOT=function(src){"
+                  + "return src.indexOf('onetrust')>-1||src.indexOf('optanon')>-1"
+                  + "||src.indexOf('cookielaw')>-1||src.indexOf('cookie-cdn')>-1;};"
+          // Hide helper — also watches element's style attribute so any
+          // re-show attempt by OneTrust is caught before the next paint.
+                  + "window.__kinoHideOT=function(el){"
+                  + "el.style.setProperty('display','none','important');"
+                  + "el.style.setProperty('visibility','hidden','important');"
+                  + "el.style.setProperty('opacity','0','important');"
+                  + "el.style.setProperty('position','fixed','important');"
+                  + "el.style.setProperty('top','-9999px','important');"
+                  + "if(window.__kinoMutObs){"
+                  + "window.__kinoMutObs.observe(el,"
+                  + "{attributes:true,attributeFilter:['style','class']});}};"
+          // Named observer handles both childList and attribute mutations
+                  + "window.__kinoMutObs=new MutationObserver(function(ml){"
+                  + "for(var m=0;m<ml.length;m++){" + "var mut=ml[m];"
+          // Attribute change on a known OneTrust element — re-hide it
+                  + "if(mut.type==='attributes'){" + "var t=mut.target;"
+                  + "if(t.id&&t.id.indexOf('onetrust')===0){"
+                  + "t.style.setProperty('display','none','important');"
+                  + "t.style.setProperty('visibility','hidden','important');"
+                  + "t.style.setProperty('opacity','0','important');"
+                  + "t.style.setProperty('position','fixed','important');"
+                  + "t.style.setProperty('top','-9999px','important');}"
+                  + "continue;}"
+          // New node added to DOM
+                  + "var added=mut.addedNodes;"
+                  + "for(var n=0;n<added.length;n++){" + "var nd=added[n];"
+                  + "if(nd.nodeType!==1)continue;"
+                  + "if(nd.tagName==='SCRIPT'&&window.__kinoIsOT(nd.src||''))"
+                  + "{window.__kinoBlockScript(nd);continue;}"
+                  + "if(nd.id&&nd.id.indexOf('onetrust')===0)"
+                  + "{window.__kinoHideOT(nd);continue;}"
+                  + "if(nd.classList&&nd.classList.contains('onetrust-pc-dark-filter'))"
+                  + "{window.__kinoHideOT(nd);continue;}"
+                  + "if(nd.querySelectorAll){"
+                  + "nd.querySelectorAll('script[src*=onetrust],script[src*=optanon],"
+                  + "script[src*=cookielaw],script[src*=cookie-cdn]')"
+                  + ".forEach(window.__kinoBlockScript);"
+                  + "nd.querySelectorAll('[id^=onetrust]').forEach(window.__kinoHideOT);"
+                  + "nd.querySelectorAll('.onetrust-pc-dark-filter')"
+                  + ".forEach(window.__kinoHideOT);}}}});"
+                  + "window.__kinoMutObs.observe(document.documentElement,"
+                  + "{childList:true,subtree:true});"
+          // Retroactive scan for any OneTrust scripts already in the DOM
+                  + "document.querySelectorAll('script[src*=onetrust],script[src*=optanon],"
+                  + "script[src*=cookielaw],script[src*=cookie-cdn]')"
+                  + ".forEach(window.__kinoBlockScript);" + "}");
         } catch (Exception ignored) {
         }
       }
@@ -246,9 +238,11 @@ public class ImdbController implements Refreshable {
             } else {
               String tmpLoc = webEngine.getLocation();
               String tmpNormLoc =
-                  tmpLoc != null && !tmpLoc.endsWith("/") ? tmpLoc + "/" : tmpLoc;
-              String tmpNormTarget = pendingTargetUrl.endsWith("/")
-                  ? pendingTargetUrl : pendingTargetUrl + "/";
+                  tmpLoc != null && !tmpLoc.endsWith("/") ? tmpLoc + "/"
+                      : tmpLoc;
+              String tmpNormTarget =
+                  pendingTargetUrl.endsWith("/") ? pendingTargetUrl
+                      : pendingTargetUrl + "/";
               if (tmpNormLoc != null && tmpNormLoc.equals(tmpNormTarget)) {
                 tmpShow = true;
                 pendingTargetUrl = null;
@@ -267,8 +261,7 @@ public class ImdbController implements Refreshable {
               showDelay = new PauseTransition(Duration.millis(800));
               showDelay.setOnFinished(e -> {
                 try {
-                  webEngine.executeScript(
-                      "document.documentElement.style"
+                  webEngine.executeScript("document.documentElement.style"
                       + ".setProperty('opacity','1','important');"
                       + "setTimeout(function(){"
                       + "document.documentElement.style"
@@ -322,9 +315,7 @@ public class ImdbController implements Refreshable {
   }
 
   private void injectAdSuppression() {
-    webEngine.executeScript(
-        "(function(){"
-        + "if(window.__kinoInit)return;"
+    webEngine.executeScript("(function(){" + "if(window.__kinoInit)return;"
         + "window.__kinoInit=true;"
         // Re-set OneTrust opt-out cookies (backup for early injection)
         + "try{document.cookie='OptanonAlertBoxClosed='"
@@ -337,32 +328,24 @@ public class ImdbController implements Refreshable {
         // Re-set stubs in case early injection was skipped
         + "window.OneTrust={Init:function(){},ToggleInfoDisplay:"
         + "function(){},LoadBanner:function(){},Close:function(){}};"
-        + "window.Optanon={};"
-        + "window.OptanonWrapper=function(){};"
+        + "window.Optanon={};" + "window.OptanonWrapper=function(){};"
         + "window.OptanonActive=true;"
         // Block any OneTrust scripts already in the DOM at SUCCEEDED time
-        + "(function(){"
-        + "function __b(el){el.type='text/blocked';el.src='';}"
+        + "(function(){" + "function __b(el){el.type='text/blocked';el.src='';}"
         + "document.querySelectorAll("
         + "'script[src*=onetrust],script[src*=optanon],"
         + "script[src*=cookielaw],script[src*=cookie-cdn]').forEach(__b);"
-        + "})()"
-        + ";"
+        + "})()" + ";"
         // CSS for stable selectors (ads, iframes)
-        + "var s=document.createElement('style');"
-        + "s.id='kino-block';"
-        + "s.textContent="
-        + "'.ipc-ad-slot,.ipc-native-ad"
+        + "var s=document.createElement('style');" + "s.id='kino-block';"
+        + "s.textContent=" + "'.ipc-ad-slot,.ipc-native-ad"
         + "{display:none!important}"
         + "[data-testid~=ad-slot],[data-testid*=AdSlot]"
-        + "{display:none!important}"
-        + "ins.adsbygoogle"
+        + "{display:none!important}" + "ins.adsbygoogle"
         + "{display:none!important}"
         + "iframe[src*=googlesyndication],iframe[src*=doubleclick]"
-        + ",iframe[src*=amazon-adsystem]"
-        + "{display:none!important}"
-        + "[data-testid=promptable]"
-        + "{display:none!important}"
+        + ",iframe[src*=amazon-adsystem]" + "{display:none!important}"
+        + "[data-testid=promptable]" + "{display:none!important}"
         + "#onetrust-banner-sdk,#onetrust-pc-sdk,#onetrust-consent-sdk,"
         + ".onetrust-pc-dark-filter,[id^=onetrust]"
         + "{display:none!important;visibility:hidden!important;"
@@ -379,27 +362,24 @@ public class ImdbController implements Refreshable {
         + "el.style.setProperty('pointer-events','none','important');"
         + "el.style.setProperty('position','fixed','important');"
         + "el.style.setProperty('top','-9999px','important');"
-        + "if(window.__kinoMutObs){"
-        + "window.__kinoMutObs.observe(el,"
+        + "if(window.__kinoMutObs){" + "window.__kinoMutObs.observe(el,"
         + "{attributes:true,attributeFilter:['style','class']});}"
         + "var b=el.querySelector('#onetrust-reject-all-handler');"
         + "if(!b){var bs=el.querySelectorAll('button');"
         + "for(var i=0;i<bs.length;i++){var t=(bs[i].innerText||'').trim();"
         + "if(/^(reject all|decline all|reject|decline)$/i.test(t)){b=bs[i];break;}}}"
-        + "if(b)b.click();"
-        + "}"
-        // --- hideMatching: expensive scan for ads / sign-in (timed retries only) ---
+        + "if(b)b.click();" + "}"
+        // --- hideMatching: expensive scan for ads / sign-in (timed retries
+        // only) ---
         + "function hideMatching(){"
         // OneTrust — hide off-screen + click Decline
         + "['onetrust-banner-sdk','onetrust-pc-sdk'].forEach(function(oid){"
-        + "var o=document.getElementById(oid);"
-        + "if(o)hideOT(o);});"
+        + "var o=document.getElementById(oid);" + "if(o)hideOT(o);});"
         + "var otBg=document.querySelector('.onetrust-pc-dark-filter');"
         + "if(otBg)otBg.style.setProperty('display','none','important');"
         // Ads / cookie / consent / signin — class keyword scan
         + "var all=document.querySelectorAll('div,section,aside,article,ins');"
-        + "for(var i=0;i<all.length;i++){"
-        + "var el=all[i];"
+        + "for(var i=0;i<all.length;i++){" + "var el=all[i];"
         + "var cls=(typeof el.className==='string'?el.className:'').toLowerCase();"
         + "var tid=(el.getAttribute('data-testid')||'').toLowerCase();"
         + "var id=(el.id||'').toLowerCase();"
@@ -409,42 +389,33 @@ public class ImdbController implements Refreshable {
         + "||cls.indexOf('sponsor')>-1"
         + "||tid.indexOf('ad-slot')>-1||tid.indexOf('adslot')>-1"
         + "||tid.indexOf('native-ad')>-1"
-        + "||aria==='advertisement'||aria.indexOf('sponsored')>-1"
-        + "){"
+        + "||aria==='advertisement'||aria.indexOf('sponsored')>-1" + "){"
         + "el.style.setProperty('display','none','important');continue;}"
         + "if((cls.indexOf('cookie')>-1||id.indexOf('cookie')>-1"
         + "||cls.indexOf('consent')>-1||id.indexOf('consent')>-1"
         + "||cls.indexOf('signin')>-1||cls.indexOf('sign-in')>-1"
         + "||tid.indexOf('signin')>-1||tid.indexOf('sign-in')>-1)"
         + "&&el.tagName!=='BUTTON'&&el.tagName!=='A'){"
-        + "el.style.setProperty('display','none','important');"
-        + "}}"
+        + "el.style.setProperty('display','none','important');" + "}}"
         // Sign-in popup: find positioned ancestor of "Create account"
         + "var ds=document.querySelectorAll('div');"
-        + "for(var i=0;i<ds.length;i++){"
-        + "var txt=ds[i].innerText||'';"
-        + "if(txt.indexOf('Create account')>-1){"
-        + "var p=ds[i];"
+        + "for(var i=0;i<ds.length;i++){" + "var txt=ds[i].innerText||'';"
+        + "if(txt.indexOf('Create account')>-1){" + "var p=ds[i];"
         + "while(p&&p!==document.body){"
         + "var ps=window.getComputedStyle(p).position;"
         + "if(ps==='absolute'||ps==='fixed'){"
-        + "var r=p.getBoundingClientRect();"
-        + "if(r.width<500&&r.height<500)"
+        + "var r=p.getBoundingClientRect();" + "if(r.width<500&&r.height<500)"
         + "p.style.setProperty('display','none','important');"
-        + "break;}p=p.parentElement;}}}"
-        + "}"
+        + "break;}p=p.parentElement;}}}" + "}"
         // Reject-button click
         + "function tryReject(){"
         + "var b=document.getElementById('onetrust-reject-all-handler');"
         + "if(!b)b=document.querySelector('[data-testid=\"reject-button-main\"]');"
-        + "if(!b){"
-        + "var els=document.querySelectorAll('button,a');"
+        + "if(!b){" + "var els=document.querySelectorAll('button,a');"
         + "for(var i=0;i<els.length;i++){"
         + "var t=(els[i].innerText||'').trim();"
         + "if(/^(reject all|decline all|reject|decline)$/i.test(t)){b=els[i];break;}"
-        + "}}"
-        + "if(b)b.click();"
-        + "}"
+        + "}}" + "if(b)b.click();" + "}"
         // Run expensive scan on fixed schedule only (6 times total)
         + "tryReject();hideMatching();"
         + "setTimeout(function(){tryReject();hideMatching();},100);"
@@ -454,12 +425,9 @@ public class ImdbController implements Refreshable {
         + "setTimeout(function(){tryReject();hideMatching();},6000);"
         // Fallback MutationObserver: only installed if the early observer
         // (from documentProperty listener) was not set up for this page.
-        + "if(!window.__kinoEarlyObs){"
-        + "new MutationObserver(function(ml){"
-        + "for(var m=0;m<ml.length;m++){"
-        + "var added=ml[m].addedNodes;"
-        + "for(var n=0;n<added.length;n++){"
-        + "var nd=added[n];"
+        + "if(!window.__kinoEarlyObs){" + "new MutationObserver(function(ml){"
+        + "for(var m=0;m<ml.length;m++){" + "var added=ml[m].addedNodes;"
+        + "for(var n=0;n<added.length;n++){" + "var nd=added[n];"
         + "if(nd.nodeType!==1)continue;"
         + "if(nd.id&&nd.id.indexOf('onetrust')===0){hideOT(nd);continue;}"
         + "if(nd.classList&&nd.classList.contains('onetrust-pc-dark-filter')){"
@@ -467,11 +435,9 @@ public class ImdbController implements Refreshable {
         + "if(nd.querySelectorAll){"
         + "nd.querySelectorAll('[id^=onetrust]').forEach(function(el){hideOT(el);});"
         + "nd.querySelectorAll('.onetrust-pc-dark-filter').forEach(function(el){"
-        + "el.style.setProperty('display','none','important');});}"
-        + "}}"
+        + "el.style.setProperty('display','none','important');});}" + "}}"
         + "}).observe(document.documentElement,{childList:true,subtree:true});}"
-        + "})();"
-    );
+        + "})();");
   }
 
   private void updateHistoryButtons() {

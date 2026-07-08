@@ -55,6 +55,7 @@ public class AppContext {
   private final SettingsRepository settingsRepository;
   private final LibraryScanService libraryScanService;
   private final PlaybackService playbackService;
+  private final AnalyticsService analyticsService;
 
   private AppContext() {
     this.databaseService = new DatabaseService();
@@ -65,6 +66,7 @@ public class AppContext {
     this.libraryScanService =
         new LibraryScanService(movieRepository, settingsRepository);
     this.playbackService = new PlaybackService(settingsRepository);
+    this.analyticsService = new AnalyticsService();
   }
 
   /**
@@ -133,6 +135,15 @@ public class AppContext {
    */
   public PlaybackService getPlaybackService() {
     return playbackService;
+  }
+
+  /**
+   * Gets the analytics service instance.
+   *
+   * @return the {@link AnalyticsService} instance
+   */
+  public AnalyticsService getAnalyticsService() {
+    return analyticsService;
   }
 
   private io.github.kullik01.kinonode.controller.MainController mainController;

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ BSD 3-Clause License
+  ~
+  ~ Copyright (c) 2026, Hannah Kullik
+  ~
+  ~ Redistribution and use in source and binary forms, with or without
+  ~ modification, are permitted provided that the following conditions are met:
+  ~
+  ~ 1. Redistributions of source code must retain the above copyright notice, this
+  ~    list of conditions and the following disclaimer.
+  ~
+  ~ 2. Redistributions in binary form must reproduce the above copyright notice,
+  ~    this list of conditions and the following disclaimer in the documentation
+  ~    and/or other materials provided with the distribution.
+  ~
+  ~ 3. Neither the name of the copyright holder nor the names of its
+  ~    contributors may be used to endorse or promote products derived from
+  ~    this software without specific prior written permission.
+  ~
+  ~ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  ~ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  ~ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  ~ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+  ~ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  ~ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  ~ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  ~ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  ~ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ~ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  -->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-padding: 0;"
+            stylesheets="@../css/theme.css"
+            xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="io.github.kullik01.kinonode.controller.AnalyticsController">
+    <content>
+        <VBox spacing="20.0" styleClass="detail-pane" style="-fx-padding: 24px;">
+            
+            <!-- Page Header & Action Buttons -->
+            <VBox spacing="12.0">
+                <Label text="Collection Insights &amp; Portability" wrapText="true" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2178dd;"/>
+                <Label text="Live catalog statistics, visual charts, reports, and backup management." wrapText="true" style="-fx-text-fill: -color-fg-muted;"/>
+                
+                <FlowPane hgap="12.0" vgap="12.0" style="-fx-padding: 8px 0 0 0;">
+                    <Button text="📥  Export JSON" minWidth="-Infinity" styleClass="button-primary" style="-fx-background-color: #2178dd; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8px 16px; -fx-background-radius: 6px;" onAction="#handleExportJson">
+                        <tooltip><Tooltip showDelay="100ms" text="Export entire movie catalog to JSON format"/></tooltip>
+                    </Button>
+                    <Button text="📊  Export CSV" minWidth="-Infinity" styleClass="button-primary" style="-fx-background-color: #2178dd; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8px 16px; -fx-background-radius: 6px;" onAction="#handleExportCsv">
+                        <tooltip><Tooltip showDelay="100ms" text="Export movie catalog spreadsheet to CSV format"/></tooltip>
+                    </Button>
+                    <Button text="🌐  HTML Report" minWidth="-Infinity" styleClass="button-primary" style="-fx-background-color: #2178dd; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8px 16px; -fx-background-radius: 6px;" onAction="#handleExportHtml">
+                        <tooltip><Tooltip showDelay="100ms" text="Generate a styled HTML report of your collection"/></tooltip>
+                    </Button>
+                    <Button text="💾  Backup Database" minWidth="-Infinity" styleClass="button-primary" style="-fx-background-color: #2178dd; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8px 16px; -fx-background-radius: 6px;" onAction="#handleBackupDatabase">
+                        <tooltip><Tooltip showDelay="100ms" text="Create a backup snapshot of your SQLite database"/></tooltip>
+                    </Button>
+                </FlowPane>
+            </VBox>
+            
+            <!-- KPI Summary Cards 3-Column GridPane (Exact 33.33% column widths) -->
+            <GridPane hgap="16.0" vgap="16.0">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="33.3333"/>
+                    <ColumnConstraints percentWidth="33.3333"/>
+                    <ColumnConstraints percentWidth="33.3334"/>
+                </columnConstraints>
+
+                <!-- Row 0 -->
+                <VBox GridPane.columnIndex="0" GridPane.rowIndex="0" maxWidth="Infinity" styleClass="card" style="-fx-padding: 18px; -fx-background-radius: 10px; -fx-background-color: -color-bg-subtle; -fx-border-color: -color-border-default; -fx-border-radius: 10px; -fx-border-width: 1px;">
+                    <Label text="TOTAL MOVIES" wrapText="true" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: -color-fg-muted;"/>
+                    <Label fx:id="lblTotalMovies" text="0" wrapText="true" styleClass="title-2" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default; -fx-padding: 4px 0 0 0;"/>
+                </VBox>
+                <VBox GridPane.columnIndex="1" GridPane.rowIndex="0" maxWidth="Infinity" styleClass="card" style="-fx-padding: 18px; -fx-background-radius: 10px; -fx-background-color: -color-bg-subtle; -fx-border-color: -color-border-default; -fx-border-radius: 10px; -fx-border-width: 1px;">
+                    <Label text="AVERAGE RATING" wrapText="true" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: -color-fg-muted;"/>
+                    <Label fx:id="lblAvgRating" text="—" wrapText="true" styleClass="title-2" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default; -fx-padding: 4px 0 0 0;"/>
+                </VBox>
+                <VBox GridPane.columnIndex="2" GridPane.rowIndex="0" maxWidth="Infinity" styleClass="card" style="-fx-padding: 18px; -fx-background-radius: 10px; -fx-background-color: -color-bg-subtle; -fx-border-color: -color-border-default; -fx-border-radius: 10px; -fx-border-width: 1px;">
+                    <Label text="YEAR RANGE" wrapText="true" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: -color-fg-muted;"/>
+                    <Label fx:id="lblYearRange" text="—" wrapText="true" styleClass="title-2" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default; -fx-padding: 4px 0 0 0;"/>
+                </VBox>
+
+                <!-- Row 1 -->
+                <VBox GridPane.columnIndex="0" GridPane.rowIndex="1" maxWidth="Infinity" styleClass="card" style="-fx-padding: 18px; -fx-background-radius: 10px; -fx-background-color: -color-bg-subtle; -fx-border-color: -color-border-default; -fx-border-radius: 10px; -fx-border-width: 1px;">
+                    <Label text="WATCHLISTS" wrapText="true" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: -color-fg-muted;"/>
+                    <Label fx:id="lblTotalWatchlists" text="0" wrapText="true" styleClass="title-2" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default; -fx-padding: 4px 0 0 0;"/>
+                </VBox>
+                <VBox GridPane.columnIndex="1" GridPane.rowIndex="1" maxWidth="Infinity" styleClass="card" style="-fx-padding: 18px; -fx-background-radius: 10px; -fx-background-color: -color-bg-subtle; -fx-border-color: -color-border-default; -fx-border-radius: 10px; -fx-border-width: 1px;">
+                    <Label text="TOP GENRE" wrapText="true" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: -color-fg-muted;"/>
+                    <Label fx:id="lblTopGenre" text="—" wrapText="true" styleClass="title-2" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default; -fx-padding: 4px 0 0 0;"/>
+                </VBox>
+                <VBox GridPane.columnIndex="2" GridPane.rowIndex="1" maxWidth="Infinity" styleClass="card" style="-fx-padding: 18px; -fx-background-radius: 10px; -fx-background-color: -color-bg-subtle; -fx-border-color: -color-border-default; -fx-border-radius: 10px; -fx-border-width: 1px;">
+                    <Label text="DIRECTORS" wrapText="true" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: -color-fg-muted;"/>
+                    <Label fx:id="lblTotalDirectors" text="0" wrapText="true" styleClass="title-2" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default; -fx-padding: 4px 0 0 0;"/>
+                </VBox>
+            </GridPane>
+            
+            <!-- Charts & Top Lists 2-Column GridPane (Exact 50.0% / 50.0% column widths) -->
+            <GridPane hgap="16.0" vgap="16.0" VBox.vgrow="ALWAYS">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="50.0"/>
+                    <ColumnConstraints percentWidth="50.0"/>
+                </columnConstraints>
+
+                <!-- Row 0: Charts -->
+                <VBox GridPane.columnIndex="0" GridPane.rowIndex="0" maxWidth="Infinity" styleClass="card" style="-fx-padding: 18px; -fx-background-radius: 10px; -fx-background-color: -color-bg-subtle; -fx-border-color: -color-border-default; -fx-border-radius: 10px; -fx-border-width: 1px;">
+                    <Label text="Movies per Decade" wrapText="true" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: -color-fg-default; -fx-padding: 0 0 10px 0;"/>
+                    <BarChart fx:id="decadeChart" legendVisible="false" animated="false" prefHeight="260.0">
+                        <xAxis>
+                            <CategoryAxis label="Decade"/>
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis label="Count"/>
+                        </yAxis>
+                    </BarChart>
+                </VBox>
+                
+                <VBox GridPane.columnIndex="1" GridPane.rowIndex="0" maxWidth="Infinity" styleClass="card" style="-fx-padding: 18px; -fx-background-radius: 10px; -fx-background-color: -color-bg-subtle; -fx-border-color: -color-border-default; -fx-border-radius: 10px; -fx-border-width: 1px;">
+                    <Label text="Rating Distribution (Clapperboards)" wrapText="true" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: -color-fg-default; -fx-padding: 0 0 10px 0;"/>
+                    <BarChart fx:id="ratingChart" legendVisible="false" animated="false" prefHeight="260.0">
+                        <xAxis>
+                            <CategoryAxis label="Rating"/>
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis label="Count"/>
+                        </yAxis>
+                    </BarChart>
+                </VBox>
+
+                <!-- Row 1: Top Cast & Crew Ranking Lists -->
+                <VBox GridPane.columnIndex="0" GridPane.rowIndex="1" maxWidth="Infinity" styleClass="card" style="-fx-padding: 18px; -fx-background-radius: 10px; -fx-background-color: -color-bg-subtle; -fx-border-color: -color-border-default; -fx-border-radius: 10px; -fx-border-width: 1px;">
+                    <Label text="Top Directors" wrapText="true" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: -color-fg-default; -fx-padding: 0 0 12px 0;"/>
+                    <VBox fx:id="topDirectorsBox" spacing="8.0"/>
+                </VBox>
+                <VBox GridPane.columnIndex="1" GridPane.rowIndex="1" maxWidth="Infinity" styleClass="card" style="-fx-padding: 18px; -fx-background-radius: 10px; -fx-background-color: -color-bg-subtle; -fx-border-color: -color-border-default; -fx-border-radius: 10px; -fx-border-width: 1px;">
+                    <Label text="Top Cast &amp; Actors" wrapText="true" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: -color-fg-default; -fx-padding: 0 0 12px 0;"/>
+                    <VBox fx:id="topActorsBox" spacing="8.0"/>
+                </VBox>
+            </GridPane>
+            
+        </VBox>
+    </content>
+</ScrollPane>
