@@ -182,7 +182,10 @@
         <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
 
         <VBox spacing="8.0">
-            <Label text="Database Storage Location:" style="-fx-font-weight: bold;" />
+            <HBox spacing="8.0" alignment="CENTER_LEFT">
+                <Label text="Database Storage Location:" style="-fx-font-weight: bold;" />
+                <Label fx:id="lblStorageMode" text="" style="-fx-font-size: 11px; -fx-text-fill: -color-fg-muted;" />
+            </HBox>
             <HBox spacing="10" alignment="CENTER_LEFT">
                 <TextField fx:id="lblDbPath" text="" editable="false" focusTraversable="false"
                           style="-fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-text-fill: -color-fg-default; -fx-control-inner-background: -color-bg-default; -fx-background-radius: 6px; -fx-border-color: -color-border-default; -fx-border-radius: 6px;"

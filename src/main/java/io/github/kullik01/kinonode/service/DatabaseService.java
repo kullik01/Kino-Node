@@ -257,6 +257,28 @@ public class DatabaseService {
    * @return the resolved {@link Path} to the database file
    */
   private static Path resolveDefaultDbPath() {
+    // 1. Check custom system property override
+    String tmpCustomHome = System.getProperty("kinonode.home");
+    if (tmpCustomHome != null && !tmpCustomHome.isBlank()) {
+      return Paths.get(tmpCustomHome, DB_FILENAME);
+    }
+
+    // 2. Check if local kinonode.db already exists in current directory
+    // (portable mode)
+    Path tmpLocalDb = Paths.get(System.getProperty("user.dir"), DB_FILENAME);
+    if (Files.exists(tmpLocalDb)) {
+      return tmpLocalDb;
+    }
+
+    // 3. Check single directory mode: if running inside a directory named
+    // KinoNode
+    Path tmpCurrentDir = Paths.get(System.getProperty("user.dir"));
+    if (tmpCurrentDir.getFileName() != null && tmpCurrentDir.getFileName()
+        .toString().equalsIgnoreCase("KinoNode")) {
+      return tmpCurrentDir.resolve(DB_FILENAME);
+    }
+
+    // 4. Fallback to OS-specific user application data directory
     String tmpOperatingSystemName = System.getProperty("os.name").toLowerCase();
     Path tmpAppDataDir;
 

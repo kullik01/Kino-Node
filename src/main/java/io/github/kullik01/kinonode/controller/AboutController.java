@@ -60,6 +60,8 @@ public class AboutController implements Refreshable {
   private TextField lblExtensions;
   @FXML
   private TextField lblDbPath;
+  @FXML
+  private Label lblStorageMode;
 
   @FXML
   private Label lblJavaRuntime;
@@ -108,6 +110,15 @@ public class AboutController implements Refreshable {
       // Display path with forward slashes for cross-platform consistency
       lblDbPath.setText(
           tmpDatabasePath.toAbsolutePath().toString().replace("\\", "/"));
+
+      if (lblStorageMode != null) {
+        Path tmpCurrentDir = Path.of(System.getProperty("user.dir"));
+        if (tmpDatabasePath.toAbsolutePath().startsWith(tmpCurrentDir)) {
+          lblStorageMode.setText("(Single Directory / Portable Mode)");
+        } else {
+          lblStorageMode.setText("(OS Application Data Directory)");
+        }
+      }
 
       if (Files.exists(tmpDatabasePath)) {
         // Calculate file size in MB

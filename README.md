@@ -19,6 +19,10 @@ KinoNode is a modern, lightweight, personal movie library manager built on a sol
 * **YouTube Trailer Integration:** Automatically scrapes and saves official YouTube trailer URLs, allowing you to watch them in your default web browser with a single click.
 * **Clapperboard Rating System:** Rate your favorite films on a sliding 0–10 scale using custom film-reel clapperboard graphics.
 * **Playlists & Watchlists:** Build, rename, and manage multiple watchlists. Drag, reorder, or organize movies exactly the way you want them.
+* **Library Analytics Dashboard:** A dedicated interactive Analytics view displaying real-time library KPIs (Total Movies, Average Rating, Year Span, Total Watchlists, Top Genre, and Unique Directors count), dynamic decade distribution bar charts, and clapperboard rating frequency charts.
+* **Top Cast & Crew Leaderboards:** Automatically calculates and displays ranked leaderboards of your collection's most featured Directors and Actors/Cast members.
+* **Catalog Export & HTML Reports:** One-click portability allowing you to export your entire movie catalog to structured **JSON**, spreadsheet-ready **CSV**, or generate a styled, standalone **HTML Collection Report** that can be opened in any web browser.
+* **Automated SQLite Snapshot Backups:** Create instant, timestamped backup snapshots of your embedded SQLite database (`kinonode.db`) with a single click from the Analytics toolbar.
 * **External Player Launch:** Seamlessly watch your movies. KinoNode auto-detects system media players (like `mpv` and `VLC`) or launches any custom player executable path.
 
 ---
@@ -73,13 +77,20 @@ To automatically apply Google Java Format to all source files:
 
 ## 📂 Database & Data Storage
 
-KinoNode utilizes an embedded SQLite database (`kinonode.db`) for all library metadata, watchlists, and settings. By default, the database file is stored in your user application data directory depending on your operating system:
+KinoNode utilizes an embedded SQLite database (`kinonode.db`) for all library metadata, watchlists, and application settings.
 
+### Single Directory / Portable Mode (Recommended)
+KinoNode supports running as a self-contained application where all data and configuration are stored together inside a single directory named **`KinoNode`**. When running from a directory named `KinoNode` (or when a local `kinonode.db` exists in the application directory), the database is stored directly inside that directory:
+* **Single Directory Path:** `<AppDirectory>/kinonode.db`
+* **Custom Path Override:** You can also override the storage directory by starting Java with `-Dkinonode.home=/path/to/directory`.
+
+### Standard OS Application Data Directory
+If not running in single-directory mode, KinoNode automatically creates and uses a platform-specific `KinoNode` directory inside your operating system user profile:
 * **Windows:** `%APPDATA%/KinoNode/kinonode.db`
 * **macOS:** `~/Library/Application Support/KinoNode/kinonode.db`
 * **Linux/Unix:** `~/.local/share/KinoNode/kinonode.db` (or `$XDG_DATA_HOME/KinoNode/kinonode.db`)
 
-You can view your active database path, check its file size, and open the database's parent directory directly from the **About** section within the application interface.
+You can inspect your active storage mode (`Single Directory / Portable Mode` vs `OS Application Data Directory`), check database file size, and open the containing folder directly from the **About** page within the application interface.
 
 ---
 
