@@ -134,6 +134,7 @@ jlink {
         
         installerName = "KinoNode"
         appVersion = "1.0.0"
+        vendor = "Hannah Kullik"
         
         val iconPath = when {
             isWindows -> "src/main/resources/io/github/kullik01/kinonode/images/logo.ico"
@@ -152,23 +153,42 @@ jlink {
                 "--win-dir-chooser",
                 "--win-menu",
                 "--win-shortcut",
-                "--win-upgrade-uuid", "c1a0b0d3-8f83-4a3d-82d8-5f2122650f92"
+                "--win-upgrade-uuid", "c1a0b0d3-8f83-4a3d-82d8-5f2122650f92",
+                "--install-dir", "KinoNode"
             )
             isMac -> listOf(
                 "--mac-package-identifier", "io.github.kullik01.kinonode",
-                "--mac-package-name", "KinoNode"
+                "--mac-package-name", "KinoNode",
+                "--install-dir", "/Applications/KinoNode"
             )
             else -> {
                 val linuxCommon = listOf(
                     "--linux-menu-group", "Utility",
                     "--linux-shortcut",
-                    "--linux-package-name", "kinonode"
+                    "--linux-package-name", "kinonode",
+                    "--install-dir", "/opt/KinoNode"
                 )
                 when (installerType) {
                     "deb" -> linuxCommon + listOf("--linux-deb-maintainer", "hannah@example.com")
                     "rpm" -> linuxCommon + listOf("--linux-rpm-license-type", "BSD-3-Clause")
                     else -> linuxCommon
                 }
+            }
+        }
+    }
+}
+
+// Preserve generated installer packages across multiple jpackage invocations
+tasks.named("jpackage") {
+    doLast {
+        val outputDir = layout.buildDirectory.dir("jpackage").get().asFile
+        val installersDir = layout.buildDirectory.dir("installers").get().asFile
+        installersDir.mkdirs()
+        outputDir.listFiles()?.forEach { file ->
+            if (file.isFile && (file.name.endsWith(".exe") || file.name.endsWith(".msi") ||
+                                file.name.endsWith(".deb") || file.name.endsWith(".rpm") ||
+                                file.name.endsWith(".dmg") || file.name.endsWith(".pkg"))) {
+                file.copyTo(File(installersDir, file.name), overwrite = true)
             }
         }
     }
@@ -182,7 +202,7 @@ tasks.register<Zip>("windowsAppImageZip") {
     onlyIf { isWindows }
     
     from(layout.buildDirectory.dir("jpackage/KinoNode")) {
-        into("KinoNode-${version}")
+        into("KinoNode")
     }
     
     archiveFileName.set("KinoNode-${version}-Windows-Portable.zip")
@@ -197,7 +217,7 @@ tasks.register<Zip>("macAppImageZip") {
     onlyIf { isMac }
     
     from(layout.buildDirectory.dir("jpackage/KinoNode.app")) {
-        into("KinoNode.app")
+        into("KinoNode/KinoNode.app")
     }
     
     archiveFileName.set("KinoNode-${version}-macOS-Portable.zip")
@@ -212,7 +232,7 @@ tasks.register<Zip>("linuxAppImageZip") {
     onlyIf { isLinux }
     
     from(layout.buildDirectory.dir("jpackage/KinoNode")) {
-        into("KinoNode-${version}")
+        into("KinoNode")
     }
     
     archiveFileName.set("KinoNode-${version}-Linux-Portable.zip")
@@ -228,7 +248,7 @@ tasks.register<Tar>("linuxAppImageTar") {
     
     compression = Compression.GZIP
     from(layout.buildDirectory.dir("jpackage/KinoNode")) {
-        into("KinoNode-${version}")
+        into("KinoNode")
     }
     
     archiveFileName.set("KinoNode-${version}-Linux-Portable.tar.gz")

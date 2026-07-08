@@ -23,19 +23,19 @@ jobs:
         include:
           - os: windows-latest
             artifact-path: |
-              build/jpackage/*.exe
-              build/jpackage/*.msi
+              build/installers/*.exe
+              build/installers/*.msi
               build/distributions/*.zip
           - os: ubuntu-latest
             artifact-path: |
-              build/jpackage/*.deb
-              build/jpackage/*.rpm
+              build/installers/*.deb
+              build/installers/*.rpm
               build/distributions/*.zip
               build/distributions/*.tar.gz
           - os: macos-latest
             artifact-path: |
-              build/jpackage/*.dmg
-              build/jpackage/*.pkg
+              build/installers/*.dmg
+              build/installers/*.pkg
               build/distributions/*.zip
 
     steps:
@@ -61,7 +61,7 @@ jobs:
             Write-Host "Installing WiX Toolset v3 via Chocolatey..."
             choco install wixtoolset -y --no-progress
           }
-          $wixBinPath = Get-ChildItem -Path "C:\Program Files (x86)" -Filter "WiX Toolset v3*" -Directory -ErrorAction SilentlyContinue |
+          $wixBinPath = Get-ChildItem -Path "C:\Program Files (x86)", "C:\Program Files" -Filter "WiX Toolset v3*" -Directory -ErrorAction SilentlyContinue |
                         ForEach-Object { Join-Path $_.FullName "bin" } |
                         Where-Object { Test-Path (Join-Path $_ "light.exe") } |
                         Select-Object -First 1
@@ -89,7 +89,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y fakeroot dpkg-dev rpm
+          sudo apt-get install -y binutils fakeroot dpkg-dev rpm
           ./gradlew jpackage -PinstallerType=deb
           ./gradlew jpackage -PinstallerType=rpm
           ./gradlew linuxAppImageZip
