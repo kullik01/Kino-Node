@@ -53,11 +53,25 @@ jobs:
         if: matrix.os != 'windows-latest'
         run: chmod +x gradlew
 
-      - name: Add WiX Toolset to PATH (Windows)
+      - name: Install and Add WiX Toolset to PATH (Windows)
         if: matrix.os == 'windows-latest'
+        shell: pwsh
         run: |
-          if (Test-Path "C:\Program Files (x86)\WiX Toolset v3.11\bin") {
-            echo "C:\Program Files (x86)\WiX Toolset v3.11\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          if (-not (Get-Command light.exe -ErrorAction SilentlyContinue)) {
+            Write-Host "Installing WiX Toolset v3 via Chocolatey..."
+            choco install wixtoolset -y --no-progress
+          }
+          $wixBinPath = Get-ChildItem -Path "C:\Program Files (x86)" -Filter "WiX Toolset v3*" -Directory -ErrorAction SilentlyContinue |
+                        ForEach-Object { Join-Path $_.FullName "bin" } |
+                        Where-Object { Test-Path (Join-Path $_ "light.exe") } |
+                        Select-Object -First 1
+          if ($wixBinPath) {
+            Write-Host "Adding WiX Toolset bin path to GITHUB_PATH: $wixBinPath"
+            $wixBinPath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+            $env:PATH = "$wixBinPath;$env:PATH"
+          } else {
+            Write-Error "Failed to locate WiX Toolset v3 bin directory."
+            exit 1
           }
 
       - name: Build and Test

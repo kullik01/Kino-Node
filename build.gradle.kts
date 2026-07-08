@@ -152,19 +152,24 @@ jlink {
                 "--win-dir-chooser",
                 "--win-menu",
                 "--win-shortcut",
-                "--win-upgrade-uuid", "k1n0n0d3-8f83-4a3d-82d8-5f2122650f92"
+                "--win-upgrade-uuid", "c1a0b0d3-8f83-4a3d-82d8-5f2122650f92"
             )
             isMac -> listOf(
                 "--mac-package-identifier", "io.github.kullik01.kinonode",
                 "--mac-package-name", "KinoNode"
             )
-            else -> listOf(
-                "--linux-menu-group", "Utility",
-                "--linux-shortcut",
-                "--linux-package-name", "kinonode",
-                "--linux-deb-maintainer", "hannah@example.com",
-                "--linux-rpm-license-type", "BSD-3-Clause"
-            )
+            else -> {
+                val linuxCommon = listOf(
+                    "--linux-menu-group", "Utility",
+                    "--linux-shortcut",
+                    "--linux-package-name", "kinonode"
+                )
+                when (installerType) {
+                    "deb" -> linuxCommon + listOf("--linux-deb-maintainer", "hannah@example.com")
+                    "rpm" -> linuxCommon + listOf("--linux-rpm-license-type", "BSD-3-Clause")
+                    else -> linuxCommon
+                }
+            }
         }
     }
 }
