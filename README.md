@@ -126,5 +126,5 @@ Finished binaries are automatically bundled and uploaded directly as draft asset
 This project is licensed under the **BSD 3-Clause License** - see the [LICENSE](LICENSE) file for details.
 
 ## 👥 Contributors & Credits
-* **Hannah Kullik** - *Lead Developer*
-* **Martin Urban** - * Logo Designer*
+* *Lead Developer* - Hannah Kullik
+* *Logo Designer* - Martin Urban & Hannah Kullik
