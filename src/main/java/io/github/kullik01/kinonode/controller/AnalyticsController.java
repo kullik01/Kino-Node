@@ -368,6 +368,13 @@ public class AnalyticsController implements Refreshable {
       double tmpRatio = (double) count / tmpMaxCount;
       javafx.scene.layout.Region tmpFill = new javafx.scene.layout.Region();
       tmpFill.getStyleClass().add("ranking-bar-fill");
+      if (rank == 1) {
+        tmpFill.getStyleClass().add("ranking-bar-fill-top1");
+      } else if (rank == 2) {
+        tmpFill.getStyleClass().add("ranking-bar-fill-top2");
+      } else if (rank == 3) {
+        tmpFill.getStyleClass().add("ranking-bar-fill-top3");
+      }
       tmpFill.prefWidthProperty()
           .bind(tmpTrack.widthProperty().multiply(tmpRatio));
 

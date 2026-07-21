@@ -102,6 +102,14 @@
 
     /* Global text/graphics contrast color on accent backgrounds */
     -color-fg-on-accent: white;
+
+    /* Palette variables for GUI Harmony */
+    -color-brand-blue: #2178dd;
+    -color-brand-emerald: #10b981;
+    -color-brand-gold: #ED8B00;
+    -color-brand-purple: #8b5cf6;
+    -color-brand-cyan: #06b6d4;
+    -color-brand-rose: #f43f5e;
 }
 
 /* Sidebar navigation styling */
@@ -263,7 +271,11 @@
 
 /* Accent and Global Buttons */
 .root .button.button-primary, .root .button.button-secondary,
-.root .menu-button.button-primary, .root .menu-button.button-secondary {
+.root .menu-button.button-primary, .root .menu-button.button-secondary,
+.root .button.button-play, .root .button.button-success,
+.root .button.button-imdb, .root .button.button-warning,
+.root .button.button-danger, .root .button.button-info,
+.root .button.button-purple, .analytics-action-button {
     -fx-background-color: #2178dd;
     -fx-text-fill: white;
     -fx-font-weight: bold;
@@ -272,11 +284,15 @@
     -fx-background-radius: 4px;
 }
 
-/* Force hover and pressed states to be identical to remove the effect entirely */
+/* Force hover and pressed states to use the blue color */
 .root .button.button-primary:hover, .root .button.button-secondary:hover,
 .root .menu-button.button-primary:hover, .root .menu-button.button-secondary:hover,
 .root .menu-button.button-primary:showing, .root .menu-button.button-secondary:showing,
-.root .menu-button.button-primary:focused, .root .menu-button.button-secondary:focused {
+.root .menu-button.button-primary:focused, .root .menu-button.button-secondary:focused,
+.root .button.button-play:hover, .root .button.button-success:hover,
+.root .button.button-imdb:hover, .root .button.button-warning:hover,
+.root .button.button-danger:hover, .root .button.button-info:hover,
+.root .button.button-purple:hover, .analytics-action-button:hover {
     -fx-background-color: #2178dd;
     -fx-text-fill: white;
     -fx-opacity: 1.0;
@@ -285,11 +301,22 @@
 }
 
 .root .button.button-primary:pressed, .root .button.button-secondary:pressed,
-.root .menu-button.button-primary:pressed, .root .menu-button.button-secondary:pressed {
+.root .menu-button.button-primary:pressed, .root .menu-button.button-secondary:pressed,
+.root .button.button-play:pressed, .root .button.button-success:pressed,
+.root .button.button-imdb:pressed, .root .button.button-warning:pressed,
+.root .button.button-danger:pressed, .root .button.button-info:pressed,
+.root .button.button-purple:pressed, .analytics-action-button:pressed {
     -fx-background-color: #2178dd;
     -fx-opacity: 1.0;
     -fx-effect: none;
     -fx-border-color: transparent;
+}
+
+.button-imdb .button-svg, .button-warning .button-svg,
+.button-play .button-svg, .button-success .button-svg,
+.button-danger .button-svg, .button-info .button-svg, .button-purple .button-svg,
+.analytics-btn-svg {
+    -fx-fill: white;
 }
 
 /* Custom Text Inputs */
@@ -481,6 +508,21 @@
     -fx-effect: dropshadow(three-pass-box, rgba(33, 120, 221, 0.15), 8, 0, 0, 2);
 }
 
+/* Harmonious Color Variations for Analytics KPI Cards */
+.kpi-card-blue .analytics-kpi-svg { -fx-fill: #2178dd; }
+.kpi-card-gold .analytics-kpi-svg { -fx-fill: #ED8B00; }
+.kpi-card-emerald .analytics-kpi-svg { -fx-fill: #10b981; }
+.kpi-card-purple .analytics-kpi-svg { -fx-fill: #8b5cf6; }
+.kpi-card-cyan .analytics-kpi-svg { -fx-fill: #06b6d4; }
+.kpi-card-rose .analytics-kpi-svg { -fx-fill: #f43f5e; }
+
+.kpi-card-blue:hover { -fx-border-color: rgba(33, 120, 221, 0.5); -fx-effect: dropshadow(three-pass-box, rgba(33, 120, 221, 0.2), 8, 0, 0, 2); }
+.kpi-card-gold:hover { -fx-border-color: rgba(237, 139, 0, 0.5); -fx-effect: dropshadow(three-pass-box, rgba(237, 139, 0, 0.2), 8, 0, 0, 2); }
+.kpi-card-emerald:hover { -fx-border-color: rgba(16, 185, 129, 0.5); -fx-effect: dropshadow(three-pass-box, rgba(16, 185, 129, 0.2), 8, 0, 0, 2); }
+.kpi-card-purple:hover { -fx-border-color: rgba(139, 92, 246, 0.5); -fx-effect: dropshadow(three-pass-box, rgba(139, 92, 246, 0.2), 8, 0, 0, 2); }
+.kpi-card-cyan:hover { -fx-border-color: rgba(6, 182, 212, 0.5); -fx-effect: dropshadow(three-pass-box, rgba(6, 182, 212, 0.2), 8, 0, 0, 2); }
+.kpi-card-rose:hover { -fx-border-color: rgba(244, 63, 94, 0.5); -fx-effect: dropshadow(three-pass-box, rgba(244, 63, 94, 0.2), 8, 0, 0, 2); }
+
 .analytics-kpi-icon {
     -fx-font-size: 18px;
 }
@@ -557,7 +599,7 @@
     -fx-text-fill: #2178dd;
 }
 
-/* JavaFX Chart Custom Styling */
+/* JavaFX Chart Custom Styling with Palette Harmony */
 .chart {
     -fx-padding: 10px 5px 5px 5px;
 }
@@ -577,8 +619,33 @@
     -fx-background-color: #2178dd;
 }
 
-.chart-bar:hover {
-    -fx-background-color: #3388ee;
+#decadeChart .chart-bar {
+    -fx-bar-fill: #2178dd;
+    -fx-background-color: #2178dd;
+}
+
+#decadeChart .chart-bar:hover {
+    -fx-background-color: #1d64ba;
+    -fx-cursor: hand;
+}
+
+#ratingChart .chart-bar {
+    -fx-bar-fill: #ED8B00;
+    -fx-background-color: #ED8B00;
+}
+
+#ratingChart .chart-bar:hover {
+    -fx-background-color: #d67d00;
+    -fx-cursor: hand;
+}
+
+#genreChart .chart-bar {
+    -fx-bar-fill: #8b5cf6;
+    -fx-background-color: #8b5cf6;
+}
+
+#genreChart .chart-bar:hover {
+    -fx-background-color: #7c3aed;
     -fx-cursor: hand;
 }
 
@@ -650,4 +717,17 @@
     -fx-min-height: 6px;
     -fx-max-height: 6px;
 }
+
+.ranking-bar-fill-top1 {
+    -fx-background-color: #ED8B00;
+}
+
+.ranking-bar-fill-top2 {
+    -fx-background-color: #a0aec0;
+}
+
+.ranking-bar-fill-top3 {
+    -fx-background-color: #cd7f32;
+}
+
 
