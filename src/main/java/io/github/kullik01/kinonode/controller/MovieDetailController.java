@@ -255,7 +255,8 @@ public class MovieDetailController {
 
   private SVGPath createCameraSvg() {
     SVGPath tmpIcon = new SVGPath();
-    tmpIcon.setContent("M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z");
+    tmpIcon.setContent(
+        "M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z");
     tmpIcon.setScaleX(0.75);
     tmpIcon.setScaleY(0.75);
     return tmpIcon;
@@ -277,7 +278,8 @@ public class MovieDetailController {
 
     // Clear Rating button (Reset to unrated) with SVG cross icon
     SVGPath tmpClearIcon = new SVGPath();
-    tmpClearIcon.setContent("M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z");
+    tmpClearIcon.setContent(
+        "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z");
     tmpClearIcon.setScaleX(0.65);
     tmpClearIcon.setScaleY(0.65);
     tmpClearIcon.setStyle("-fx-fill: #e55353;");
@@ -305,8 +307,7 @@ public class MovieDetailController {
       tmpReel.setMinSize(javafx.scene.control.Label.USE_PREF_SIZE,
           javafx.scene.control.Label.USE_PREF_SIZE);
       tmpReel.getStyleClass().add("rating-reel");
-      tmpReel.setStyle(
-          "-fx-cursor: hand; -fx-padding: 0 1px;");
+      tmpReel.setStyle("-fx-cursor: hand; -fx-padding: 0 1px;");
       Tooltip tmpReelTooltip = new Tooltip("Rate " + tmpScore + "/10");
       tmpReelTooltip.setShowDelay(javafx.util.Duration.millis(250));
       tmpReel.setTooltip(tmpReelTooltip);

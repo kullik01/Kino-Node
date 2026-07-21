@@ -444,3 +444,202 @@
 .main-content-vbox {
     -fx-background-color: -color-bg-default;
 }
+
+/* Analytics Dashboard Professional Styling */
+.analytics-header-card {
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 20px 24px;
+}
+
+.analytics-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2178dd;
+}
+
+.analytics-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: -color-fg-muted;
+}
+
+.analytics-kpi-card {
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 16px 18px;
+    -fx-spacing: 4px;
+}
+
+.analytics-kpi-card:hover {
+    -fx-border-color: -color-accent-muted;
+    -fx-effect: dropshadow(three-pass-box, rgba(33, 120, 221, 0.15), 8, 0, 0, 2);
+}
+
+.analytics-kpi-icon {
+    -fx-font-size: 18px;
+}
+
+.analytics-kpi-title {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-muted;
+}
+
+.analytics-kpi-value {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-default;
+}
+
+.analytics-kpi-subtitle {
+    -fx-font-size: 11px;
+    -fx-text-fill: -color-fg-muted;
+}
+
+.analytics-section-card {
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 18px;
+}
+
+.analytics-section-header {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-default;
+}
+
+.analytics-action-button {
+    -fx-background-color: #2178dd;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 16px;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+}
+
+.analytics-action-button:hover {
+    -fx-background-color: #1a64bd;
+}
+
+.analytics-action-button-secondary {
+    -fx-background-color: -color-bg-default;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-text-fill: -color-fg-default;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+}
+
+.analytics-action-button-secondary:hover {
+    -fx-border-color: #2178dd;
+    -fx-text-fill: #2178dd;
+}
+
+/* JavaFX Chart Custom Styling */
+.chart {
+    -fx-padding: 10px 5px 5px 5px;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.chart-vertical-grid-lines, .chart-horizontal-grid-lines {
+    -fx-stroke: -color-border-muted;
+    -fx-stroke-dash-array: 3 3;
+}
+
+.chart-bar {
+    -fx-bar-fill: #2178dd;
+    -fx-background-radius: 4px 4px 0 0;
+    -fx-background-color: #2178dd;
+}
+
+.chart-bar:hover {
+    -fx-background-color: #3388ee;
+    -fx-cursor: hand;
+}
+
+.axis {
+    -fx-tick-label-fill: -color-fg-muted;
+    -fx-font-size: 11px;
+}
+
+.axis-label {
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+/* Ranking Row Styling */
+.ranking-row {
+    -fx-padding: 10px 14px;
+    -fx-background-color: -color-bg-default;
+    -fx-background-radius: 8px;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-alignment: center-left;
+}
+
+.ranking-row:hover {
+    -fx-border-color: -color-accent-muted;
+    -fx-background-color: -color-bg-subtle;
+}
+
+.rank-badge {
+    -fx-background-color: -color-bg-subtle;
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-padding: 3px 8px;
+    -fx-background-radius: 12px;
+    -fx-min-width: 28px;
+    -fx-alignment: center;
+}
+
+.rank-badge-top1 {
+    -fx-background-color: rgba(237, 139, 0, 0.2);
+    -fx-text-fill: #ED8B00;
+}
+
+.rank-badge-top2 {
+    -fx-background-color: rgba(160, 174, 192, 0.2);
+    -fx-text-fill: #a0aec0;
+}
+
+.rank-badge-top3 {
+    -fx-background-color: rgba(205, 127, 50, 0.2);
+    -fx-text-fill: #cd7f32;
+}
+
+.ranking-bar-track {
+    -fx-background-color: -color-bg-subtle;
+    -fx-background-radius: 4px;
+    -fx-pref-height: 6px;
+    -fx-min-height: 6px;
+    -fx-max-height: 6px;
+}
+
+.ranking-bar-fill {
+    -fx-background-color: #2178dd;
+    -fx-background-radius: 4px;
+    -fx-pref-height: 6px;
+    -fx-min-height: 6px;
+    -fx-max-height: 6px;
+}
+

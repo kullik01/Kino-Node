@@ -39,12 +39,9 @@ package io.github.kullik01.kinonode.controller;
 
 import io.github.kullik01.kinonode.model.Movie;
 import io.github.kullik01.kinonode.model.Watchlist;
-import io.github.kullik01.kinonode.service.AnalyticsService;
 import io.github.kullik01.kinonode.service.AppContext;
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,15 +49,16 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
 /**
- * Controller for the Analytics & Portability dashboard view. Computes live
- * statistics for the collection and offers catalog export and database backup
- * actions.
+ * Controller for the Analytics dashboard view. Computes live statistics for the
+ * collection (movies per decade, rating distribution, genre distribution, and
+ * top cast & crew rankings) and offers catalog export capabilities.
  */
 public class AnalyticsController implements Refreshable {
   private static final Logger LOGGER =
@@ -83,14 +81,24 @@ public class AnalyticsController implements Refreshable {
   private BarChart<String, Number> decadeChart;
   @FXML
   private BarChart<String, Number> ratingChart;
+  @FXML
+  private BarChart<String, Number> genreChart;
 
   @FXML
-  private VBox topDirectorsBox;
+  private ComboBox<String> comboRoleFilter;
   @FXML
-  private VBox topActorsBox;
+  private VBox topPeopleBox;
+
+  private final Map<String, Map<String, Integer>> roleFrequencies =
+      new HashMap<>();
 
   @FXML
   public void initialize() {
+    if (comboRoleFilter != null && comboRoleFilter.getItems().isEmpty()) {
+      comboRoleFilter.getItems().addAll("Director(s)", "Writer(s)",
+          "Producer(s)", "Cinematographer(s)", "Composer(s)", "Actor(s)");
+      comboRoleFilter.setValue("Director(s)");
+    }
     refresh();
   }
 
@@ -117,6 +125,10 @@ public class AnalyticsController implements Refreshable {
     }
 
     Map<String, Integer> tmpDirectors = new HashMap<>();
+    Map<String, Integer> tmpWriters = new HashMap<>();
+    Map<String, Integer> tmpProducers = new HashMap<>();
+    Map<String, Integer> tmpCinematographers = new HashMap<>();
+    Map<String, Integer> tmpComposers = new HashMap<>();
     Map<String, Integer> tmpActors = new HashMap<>();
     Map<String, Integer> tmpGenres = new HashMap<>();
 
@@ -147,25 +159,20 @@ public class AnalyticsController implements Refreshable {
         }
       }
 
-      if (tmpMovie.getDirector() != null && !tmpMovie.getDirector().isBlank()) {
-        for (String tmpDir : tmpMovie.getDirector().split(",")) {
-          String tmpClean = tmpDir.trim();
-          if (!tmpClean.isEmpty() && !tmpClean.equalsIgnoreCase("Unknown")) {
-            tmpDirectors.put(tmpClean,
-                tmpDirectors.getOrDefault(tmpClean, 0) + 1);
-          }
-        }
-      }
-
-      if (tmpMovie.getActors() != null && !tmpMovie.getActors().isBlank()) {
-        for (String tmpAct : tmpMovie.getActors().split(",")) {
-          String tmpClean = tmpAct.trim();
-          if (!tmpClean.isEmpty() && !tmpClean.equalsIgnoreCase("Unknown")) {
-            tmpActors.put(tmpClean, tmpActors.getOrDefault(tmpClean, 0) + 1);
-          }
-        }
-      }
+      parseAndCount(tmpMovie.getDirector(), tmpDirectors);
+      parseAndCount(tmpMovie.getWriter(), tmpWriters);
+      parseAndCount(tmpMovie.getProducer(), tmpProducers);
+      parseAndCount(tmpMovie.getCinematographer(), tmpCinematographers);
+      parseAndCount(tmpMovie.getComposer(), tmpComposers);
+      parseAndCount(tmpMovie.getActors(), tmpActors);
     }
+
+    roleFrequencies.put("Director(s)", tmpDirectors);
+    roleFrequencies.put("Writer(s)", tmpWriters);
+    roleFrequencies.put("Producer(s)", tmpProducers);
+    roleFrequencies.put("Cinematographer(s)", tmpCinematographers);
+    roleFrequencies.put("Composer(s)", tmpComposers);
+    roleFrequencies.put("Actor(s)", tmpActors);
 
     if (tmpRatedCount > 0) {
       lblAvgRating
@@ -193,10 +200,40 @@ public class AnalyticsController implements Refreshable {
     // Populate charts
     populateDecadeChart(tmpDecades);
     populateRatingChart(tmpRatings);
+    populateGenreChart(tmpGenres);
 
-    // Populate Top Lists
-    populateRankingList(topDirectorsBox, tmpDirectors, 5);
-    populateRankingList(topActorsBox, tmpActors, 5);
+    // Populate Top People
+    updateTopPeople();
+  }
+
+  private void parseAndCount(String rawField, Map<String, Integer> targetMap) {
+    if (rawField != null && !rawField.isBlank()) {
+      for (String token : rawField.split(",")) {
+        String tmpClean = token.trim();
+        if (!tmpClean.isEmpty() && !tmpClean.equals("...")
+            && !tmpClean.equalsIgnoreCase("Unknown")) {
+          targetMap.put(tmpClean, targetMap.getOrDefault(tmpClean, 0) + 1);
+        }
+      }
+    }
+  }
+
+  @FXML
+  private void handleRoleFilterChange() {
+    updateTopPeople();
+  }
+
+  private void updateTopPeople() {
+    if (comboRoleFilter == null || topPeopleBox == null) {
+      return;
+    }
+    String selectedRole = comboRoleFilter.getValue();
+    if (selectedRole == null) {
+      selectedRole = "Director(s)";
+    }
+    Map<String, Integer> frequencies =
+        roleFrequencies.getOrDefault(selectedRole, Collections.emptyMap());
+    populateRankingList(topPeopleBox, frequencies, 5);
   }
 
   private void populateDecadeChart(Map<String, Integer> decades) {
@@ -207,10 +244,19 @@ public class AnalyticsController implements Refreshable {
     XYChart.Series<String, Number> tmpSeries = new XYChart.Series<>();
     tmpSeries.setName("Movies per Decade");
     for (Map.Entry<String, Integer> tmpEntry : decades.entrySet()) {
-      tmpSeries.getData()
-          .add(new XYChart.Data<>(tmpEntry.getKey(), tmpEntry.getValue()));
+      XYChart.Data<String, Number> tmpData =
+          new XYChart.Data<>(tmpEntry.getKey(), tmpEntry.getValue());
+      tmpSeries.getData().add(tmpData);
     }
     decadeChart.getData().add(tmpSeries);
+
+    for (XYChart.Data<String, Number> tmpData : tmpSeries.getData()) {
+      if (tmpData.getNode() != null) {
+        javafx.scene.control.Tooltip.install(tmpData.getNode(),
+            new javafx.scene.control.Tooltip(tmpData.getXValue() + ": "
+                + tmpData.getYValue() + " title(s)"));
+      }
+    }
   }
 
   private void populateRatingChart(Map<String, Integer> ratings) {
@@ -221,10 +267,44 @@ public class AnalyticsController implements Refreshable {
     XYChart.Series<String, Number> tmpSeries = new XYChart.Series<>();
     tmpSeries.setName("Rating Distribution");
     for (Map.Entry<String, Integer> tmpEntry : ratings.entrySet()) {
-      tmpSeries.getData()
-          .add(new XYChart.Data<>(tmpEntry.getKey(), tmpEntry.getValue()));
+      XYChart.Data<String, Number> tmpData =
+          new XYChart.Data<>(tmpEntry.getKey(), tmpEntry.getValue());
+      tmpSeries.getData().add(tmpData);
     }
     ratingChart.getData().add(tmpSeries);
+
+    for (XYChart.Data<String, Number> tmpData : tmpSeries.getData()) {
+      if (tmpData.getNode() != null) {
+        javafx.scene.control.Tooltip.install(tmpData.getNode(),
+            new javafx.scene.control.Tooltip(tmpData.getXValue() + ": "
+                + tmpData.getYValue() + " title(s)"));
+      }
+    }
+  }
+
+  private void populateGenreChart(Map<String, Integer> genres) {
+    if (genreChart == null) {
+      return;
+    }
+    genreChart.getData().clear();
+    XYChart.Series<String, Number> tmpSeries = new XYChart.Series<>();
+    tmpSeries.setName("Movies per Genre");
+    genres.entrySet().stream()
+        .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+        .limit(10).forEach(entry -> {
+          XYChart.Data<String, Number> tmpData =
+              new XYChart.Data<>(entry.getKey(), entry.getValue());
+          tmpSeries.getData().add(tmpData);
+        });
+    genreChart.getData().add(tmpSeries);
+
+    for (XYChart.Data<String, Number> tmpData : tmpSeries.getData()) {
+      if (tmpData.getNode() != null) {
+        javafx.scene.control.Tooltip.install(tmpData.getNode(),
+            new javafx.scene.control.Tooltip(tmpData.getXValue() + ": "
+                + tmpData.getYValue() + " title(s)"));
+      }
+    }
   }
 
   private void populateRankingList(VBox container,
@@ -233,23 +313,72 @@ public class AnalyticsController implements Refreshable {
       return;
     }
     container.getChildren().clear();
-    frequencies.entrySet().stream()
+
+    if (frequencies == null || frequencies.isEmpty()) {
+      Label tmpEmpty = new Label("No statistics available for this role");
+      tmpEmpty.getStyleClass().add("analytics-subtitle");
+      container.getChildren().add(tmpEmpty);
+      return;
+    }
+
+    List<Map.Entry<String, Integer>> tmpSorted = frequencies.entrySet().stream()
         .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-        .limit(limit).forEach(entry -> {
-          HBox tmpRow = new HBox(10);
-          tmpRow.setStyle(
-              "-fx-padding: 8 12; -fx-background-color: -color-bg-default; -fx-background-radius: 6; -fx-border-color: -color-border-default; -fx-border-radius: 6; -fx-border-width: 1;");
-          Label tmpName = new Label(entry.getKey());
-          tmpName.setStyle(
-              "-fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
-          Label tmpCount = new Label(entry.getValue() + " title(s)");
-          tmpCount.setStyle("-fx-text-fill: -color-fg-muted;");
-          javafx.scene.layout.Region tmpSpacer =
-              new javafx.scene.layout.Region();
-          HBox.setHgrow(tmpSpacer, javafx.scene.layout.Priority.ALWAYS);
-          tmpRow.getChildren().addAll(tmpName, tmpSpacer, tmpCount);
-          container.getChildren().add(tmpRow);
-        });
+        .limit(limit).toList();
+
+    int tmpMaxCount =
+        tmpSorted.stream().mapToInt(Map.Entry::getValue).max().orElse(1);
+
+    int rank = 1;
+    for (Map.Entry<String, Integer> entry : tmpSorted) {
+      VBox tmpCard = new VBox(6);
+      tmpCard.getStyleClass().add("ranking-row");
+
+      HBox tmpHeader = new HBox(10);
+      tmpHeader.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+      Label tmpBadge = new Label("#" + rank);
+      tmpBadge.getStyleClass().add("rank-badge");
+      if (rank == 1) {
+        tmpBadge.getStyleClass().add("rank-badge-top1");
+      } else if (rank == 2) {
+        tmpBadge.getStyleClass().add("rank-badge-top2");
+      } else if (rank == 3) {
+        tmpBadge.getStyleClass().add("rank-badge-top3");
+      }
+
+      Label tmpName = new Label(entry.getKey());
+      tmpName
+          .setStyle("-fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
+
+      javafx.scene.layout.Region tmpSpacer = new javafx.scene.layout.Region();
+      HBox.setHgrow(tmpSpacer, javafx.scene.layout.Priority.ALWAYS);
+
+      int count = entry.getValue();
+      Label tmpCount = new Label(count + (count == 1 ? " title" : " titles"));
+      tmpCount.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;");
+
+      tmpHeader.getChildren().addAll(tmpBadge, tmpName, tmpSpacer, tmpCount);
+
+      // Relative visual bar track & fill
+      javafx.scene.layout.StackPane tmpTrack =
+          new javafx.scene.layout.StackPane();
+      tmpTrack.getStyleClass().add("ranking-bar-track");
+      tmpTrack.setMaxWidth(Double.MAX_VALUE);
+
+      double tmpRatio = (double) count / tmpMaxCount;
+      javafx.scene.layout.Region tmpFill = new javafx.scene.layout.Region();
+      tmpFill.getStyleClass().add("ranking-bar-fill");
+      tmpFill.prefWidthProperty()
+          .bind(tmpTrack.widthProperty().multiply(tmpRatio));
+
+      tmpTrack.getChildren().add(tmpFill);
+      javafx.scene.layout.StackPane.setAlignment(tmpFill,
+          javafx.geometry.Pos.CENTER_LEFT);
+
+      tmpCard.getChildren().addAll(tmpHeader, tmpTrack);
+      container.getChildren().add(tmpCard);
+      rank++;
+    }
   }
 
   @FXML
@@ -331,8 +460,8 @@ public class AnalyticsController implements Refreshable {
   private void handleBackupDatabase() {
     FileChooser tmpChooser = new FileChooser();
     tmpChooser.setTitle("Backup SQLite Database");
-    String tmpTimestamp = LocalDateTime.now()
-        .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+    String tmpTimestamp = java.time.LocalDateTime.now().format(
+        java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
     tmpChooser.setInitialFileName("kinonode_backup_" + tmpTimestamp + ".db");
     tmpChooser.getExtensionFilters()
         .add(new FileChooser.ExtensionFilter("SQLite Database (*.db)", "*.db"));

@@ -179,7 +179,8 @@ public class WatchlistsController implements Refreshable {
           for (int tmpIndex = 1; tmpIndex <= 10; tmpIndex++) {
             Label tmpReel = new Label();
             SVGPath tmpIcon = new SVGPath();
-            tmpIcon.setContent("M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z");
+            tmpIcon.setContent(
+                "M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z");
             tmpIcon.setScaleX(0.65);
             tmpIcon.setScaleY(0.65);
             tmpReel.setGraphic(tmpIcon);
