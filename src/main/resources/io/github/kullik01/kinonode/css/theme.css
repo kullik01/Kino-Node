@@ -485,6 +485,14 @@
     -fx-font-size: 18px;
 }
 
+.analytics-kpi-svg {
+    -fx-fill: #2178dd;
+}
+
+.analytics-btn-svg {
+    -fx-fill: white;
+}
+
 .analytics-kpi-title {
     -fx-font-size: 11px;
     -fx-font-weight: bold;
