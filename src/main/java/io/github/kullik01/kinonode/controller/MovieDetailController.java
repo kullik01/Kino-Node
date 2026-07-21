@@ -62,9 +62,11 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.SVGPath;
 import javafx.stage.FileChooser;
 
 /**
@@ -125,7 +127,7 @@ public class MovieDetailController {
   private TextField txtTrailerUrl;
 
   @FXML
-  private HBox ratingContainer;
+  private FlowPane ratingContainer;
   @FXML
   private Label lblWatchlistsList;
   @FXML
@@ -251,15 +253,40 @@ public class MovieDetailController {
     }
   }
 
+  private SVGPath createCameraSvg() {
+    SVGPath tmpIcon = new SVGPath();
+    tmpIcon.setContent("M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z");
+    tmpIcon.setScaleX(0.75);
+    tmpIcon.setScaleY(0.75);
+    return tmpIcon;
+  }
+
+  private void setReelState(Label reelLabel, boolean active) {
+    SVGPath tmpIcon = (SVGPath) reelLabel.getGraphic();
+    if (tmpIcon != null) {
+      if (active) {
+        tmpIcon.setStyle("-fx-fill: #ED8B00; -fx-opacity: 1.0;");
+      } else {
+        tmpIcon.setStyle("-fx-fill: #666666; -fx-opacity: 0.35;");
+      }
+    }
+  }
+
   private void buildRatingWidget() {
     ratingContainer.getChildren().clear();
 
-    // Clear Rating button (Reset to unrated)
-    Button tmpBtnClear = new Button("❌");
+    // Clear Rating button (Reset to unrated) with SVG cross icon
+    SVGPath tmpClearIcon = new SVGPath();
+    tmpClearIcon.setContent("M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z");
+    tmpClearIcon.setScaleX(0.65);
+    tmpClearIcon.setScaleY(0.65);
+    tmpClearIcon.setStyle("-fx-fill: #e55353;");
+    Button tmpBtnClear = new Button("", tmpClearIcon);
     tmpBtnClear.setMinSize(javafx.scene.control.Button.USE_PREF_SIZE,
         javafx.scene.control.Button.USE_PREF_SIZE);
     tmpBtnClear.setStyle(
-        "-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 2px; -fx-font-size: 11px;");
+        "-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 2px;");
+    tmpBtnClear.managedProperty().bind(tmpBtnClear.visibleProperty());
     Tooltip tmpClearTooltip = new Tooltip("Clear rating (unrated)");
     tmpClearTooltip.setShowDelay(javafx.util.Duration.millis(250));
     tmpBtnClear.setTooltip(tmpClearTooltip);
@@ -273,12 +300,13 @@ public class MovieDetailController {
     List<Label> tmpReels = new ArrayList<>();
     for (int tmpIndex = 1; tmpIndex <= 10; tmpIndex++) {
       final int tmpScore = tmpIndex;
-      Label tmpReel = new Label("🎥");
+      Label tmpReel = new Label();
+      tmpReel.setGraphic(createCameraSvg());
       tmpReel.setMinSize(javafx.scene.control.Label.USE_PREF_SIZE,
           javafx.scene.control.Label.USE_PREF_SIZE);
       tmpReel.getStyleClass().add("rating-reel");
       tmpReel.setStyle(
-          "-fx-cursor: hand; -fx-font-size: 15px; -fx-padding: 0 1px;");
+          "-fx-cursor: hand; -fx-padding: 0 1px;");
       Tooltip tmpReelTooltip = new Tooltip("Rate " + tmpScore + "/10");
       tmpReelTooltip.setShowDelay(javafx.util.Duration.millis(250));
       tmpReel.setTooltip(tmpReelTooltip);
@@ -286,9 +314,12 @@ public class MovieDetailController {
         currentRating = tmpScore;
         updateRatingUI();
       });
+      tmpReel.setOnMouseEntered(e -> previewRatingHover(tmpScore));
       tmpReels.add(tmpReel);
       ratingContainer.getChildren().add(tmpReel);
     }
+
+    ratingContainer.setOnMouseExited(e -> updateRatingUI());
 
     // Numerical display label positioned at the end of the rating container
     Label tmpLblRatingVal = new Label();
@@ -299,6 +330,18 @@ public class MovieDetailController {
     ratingContainer.getChildren().add(tmpLblRatingVal);
 
     updateRatingUI();
+  }
+
+  private void previewRatingHover(int hoverScore) {
+    Label tmpLblRatingVal = (Label) ratingContainer.getChildren()
+        .get(ratingContainer.getChildren().size() - 1);
+    for (int tmpIndex = 1; tmpIndex <= 10; tmpIndex++) {
+      Label tmpReel = (Label) ratingContainer.getChildren().get(tmpIndex);
+      setReelState(tmpReel, tmpIndex <= hoverScore);
+    }
+    tmpLblRatingVal.setText(hoverScore + "/10");
+    tmpLblRatingVal.setStyle(
+        "-fx-text-fill: #ED8B00; -fx-font-weight: bold; -fx-padding: 0 0 0 10px;");
   }
 
   private void updateRatingUI() {
@@ -313,22 +356,17 @@ public class MovieDetailController {
       // Gray out all film reels when unrated
       for (int tmpIndex = 1; tmpIndex <= 10; tmpIndex++) {
         Label tmpReel = (Label) ratingContainer.getChildren().get(tmpIndex);
-        tmpReel.setStyle(
-            "-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #444444; -fx-opacity: 0.3;");
+        setReelState(tmpReel, false);
       }
-      tmpLblRatingVal.setText("");
+      tmpLblRatingVal.setText("Unrated");
+      tmpLblRatingVal.setStyle(
+          "-fx-text-fill: -color-fg-muted; -fx-font-style: italic; -fx-padding: 0 0 0 10px;");
     } else {
       tmpBtnClear.setVisible(true);
       // Highlight rating reels up to the current selected rating level
       for (int tmpIndex = 1; tmpIndex <= 10; tmpIndex++) {
         Label tmpReel = (Label) ratingContainer.getChildren().get(tmpIndex);
-        if (tmpIndex <= currentRating) {
-          tmpReel.setStyle(
-              "-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #ED8B00; -fx-opacity: 1.0;");
-        } else {
-          tmpReel.setStyle(
-              "-fx-cursor: hand; -fx-font-size: 15px; -fx-text-fill: #444444; -fx-opacity: 0.3;");
-        }
+        setReelState(tmpReel, tmpIndex <= currentRating);
       }
       tmpLblRatingVal.setText(currentRating + "/10");
       tmpLblRatingVal.setStyle(

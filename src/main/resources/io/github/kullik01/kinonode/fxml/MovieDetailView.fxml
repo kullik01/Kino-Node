@@ -42,6 +42,7 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
@@ -255,9 +256,9 @@
                 
                 <!-- Rating -->
                 <Label style="-fx-font-weight: bold;" text="Rating:" GridPane.columnIndex="0" GridPane.rowIndex="10" />
-                <HBox fx:id="ratingContainer" alignment="CENTER_LEFT" spacing="2.0" GridPane.columnIndex="1" GridPane.rowIndex="10">
+                <FlowPane fx:id="ratingContainer" alignment="CENTER_LEFT" hgap="2.0" vgap="4.0" GridPane.columnIndex="1" GridPane.rowIndex="10">
                     <!-- Rating buttons and text will be populated dynamically -->
-                </HBox>
+                </FlowPane>
  
                 <!-- Watchlist association -->
                 <Label style="-fx-font-weight: bold;" text="Watchlists:" GridPane.columnIndex="0" GridPane.rowIndex="11" />

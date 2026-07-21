@@ -55,6 +55,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.SVGPath;
 
 /**
  * Controller for the Watchlists View of the application. Manages the
@@ -176,15 +177,18 @@ public class WatchlistsController implements Refreshable {
           // Render movie rating film reel icons dynamically in the cell
           ratingBox.getChildren().clear();
           for (int tmpIndex = 1; tmpIndex <= 10; tmpIndex++) {
-            Label tmpReel = new Label("🎥");
+            Label tmpReel = new Label();
+            SVGPath tmpIcon = new SVGPath();
+            tmpIcon.setContent("M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z");
+            tmpIcon.setScaleX(0.65);
+            tmpIcon.setScaleY(0.65);
+            tmpReel.setGraphic(tmpIcon);
             tmpReel.setMinSize(javafx.scene.control.Label.USE_PREF_SIZE,
                 javafx.scene.control.Label.USE_PREF_SIZE);
             if (item.getRating() != null && tmpIndex <= item.getRating()) {
-              tmpReel.setStyle(
-                  "-fx-font-size: 13px; -fx-text-fill: #ED8B00; -fx-opacity: 1.0;");
+              tmpIcon.setStyle("-fx-fill: #ED8B00; -fx-opacity: 1.0;");
             } else {
-              tmpReel.setStyle(
-                  "-fx-font-size: 13px; -fx-text-fill: #444444; -fx-opacity: 0.3;");
+              tmpIcon.setStyle("-fx-fill: #666666; -fx-opacity: 0.35;");
             }
             ratingBox.getChildren().add(tmpReel);
           }
