@@ -96,6 +96,8 @@ public class MovieDetailController {
   @FXML
   private TextField txtYear;
   @FXML
+  private TextField txtDuration;
+  @FXML
   private TextField txtGenre;
   @FXML
   private TextField txtDirector;
@@ -182,6 +184,7 @@ public class MovieDetailController {
     txtTitle.setText(movie.getTitle());
     txtYear.setText(
         movie.getYear() != null ? String.valueOf(movie.getYear()) : "");
+    txtDuration.setText(movie.getFormattedDuration());
     txtGenre.setText(movie.getGenre() != null ? movie.getGenre() : "");
     setupMultiField(movie.getDirector(), txtDirector, comboDirector);
     setupMultiField(movie.getWriter(), txtWriter, comboWriter);
@@ -874,6 +877,19 @@ public class MovieDetailController {
             movie.setYear(val.isEmpty() ? null : Integer.parseInt(val));
           } catch (NumberFormatException tmpException) {
             showStatus("Year must be a number!");
+          }
+        });
+  }
+
+  @FXML
+  private void editDuration() {
+    showEditDialog("Duration", "Duration in minutes", txtDuration,
+        InputConstraint.NUMBERS_ONLY, val -> {
+          try {
+            movie.setDuration(val.isEmpty() ? null : Integer.parseInt(val));
+            txtDuration.setText(movie.getFormattedDuration());
+          } catch (NumberFormatException tmpException) {
+            showStatus("Duration must be a number!");
           }
         });
   }

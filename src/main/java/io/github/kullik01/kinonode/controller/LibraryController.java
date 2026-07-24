@@ -108,8 +108,8 @@ public class LibraryController implements Refreshable {
 
     // Setup sort and filter options
     cmbSort.getItems().addAll("Cinematographer", "Composer", "Director",
-        "Genre", "Producer", "Rating (Highest)", "Recently Added",
-        "Release Year", "Title (A-Z)", "Writer");
+        "Genre", "Longest Movie", "Producer", "Rating (Highest)", "Recently Added",
+        "Release Year", "Shortest Movie", "Title (A-Z)", "Writer");
 
     cmbSort.setValue("Title (A-Z)");
 
@@ -218,6 +218,24 @@ public class LibraryController implements Refreshable {
           if (movie2.getRating() == null)
             return -1;
           return Integer.compare(movie2.getRating(), movie1.getRating()); // Descending
+        });
+        case "Longest Movie" -> tmpFiltered.sort((movie1, movie2) -> {
+          if (movie1.getDuration() == null && movie2.getDuration() == null)
+            return 0;
+          if (movie1.getDuration() == null)
+            return 1;
+          if (movie2.getDuration() == null)
+            return -1;
+          return Integer.compare(movie2.getDuration(), movie1.getDuration()); // Longest first
+        });
+        case "Shortest Movie" -> tmpFiltered.sort((movie1, movie2) -> {
+          if (movie1.getDuration() == null && movie2.getDuration() == null)
+            return 0;
+          if (movie1.getDuration() == null)
+            return 1;
+          if (movie2.getDuration() == null)
+            return -1;
+          return Integer.compare(movie1.getDuration(), movie2.getDuration()); // Shortest first
         });
         default -> tmpFiltered
             .sort(Comparator

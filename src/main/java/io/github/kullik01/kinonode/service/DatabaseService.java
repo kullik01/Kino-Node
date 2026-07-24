@@ -142,6 +142,7 @@ public class DatabaseService {
             cinematographer TEXT,
             composer TEXT,
             actors TEXT,
+            duration INTEGER,
             date_added INTEGER NOT NULL
         );
         """;
@@ -185,16 +186,15 @@ public class DatabaseService {
 
       // Schema migration for new columns
       String[] tmpNewColumns = {"director", "writer", "producer",
-          "cinematographer", "composer", "actors"};
+          "cinematographer", "composer", "actors", "duration"};
       for (String tmpColumn : tmpNewColumns) {
         try {
+          String colType = tmpColumn.equals("duration") ? "INTEGER" : "TEXT";
           tmpStatement
-              .execute("ALTER TABLE movies ADD COLUMN " + tmpColumn + " TEXT;");
+              .execute("ALTER TABLE movies ADD COLUMN " + tmpColumn + " " + colType + ";");
           LOGGER.info("Added new column to movies: " + tmpColumn);
         } catch (SQLException tmpException) {
-          // Ignore, column likely already exists. This avoids failure during
-          // runtime if schema is
-          // already upgraded.
+          // Ignore, column likely already exists.
         }
       }
 

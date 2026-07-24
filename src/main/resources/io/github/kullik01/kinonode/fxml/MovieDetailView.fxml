@@ -125,6 +125,7 @@
                     <RowConstraints minHeight="30.0" />
                     <RowConstraints minHeight="30.0" />
                     <RowConstraints minHeight="30.0" />
+                    <RowConstraints minHeight="30.0" />
                     <RowConstraints minHeight="100.0" prefHeight="120.0" valignment="CENTER" />
                 </rowConstraints>
                 
@@ -142,16 +143,23 @@
                     <Button onAction="#editYear" styleClass="button-secondary" text="📝" minWidth="-Infinity"><tooltip><Tooltip showDelay="250ms" text="Edit Year"/></tooltip></Button>
                 </HBox>
 
-                <!-- Genre -->
-                <Label style="-fx-font-weight: bold;" text="Genre:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <!-- Duration -->
+                <Label style="-fx-font-weight: bold;" text="Duration:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
                 <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                    <TextField fx:id="txtDuration" style="-fx-text-fill: -color-fg-default;" editable="false" mouseTransparent="true" focusTraversable="false" HBox.hgrow="ALWAYS" />
+                    <Button onAction="#editDuration" styleClass="button-secondary" text="📝" minWidth="-Infinity"><tooltip><Tooltip showDelay="250ms" text="Edit Duration"/></tooltip></Button>
+                </HBox>
+
+                <!-- Genre -->
+                <Label style="-fx-font-weight: bold;" text="Genre:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="3">
                     <TextField fx:id="txtGenre" style="-fx-text-fill: -color-fg-default;" editable="false" mouseTransparent="true" focusTraversable="false" HBox.hgrow="ALWAYS" />
                     <Button onAction="#editGenre" styleClass="button-secondary" text="📝" minWidth="-Infinity"><tooltip><Tooltip showDelay="250ms" text="Edit Genre"/></tooltip></Button>
                 </HBox>
 
                 <!-- Director -->
-                <Label style="-fx-font-weight: bold;" text="Director(s):" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="3" alignment="CENTER_LEFT">
+                <Label style="-fx-font-weight: bold;" text="Director(s):" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="4" alignment="CENTER_LEFT">
                     <StackPane HBox.hgrow="ALWAYS">
                         <TextField fx:id="txtDirector" style="-fx-text-fill: -color-fg-default;" editable="false" mouseTransparent="true" focusTraversable="false" visible="true" managed="true" />
                         <ComboBox fx:id="comboDirector" maxWidth="1.7976931348623157E308" visible="false" managed="false" />
@@ -166,8 +174,8 @@
                 </HBox>
 
                 <!-- Writer -->
-                <Label style="-fx-font-weight: bold;" text="Writer(s):" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="4" alignment="CENTER_LEFT">
+                <Label style="-fx-font-weight: bold;" text="Writer(s):" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="5" alignment="CENTER_LEFT">
                     <StackPane HBox.hgrow="ALWAYS">
                         <TextField fx:id="txtWriter" style="-fx-text-fill: -color-fg-default;" editable="false" mouseTransparent="true" focusTraversable="false" visible="true" managed="true" />
                         <ComboBox fx:id="comboWriter" maxWidth="1.7976931348623157E308" visible="false" managed="false" />
@@ -182,8 +190,8 @@
                 </HBox>
 
                 <!-- Producer -->
-                <Label style="-fx-font-weight: bold;" text="Producer(s):" GridPane.columnIndex="0" GridPane.rowIndex="5" />
-                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="5" alignment="CENTER_LEFT">
+                <Label style="-fx-font-weight: bold;" text="Producer(s):" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="6" alignment="CENTER_LEFT">
                     <StackPane HBox.hgrow="ALWAYS">
                         <TextField fx:id="txtProducer" style="-fx-text-fill: -color-fg-default;" editable="false" mouseTransparent="true" focusTraversable="false" visible="true" managed="true" />
                         <ComboBox fx:id="comboProducer" maxWidth="1.7976931348623157E308" visible="false" managed="false" />
@@ -198,8 +206,8 @@
                 </HBox>
 
                 <!-- Cinematographer -->
-                <Label style="-fx-font-weight: bold;" text="Cinematographer(s):" GridPane.columnIndex="0" GridPane.rowIndex="6" />
-                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="6" alignment="CENTER_LEFT">
+                <Label style="-fx-font-weight: bold;" text="Cinematographer(s):" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="7" alignment="CENTER_LEFT">
                     <StackPane HBox.hgrow="ALWAYS">
                         <TextField fx:id="txtCinematographer" style="-fx-text-fill: -color-fg-default;" editable="false" mouseTransparent="true" focusTraversable="false" visible="true" managed="true" />
                         <ComboBox fx:id="comboCinematographer" maxWidth="1.7976931348623157E308" visible="false" managed="false" />
@@ -214,8 +222,8 @@
                 </HBox>
 
                 <!-- Composer -->
-                <Label style="-fx-font-weight: bold;" text="Composer(s):" GridPane.columnIndex="0" GridPane.rowIndex="7" />
-                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="7" alignment="CENTER_LEFT">
+                <Label style="-fx-font-weight: bold;" text="Composer(s):" GridPane.columnIndex="0" GridPane.rowIndex="8" />
+                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="8" alignment="CENTER_LEFT">
                     <StackPane HBox.hgrow="ALWAYS">
                         <TextField fx:id="txtComposer" style="-fx-text-fill: -color-fg-default;" editable="false" mouseTransparent="true" focusTraversable="false" visible="true" managed="true" />
                         <ComboBox fx:id="comboComposer" maxWidth="1.7976931348623157E308" visible="false" managed="false" />
@@ -230,8 +238,8 @@
                 </HBox>
 
                 <!-- Actors -->
-                <Label style="-fx-font-weight: bold;" text="Actor(s):" GridPane.columnIndex="0" GridPane.rowIndex="8" />
-                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="8" alignment="CENTER_LEFT">
+                <Label style="-fx-font-weight: bold;" text="Actor(s):" GridPane.columnIndex="0" GridPane.rowIndex="9" />
+                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="9" alignment="CENTER_LEFT">
                     <StackPane HBox.hgrow="ALWAYS">
                         <TextField fx:id="txtActors" style="-fx-text-fill: -color-fg-default;" editable="false" mouseTransparent="true" focusTraversable="false" visible="true" managed="true" />
                         <ComboBox fx:id="comboActors" maxWidth="1.7976931348623157E308" visible="false" managed="false" />
@@ -246,8 +254,8 @@
                 </HBox>
 
                 <!-- Trailer URL -->
-                <Label style="-fx-font-weight: bold;" text="Trailer Link:" GridPane.columnIndex="0" GridPane.rowIndex="9" />
-                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="9">
+                <Label style="-fx-font-weight: bold;" text="Trailer Link:" GridPane.columnIndex="0" GridPane.rowIndex="10" />
+                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="10">
                     <TextField fx:id="txtTrailerUrl" style="-fx-text-fill: -color-fg-default;" editable="false" mouseTransparent="true" focusTraversable="false" promptText="https://www.youtube.com/watch?v=..." HBox.hgrow="ALWAYS" />
                     <Button fx:id="btnEditTrailer" onAction="#editTrailerUrl" styleClass="button-secondary" text="📝" minWidth="-Infinity">
                         <tooltip><Tooltip showDelay="250ms" text="Edit Trailer Link"/></tooltip>
@@ -255,14 +263,14 @@
                 </HBox>
                 
                 <!-- Rating -->
-                <Label style="-fx-font-weight: bold;" text="Rating:" GridPane.columnIndex="0" GridPane.rowIndex="10" />
-                <FlowPane fx:id="ratingContainer" alignment="CENTER_LEFT" hgap="2.0" vgap="4.0" GridPane.columnIndex="1" GridPane.rowIndex="10">
+                <Label style="-fx-font-weight: bold;" text="Rating:" GridPane.columnIndex="0" GridPane.rowIndex="11" />
+                <FlowPane fx:id="ratingContainer" alignment="CENTER_LEFT" hgap="2.0" vgap="4.0" GridPane.columnIndex="1" GridPane.rowIndex="11">
                     <!-- Rating buttons and text will be populated dynamically -->
                 </FlowPane>
  
                 <!-- Watchlist association -->
-                <Label style="-fx-font-weight: bold;" text="Watchlists:" GridPane.columnIndex="0" GridPane.rowIndex="11" />
-                <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="11">
+                <Label style="-fx-font-weight: bold;" text="Watchlists:" GridPane.columnIndex="0" GridPane.rowIndex="12" />
+                <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="12">
                     <Label fx:id="lblWatchlistsList" style="-fx-text-fill: -color-fg-muted;" text="None" HBox.hgrow="ALWAYS" />
                     <MenuButton fx:id="menuWatchlists" styleClass="button-secondary" text="➕" minWidth="-Infinity">
                         <tooltip><Tooltip showDelay="250ms" text="Add to Watchlist"/></tooltip>
@@ -270,8 +278,8 @@
                 </HBox>
 
                 <!-- Description -->
-                <Label style="-fx-font-weight: bold;" text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="12" />
-                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="12" alignment="CENTER_LEFT">
+                <Label style="-fx-font-weight: bold;" text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="13" />
+                <HBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="13" alignment="CENTER_LEFT">
                     <TextArea fx:id="txtDescription" style="-fx-text-fill: -color-fg-default;" editable="false" mouseTransparent="true" focusTraversable="false" prefHeight="100.0" wrapText="true" HBox.hgrow="ALWAYS" />
                     <Button onAction="#editDescription" styleClass="button-secondary" text="📝" minWidth="-Infinity"><tooltip><Tooltip showDelay="250ms" text="Edit Description"/></tooltip></Button>
                 </HBox>

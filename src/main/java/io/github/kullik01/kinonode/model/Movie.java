@@ -61,6 +61,7 @@ public class Movie {
   private String cinematographer;
   private String composer;
   private String actors;
+  private Integer duration; // Duration in minutes
   private Instant dateAdded;
 
   /** Constructs a new Movie with the current timestamp as the date added. */
@@ -382,6 +383,42 @@ public class Movie {
       this.actors = trimmed.isEmpty() ? null : trimmed;
     } else {
       this.actors = null;
+    }
+  }
+
+  /**
+   * Gets the duration of the movie in minutes.
+   *
+   * @return the duration in minutes, or null if unknown
+   */
+  public Integer getDuration() {
+    return duration;
+  }
+
+  /**
+   * Sets the duration of the movie in minutes.
+   *
+   * @param duration the duration in minutes to set
+   */
+  public void setDuration(Integer duration) {
+    this.duration = duration;
+  }
+
+  /**
+   * Formats the movie duration into a human-readable string (e.g., "148 min (2h 28m)").
+   *
+   * @return formatted duration string, or "—" if unknown
+   */
+  public String getFormattedDuration() {
+    if (duration == null || duration <= 0) {
+      return "—";
+    }
+    int hours = duration / 60;
+    int mins = duration % 60;
+    if (hours > 0) {
+      return String.format("%d min (%dh %dm)", duration, hours, mins);
+    } else {
+      return duration + " min";
     }
   }
 
