@@ -548,13 +548,15 @@
     -fx-border-width: 1px;
     -fx-border-radius: 10px;
     -fx-background-radius: 10px;
-    -fx-padding: 18px;
+    -fx-padding: 20px;
+    -fx-spacing: 16px;
 }
 
 .analytics-section-header {
     -fx-font-size: 15px;
     -fx-font-weight: bold;
     -fx-text-fill: -color-fg-default;
+    -fx-padding: 0 0 6px 0;
 }
 
 .analytics-action-button {
@@ -591,7 +593,7 @@
 
 /* JavaFX Chart Custom Styling with Palette Harmony */
 .chart {
-    -fx-padding: 10px 5px 5px 5px;
+    -fx-padding: 24px 5px 5px 5px;
 }
 
 .chart-plot-background {

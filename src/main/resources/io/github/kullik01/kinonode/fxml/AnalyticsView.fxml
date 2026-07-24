@@ -157,7 +157,7 @@
                 </columnConstraints>
 
                 <!-- Row 0: Charts (Decades & Ratings) -->
-                <VBox GridPane.columnIndex="0" GridPane.rowIndex="0" maxWidth="Infinity" styleClass="analytics-section-card">
+                <VBox GridPane.columnIndex="0" GridPane.rowIndex="0" maxWidth="Infinity" spacing="16.0" styleClass="analytics-section-card">
                     <Label text="Movies per Decade" styleClass="analytics-section-header"/>
                     <BarChart fx:id="decadeChart" legendVisible="false" animated="false" prefHeight="260.0">
                         <xAxis>
@@ -169,7 +169,7 @@
                     </BarChart>
                 </VBox>
                 
-                <VBox GridPane.columnIndex="1" GridPane.rowIndex="0" maxWidth="Infinity" styleClass="analytics-section-card">
+                <VBox GridPane.columnIndex="1" GridPane.rowIndex="0" maxWidth="Infinity" spacing="16.0" styleClass="analytics-section-card">
                     <Label text="Rating Breakdown (0-10)" styleClass="analytics-section-header"/>
                     <BarChart fx:id="ratingChart" legendVisible="false" animated="false" prefHeight="260.0">
                         <xAxis>
@@ -182,7 +182,7 @@
                 </VBox>
 
                 <!-- Row 1: Left: Genre Distribution Diagram | Right: Filterable Top People Window -->
-                <VBox GridPane.columnIndex="0" GridPane.rowIndex="1" maxWidth="Infinity" styleClass="analytics-section-card">
+                <VBox GridPane.columnIndex="0" GridPane.rowIndex="1" maxWidth="Infinity" spacing="16.0" styleClass="analytics-section-card">
                     <Label text="Movie Genres &amp; Appearance" styleClass="analytics-section-header"/>
                     <BarChart fx:id="genreChart" legendVisible="false" animated="false" prefHeight="260.0">
                         <xAxis>
@@ -194,13 +194,13 @@
                     </BarChart>
                 </VBox>
 
-                <VBox GridPane.columnIndex="1" GridPane.rowIndex="1" maxWidth="Infinity" styleClass="analytics-section-card">
+                <VBox GridPane.columnIndex="1" GridPane.rowIndex="1" maxWidth="Infinity" spacing="16.0" styleClass="analytics-section-card">
                     <HBox alignment="CENTER_LEFT" spacing="10.0">
                         <Label text="Top People" styleClass="analytics-section-header"/>
                         <javafx.scene.layout.Region HBox.hgrow="ALWAYS"/>
                         <ComboBox fx:id="comboRoleFilter" onAction="#handleRoleFilterChange"/>
                     </HBox>
-                    <VBox fx:id="topPeopleBox" spacing="10.0" style="-fx-padding: 10px 0 0 0;"/>
+                    <VBox fx:id="topPeopleBox" spacing="10.0" style="-fx-padding: 6px 0 0 0;"/>
                 </VBox>
             </GridPane>
             
