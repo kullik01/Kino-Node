@@ -157,14 +157,14 @@ public class ResizeHelper {
           cursorEvent = Cursor.N_RESIZE;
         } else if (tmpMouseEventY > tmpSceneHeight - border) {
           cursorEvent = Cursor.S_RESIZE;
+        if (!Cursor.DEFAULT.equals(cursorEvent)) {
+          tmpScene.setCursor(cursorEvent);
         } else {
-          cursorEvent = Cursor.DEFAULT;
+          tmpScene.setCursor(CursorUtils.getAppLogoCursor());
         }
-        tmpScene.setCursor(cursorEvent);
       } else if (MouseEvent.MOUSE_EXITED.equals(tmpMouseEventType)
           || MouseEvent.MOUSE_EXITED_TARGET.equals(tmpMouseEventType)) {
-        // Reset the cursor to default when mouse exits the window area
-        tmpScene.setCursor(Cursor.DEFAULT);
+        tmpScene.setCursor(CursorUtils.getAppLogoCursor());
       } else if (MouseEvent.MOUSE_PRESSED.equals(tmpMouseEventType)) {
         // Store mouse press anchor offsets used during resize calculation
         startX = stage.getWidth() - tmpMouseEventX;
@@ -173,6 +173,8 @@ public class ResizeHelper {
         startScreenY = mouseEvent.getScreenY();
       } else if (MouseEvent.MOUSE_DRAGGED.equals(tmpMouseEventType)) {
         if (!Cursor.DEFAULT.equals(cursorEvent)) {
+          tmpScene.setCursor(cursorEvent);
+        }
           double tmpMinWidth =
               stage.getMinWidth() > 0 ? stage.getMinWidth() : 400;
           double tmpMinHeight =

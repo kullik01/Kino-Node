@@ -51,30 +51,40 @@ public class CursorUtils {
   private static final Logger LOGGER =
       Logger.getLogger(CursorUtils.class.getName());
 
-  private static Cursor cameraCursor;
+  private static Cursor appLogoCursor;
 
   /**
-   * Gets the film camera mouse cursor based on the Rating camera icon.
+   * Gets the transparent application logo mouse cursor.
    *
-   * @return custom film camera {@link Cursor}, or {@link Cursor#HAND} as fallback
+   * @return custom application logo {@link Cursor}, or {@link Cursor#DEFAULT} as fallback
    */
-  public static Cursor getCameraCursor() {
-    if (cameraCursor == null) {
+  public static Cursor getAppLogoCursor() {
+    if (appLogoCursor == null) {
       try {
         InputStream tmpStream = CursorUtils.class.getResourceAsStream(
-            "/io/github/kullik01/kinonode/images/camera_cursor.png");
+            "/io/github/kullik01/kinonode/images/app_logo_cursor.png");
         if (tmpStream != null) {
-          Image tmpImage = new Image(tmpStream, 32, 32, true, true);
-          cameraCursor = new ImageCursor(tmpImage, 4, 4);
+          Image tmpImage = new Image(tmpStream);
+          appLogoCursor = new ImageCursor(tmpImage, tmpImage.getWidth() * 0.15,
+              tmpImage.getHeight() * 0.15);
         } else {
-          cameraCursor = Cursor.HAND;
+          appLogoCursor = Cursor.DEFAULT;
         }
       } catch (Exception tmpException) {
-        LOGGER.log(Level.WARNING, "Failed to load camera cursor image",
-            tmpException);
-        cameraCursor = Cursor.HAND;
+        LOGGER.log(Level.WARNING,
+            "Failed to load application logo cursor image", tmpException);
+        appLogoCursor = Cursor.DEFAULT;
       }
     }
-    return cameraCursor;
+    return appLogoCursor;
+  }
+
+  /**
+   * Backwards compatible method returning the application logo cursor.
+   *
+   * @return custom application logo {@link Cursor}
+   */
+  public static Cursor getCameraCursor() {
+    return getAppLogoCursor();
   }
 }

@@ -134,7 +134,7 @@
     -fx-font-size: 14px;
     -fx-padding: 10px 10px;
     -fx-background-radius: 6px;
-    -fx-cursor: hand;
+    -fx-cursor: url("../images/app_logo_cursor.png"), default;
     -fx-pref-width: 125px;
     -fx-border-color: transparent;
 }
@@ -173,7 +173,7 @@
     -fx-spacing: 6px;
     -fx-pref-width: 146px;
     -fx-pref-height: 255px;
-    -fx-cursor: hand;
+    -fx-cursor: url("../images/app_logo_cursor.png"), default;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 6, 0.0, 0, 3);
     -fx-alignment: top-center;
     -fx-border-color: -color-border-default;
@@ -226,7 +226,7 @@
 .rating-reel {
     -fx-font-size: 14px;
     -fx-text-fill: -color-fg-muted;
-    -fx-cursor: hand;
+    -fx-cursor: url("../images/app_logo_cursor.png"), default;
 }
 
 .rating-reel.active {
@@ -267,9 +267,13 @@
     -fx-text-fill: -color-fg-muted;
 }
 
-/* Accent and Global Buttons */
+/* Universal Application Logo Mouse Cursor for ALL mouse events */
+*, .root, .root * {
+    -fx-cursor: url("../images/app_logo_cursor.png"), default;
+}
+
 .root .button, .root .menu-button, .root .toggle-switch, .sidebar-button, .movie-card {
-    -fx-cursor: url("../images/camera_cursor.png"), hand;
+    -fx-cursor: url("../images/app_logo_cursor.png"), default;
 }
 
 .root .button.button-primary, .root .button.button-secondary,
@@ -284,7 +288,7 @@
     -fx-border-color: transparent;
     -fx-border-radius: 4px;
     -fx-background-radius: 4px;
-    -fx-cursor: url("../images/camera_cursor.png"), hand;
+    -fx-cursor: url("../images/app_logo_cursor.png"), default;
 }
 
 /* Force hover and pressed states to use the blue color */
@@ -571,7 +575,7 @@
     -fx-font-size: 13px;
     -fx-padding: 8px 16px;
     -fx-background-radius: 6px;
-    -fx-cursor: hand;
+    -fx-cursor: url("../images/app_logo_cursor.png"), default;
 }
 
 .analytics-action-button:hover {
@@ -588,7 +592,7 @@
     -fx-font-weight: bold;
     -fx-font-size: 13px;
     -fx-padding: 8px 16px;
-    -fx-cursor: hand;
+    -fx-cursor: url("../images/app_logo_cursor.png"), default;
 }
 
 .analytics-action-button-secondary:hover {
@@ -636,7 +640,7 @@
 
 #decadeChart .chart-bar:hover {
     -fx-background-color: #1d64ba;
-    -fx-cursor: hand;
+    -fx-cursor: url("../images/app_logo_cursor.png"), default;
 }
 
 #ratingChart .chart-bar {
@@ -646,7 +650,7 @@
 
 #ratingChart .chart-bar:hover {
     -fx-background-color: #d67d00;
-    -fx-cursor: hand;
+    -fx-cursor: url("../images/app_logo_cursor.png"), default;
 }
 
 #genreChart .chart-bar {
@@ -656,7 +660,7 @@
 
 #genreChart .chart-bar:hover {
     -fx-background-color: #1d64ba;
-    -fx-cursor: hand;
+    -fx-cursor: url("../images/app_logo_cursor.png"), default;
 }
 
 .axis {

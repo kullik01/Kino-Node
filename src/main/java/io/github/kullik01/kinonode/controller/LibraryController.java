@@ -126,6 +126,10 @@ public class LibraryController implements Refreshable {
     });
 
     btnSyncLibrary.disableProperty().bind(progressArea.visibleProperty());
+    btnSyncLibrary.setCursor(
+        io.github.kullik01.kinonode.util.CursorUtils.getCameraCursor());
+    cmbSort.setCursor(
+        io.github.kullik01.kinonode.util.CursorUtils.getCameraCursor());
 
     refresh();
   }
@@ -284,38 +288,61 @@ public class LibraryController implements Refreshable {
   }
 
   private javafx.scene.Node createEmptyStateNode(boolean isLibraryEmpty) {
-    javafx.scene.layout.VBox tmpVBox = new javafx.scene.layout.VBox(22);
-    tmpVBox.setAlignment(javafx.geometry.Pos.CENTER);
-    tmpVBox.setPadding(new javafx.geometry.Insets(40, 20, 40, 20));
-    tmpVBox.prefHeightProperty().bind(gridPane.heightProperty().subtract(30));
-    tmpVBox.setMaxWidth(Double.MAX_VALUE);
+    javafx.scene.layout.VBox tmpRootVBox = new javafx.scene.layout.VBox();
+    tmpRootVBox.setAlignment(javafx.geometry.Pos.CENTER);
+    tmpRootVBox.setPadding(new javafx.geometry.Insets(30, 20, 30, 20));
+    tmpRootVBox.prefHeightProperty().bind(gridPane.heightProperty().subtract(30));
+    tmpRootVBox.setMaxWidth(Double.MAX_VALUE);
 
-    SVGPath tmpIcon = new SVGPath();
-    tmpIcon.setContent(
-        "M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z");
-    tmpIcon.setScaleX(2.2);
-    tmpIcon.setScaleY(2.2);
-    tmpIcon.setStyle("-fx-fill: -color-fg-muted;");
+    javafx.scene.layout.VBox tmpCard = new javafx.scene.layout.VBox(20);
+    tmpCard.setAlignment(javafx.geometry.Pos.CENTER);
+    tmpCard.setMaxWidth(520);
+    tmpCard.setPadding(new javafx.geometry.Insets(36, 40, 36, 40));
+    tmpCard.setStyle(
+        "-fx-background-color: -color-bg-overlay; "
+            + "-fx-background-radius: 16px; "
+            + "-fx-border-color: -color-border-default; "
+            + "-fx-border-radius: 16px; "
+            + "-fx-effect: dropshadow(three-pass-box, rgba(33, 120, 221, 0.18), 24, 0.0, 0, 8);");
 
     if (isLibraryEmpty) {
-      Label tmpTitle = new Label("No movies found in your library");
+      Label tmpBadge = new Label("WORKSPACE CONFIGURATION");
+      tmpBadge.setStyle(
+          "-fx-background-color: rgba(33, 120, 221, 0.15); "
+              + "-fx-text-fill: #2178dd; "
+              + "-fx-font-weight: bold; "
+              + "-fx-font-size: 11px; "
+              + "-fx-padding: 4px 14px; "
+              + "-fx-background-radius: 12px;");
+
+      SVGPath tmpCameraIcon = new SVGPath();
+      tmpCameraIcon.setContent(
+          "M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z");
+      tmpCameraIcon.setScaleX(2.4);
+      tmpCameraIcon.setScaleY(2.4);
+      tmpCameraIcon.setStyle(
+          "-fx-fill: #ED8B00; -fx-effect: dropshadow(three-pass-box, rgba(237, 139, 0, 0.35), 10, 0, 0, 2);");
+
+      Label tmpTitle = new Label("Start Your Movie Library");
       tmpTitle.setStyle(
-          "-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
+          "-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
 
-      javafx.scene.layout.HBox tmpHBox = new javafx.scene.layout.HBox(12);
-      tmpHBox.setAlignment(javafx.geometry.Pos.CENTER);
+      Label tmpText = new Label(
+          "Please configure your workspace folder in Settings to scan, index, and organize your films.");
+      tmpText.setWrapText(true);
+      tmpText.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+      tmpText.setMaxWidth(420);
+      tmpText.setStyle("-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
 
-      Label tmpText =
-          new Label("Please set your workspace directory to index movies:");
-      tmpText.setStyle(
-          "-fx-font-size: 15px; -fx-text-fill: -color-fg-muted;");
+      javafx.scene.layout.HBox tmpBtnBox = new javafx.scene.layout.HBox(14);
+      tmpBtnBox.setAlignment(javafx.geometry.Pos.CENTER);
 
-      Button tmpBtnSettings = new Button();
-      tmpBtnSettings.getStyleClass().addAll("button-success", "button-icon");
-      tmpBtnSettings.setMinSize(36.0, 36.0);
-      tmpBtnSettings.setMaxSize(36.0, 36.0);
+      Button tmpBtnSettings = new Button("Configure Workspaces");
+      tmpBtnSettings.getStyleClass().addAll("button-success");
+      tmpBtnSettings.setStyle(
+          "-fx-padding: 8px 18px; -fx-font-size: 14px; -fx-font-weight: bold;");
       tmpBtnSettings.setCursor(
-          io.github.kullik01.kinonode.util.CursorUtils.getCameraCursor());
+          io.github.kullik01.kinonode.util.CursorUtils.getAppLogoCursor());
 
       SVGPath tmpGear = new SVGPath();
       tmpGear.setContent(
@@ -339,20 +366,29 @@ public class LibraryController implements Refreshable {
         }
       });
 
-      tmpHBox.getChildren().addAll(tmpText, tmpBtnSettings);
-      tmpVBox.getChildren().addAll(tmpIcon, tmpTitle, tmpHBox);
+      tmpBtnBox.getChildren().add(tmpBtnSettings);
+      tmpCard.getChildren().addAll(tmpBadge, tmpCameraIcon, tmpTitle, tmpText,
+          tmpBtnBox);
     } else {
-      Label tmpTitle = new Label("No matching movies found");
+      SVGPath tmpSearchIcon = new SVGPath();
+      tmpSearchIcon.setContent(
+          "M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z");
+      tmpSearchIcon.setScaleX(2.0);
+      tmpSearchIcon.setScaleY(2.0);
+      tmpSearchIcon.setStyle("-fx-fill: -color-fg-muted;");
+
+      Label tmpTitle = new Label("No Matching Movies Found");
       tmpTitle.setStyle(
           "-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
-      Label tmpSub =
-          new Label("Try clearing your search query or changing filters.");
+      Label tmpSub = new Label(
+          "Try clearing your search query or choosing a different filter.");
       tmpSub.setStyle(
-          "-fx-font-size: 15px; -fx-text-fill: -color-fg-muted;");
-      tmpVBox.getChildren().addAll(tmpIcon, tmpTitle, tmpSub);
+          "-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
+      tmpCard.getChildren().addAll(tmpSearchIcon, tmpTitle, tmpSub);
     }
 
-    return tmpVBox;
+    tmpRootVBox.getChildren().add(tmpCard);
+    return tmpRootVBox;
   }
 
   private void openMovieDetail(Movie movie) {

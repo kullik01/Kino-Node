@@ -131,6 +131,17 @@ public class MainController {
           toggleTheme(newValue);
         });
 
+    // Apply application logo cursor to sidebar buttons
+    javafx.scene.Cursor tmpLogoCursor =
+        io.github.kullik01.kinonode.util.CursorUtils.getAppLogoCursor();
+    btnLibrary.setCursor(tmpLogoCursor);
+    btnWatchlists.setCursor(tmpLogoCursor);
+    btnAnalytics.setCursor(tmpLogoCursor);
+    btnImdb.setCursor(tmpLogoCursor);
+    btnSettings.setCursor(tmpLogoCursor);
+    btnAbout.setCursor(tmpLogoCursor);
+    btnThemeToggle.setCursor(tmpLogoCursor);
+
     // Show Library by default
     showLibrary();
 
@@ -138,18 +149,24 @@ public class MainController {
     // immediately
     preloadView("IMDb", "/io/github/kullik01/kinonode/fxml/ImdbView.fxml");
 
-    // Query and listen to the window stage once it is rendered to apply
-    // maximized styling
+    // Apply application logo cursor globally to scene
     javafx.application.Platform.runLater(() -> {
+      javafx.scene.Scene tmpScene = rootPane.getScene();
+      if (tmpScene != null) {
+        tmpScene.setCursor(tmpLogoCursor);
+      }
+
       Stage tmpStage = (Stage) rootPane.getScene().getWindow();
-      tmpStage.maximizedProperty()
-          .addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-              rootPane.getStyleClass().add("maximized");
-            } else {
-              rootPane.getStyleClass().remove("maximized");
-            }
-          });
+      if (tmpStage != null) {
+        tmpStage.maximizedProperty()
+            .addListener((observable, oldValue, newValue) -> {
+              if (newValue) {
+                rootPane.getStyleClass().add("maximized");
+              } else {
+                rootPane.getStyleClass().remove("maximized");
+              }
+            });
+      }
     });
   }
 

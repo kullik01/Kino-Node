@@ -299,7 +299,8 @@ public class AnalyticsController implements Refreshable {
 
         node.setOnMouseEntered(e -> {
           node.setOpacity(0.85);
-          node.setCursor(javafx.scene.Cursor.HAND);
+          node.setCursor(
+              io.github.kullik01.kinonode.util.CursorUtils.getCameraCursor());
         });
         node.setOnMouseExited(e -> node.setOpacity(1.0));
       }
