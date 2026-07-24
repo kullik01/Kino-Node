@@ -284,17 +284,17 @@ public class LibraryController implements Refreshable {
   }
 
   private javafx.scene.Node createEmptyStateNode(boolean isLibraryEmpty) {
-    javafx.scene.layout.VBox tmpVBox = new javafx.scene.layout.VBox(20);
+    javafx.scene.layout.VBox tmpVBox = new javafx.scene.layout.VBox(22);
     tmpVBox.setAlignment(javafx.geometry.Pos.CENTER);
     tmpVBox.setPadding(new javafx.geometry.Insets(40, 20, 40, 20));
+    tmpVBox.prefHeightProperty().bind(gridPane.heightProperty().subtract(30));
     tmpVBox.setMaxWidth(Double.MAX_VALUE);
-    tmpVBox.setMaxHeight(Double.MAX_VALUE);
 
     SVGPath tmpIcon = new SVGPath();
     tmpIcon.setContent(
         "M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z");
-    tmpIcon.setScaleX(2.0);
-    tmpIcon.setScaleY(2.0);
+    tmpIcon.setScaleX(2.2);
+    tmpIcon.setScaleY(2.2);
     tmpIcon.setStyle("-fx-fill: -color-fg-muted;");
 
     if (isLibraryEmpty) {
@@ -314,6 +314,8 @@ public class LibraryController implements Refreshable {
       tmpBtnSettings.getStyleClass().addAll("button-success", "button-icon");
       tmpBtnSettings.setMinSize(36.0, 36.0);
       tmpBtnSettings.setMaxSize(36.0, 36.0);
+      tmpBtnSettings.setCursor(
+          io.github.kullik01.kinonode.util.CursorUtils.getCameraCursor());
 
       SVGPath tmpGear = new SVGPath();
       tmpGear.setContent(
