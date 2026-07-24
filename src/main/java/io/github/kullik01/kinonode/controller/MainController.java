@@ -185,7 +185,7 @@ public class MainController {
   }
 
   @FXML
-  private void showSettings() {
+  public void showSettings() {
     navigate("Settings", "/io/github/kullik01/kinonode/fxml/SettingsView.fxml",
         btnSettings);
   }

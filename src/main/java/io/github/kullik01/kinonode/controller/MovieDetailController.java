@@ -184,7 +184,13 @@ public class MovieDetailController {
     txtTitle.setText(movie.getTitle());
     txtYear.setText(
         movie.getYear() != null ? String.valueOf(movie.getYear()) : "");
-    txtDuration.setText(movie.getFormattedDuration());
+    if (movie.getDuration() != null && movie.getDuration() > 0) {
+      txtDuration.setText(movie.getFormattedDuration());
+      txtDuration.setStyle("-fx-text-fill: -color-fg-default;");
+    } else {
+      txtDuration.setText("Not specified (Click 📝 to set duration)");
+      txtDuration.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-style: italic;");
+    }
     txtGenre.setText(movie.getGenre() != null ? movie.getGenre() : "");
     setupMultiField(movie.getDirector(), txtDirector, comboDirector);
     setupMultiField(movie.getWriter(), txtWriter, comboWriter);
@@ -886,8 +892,15 @@ public class MovieDetailController {
     showEditDialog("Duration", "Duration in minutes", txtDuration,
         InputConstraint.NUMBERS_ONLY, val -> {
           try {
-            movie.setDuration(val.isEmpty() ? null : Integer.parseInt(val));
-            txtDuration.setText(movie.getFormattedDuration());
+            if (val.isEmpty()) {
+              movie.setDuration(null);
+              txtDuration.setText("Not specified (Click 📝 to set duration)");
+              txtDuration.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-style: italic;");
+            } else {
+              movie.setDuration(Integer.parseInt(val));
+              txtDuration.setText(movie.getFormattedDuration());
+              txtDuration.setStyle("-fx-text-fill: -color-fg-default;");
+            }
           } catch (NumberFormatException tmpException) {
             showStatus("Duration must be a number!");
           }

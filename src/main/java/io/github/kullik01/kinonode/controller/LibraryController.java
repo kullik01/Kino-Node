@@ -58,6 +58,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.shape.SVGPath;
 import javafx.scene.layout.VBox;
 
 /**
@@ -272,7 +273,84 @@ public class LibraryController implements Refreshable {
       }
       tmpNewCards.add(tmpCard);
     }
-    gridPane.getChildren().setAll(tmpNewCards);
+
+    if (tmpFiltered.isEmpty()) {
+      gridPane.setAlignment(javafx.geometry.Pos.CENTER);
+      gridPane.getChildren().setAll(createEmptyStateNode(allMovies.isEmpty()));
+    } else {
+      gridPane.setAlignment(javafx.geometry.Pos.TOP_LEFT);
+      gridPane.getChildren().setAll(tmpNewCards);
+    }
+  }
+
+  private javafx.scene.Node createEmptyStateNode(boolean isLibraryEmpty) {
+    javafx.scene.layout.VBox tmpVBox = new javafx.scene.layout.VBox(20);
+    tmpVBox.setAlignment(javafx.geometry.Pos.CENTER);
+    tmpVBox.setPadding(new javafx.geometry.Insets(40, 20, 40, 20));
+    tmpVBox.setMaxWidth(Double.MAX_VALUE);
+    tmpVBox.setMaxHeight(Double.MAX_VALUE);
+
+    SVGPath tmpIcon = new SVGPath();
+    tmpIcon.setContent(
+        "M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z");
+    tmpIcon.setScaleX(2.0);
+    tmpIcon.setScaleY(2.0);
+    tmpIcon.setStyle("-fx-fill: -color-fg-muted;");
+
+    if (isLibraryEmpty) {
+      Label tmpTitle = new Label("No movies found in your library");
+      tmpTitle.setStyle(
+          "-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
+
+      javafx.scene.layout.HBox tmpHBox = new javafx.scene.layout.HBox(12);
+      tmpHBox.setAlignment(javafx.geometry.Pos.CENTER);
+
+      Label tmpText =
+          new Label("Please set your workspace directory to index movies:");
+      tmpText.setStyle(
+          "-fx-font-size: 15px; -fx-text-fill: -color-fg-muted;");
+
+      Button tmpBtnSettings = new Button();
+      tmpBtnSettings.getStyleClass().addAll("button-success", "button-icon");
+      tmpBtnSettings.setMinSize(36.0, 36.0);
+      tmpBtnSettings.setMaxSize(36.0, 36.0);
+
+      SVGPath tmpGear = new SVGPath();
+      tmpGear.setContent(
+          "M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z");
+      tmpGear.setScaleX(0.85);
+      tmpGear.setScaleY(0.85);
+      tmpGear.setStyle("-fx-fill: white;");
+      tmpBtnSettings.setGraphic(tmpGear);
+
+      Tooltip tmpTooltip = new Tooltip(
+          "Why set a workspace?\n"
+              + "KinoNode needs at least one workspace folder path to scan, locate, and catalog your movie files, posters, and metadata into your collection library.");
+      tmpTooltip.setShowDelay(javafx.util.Duration.millis(50));
+      tmpTooltip.getStyleClass().add("chart-popup-tooltip");
+      tmpBtnSettings.setTooltip(tmpTooltip);
+
+      tmpBtnSettings.setOnAction(e -> {
+        MainController tmpMain = AppContext.getInstance().getMainController();
+        if (tmpMain != null) {
+          tmpMain.showSettings();
+        }
+      });
+
+      tmpHBox.getChildren().addAll(tmpText, tmpBtnSettings);
+      tmpVBox.getChildren().addAll(tmpIcon, tmpTitle, tmpHBox);
+    } else {
+      Label tmpTitle = new Label("No matching movies found");
+      tmpTitle.setStyle(
+          "-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
+      Label tmpSub =
+          new Label("Try clearing your search query or changing filters.");
+      tmpSub.setStyle(
+          "-fx-font-size: 15px; -fx-text-fill: -color-fg-muted;");
+      tmpVBox.getChildren().addAll(tmpIcon, tmpTitle, tmpSub);
+    }
+
+    return tmpVBox;
   }
 
   private void openMovieDetail(Movie movie) {

@@ -171,10 +171,9 @@ public class ImdbService {
               }
             }
 
-            // Fetch additional details from Wikidata (director, writer, etc.)
-            // using the IMDb ID
-            // ('tt...')
+            // Fetch additional details from IMDb title page (duration & rating) and Wikidata
             String tmpImdbIdentifierString = tmpResult.get("id").getAsString();
+            fetchImdbTitleDetails(tmpImdbIdentifierString, movie);
             fetchWikidataDetails(tmpImdbIdentifierString, movie);
 
             LOGGER.info(
@@ -192,6 +191,61 @@ public class ImdbService {
       LOGGER.log(Level.WARNING,
           "Error enriching movie data from IMDb for query: " + tmpQuery,
           tmpException);
+    }
+  }
+
+  /**
+   * Fetches title page details directly from IMDb to extract movie duration and IMDb rating.
+   *
+   * @param imdbId the IMDb identifier of the movie (starting with 'tt')
+   * @param movie the {@link Movie} object to enrich
+   */
+  private static void fetchImdbTitleDetails(String imdbId, Movie movie) {
+    try {
+      String tmpUrl = "https://www.imdb.com/title/" + imdbId + "/";
+      HttpRequest tmpRequest = HttpRequest.newBuilder()
+          .uri(URI.create(tmpUrl))
+          .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+          .header("Accept-Language", "en-US,en;q=0.9")
+          .GET().build();
+
+      HttpResponse<String> tmpResponse = client.send(tmpRequest, HttpResponse.BodyHandlers.ofString());
+      if (tmpResponse.statusCode() == 200) {
+        String body = tmpResponse.body();
+
+        // 1. Duration parsing: ISO 8601 duration in JSON-LD e.g. "duration":"PT2H28M" or "duration":"PT148M"
+        if (movie.getDuration() == null || movie.getDuration() <= 0) {
+          java.util.regex.Pattern durPattern = java.util.regex.Pattern.compile("\"duration\"\\s*:\\s*\"PT(?:(\\d+)H)?(?:(\\d+)M)?\"");
+          java.util.regex.Matcher durMatcher = durPattern.matcher(body);
+          if (durMatcher.find()) {
+            int hours = durMatcher.group(1) != null ? Integer.parseInt(durMatcher.group(1)) : 0;
+            int mins = durMatcher.group(2) != null ? Integer.parseInt(durMatcher.group(2)) : 0;
+            int totalMins = (hours * 60) + mins;
+            if (totalMins > 0) {
+              movie.setDuration(totalMins);
+              LOGGER.info("Extracted IMDb duration for " + movie.getTitle() + ": " + totalMins + " mins");
+            }
+          }
+        }
+
+        // 2. Rating parsing: JSON-LD aggregateRating ratingValue e.g. "ratingValue":8.8 or "ratingValue": "8.8"
+        if (movie.getRating() == null) {
+          java.util.regex.Pattern ratingPattern = java.util.regex.Pattern.compile("\"ratingValue\"\\s*:\\s*\"?([\\d\\.]+)\"?");
+          java.util.regex.Matcher ratingMatcher = ratingPattern.matcher(body);
+          if (ratingMatcher.find()) {
+            try {
+              double score = Double.parseDouble(ratingMatcher.group(1));
+              int ratingInt = (int) Math.round(score);
+              if (ratingInt >= 1 && ratingInt <= 10) {
+                movie.setRating(ratingInt);
+                LOGGER.info("Extracted IMDb rating for " + movie.getTitle() + ": " + ratingInt + "/10");
+              }
+            } catch (NumberFormatException ignored) {}
+          }
+        }
+      }
+    } catch (Exception e) {
+      LOGGER.log(Level.WARNING, "Error fetching IMDb title page for " + imdbId, e);
     }
   }
 

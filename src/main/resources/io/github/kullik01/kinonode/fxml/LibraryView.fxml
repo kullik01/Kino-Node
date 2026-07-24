@@ -86,7 +86,7 @@
     </HBox>
 
     <!-- Movies Grid -->
-    <ScrollPane fitToWidth="true" styleClass="movie-grid-scroll" VBox.vgrow="ALWAYS">
+    <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="movie-grid-scroll" VBox.vgrow="ALWAYS">
         <FlowPane fx:id="gridPane" styleClass="movie-grid" />
     </ScrollPane>
     </VBox>
