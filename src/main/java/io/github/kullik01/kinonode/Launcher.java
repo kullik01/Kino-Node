@@ -49,6 +49,14 @@ public final class Launcher {
   }
 
   public static void main(String[] args) {
+    // Configure JavaFX Prism & Glass engine for High-DPI, 4K Retina scaling,
+    // and
+    // LCD sub-pixel font anti-aliasing
+    System.setProperty("prism.allowhidpi", "true");
+    System.setProperty("prism.lcdtext", "true");
+    System.setProperty("prism.text", "t2k");
+    System.setProperty("glass.win.uiScale.enabled", "true");
+
     KinoNodeApp.main(args);
   }
 }

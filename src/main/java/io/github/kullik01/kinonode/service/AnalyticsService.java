@@ -147,14 +147,14 @@ public class AnalyticsService {
     tmpBuilder.append("  <style>\n");
     tmpBuilder.append(
         "    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; margin: 40px; }\n");
-    tmpBuilder.append("    h1 { color: #58a6ff; }\n");
+    tmpBuilder.append("    h1 { color: #2178dd; }\n");
     tmpBuilder.append(
         "    table { width: 100%; border-collapse: collapse; margin-top: 20px; }\n");
     tmpBuilder.append(
         "    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #30363d; }\n");
     tmpBuilder.append("    th { background: #161b22; color: #8b949e; }\n");
     tmpBuilder.append("    tr:hover { background: #21262d; }\n");
-    tmpBuilder.append("    .rating { font-weight: bold; color: #f2cc60; }\n");
+    tmpBuilder.append("    .rating { font-weight: bold; color: #ED8B00; }\n");
     tmpBuilder.append("  </style>\n</head>\n<body>\n");
     tmpBuilder.append("  <h1>🎬 KinoNode Library Report</h1>\n");
     tmpBuilder.append("  <p>Generated on ")

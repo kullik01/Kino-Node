@@ -73,7 +73,10 @@ application {
     mainModule.set("io.github.kullik01.kinonode")
     mainClass.set("io.github.kullik01.kinonode.Launcher")
     applicationDefaultJvmArgs = listOf(
-        "-Dapp.name=KinoNode"
+        "-Dapp.name=KinoNode",
+        "-Dprism.allowhidpi=true",
+        "-Dprism.lcdtext=true",
+        "-Dglass.win.uiScale.enabled=true"
     )
 }
 

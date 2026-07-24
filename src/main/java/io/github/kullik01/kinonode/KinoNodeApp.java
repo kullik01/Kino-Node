@@ -95,6 +95,13 @@ public class KinoNodeApp extends Application {
       throw new IOException("FXML file not found: MainView.fxml");
     }
 
+    // Set high-DPI resolution properties for crisp rendering on HiDPI / 4K /
+    // Retina screens
+    System.setProperty("prism.allowhidpi", "true");
+    System.setProperty("prism.lcdtext", "true");
+    System.setProperty("prism.text", "t2k");
+    System.setProperty("glass.win.uiScale.enabled", "true");
+
     // Load and build the JavaFX node tree from FXML layout
     FXMLLoader tmpLoader = new FXMLLoader(tmpFxmlLocation);
     Parent tmpRoot = tmpLoader.load();
@@ -104,13 +111,21 @@ public class KinoNodeApp extends Application {
         .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
     primaryStage.setTitle("KinoNode - Personal Movie Library");
 
-    // Ensure the application window maintains a functional minimum dimension
-    primaryStage.setMinWidth(800);
-    primaryStage.setMinHeight(600);
+    // Calculate adaptive, high-resolution initial window dimensions based on
+    // screen bounds
+    javafx.geometry.Rectangle2D tmpVisualBounds =
+        javafx.stage.Screen.getPrimary().getVisualBounds();
+    double tmpTargetWidth =
+        Math.max(960, Math.min(1600, tmpVisualBounds.getWidth() * 0.80));
+    double tmpTargetHeight =
+        Math.max(680, Math.min(1000, tmpVisualBounds.getHeight() * 0.80));
+
+    primaryStage.setMinWidth(Math.min(800, tmpVisualBounds.getWidth() * 0.5));
+    primaryStage.setMinHeight(Math.min(600, tmpVisualBounds.getHeight() * 0.5));
 
     // Initialize the main scene, associate it with the stage, and display the
     // window
-    Scene tmpScene = new Scene(tmpRoot, 1024, 768);
+    Scene tmpScene = new Scene(tmpRoot, tmpTargetWidth, tmpTargetHeight);
     primaryStage.setScene(tmpScene);
     primaryStage.show();
     Platform.runLater(() -> {

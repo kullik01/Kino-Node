@@ -31,7 +31,8 @@
 /* Modern dynamic stylesheet for KinoNode using AtlantaFX variables */
 
 .root {
-    -fx-font-family: 'Segoe UI', Inter, Helvetica, Arial, sans-serif;
+    -fx-font-family: 'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    -fx-font-smoothing-type: lcd;
     -fx-background-color: -color-bg-default;
     -fx-text-fill: -color-fg-default;
 }
@@ -103,13 +104,10 @@
     /* Global text/graphics contrast color on accent backgrounds */
     -color-fg-on-accent: white;
 
-    /* Palette variables for GUI Harmony */
+    /* Palette variables strictly locked to Blue and Orange */
     -color-brand-blue: #2178dd;
-    -color-brand-emerald: #10b981;
+    -color-brand-orange: #ED8B00;
     -color-brand-gold: #ED8B00;
-    -color-brand-purple: #8b5cf6;
-    -color-brand-cyan: #06b6d4;
-    -color-brand-rose: #f43f5e;
 }
 
 /* Sidebar navigation styling */
@@ -508,20 +506,12 @@
     -fx-effect: dropshadow(three-pass-box, rgba(33, 120, 221, 0.15), 8, 0, 0, 2);
 }
 
-/* Harmonious Color Variations for Analytics KPI Cards */
+/* Modern Blue & Orange Color Scheme for Analytics KPI Cards */
 .kpi-card-blue .analytics-kpi-svg { -fx-fill: #2178dd; }
-.kpi-card-gold .analytics-kpi-svg { -fx-fill: #ED8B00; }
-.kpi-card-emerald .analytics-kpi-svg { -fx-fill: #10b981; }
-.kpi-card-purple .analytics-kpi-svg { -fx-fill: #8b5cf6; }
-.kpi-card-cyan .analytics-kpi-svg { -fx-fill: #06b6d4; }
-.kpi-card-rose .analytics-kpi-svg { -fx-fill: #f43f5e; }
+.kpi-card-orange .analytics-kpi-svg, .kpi-card-gold .analytics-kpi-svg { -fx-fill: #ED8B00; }
 
 .kpi-card-blue:hover { -fx-border-color: rgba(33, 120, 221, 0.5); -fx-effect: dropshadow(three-pass-box, rgba(33, 120, 221, 0.2), 8, 0, 0, 2); }
-.kpi-card-gold:hover { -fx-border-color: rgba(237, 139, 0, 0.5); -fx-effect: dropshadow(three-pass-box, rgba(237, 139, 0, 0.2), 8, 0, 0, 2); }
-.kpi-card-emerald:hover { -fx-border-color: rgba(16, 185, 129, 0.5); -fx-effect: dropshadow(three-pass-box, rgba(16, 185, 129, 0.2), 8, 0, 0, 2); }
-.kpi-card-purple:hover { -fx-border-color: rgba(139, 92, 246, 0.5); -fx-effect: dropshadow(three-pass-box, rgba(139, 92, 246, 0.2), 8, 0, 0, 2); }
-.kpi-card-cyan:hover { -fx-border-color: rgba(6, 182, 212, 0.5); -fx-effect: dropshadow(three-pass-box, rgba(6, 182, 212, 0.2), 8, 0, 0, 2); }
-.kpi-card-rose:hover { -fx-border-color: rgba(244, 63, 94, 0.5); -fx-effect: dropshadow(three-pass-box, rgba(244, 63, 94, 0.2), 8, 0, 0, 2); }
+.kpi-card-orange:hover, .kpi-card-gold:hover { -fx-border-color: rgba(237, 139, 0, 0.5); -fx-effect: dropshadow(three-pass-box, rgba(237, 139, 0, 0.2), 8, 0, 0, 2); }
 
 .analytics-kpi-icon {
     -fx-font-size: 18px;
@@ -640,12 +630,12 @@
 }
 
 #genreChart .chart-bar {
-    -fx-bar-fill: #8b5cf6;
-    -fx-background-color: #8b5cf6;
+    -fx-bar-fill: #2178dd;
+    -fx-background-color: #2178dd;
 }
 
 #genreChart .chart-bar:hover {
-    -fx-background-color: #7c3aed;
+    -fx-background-color: #1d64ba;
     -fx-cursor: hand;
 }
 
@@ -677,8 +667,8 @@
 }
 
 .rank-badge {
-    -fx-background-color: -color-bg-subtle;
-    -fx-text-fill: -color-fg-muted;
+    -fx-background-color: rgba(237, 139, 0, 0.15);
+    -fx-text-fill: #ED8B00;
     -fx-font-weight: bold;
     -fx-font-size: 11px;
     -fx-padding: 3px 8px;
@@ -688,18 +678,18 @@
 }
 
 .rank-badge-top1 {
-    -fx-background-color: rgba(237, 139, 0, 0.2);
+    -fx-background-color: rgba(237, 139, 0, 0.25);
     -fx-text-fill: #ED8B00;
 }
 
 .rank-badge-top2 {
-    -fx-background-color: rgba(160, 174, 192, 0.2);
-    -fx-text-fill: #a0aec0;
+    -fx-background-color: rgba(237, 139, 0, 0.20);
+    -fx-text-fill: #ED8B00;
 }
 
 .rank-badge-top3 {
-    -fx-background-color: rgba(205, 127, 50, 0.2);
-    -fx-text-fill: #cd7f32;
+    -fx-background-color: rgba(237, 139, 0, 0.15);
+    -fx-text-fill: #ED8B00;
 }
 
 .ranking-bar-track {
@@ -711,7 +701,7 @@
 }
 
 .ranking-bar-fill {
-    -fx-background-color: #2178dd;
+    -fx-background-color: #ED8B00;
     -fx-background-radius: 4px;
     -fx-pref-height: 6px;
     -fx-min-height: 6px;
@@ -723,11 +713,11 @@
 }
 
 .ranking-bar-fill-top2 {
-    -fx-background-color: #a0aec0;
+    -fx-background-color: #ED8B00;
 }
 
 .ranking-bar-fill-top3 {
-    -fx-background-color: #cd7f32;
+    -fx-background-color: #ED8B00;
 }
 
 
