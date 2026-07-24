@@ -91,6 +91,11 @@ public class AnalyticsController implements Refreshable {
 
   private final Map<String, Map<String, Integer>> roleFrequencies =
       new HashMap<>();
+  private final Map<String, List<String>> decadeMovies = new TreeMap<>();
+  private final Map<String, List<String>> ratingMovies = new LinkedHashMap<>();
+  private final Map<String, List<String>> genreMovies = new HashMap<>();
+  private final Map<String, Map<String, List<String>>> rolePersonMovies =
+      new HashMap<>();
 
   @FXML
   public void initialize() {
@@ -118,10 +123,17 @@ public class AnalyticsController implements Refreshable {
     int tmpMinYear = Integer.MAX_VALUE;
     int tmpMaxYear = Integer.MIN_VALUE;
 
+    decadeMovies.clear();
+    ratingMovies.clear();
+    genreMovies.clear();
+    rolePersonMovies.clear();
+
     Map<String, Integer> tmpDecades = new TreeMap<>();
     Map<String, Integer> tmpRatings = new LinkedHashMap<>();
     for (int i = 0; i <= 10; i++) {
-      tmpRatings.put(i + "/10", 0);
+      String tmpKey = i + "/10";
+      tmpRatings.put(tmpKey, 0);
+      ratingMovies.put(tmpKey, new ArrayList<>());
     }
 
     Map<String, Integer> tmpDirectors = new HashMap<>();
@@ -132,13 +144,24 @@ public class AnalyticsController implements Refreshable {
     Map<String, Integer> tmpActors = new HashMap<>();
     Map<String, Integer> tmpGenres = new HashMap<>();
 
+    Map<String, List<String>> tmpDirectorMovies = new HashMap<>();
+    Map<String, List<String>> tmpWriterMovies = new HashMap<>();
+    Map<String, List<String>> tmpProducerMovies = new HashMap<>();
+    Map<String, List<String>> tmpCinematographerMovies = new HashMap<>();
+    Map<String, List<String>> tmpComposerMovies = new HashMap<>();
+    Map<String, List<String>> tmpActorMovies = new HashMap<>();
+
     for (Movie tmpMovie : tmpMovies) {
+      String title = (tmpMovie.getTitle() != null && !tmpMovie.getTitle().isBlank())
+          ? tmpMovie.getTitle() : "Untitled";
+
       if (tmpMovie.getRating() != null) {
         tmpTotalRating += tmpMovie.getRating();
         tmpRatedCount++;
         String tmpRatingKey = tmpMovie.getRating() + "/10";
         tmpRatings.put(tmpRatingKey,
             tmpRatings.getOrDefault(tmpRatingKey, 0) + 1);
+        ratingMovies.computeIfAbsent(tmpRatingKey, k -> new ArrayList<>()).add(title);
       }
 
       if (tmpMovie.getYear() != null) {
@@ -148,6 +171,7 @@ public class AnalyticsController implements Refreshable {
         String tmpDecadeKey = tmpDecadeStart + "s";
         tmpDecades.put(tmpDecadeKey,
             tmpDecades.getOrDefault(tmpDecadeKey, 0) + 1);
+        decadeMovies.computeIfAbsent(tmpDecadeKey, k -> new ArrayList<>()).add(title);
       }
 
       if (tmpMovie.getGenre() != null && !tmpMovie.getGenre().isBlank()) {
@@ -155,16 +179,17 @@ public class AnalyticsController implements Refreshable {
           String tmpClean = tmpGenre.trim();
           if (!tmpClean.isEmpty() && !tmpClean.equalsIgnoreCase("Unknown")) {
             tmpGenres.put(tmpClean, tmpGenres.getOrDefault(tmpClean, 0) + 1);
+            genreMovies.computeIfAbsent(tmpClean, k -> new ArrayList<>()).add(title);
           }
         }
       }
 
-      parseAndCount(tmpMovie.getDirector(), tmpDirectors);
-      parseAndCount(tmpMovie.getWriter(), tmpWriters);
-      parseAndCount(tmpMovie.getProducer(), tmpProducers);
-      parseAndCount(tmpMovie.getCinematographer(), tmpCinematographers);
-      parseAndCount(tmpMovie.getComposer(), tmpComposers);
-      parseAndCount(tmpMovie.getActors(), tmpActors);
+      parseAndCountWithTitle(tmpMovie.getDirector(), tmpDirectors, tmpDirectorMovies, title);
+      parseAndCountWithTitle(tmpMovie.getWriter(), tmpWriters, tmpWriterMovies, title);
+      parseAndCountWithTitle(tmpMovie.getProducer(), tmpProducers, tmpProducerMovies, title);
+      parseAndCountWithTitle(tmpMovie.getCinematographer(), tmpCinematographers, tmpCinematographerMovies, title);
+      parseAndCountWithTitle(tmpMovie.getComposer(), tmpComposers, tmpComposerMovies, title);
+      parseAndCountWithTitle(tmpMovie.getActors(), tmpActors, tmpActorMovies, title);
     }
 
     roleFrequencies.put("Director(s)", tmpDirectors);
@@ -173,6 +198,13 @@ public class AnalyticsController implements Refreshable {
     roleFrequencies.put("Cinematographer(s)", tmpCinematographers);
     roleFrequencies.put("Composer(s)", tmpComposers);
     roleFrequencies.put("Actor(s)", tmpActors);
+
+    rolePersonMovies.put("Director(s)", tmpDirectorMovies);
+    rolePersonMovies.put("Writer(s)", tmpWriterMovies);
+    rolePersonMovies.put("Producer(s)", tmpProducerMovies);
+    rolePersonMovies.put("Cinematographer(s)", tmpCinematographerMovies);
+    rolePersonMovies.put("Composer(s)", tmpComposerMovies);
+    rolePersonMovies.put("Actor(s)", tmpActorMovies);
 
     if (tmpRatedCount > 0) {
       lblAvgRating
@@ -206,16 +238,33 @@ public class AnalyticsController implements Refreshable {
     updateTopPeople();
   }
 
-  private void parseAndCount(String rawField, Map<String, Integer> targetMap) {
+  private void parseAndCountWithTitle(String rawField, Map<String, Integer> targetMap,
+      Map<String, List<String>> targetMovieMap, String movieTitle) {
     if (rawField != null && !rawField.isBlank()) {
       for (String token : rawField.split(",")) {
         String tmpClean = token.trim();
         if (!tmpClean.isEmpty() && !tmpClean.equals("...")
             && !tmpClean.equalsIgnoreCase("Unknown")) {
           targetMap.put(tmpClean, targetMap.getOrDefault(tmpClean, 0) + 1);
+          targetMovieMap.computeIfAbsent(tmpClean, k -> new ArrayList<>()).add(movieTitle);
         }
       }
     }
+  }
+
+  private String buildMovieListText(List<String> rawMovies) {
+    if (rawMovies == null || rawMovies.isEmpty()) {
+      return "No movies found";
+    }
+    List<String> movies = rawMovies.stream().distinct().toList();
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < movies.size(); i++) {
+      if (i > 0) {
+        sb.append("\n");
+      }
+      sb.append("• ").append(movies.get(i));
+    }
+    return sb.toString();
   }
 
   @FXML
@@ -236,6 +285,37 @@ public class AnalyticsController implements Refreshable {
     populateRankingList(topPeopleBox, frequencies, 5);
   }
 
+  private void installChartTooltip(
+      XYChart.Data<String, Number> data, String tooltipText) {
+    Runnable attacher = () -> {
+      javafx.scene.Node node = data.getNode();
+      if (node != null) {
+        javafx.scene.control.Tooltip tmpTooltip =
+            new javafx.scene.control.Tooltip(tooltipText);
+        tmpTooltip.setShowDelay(javafx.util.Duration.millis(50));
+        tmpTooltip.setShowDuration(javafx.util.Duration.seconds(15));
+        tmpTooltip.getStyleClass().add("chart-popup-tooltip");
+        javafx.scene.control.Tooltip.install(node, tmpTooltip);
+
+        node.setOnMouseEntered(e -> {
+          node.setOpacity(0.85);
+          node.setCursor(javafx.scene.Cursor.HAND);
+        });
+        node.setOnMouseExited(e -> node.setOpacity(1.0));
+      }
+    };
+
+    if (data.getNode() != null) {
+      attacher.run();
+    } else {
+      data.nodeProperty().addListener((obs, oldNode, newNode) -> {
+        if (newNode != null) {
+          attacher.run();
+        }
+      });
+    }
+  }
+
   private void populateDecadeChart(Map<String, Integer> decades) {
     if (decadeChart == null) {
       return;
@@ -243,20 +323,16 @@ public class AnalyticsController implements Refreshable {
     decadeChart.getData().clear();
     XYChart.Series<String, Number> tmpSeries = new XYChart.Series<>();
     tmpSeries.setName("Movies per Decade");
+
     for (Map.Entry<String, Integer> tmpEntry : decades.entrySet()) {
       XYChart.Data<String, Number> tmpData =
           new XYChart.Data<>(tmpEntry.getKey(), tmpEntry.getValue());
       tmpSeries.getData().add(tmpData);
+
+      List<String> titles = decadeMovies.getOrDefault(tmpEntry.getKey(), Collections.emptyList());
+      installChartTooltip(tmpData, buildMovieListText(titles));
     }
     decadeChart.getData().add(tmpSeries);
-
-    for (XYChart.Data<String, Number> tmpData : tmpSeries.getData()) {
-      if (tmpData.getNode() != null) {
-        javafx.scene.control.Tooltip.install(tmpData.getNode(),
-            new javafx.scene.control.Tooltip(tmpData.getXValue() + ": "
-                + tmpData.getYValue() + " title(s)"));
-      }
-    }
   }
 
   private void populateRatingChart(Map<String, Integer> ratings) {
@@ -266,20 +342,16 @@ public class AnalyticsController implements Refreshable {
     ratingChart.getData().clear();
     XYChart.Series<String, Number> tmpSeries = new XYChart.Series<>();
     tmpSeries.setName("Rating Distribution");
+
     for (Map.Entry<String, Integer> tmpEntry : ratings.entrySet()) {
       XYChart.Data<String, Number> tmpData =
           new XYChart.Data<>(tmpEntry.getKey(), tmpEntry.getValue());
       tmpSeries.getData().add(tmpData);
+
+      List<String> titles = ratingMovies.getOrDefault(tmpEntry.getKey(), Collections.emptyList());
+      installChartTooltip(tmpData, buildMovieListText(titles));
     }
     ratingChart.getData().add(tmpSeries);
-
-    for (XYChart.Data<String, Number> tmpData : tmpSeries.getData()) {
-      if (tmpData.getNode() != null) {
-        javafx.scene.control.Tooltip.install(tmpData.getNode(),
-            new javafx.scene.control.Tooltip(tmpData.getXValue() + ": "
-                + tmpData.getYValue() + " title(s)"));
-      }
-    }
   }
 
   private void populateGenreChart(Map<String, Integer> genres) {
@@ -289,22 +361,18 @@ public class AnalyticsController implements Refreshable {
     genreChart.getData().clear();
     XYChart.Series<String, Number> tmpSeries = new XYChart.Series<>();
     tmpSeries.setName("Movies per Genre");
+
     genres.entrySet().stream()
         .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
         .limit(10).forEach(entry -> {
           XYChart.Data<String, Number> tmpData =
               new XYChart.Data<>(entry.getKey(), entry.getValue());
           tmpSeries.getData().add(tmpData);
+
+          List<String> titles = genreMovies.getOrDefault(entry.getKey(), Collections.emptyList());
+          installChartTooltip(tmpData, buildMovieListText(titles));
         });
     genreChart.getData().add(tmpSeries);
-
-    for (XYChart.Data<String, Number> tmpData : tmpSeries.getData()) {
-      if (tmpData.getNode() != null) {
-        javafx.scene.control.Tooltip.install(tmpData.getNode(),
-            new javafx.scene.control.Tooltip(tmpData.getXValue() + ": "
-                + tmpData.getYValue() + " title(s)"));
-      }
-    }
   }
 
   private void populateRankingList(VBox container,
@@ -320,6 +388,10 @@ public class AnalyticsController implements Refreshable {
       container.getChildren().add(tmpEmpty);
       return;
     }
+
+    String selectedRole = comboRoleFilter != null ? comboRoleFilter.getValue() : "Director(s)";
+    Map<String, List<String>> personMovies =
+        rolePersonMovies.getOrDefault(selectedRole, Collections.emptyMap());
 
     List<Map.Entry<String, Integer>> tmpSorted = frequencies.entrySet().stream()
         .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
@@ -383,6 +455,15 @@ public class AnalyticsController implements Refreshable {
           javafx.geometry.Pos.CENTER_LEFT);
 
       tmpCard.getChildren().addAll(tmpHeader, tmpTrack);
+
+      List<String> titles = personMovies.getOrDefault(entry.getKey(), Collections.emptyList());
+      javafx.scene.control.Tooltip tmpTooltip =
+          new javafx.scene.control.Tooltip(buildMovieListText(titles));
+      tmpTooltip.setShowDelay(javafx.util.Duration.millis(50));
+      tmpTooltip.setShowDuration(javafx.util.Duration.seconds(15));
+      tmpTooltip.getStyleClass().add("chart-popup-tooltip");
+      javafx.scene.control.Tooltip.install(tmpCard, tmpTooltip);
+
       container.getChildren().add(tmpCard);
       rank++;
     }

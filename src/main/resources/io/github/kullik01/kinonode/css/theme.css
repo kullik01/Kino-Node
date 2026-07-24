@@ -596,6 +596,19 @@
     -fx-padding: 24px 5px 5px 5px;
 }
 
+.chart-popup-tooltip {
+    -fx-background-color: -color-bg-overlay;
+    -fx-text-fill: -color-fg-default;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 8px;
+    -fx-border-color: #2178dd;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 12, 0, 0, 4);
+}
+
 .chart-plot-background {
     -fx-background-color: transparent;
 }
