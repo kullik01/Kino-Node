@@ -66,7 +66,7 @@ public class CursorUtils {
         if (tmpStream != null) {
           Image tmpImage = new Image(tmpStream);
           appLogoCursor = new ImageCursor(tmpImage, tmpImage.getWidth() / 2.0,
-              tmpImage.getHeight() / 2.0);
+              tmpImage.getHeight() * 0.20);
         } else {
           appLogoCursor = Cursor.DEFAULT;
         }

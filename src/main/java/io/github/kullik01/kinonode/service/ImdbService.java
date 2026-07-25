@@ -200,6 +200,12 @@ public class ImdbService {
    * @param imdbId the IMDb identifier of the movie (starting with 'tt')
    * @param movie the {@link Movie} object to enrich
    */
+  /**
+   * Fetches title page details directly from IMDb to extract movie duration and IMDb rating.
+   *
+   * @param imdbId the IMDb identifier of the movie (starting with 'tt')
+   * @param movie the {@link Movie} object to enrich
+   */
   private static void fetchImdbTitleDetails(String imdbId, Movie movie) {
     try {
       String tmpUrl = "https://www.imdb.com/title/" + imdbId + "/";
@@ -213,22 +219,51 @@ public class ImdbService {
       if (tmpResponse.statusCode() == 200) {
         String body = tmpResponse.body();
 
-        // 1. Duration parsing: ISO 8601 duration in JSON-LD e.g. "duration":"PT2H28M" or "duration":"PT148M"
+        // 1. ISO 8601 duration in JSON-LD e.g. "duration":"PT2H28M" or "duration":"PT148M"
         if (movie.getDuration() == null || movie.getDuration() <= 0) {
-          java.util.regex.Pattern durPattern = java.util.regex.Pattern.compile("\"duration\"\\s*:\\s*\"PT(?:(\\d+)H)?(?:(\\d+)M)?\"");
-          java.util.regex.Matcher durMatcher = durPattern.matcher(body);
-          if (durMatcher.find()) {
-            int hours = durMatcher.group(1) != null ? Integer.parseInt(durMatcher.group(1)) : 0;
-            int mins = durMatcher.group(2) != null ? Integer.parseInt(durMatcher.group(2)) : 0;
+          java.util.regex.Pattern durPattern1 = java.util.regex.Pattern.compile("\"duration\"\\s*:\\s*\"PT(?:(\\d+)H)?(?:(\\d+)M)?\"");
+          java.util.regex.Matcher durMatcher1 = durPattern1.matcher(body);
+          if (durMatcher1.find()) {
+            int hours = durMatcher1.group(1) != null ? Integer.parseInt(durMatcher1.group(1)) : 0;
+            int mins = durMatcher1.group(2) != null ? Integer.parseInt(durMatcher1.group(2)) : 0;
             int totalMins = (hours * 60) + mins;
             if (totalMins > 0) {
               movie.setDuration(totalMins);
-              LOGGER.info("Extracted IMDb duration for " + movie.getTitle() + ": " + totalMins + " mins");
+              LOGGER.info("Extracted IMDb ISO duration for " + movie.getTitle() + ": " + totalMins + " mins");
             }
           }
         }
 
-        // 2. Rating parsing: JSON-LD aggregateRating ratingValue e.g. "ratingValue":8.8 or "ratingValue": "8.8"
+        // 2. Next.js JSON / GraphQL runtime e.g. "runtime":{"seconds":8880}
+        if (movie.getDuration() == null || movie.getDuration() <= 0) {
+          java.util.regex.Pattern durPattern2 = java.util.regex.Pattern.compile("\"runtime\"\\s*:\\s*\\{\\s*\"seconds\"\\s*:\\s*(\\d+)");
+          java.util.regex.Matcher durMatcher2 = durPattern2.matcher(body);
+          if (durMatcher2.find()) {
+            int seconds = Integer.parseInt(durMatcher2.group(1));
+            int totalMins = seconds / 60;
+            if (totalMins > 0) {
+              movie.setDuration(totalMins);
+              LOGGER.info("Extracted IMDb runtime seconds for " + movie.getTitle() + ": " + totalMins + " mins");
+            }
+          }
+        }
+
+        // 3. HTML text pattern e.g. "2h 28m" or "1h 45m"
+        if (movie.getDuration() == null || movie.getDuration() <= 0) {
+          java.util.regex.Pattern durPattern3 = java.util.regex.Pattern.compile("(\\d+)\\s*h(?:ours?)?\\s*(\\d+)\\s*m(?:in(?:ute)?s?)?");
+          java.util.regex.Matcher durMatcher3 = durPattern3.matcher(body);
+          if (durMatcher3.find()) {
+            int hours = Integer.parseInt(durMatcher3.group(1));
+            int mins = Integer.parseInt(durMatcher3.group(2));
+            int totalMins = (hours * 60) + mins;
+            if (totalMins > 0) {
+              movie.setDuration(totalMins);
+              LOGGER.info("Extracted IMDb text duration for " + movie.getTitle() + ": " + totalMins + " mins");
+            }
+          }
+        }
+
+        // 4. Rating parsing: JSON-LD aggregateRating ratingValue e.g. "ratingValue":8.8 or "ratingValue": "8.8"
         if (movie.getRating() == null) {
           java.util.regex.Pattern ratingPattern = java.util.regex.Pattern.compile("\"ratingValue\"\\s*:\\s*\"?([\\d\\.]+)\"?");
           java.util.regex.Matcher ratingMatcher = ratingPattern.matcher(body);
@@ -247,6 +282,88 @@ public class ImdbService {
     } catch (Exception e) {
       LOGGER.log(Level.WARNING, "Error fetching IMDb title page for " + imdbId, e);
     }
+  }
+
+  /**
+   * Cleans a movie title string by stripping file extensions, year numbers, and video quality tags.
+   *
+   * @param rawTitle the raw movie title string
+   * @return cleaned movie title for IMDb queries
+   */
+  public static String cleanMovieTitle(String rawTitle) {
+    if (rawTitle == null) return "";
+    String cleaned = rawTitle;
+    cleaned = cleaned.replaceAll("(?i)\\.(mkv|mp4|avi|mov|wmv|flv|webm|m4v)$", "");
+    cleaned = cleaned.replaceAll("[._-]", " ");
+    cleaned = cleaned.replaceAll("(?i)\\b(19|20)\\d{2}\\b", "");
+    cleaned = cleaned.replaceAll("(?i)\\b(1080p|720p|2160p|4k|uhd|bluray|web-?dl|h264|x264|hevc|x265|dvdrip|brrip|repack|proper)\\b", "");
+    cleaned = cleaned.replaceAll("\\s+", " ").trim();
+    return cleaned.isEmpty() ? rawTitle.trim() : cleaned;
+  }
+
+  /**
+   * Directly fetches and fills the movie duration from IMDb (imdb.com).
+   *
+   * @param movie the {@link Movie} object to fetch duration for
+   * @return true if duration was successfully fetched from IMDb and set, false otherwise
+   */
+  public static boolean fetchImdbDurationDirectly(Movie movie) {
+    if (movie == null || movie.getTitle() == null || movie.getTitle().isBlank()) {
+      return false;
+    }
+    String[] queriesToTry = new String[] {
+        cleanMovieTitle(movie.getTitle()),
+        movie.getTitle().trim()
+    };
+
+    for (String tmpQuery : queriesToTry) {
+      if (tmpQuery.isEmpty()) continue;
+      try {
+        String tmpCleanedQuery = tmpQuery.replaceAll("[^a-zA-Z0-9 äöüÄÖÜß-]", " ")
+            .trim().replaceAll("\\s+", " ");
+        if (tmpCleanedQuery.isEmpty()) continue;
+
+        String tmpEncodedQuery = URLEncoder
+            .encode(tmpCleanedQuery.toLowerCase(), StandardCharsets.UTF_8)
+            .replace("+", "%20");
+        String tmpFirstLetter = tmpCleanedQuery.substring(0, 1).toLowerCase();
+        String tmpUrlStr = "https://v3.sg.media-imdb.com/suggestion/"
+            + tmpFirstLetter + "/" + tmpEncodedQuery + ".json";
+
+        HttpRequest tmpRequest = HttpRequest.newBuilder()
+            .uri(URI.create(tmpUrlStr))
+            .header("User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
+            .header("Accept", "application/json")
+            .header("Accept-Language", "en-US,en;q=0.5").GET().build();
+
+        HttpResponse<String> tmpResponse =
+            client.send(tmpRequest, HttpResponse.BodyHandlers.ofString());
+
+        if (tmpResponse.statusCode() == 200) {
+          JsonObject tmpJsonObject =
+              JsonParser.parseString(tmpResponse.body()).getAsJsonObject();
+          if (tmpJsonObject.has("d") && tmpJsonObject.get("d").isJsonArray()) {
+            JsonArray tmpResults = tmpJsonObject.getAsJsonArray("d");
+            for (JsonElement tmpElement : tmpResults) {
+              JsonObject tmpResult = tmpElement.getAsJsonObject();
+              if (tmpResult.has("id")) {
+                String tmpIdentifier = tmpResult.get("id").getAsString();
+                if (tmpIdentifier.startsWith("tt")) {
+                  fetchImdbTitleDetails(tmpIdentifier, movie);
+                  if (movie.getDuration() != null && movie.getDuration() > 0) {
+                    return true;
+                  }
+                }
+              }
+            }
+          }
+        }
+      } catch (Exception e) {
+        LOGGER.log(Level.WARNING, "Failed to fetch IMDb duration for: " + tmpQuery, e);
+      }
+    }
+    return movie.getDuration() != null && movie.getDuration() > 0;
   }
 
   /**

@@ -511,16 +511,16 @@
 }
 
 .analytics-kpi-card:hover {
-    -fx-border-color: -color-accent-muted;
-    -fx-effect: dropshadow(three-pass-box, rgba(33, 120, 221, 0.15), 8, 0, 0, 2);
+    -fx-border-color: #2178dd;
+    -fx-effect: dropshadow(three-pass-box, rgba(33, 120, 221, 0.3), 12, 0, 0, 3);
 }
 
 /* Modern Blue & Orange Color Scheme for Analytics KPI Cards */
 .kpi-card-blue .analytics-kpi-svg { -fx-fill: #2178dd; }
 .kpi-card-orange .analytics-kpi-svg, .kpi-card-gold .analytics-kpi-svg { -fx-fill: #ED8B00; }
 
-.kpi-card-blue:hover { -fx-border-color: rgba(33, 120, 221, 0.5); -fx-effect: dropshadow(three-pass-box, rgba(33, 120, 221, 0.2), 8, 0, 0, 2); }
-.kpi-card-orange:hover, .kpi-card-gold:hover { -fx-border-color: rgba(237, 139, 0, 0.5); -fx-effect: dropshadow(three-pass-box, rgba(237, 139, 0, 0.2), 8, 0, 0, 2); }
+.kpi-card-blue:hover { -fx-border-color: rgba(33, 120, 221, 0.7); -fx-effect: dropshadow(three-pass-box, rgba(33, 120, 221, 0.35), 12, 0, 0, 3); }
+.kpi-card-orange:hover, .kpi-card-gold:hover { -fx-border-color: rgba(237, 139, 0, 0.7); -fx-effect: dropshadow(three-pass-box, rgba(237, 139, 0, 0.35), 12, 0, 0, 3); }
 
 .analytics-kpi-icon {
     -fx-font-size: 18px;
@@ -616,6 +616,7 @@
     -fx-border-radius: 8px;
     -fx-border-width: 1px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 12, 0, 0, 4);
+    -fx-mouse-transparent: true;
 }
 
 .chart-plot-background {
@@ -639,7 +640,8 @@
 }
 
 #decadeChart .chart-bar:hover {
-    -fx-background-color: #1d64ba;
+    -fx-background-color: #2178dd;
+    -fx-opacity: 0.80;
     -fx-cursor: url("../images/app_logo_cursor.png"), default;
 }
 
@@ -649,7 +651,8 @@
 }
 
 #ratingChart .chart-bar:hover {
-    -fx-background-color: #d67d00;
+    -fx-background-color: #ED8B00;
+    -fx-opacity: 0.80;
     -fx-cursor: url("../images/app_logo_cursor.png"), default;
 }
 
@@ -659,7 +662,8 @@
 }
 
 #genreChart .chart-bar:hover {
-    -fx-background-color: #1d64ba;
+    -fx-background-color: #2178dd;
+    -fx-opacity: 0.80;
     -fx-cursor: url("../images/app_logo_cursor.png"), default;
 }
 

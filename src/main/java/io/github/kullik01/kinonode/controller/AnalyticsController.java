@@ -99,6 +99,15 @@ public class AnalyticsController implements Refreshable {
 
   @FXML
   public void initialize() {
+    if (decadeChart != null) {
+      decadeChart.setAnimated(false);
+    }
+    if (ratingChart != null) {
+      ratingChart.setAnimated(false);
+    }
+    if (genreChart != null) {
+      genreChart.setAnimated(false);
+    }
     if (comboRoleFilter != null && comboRoleFilter.getItems().isEmpty()) {
       comboRoleFilter.getItems().addAll("Director(s)", "Writer(s)",
           "Producer(s)", "Cinematographer(s)", "Composer(s)", "Actor(s)");
@@ -292,17 +301,20 @@ public class AnalyticsController implements Refreshable {
       if (node != null) {
         javafx.scene.control.Tooltip tmpTooltip =
             new javafx.scene.control.Tooltip(tooltipText);
-        tmpTooltip.setShowDelay(javafx.util.Duration.millis(50));
+        tmpTooltip.setShowDelay(javafx.util.Duration.millis(150));
         tmpTooltip.setShowDuration(javafx.util.Duration.seconds(15));
         tmpTooltip.getStyleClass().add("chart-popup-tooltip");
         javafx.scene.control.Tooltip.install(node, tmpTooltip);
 
-        node.setOnMouseEntered(e -> {
-          node.setOpacity(0.85);
-          node.setCursor(
-              io.github.kullik01.kinonode.util.CursorUtils.getCameraCursor());
+        node.setCursor(
+            io.github.kullik01.kinonode.util.CursorUtils.getCameraCursor());
+        node.hoverProperty().addListener((obs, wasHovered, isHovered) -> {
+          if (isHovered) {
+            node.setOpacity(0.80);
+          } else {
+            node.setOpacity(1.0);
+          }
         });
-        node.setOnMouseExited(e -> node.setOpacity(1.0));
       }
     };
 
@@ -460,7 +472,7 @@ public class AnalyticsController implements Refreshable {
       List<String> titles = personMovies.getOrDefault(entry.getKey(), Collections.emptyList());
       javafx.scene.control.Tooltip tmpTooltip =
           new javafx.scene.control.Tooltip(buildMovieListText(titles));
-      tmpTooltip.setShowDelay(javafx.util.Duration.millis(50));
+      tmpTooltip.setShowDelay(javafx.util.Duration.millis(150));
       tmpTooltip.setShowDuration(javafx.util.Duration.seconds(15));
       tmpTooltip.getStyleClass().add("chart-popup-tooltip");
       javafx.scene.control.Tooltip.install(tmpCard, tmpTooltip);

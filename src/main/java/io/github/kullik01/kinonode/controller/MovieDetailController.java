@@ -188,8 +188,25 @@ public class MovieDetailController {
       txtDuration.setText(movie.getFormattedDuration());
       txtDuration.setStyle("-fx-text-fill: -color-fg-default;");
     } else {
-      txtDuration.setText("Not specified (Click 📝 to set duration)");
+      txtDuration.setText("Fetching IMDb duration (imdb.com)...");
       txtDuration.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-style: italic;");
+      java.util.concurrent.CompletableFuture.runAsync(() -> {
+        boolean fetched = io.github.kullik01.kinonode.service.ImdbService.fetchImdbDurationDirectly(movie);
+        if (!fetched) {
+          io.github.kullik01.kinonode.service.ImdbService.enrichMovieData(movie);
+        }
+        javafx.application.Platform.runLater(() -> {
+          if (movie.getDuration() != null && movie.getDuration() > 0) {
+            txtDuration.setText(movie.getFormattedDuration());
+            txtDuration.setStyle("-fx-text-fill: -color-fg-default;");
+            movieRepository.update(movie);
+            showStatus("IMDb Duration loaded from imdb.com!");
+          } else {
+            txtDuration.setText("Not specified (Click 📝 to set duration)");
+            txtDuration.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-style: italic;");
+          }
+        });
+      });
     }
     txtGenre.setText(movie.getGenre() != null ? movie.getGenre() : "");
     setupMultiField(movie.getDirector(), txtDirector, comboDirector);
@@ -269,6 +286,7 @@ public class MovieDetailController {
     tmpIcon.setScaleX(0.75);
     tmpIcon.setScaleY(0.75);
     tmpIcon.setPickOnBounds(true);
+    tmpIcon.setMouseTransparent(true);
     return tmpIcon;
   }
 
@@ -285,24 +303,20 @@ public class MovieDetailController {
     }
   }
 
-  private int detectHoveredScore(double mouseX) {
-    for (int tmpIndex = 0; tmpIndex < 10
-        && tmpIndex < ratingContainer.getChildren().size(); tmpIndex++) {
+  private int detectHoveredScore(javafx.scene.input.MouseEvent e) {
+    if (ratingContainer == null || ratingContainer.getChildren().isEmpty()) {
+      return 1;
+    }
+    for (int tmpIndex = 0; tmpIndex < 10 && tmpIndex < ratingContainer.getChildren().size(); tmpIndex++) {
       javafx.scene.Node tmpChild = ratingContainer.getChildren().get(tmpIndex);
-      double tmpMinX = tmpChild.getBoundsInParent().getMinX();
-      double tmpMaxX = tmpChild.getBoundsInParent().getMaxX();
-      if (mouseX >= tmpMinX && mouseX <= tmpMaxX) {
+      javafx.geometry.Point2D localPt = tmpChild.sceneToLocal(e.getSceneX(), e.getSceneY());
+      if (localPt.getX() >= 0 && localPt.getX() <= 28.0 && localPt.getY() >= 0 && localPt.getY() <= 28.0) {
         return tmpIndex + 1;
       }
     }
-    if (ratingContainer.getChildren().size() >= 10) {
-      double tmpLastMaxX = ratingContainer.getChildren().get(9)
-          .getBoundsInParent().getMaxX();
-      if (mouseX > tmpLastMaxX) {
-        return 10;
-      }
-    }
-    return 1;
+    javafx.geometry.Point2D containerPt = ratingContainer.sceneToLocal(e.getSceneX(), e.getSceneY());
+    int index = (int) Math.ceil(containerPt.getX() / 28.0);
+    return Math.max(1, Math.min(10, index));
   }
 
   private void buildRatingWidget() {
@@ -342,37 +356,38 @@ public class MovieDetailController {
       tmpReel.setOnMouseClicked(e -> applyRating.run());
       tmpReel.setOnMouseEntered(e -> previewRatingHover(tmpScore));
       tmpReel.setOnMouseMoved(e -> previewRatingHover(tmpScore));
+      tmpReel.hoverProperty().addListener((obs, wasHovered, isHovered) -> {
+        if (isHovered) {
+          previewRatingHover(tmpScore);
+        }
+      });
       tmpReels.add(tmpReel);
       ratingContainer.getChildren().add(tmpReel);
     }
 
-    ratingContainer.setOnMouseMoved(e -> {
-      int score = detectHoveredScore(e.getX());
-      previewRatingHover(score);
-    });
-
-    ratingContainer.setOnMouseDragged(e -> {
-      int score = detectHoveredScore(e.getX());
-      previewRatingHover(score);
-    });
+    ratingContainer.setOnMouseMoved(e -> previewRatingHover(detectHoveredScore(e)));
+    ratingContainer.setOnMouseDragged(e -> previewRatingHover(detectHoveredScore(e)));
 
     ratingContainer.setOnMouseReleased(e -> {
-      if (e.getX() >= 0 && e.getX() <= 320) {
-        int score = detectHoveredScore(e.getX());
-        if (currentRating != null && currentRating == score) {
-          currentRating = null;
-        } else {
-          currentRating = score;
-        }
-        if (movie != null) {
-          movie.setRating(currentRating);
-          movieRepository.update(movie);
-        }
-        updateRatingUI();
+      int score = detectHoveredScore(e);
+      if (currentRating != null && currentRating == score) {
+        currentRating = null;
+      } else {
+        currentRating = score;
       }
+      if (movie != null) {
+        movie.setRating(currentRating);
+        movieRepository.update(movie);
+      }
+      updateRatingUI();
     });
 
     ratingContainer.setOnMouseExited(e -> updateRatingUI());
+    ratingContainer.hoverProperty().addListener((obs, wasHovered, isHovered) -> {
+      if (!isHovered) {
+        updateRatingUI();
+      }
+    });
 
     // Numerical display label positioned at the end of the rating container
     Label tmpLblRatingVal = new Label();
