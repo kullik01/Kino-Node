@@ -91,8 +91,10 @@ class AnalyticsServiceTest {
 
     assertTrue(Files.exists(tmpTargetFile));
     String tmpContent = Files.readString(tmpTargetFile);
-    assertTrue(tmpContent
-        .contains("ID,Title,Year,Rating,Genre,Director,Actors,FilePath"));
+    assertTrue(tmpContent.contains(
+        "ID,Title,Year,Rating,Duration,Genre,Description,Director,Writer,"
+            + "Producer,Cinematographer,Composer,Actors,TrailerUrl,"
+            + "CoverImagePath,FilePath"));
     assertTrue(tmpContent.contains("Inception"));
     assertTrue(tmpContent.contains("The Matrix"));
   }

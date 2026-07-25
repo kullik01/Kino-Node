@@ -380,8 +380,9 @@ public class ImdbService {
       // and optionally fetch directors, writers, producers, cinematographers,
       // composers, and genres.
       String tmpSparqlQuery =
-          "SELECT ?directorLabel ?writerLabel ?producerLabel ?cinematographerLabel ?composerLabel ?genreLabel WHERE { "
+          "SELECT ?duration ?directorLabel ?writerLabel ?producerLabel ?cinematographerLabel ?composerLabel ?genreLabel WHERE { "
               + "?movie wdt:P345 '" + imdbId + "'. "
+              + "OPTIONAL { ?movie wdt:P2047 ?duration. } "
               + "OPTIONAL { ?movie wdt:P57 ?director. } "
               + "OPTIONAL { ?movie wdt:P58 ?writer. } "
               + "OPTIONAL { ?movie wdt:P162 ?producer. } "
@@ -423,6 +424,16 @@ public class ImdbService {
 
           for (JsonElement tmpElement : tmpBindings) {
             JsonObject tmpRow = tmpElement.getAsJsonObject();
+            if ((movie.getDuration() == null || movie.getDuration() <= 0) && tmpRow.has("duration")) {
+              try {
+                double tmpDurVal = Double.parseDouble(tmpRow.getAsJsonObject("duration").get("value").getAsString());
+                int tmpDurMins = (int) Math.round(tmpDurVal);
+                if (tmpDurMins > 0) {
+                  movie.setDuration(tmpDurMins);
+                  LOGGER.info("Extracted duration from Wikidata for " + movie.getTitle() + ": " + tmpDurMins + " mins");
+                }
+              } catch (Exception ignored) {}
+            }
             if (tmpRow.has("directorLabel"))
               tmpDirectors.add(tmpRow.getAsJsonObject("directorLabel")
                   .get("value").getAsString());

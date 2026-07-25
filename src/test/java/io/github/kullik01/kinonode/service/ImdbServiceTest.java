@@ -51,9 +51,11 @@ public class ImdbServiceTest {
     System.out.println("Year: " + tmpMovie.getYear());
     System.out.println("Cover: " + tmpMovie.getCoverImagePath());
     System.out.println("Genre: " + tmpMovie.getGenre());
-    System.out.println("Actors: " + tmpMovie.getActors());
+    System.out.println("Duration: " + tmpMovie.getDuration());
 
     assertNotNull(tmpMovie.getYear(), "Year should not be null");
+    assertNotNull(tmpMovie.getDuration(), "Duration should not be null");
+    assertTrue(tmpMovie.getDuration() > 0, "Duration should be positive");
     assertNotNull(tmpMovie.getGenre(), "Genre should not be null");
     assertTrue(tmpMovie.getGenre().toLowerCase().contains("horror"),
         "Genre should contain 'horror'");
