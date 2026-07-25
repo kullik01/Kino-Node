@@ -292,69 +292,153 @@ public class LibraryController implements Refreshable {
             + "-fx-effect: dropshadow(three-pass-box, rgba(33, 120, 221, 0.18), 24, 0.0, 0, 8);");
 
     if (isLibraryEmpty) {
-      Label tmpBadge = new Label("WORKSPACE CONFIGURATION");
-      tmpBadge.setStyle(
-          "-fx-background-color: rgba(33, 120, 221, 0.15); "
-              + "-fx-text-fill: #2178dd; "
-              + "-fx-font-weight: bold; "
-              + "-fx-font-size: 11px; "
-              + "-fx-padding: 4px 14px; "
-              + "-fx-background-radius: 12px;");
+      // Check if workspaces are already configured
+      String tmpWorkspaces = AppContext.getInstance().getSettingsRepository()
+          .get("workspace_folders", "");
+      boolean tmpHasWorkspaces = tmpWorkspaces != null
+          && !tmpWorkspaces.isBlank();
 
-      SVGPath tmpCameraIcon = new SVGPath();
-      tmpCameraIcon.setContent(
-          "M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z");
-      tmpCameraIcon.setScaleX(2.4);
-      tmpCameraIcon.setScaleY(2.4);
-      tmpCameraIcon.setStyle(
-          "-fx-fill: #ED8B00; -fx-effect: dropshadow(three-pass-box, rgba(237, 139, 0, 0.35), 10, 0, 0, 2);");
+      if (tmpHasWorkspaces) {
+        // Workspaces configured but library not yet synced
+        Label tmpBadge = new Label("LIBRARY SYNC REQUIRED");
+        tmpBadge.setStyle(
+            "-fx-background-color: rgba(237, 139, 0, 0.15); "
+                + "-fx-text-fill: #ED8B00; "
+                + "-fx-font-weight: bold; "
+                + "-fx-font-size: 11px; "
+                + "-fx-padding: 4px 14px; "
+                + "-fx-background-radius: 12px;");
 
-      Label tmpTitle = new Label("Start Your Movie Library");
-      tmpTitle.setStyle(
-          "-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
+        SVGPath tmpSyncIcon = new SVGPath();
+        tmpSyncIcon.setContent(
+            "M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z");
+        tmpSyncIcon.setScaleX(2.4);
+        tmpSyncIcon.setScaleY(2.4);
+        tmpSyncIcon.setStyle(
+            "-fx-fill: #ED8B00; -fx-effect: dropshadow(three-pass-box, rgba(237, 139, 0, 0.35), 10, 0, 0, 2);");
+        javafx.scene.layout.VBox tmpSyncIconWrapper =
+            new javafx.scene.layout.VBox(tmpSyncIcon);
+        tmpSyncIconWrapper.setAlignment(javafx.geometry.Pos.CENTER);
+        tmpSyncIconWrapper.setPadding(
+            new javafx.geometry.Insets(10, 0, 10, 0));
 
-      Label tmpText = new Label(
-          "Please configure your workspace folder in Settings to scan, index, and organize your films.");
-      tmpText.setWrapText(true);
-      tmpText.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
-      tmpText.setMaxWidth(420);
-      tmpText.setStyle("-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
+        Label tmpTitle = new Label("Sync Your Library");
+        tmpTitle.setStyle(
+            "-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
 
-      javafx.scene.layout.HBox tmpBtnBox = new javafx.scene.layout.HBox(14);
-      tmpBtnBox.setAlignment(javafx.geometry.Pos.CENTER);
+        Label tmpText = new Label(
+            "Your workspace is configured. Press the Sync button to scan your folder(s) and populate your movie library.");
+        tmpText.setWrapText(true);
+        tmpText.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+        tmpText.setMaxWidth(420);
+        tmpText.setStyle(
+            "-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
 
-      Button tmpBtnSettings = new Button("Configure Workspaces");
-      tmpBtnSettings.getStyleClass().addAll("button-success");
-      tmpBtnSettings.setStyle(
-          "-fx-padding: 8px 18px; -fx-font-size: 14px; -fx-font-weight: bold;");
-      tmpBtnSettings.setCursor(
-          io.github.kullik01.kinonode.util.CursorUtils.getAppLogoCursor());
+        javafx.scene.layout.HBox tmpBtnBox =
+            new javafx.scene.layout.HBox(14);
+        tmpBtnBox.setAlignment(javafx.geometry.Pos.CENTER);
 
-      SVGPath tmpGear = new SVGPath();
-      tmpGear.setContent(
-          "M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z");
-      tmpGear.setScaleX(0.85);
-      tmpGear.setScaleY(0.85);
-      tmpGear.setStyle("-fx-fill: white;");
-      tmpBtnSettings.setGraphic(tmpGear);
+        Button tmpBtnSync = new Button("Sync Library");
+        tmpBtnSync.getStyleClass().addAll("button-success");
+        tmpBtnSync.setStyle(
+            "-fx-padding: 8px 18px; -fx-font-size: 14px; -fx-font-weight: bold;");
+        tmpBtnSync.setCursor(
+            io.github.kullik01.kinonode.util.CursorUtils.getAppLogoCursor());
 
-      Tooltip tmpTooltip = new Tooltip(
-          "Why set a workspace?\n"
-              + "KinoNode needs at least one workspace folder path to scan, locate, and catalog your movie files, posters, and metadata into your collection library.");
-      tmpTooltip.setShowDelay(javafx.util.Duration.millis(50));
-      tmpTooltip.getStyleClass().add("chart-popup-tooltip");
-      tmpBtnSettings.setTooltip(tmpTooltip);
+        SVGPath tmpSyncBtnIcon = new SVGPath();
+        tmpSyncBtnIcon.setContent(
+            "M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z");
+        tmpSyncBtnIcon.setScaleX(0.85);
+        tmpSyncBtnIcon.setScaleY(0.85);
+        tmpSyncBtnIcon.setStyle("-fx-fill: white;");
+        tmpBtnSync.setGraphic(tmpSyncBtnIcon);
 
-      tmpBtnSettings.setOnAction(e -> {
-        MainController tmpMain = AppContext.getInstance().getMainController();
-        if (tmpMain != null) {
-          tmpMain.showSettings();
-        }
-      });
+        Tooltip tmpSyncTooltip = new Tooltip(
+            "Why sync?\n"
+                + "Syncing scans your configured workspace folder(s) to discover, index, and catalog your movie files, posters, and metadata into your collection library.");
+        tmpSyncTooltip.setShowDelay(javafx.util.Duration.millis(250));
+        tmpSyncTooltip.getStyleClass().add("chart-popup-tooltip");
+        Tooltip.install(tmpBtnSync, tmpSyncTooltip);
 
-      tmpBtnBox.getChildren().add(tmpBtnSettings);
-      tmpCard.getChildren().addAll(tmpBadge, tmpCameraIcon, tmpTitle, tmpText,
-          tmpBtnBox);
+        tmpBtnSync.setOnAction(e -> syncLibrary());
+
+        tmpBtnBox.getChildren().add(tmpBtnSync);
+        tmpCard.getChildren().addAll(tmpBadge, tmpSyncIconWrapper,
+            tmpTitle, tmpText, tmpBtnBox);
+      } else {
+        // No workspaces configured yet
+        Label tmpBadge = new Label("WORKSPACE CONFIGURATION");
+        tmpBadge.setStyle(
+            "-fx-background-color: rgba(33, 120, 221, 0.15); "
+                + "-fx-text-fill: #2178dd; "
+                + "-fx-font-weight: bold; "
+                + "-fx-font-size: 11px; "
+                + "-fx-padding: 4px 14px; "
+                + "-fx-background-radius: 12px;");
+
+        SVGPath tmpCameraIcon = new SVGPath();
+        tmpCameraIcon.setContent(
+            "M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z");
+        tmpCameraIcon.setScaleX(2.4);
+        tmpCameraIcon.setScaleY(2.4);
+        tmpCameraIcon.setStyle(
+            "-fx-fill: #ED8B00; -fx-effect: dropshadow(three-pass-box, rgba(237, 139, 0, 0.35), 10, 0, 0, 2);");
+        javafx.scene.layout.VBox tmpCameraIconWrapper =
+            new javafx.scene.layout.VBox(tmpCameraIcon);
+        tmpCameraIconWrapper.setAlignment(javafx.geometry.Pos.CENTER);
+        tmpCameraIconWrapper.setPadding(
+            new javafx.geometry.Insets(10, 0, 10, 0));
+
+        Label tmpTitle = new Label("Start Your Movie Library");
+        tmpTitle.setStyle(
+            "-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
+
+        Label tmpText = new Label(
+            "Please configure your workspace folder in Settings to scan, index, and organize your films.");
+        tmpText.setWrapText(true);
+        tmpText.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+        tmpText.setMaxWidth(420);
+        tmpText.setStyle(
+            "-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
+
+        javafx.scene.layout.HBox tmpBtnBox =
+            new javafx.scene.layout.HBox(14);
+        tmpBtnBox.setAlignment(javafx.geometry.Pos.CENTER);
+
+        Button tmpBtnSettings = new Button("Configure Workspaces");
+        tmpBtnSettings.getStyleClass().addAll("button-success");
+        tmpBtnSettings.setStyle(
+            "-fx-padding: 8px 18px; -fx-font-size: 14px; -fx-font-weight: bold;");
+        tmpBtnSettings.setCursor(
+            io.github.kullik01.kinonode.util.CursorUtils.getAppLogoCursor());
+
+        SVGPath tmpGear = new SVGPath();
+        tmpGear.setContent(
+            "M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z");
+        tmpGear.setScaleX(0.85);
+        tmpGear.setScaleY(0.85);
+        tmpGear.setStyle("-fx-fill: white;");
+        tmpBtnSettings.setGraphic(tmpGear);
+
+        Tooltip tmpTooltip = new Tooltip(
+            "Why set a workspace?\n"
+                + "KinoNode needs at least one workspace folder path to scan, locate, and catalog your movie files, posters, and metadata into your collection library.");
+        tmpTooltip.setShowDelay(javafx.util.Duration.millis(250));
+        tmpTooltip.getStyleClass().add("chart-popup-tooltip");
+        Tooltip.install(tmpBtnSettings, tmpTooltip);
+
+        tmpBtnSettings.setOnAction(e -> {
+          MainController tmpMain =
+              AppContext.getInstance().getMainController();
+          if (tmpMain != null) {
+            tmpMain.showSettings();
+          }
+        });
+
+        tmpBtnBox.getChildren().add(tmpBtnSettings);
+        tmpCard.getChildren().addAll(tmpBadge, tmpCameraIconWrapper, tmpTitle,
+            tmpText, tmpBtnBox);
+      }
     } else {
       SVGPath tmpSearchIcon = new SVGPath();
       tmpSearchIcon.setContent(

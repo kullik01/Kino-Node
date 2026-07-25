@@ -53,6 +53,7 @@ public class CursorUtils {
       Logger.getLogger(CursorUtils.class.getName());
 
   private static Cursor appLogoCursor;
+  private static Cursor centeredAppLogoCursor;
 
   /**
    * Gets the transparent application logo mouse cursor.
@@ -78,6 +79,32 @@ public class CursorUtils {
       }
     }
     return appLogoCursor;
+  }
+
+  /**
+   * Gets the transparent application logo mouse cursor centered at the image.
+   *
+   * @return custom centered application logo {@link Cursor}, or {@link Cursor#DEFAULT} as fallback
+   */
+  public static Cursor getCenteredAppLogoCursor() {
+    if (centeredAppLogoCursor == null) {
+      try {
+        InputStream tmpStream = CursorUtils.class.getResourceAsStream(
+            "/io/github/kullik01/kinonode/images/app_logo_cursor.png");
+        if (tmpStream != null) {
+          Image tmpImage = new Image(tmpStream);
+          centeredAppLogoCursor = new ImageCursor(tmpImage, tmpImage.getWidth() / 2.0,
+              tmpImage.getHeight() / 2.0);
+        } else {
+          centeredAppLogoCursor = Cursor.DEFAULT;
+        }
+      } catch (Exception tmpException) {
+        LOGGER.log(Level.WARNING,
+            "Failed to load centered application logo cursor image", tmpException);
+        centeredAppLogoCursor = Cursor.DEFAULT;
+      }
+    }
+    return centeredAppLogoCursor;
   }
 
   /**

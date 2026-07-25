@@ -140,7 +140,7 @@ public class MainController {
     btnImdb.setCursor(tmpLogoCursor);
     btnSettings.setCursor(tmpLogoCursor);
     btnAbout.setCursor(tmpLogoCursor);
-    btnThemeToggle.setCursor(tmpLogoCursor);
+    btnThemeToggle.setCursor(io.github.kullik01.kinonode.util.CursorUtils.getCenteredAppLogoCursor());
 
     // Show Library by default
     showLibrary();
