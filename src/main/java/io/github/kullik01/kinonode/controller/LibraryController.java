@@ -192,61 +192,44 @@ public class LibraryController implements Refreshable {
       };
     }).collect(Collectors.toList());
 
-    // Sort movies according to selected sorting criteria
+    // Sort movies according to selected sorting criteria with deterministic tie-breakers
     if (tmpSortOption != null) {
+      Comparator<String> strComp = Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER);
+      Comparator<Integer> idComp = Comparator.nullsLast(Comparator.naturalOrder());
+
       switch (tmpSortOption) {
-        case "Title (A-Z)" ->
-          tmpFiltered.sort(Comparator.comparing(Movie::getTitle,
-              Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)));
+        case "Title (A-Z)" -> tmpFiltered.sort(Comparator
+            .comparing(Movie::getTitle, strComp)
+            .thenComparing(Movie::getId, idComp));
+
         case "Title (Z-A)" -> tmpFiltered.sort(Comparator
-            .comparing(Movie::getTitle,
-                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
-            .reversed());
-        case "Release Year" -> tmpFiltered.sort((movie1, movie2) -> {
-          // Safe sorting of year that places null-valued release years at the
-          // bottom
-          if (movie1.getYear() == null && movie2.getYear() == null)
-            return 0;
-          if (movie1.getYear() == null)
-            return 1;
-          if (movie2.getYear() == null)
-            return -1;
-          return Integer.compare(movie1.getYear(), movie2.getYear());
-        });
-        case "Rating (Highest)" -> tmpFiltered.sort((movie1, movie2) -> {
-          // Safe sorting of ratings in descending order, putting nulls at the
-          // end
-          if (movie1.getRating() == null && movie2.getRating() == null)
-            return 0;
-          if (movie1.getRating() == null)
-            return 1;
-          if (movie2.getRating() == null)
-            return -1;
-          return Integer.compare(movie2.getRating(), movie1.getRating()); // Descending
-        });
-        case "Longest Movie" -> tmpFiltered.sort((movie1, movie2) -> {
-          if (movie1.getDuration() == null && movie2.getDuration() == null)
-            return 0;
-          if (movie1.getDuration() == null)
-            return 1;
-          if (movie2.getDuration() == null)
-            return -1;
-          return Integer.compare(movie2.getDuration(), movie1.getDuration()); // Longest first
-        });
-        case "Shortest Movie" -> tmpFiltered.sort((movie1, movie2) -> {
-          if (movie1.getDuration() == null && movie2.getDuration() == null)
-            return 0;
-          if (movie1.getDuration() == null)
-            return 1;
-          if (movie2.getDuration() == null)
-            return -1;
-          return Integer.compare(movie1.getDuration(), movie2.getDuration()); // Shortest first
-        });
-        default -> tmpFiltered
-            .sort(Comparator
-                .comparing(Movie::getDateAdded,
-                    Comparator.nullsLast(Comparator.naturalOrder()))
-                .reversed()); // Default sort for Filters and Recently Added
+            .comparing(Movie::getTitle, strComp).reversed()
+            .thenComparing(Movie::getId, idComp));
+
+        case "Release Year" -> tmpFiltered.sort(Comparator
+            .comparing(Movie::getYear, Comparator.nullsLast(Comparator.reverseOrder()))
+            .thenComparing(Movie::getTitle, strComp)
+            .thenComparing(Movie::getId, idComp));
+
+        case "Rating (Highest)" -> tmpFiltered.sort(Comparator
+            .comparing(Movie::getRating, Comparator.nullsLast(Comparator.reverseOrder()))
+            .thenComparing(Movie::getTitle, strComp)
+            .thenComparing(Movie::getId, idComp));
+
+        case "Longest Movie" -> tmpFiltered.sort(Comparator
+            .comparing(Movie::getDuration, Comparator.nullsLast(Comparator.reverseOrder()))
+            .thenComparing(Movie::getTitle, strComp)
+            .thenComparing(Movie::getId, idComp));
+
+        case "Shortest Movie" -> tmpFiltered.sort(Comparator
+            .comparing(Movie::getDuration, Comparator.nullsLast(Comparator.naturalOrder()))
+            .thenComparing(Movie::getTitle, strComp)
+            .thenComparing(Movie::getId, idComp));
+
+        default -> tmpFiltered.sort(Comparator
+            .comparing(Movie::getDateAdded, Comparator.nullsLast(Comparator.reverseOrder()))
+            .thenComparing(Movie::getTitle, strComp)
+            .thenComparing(Movie::getId, Comparator.nullsLast(Comparator.reverseOrder())));
       }
     }
 

@@ -76,7 +76,7 @@ public class MovieRepository {
    */
   public List<Movie> findAll() {
     List<Movie> tmpMovies = new ArrayList<>();
-    String tmpSql = "SELECT * FROM movies ORDER BY date_added DESC";
+    String tmpSql = "SELECT * FROM movies ORDER BY date_added DESC, id DESC";
     // Query the database using a simple statement since no parameters are
     // needed
     try (

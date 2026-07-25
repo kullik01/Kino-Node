@@ -166,6 +166,8 @@ public class CustomAlert {
     tmpStage.setWidth(450);
     tmpStage.setHeight(250);
 
+    CursorUtils.centerOnOwnerOrScreen(tmpStage, owner);
+
     tmpStage.showAndWait();
   }
 }

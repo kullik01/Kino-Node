@@ -245,9 +245,9 @@
 
 .detail-cover {
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 15, 0.0, 0, 6);
-    -fx-background-radius: 8px;
-    -fx-fit-width: 240px;
-    -fx-fit-height: 360px;
+    -fx-background-radius: 12px;
+    -fx-fit-width: 320px;
+    -fx-fit-height: 480px;
 }
 
 .detail-title {

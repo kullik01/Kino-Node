@@ -43,6 +43,7 @@ import java.util.logging.Logger;
 import javafx.scene.Cursor;
 import javafx.scene.ImageCursor;
 import javafx.scene.image.Image;
+import javafx.stage.Window;
 
 /**
  * Utility class to provide custom mouse cursors across the application.
@@ -89,7 +90,46 @@ public class CursorUtils {
   }
 
   /**
-   * Applies the high-resolution application logo cursor to a dialog window.
+   * Centers a window dead in the middle of its owner window or screen.
+   *
+   * @param window the {@link Window} to position
+   * @param owner the owner {@link Window} to center over
+   */
+  public static void centerOnOwnerOrScreen(Window window, Window owner) {
+    if (window == null) return;
+    Runnable positioner = () -> {
+      Window activeOwner = owner;
+      if (activeOwner == null && window instanceof javafx.stage.Stage stageWin) {
+        activeOwner = stageWin.getOwner();
+      }
+      if (activeOwner != null && activeOwner.isShowing() && activeOwner.getWidth() > 0 && activeOwner.getHeight() > 0) {
+        double ownerX = activeOwner.getX();
+        double ownerY = activeOwner.getY();
+        double ownerWidth = activeOwner.getWidth();
+        double ownerHeight = activeOwner.getHeight();
+
+        double winWidth = window.getWidth();
+        double winHeight = window.getHeight();
+
+        if (winWidth > 0 && winHeight > 0) {
+          window.setX(ownerX + (ownerWidth - winWidth) / 2.0);
+          window.setY(ownerY + (ownerHeight - winHeight) / 2.0);
+          return;
+        }
+      }
+      window.centerOnScreen();
+    };
+
+    if (window.isShowing()) {
+      positioner.run();
+    } else {
+      window.setOnShown(e -> positioner.run());
+    }
+  }
+
+  /**
+   * Applies the high-resolution application logo cursor to a dialog window
+   * and centers it over the owner window or screen.
    *
    * @param dialog the JavaFX {@link javafx.scene.control.Dialog} to configure
    */
@@ -105,11 +145,17 @@ public class CursorUtils {
           }
         });
       }
+      dialog.setOnShown(e -> {
+        if (dialog.getDialogPane() != null && dialog.getDialogPane().getScene() != null) {
+          centerOnOwnerOrScreen(dialog.getDialogPane().getScene().getWindow(), dialog.getOwner());
+        }
+      });
     }
   }
 
   /**
-   * Applies the high-resolution application logo cursor to a stage window.
+   * Applies the high-resolution application logo cursor to a stage window
+   * and centers it over the owner window or screen.
    *
    * @param stage the JavaFX {@link javafx.stage.Stage} to configure
    */
@@ -124,6 +170,7 @@ public class CursorUtils {
           }
         });
       }
+      centerOnOwnerOrScreen(stage, stage.getOwner());
     }
   }
 }
