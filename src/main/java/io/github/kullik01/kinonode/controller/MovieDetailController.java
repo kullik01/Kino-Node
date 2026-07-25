@@ -293,11 +293,12 @@ public class MovieDetailController {
       Label tmpReel = new Label();
       tmpReel.setPickOnBounds(true);
       tmpReel.setGraphic(createCameraSvg());
-      tmpReel.setMinSize(24.0, 24.0);
-      tmpReel.setPrefSize(24.0, 24.0);
+      tmpReel.setMinSize(28.0, 28.0);
+      tmpReel.setPrefSize(28.0, 28.0);
+      tmpReel.setMaxSize(28.0, 28.0);
       tmpReel.setAlignment(javafx.geometry.Pos.CENTER);
       tmpReel.getStyleClass().add("rating-reel");
-      tmpReel.setStyle("-fx-padding: 0 1px;");
+      tmpReel.setStyle("-fx-padding: 0;");
       Tooltip tmpReelTooltip = new Tooltip("Rate " + tmpScore + "/10");
       tmpReelTooltip.setShowDelay(javafx.util.Duration.millis(250));
       tmpReel.setTooltip(tmpReelTooltip);
@@ -321,6 +322,33 @@ public class MovieDetailController {
       tmpReels.add(tmpReel);
       ratingContainer.getChildren().add(tmpReel);
     }
+
+    ratingContainer.setOnMouseDragged(e -> {
+      double mouseX = e.getX();
+      int hoveredIndex = (int) Math.ceil(mouseX / 28.0);
+      if (hoveredIndex >= 1 && hoveredIndex <= 10) {
+        previewRatingHover(hoveredIndex);
+      }
+    });
+
+    ratingContainer.setOnMouseReleased(e -> {
+      double mouseX = e.getX();
+      if (mouseX >= 0 && mouseX <= 280) {
+        int score = (int) Math.ceil(mouseX / 28.0);
+        if (score >= 1 && score <= 10) {
+          if (currentRating != null && currentRating == score) {
+            currentRating = null;
+          } else {
+            currentRating = score;
+          }
+          if (movie != null) {
+            movie.setRating(currentRating);
+            movieRepository.update(movie);
+          }
+          updateRatingUI();
+        }
+      }
+    });
 
     ratingContainer.setOnMouseExited(e -> updateRatingUI());
 

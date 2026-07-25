@@ -65,8 +65,8 @@ public class CursorUtils {
             "/io/github/kullik01/kinonode/images/app_logo_cursor.png");
         if (tmpStream != null) {
           Image tmpImage = new Image(tmpStream);
-          appLogoCursor = new ImageCursor(tmpImage, tmpImage.getWidth() * 0.15,
-              tmpImage.getHeight() * 0.15);
+          appLogoCursor = new ImageCursor(tmpImage, tmpImage.getWidth() / 2.0,
+              tmpImage.getHeight() / 2.0);
         } else {
           appLogoCursor = Cursor.DEFAULT;
         }
