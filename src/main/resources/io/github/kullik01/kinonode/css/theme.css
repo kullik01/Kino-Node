@@ -162,23 +162,23 @@
     -fx-hgap: 15px;
     -fx-vgap: 20px;
     -fx-padding: 5px;
-    -fx-alignment: top-center;
+    -fx-alignment: top-left;
 }
 
 /* Movie Card styling */
 .movie-card {
     -fx-background-color: -color-bg-overlay;
-    -fx-background-radius: 8px;
-    -fx-padding: 8px;
-    -fx-spacing: 6px;
-    -fx-pref-width: 146px;
-    -fx-pref-height: 255px;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px;
+    -fx-spacing: 8px;
+    -fx-pref-width: 200px;
+    -fx-pref-height: 330px;
     -fx-cursor: url("../images/app_logo_cursor.png"), default;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 6, 0.0, 0, 3);
     -fx-alignment: top-center;
     -fx-border-color: -color-border-default;
     -fx-border-width: 1px;
-    -fx-border-radius: 8px;
+    -fx-border-radius: 10px;
 }
 
 .movie-card:hover {
@@ -191,29 +191,29 @@
 
 .movie-poster-container {
     -fx-background-color: -color-bg-subtle;
-    -fx-background-radius: 6px;
-    -fx-pref-width: 130px;
-    -fx-pref-height: 190px;
+    -fx-background-radius: 8px;
+    -fx-pref-width: 184px;
+    -fx-pref-height: 270px;
     -fx-alignment: center;
 }
 
 .movie-poster {
-    -fx-fit-width: 130px;
-    -fx-fit-height: 190px;
+    -fx-fit-width: 184px;
+    -fx-fit-height: 270px;
     -fx-preserve-ratio: false;
 }
 
 .movie-title-label {
-    -fx-font-size: 13px;
+    -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-text-fill: -color-fg-default;
     -fx-wrap-text: false;
     -fx-text-overrun: ellipsis;
-    -fx-max-width: 130px;
+    -fx-max-width: 184px;
 }
 
 .movie-year-label {
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     -fx-text-fill: -color-fg-muted;
 }
 
@@ -639,7 +639,8 @@
     -fx-background-color: #2178dd;
 }
 
-#decadeChart .chart-bar:hover {
+#decadeChart .chart-bar:hover,
+#decadeChart .chart-bar.chart-bar-hovered {
     -fx-background-color: #2178dd;
     -fx-opacity: 0.80;
     -fx-cursor: url("../images/app_logo_cursor.png"), default;
@@ -650,7 +651,8 @@
     -fx-background-color: #ED8B00;
 }
 
-#ratingChart .chart-bar:hover {
+#ratingChart .chart-bar:hover,
+#ratingChart .chart-bar.chart-bar-hovered {
     -fx-background-color: #ED8B00;
     -fx-opacity: 0.80;
     -fx-cursor: url("../images/app_logo_cursor.png"), default;
@@ -661,7 +663,8 @@
     -fx-background-color: #2178dd;
 }
 
-#genreChart .chart-bar:hover {
+#genreChart .chart-bar:hover,
+#genreChart .chart-bar.chart-bar-hovered {
     -fx-background-color: #2178dd;
     -fx-opacity: 0.80;
     -fx-cursor: url("../images/app_logo_cursor.png"), default;

@@ -308,11 +308,16 @@ public class AnalyticsController implements Refreshable {
 
         node.setCursor(
             io.github.kullik01.kinonode.util.CursorUtils.getCameraCursor());
+        // Use a style class toggle instead of setOpacity() to avoid
+        // conflicting with CSS :hover rules which causes flickering.
+        // hoverProperty() fires even when the mouse is stationary.
         node.hoverProperty().addListener((obs, wasHovered, isHovered) -> {
           if (isHovered) {
-            node.setOpacity(0.80);
+            if (!node.getStyleClass().contains("chart-bar-hovered")) {
+              node.getStyleClass().add("chart-bar-hovered");
+            }
           } else {
-            node.setOpacity(1.0);
+            node.getStyleClass().remove("chart-bar-hovered");
           }
         });
       }
