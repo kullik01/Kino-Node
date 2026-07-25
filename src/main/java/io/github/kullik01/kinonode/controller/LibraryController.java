@@ -275,7 +275,10 @@ public class LibraryController implements Refreshable {
     tmpRootVBox.setAlignment(javafx.geometry.Pos.CENTER);
     tmpRootVBox.setPadding(new javafx.geometry.Insets(30, 20, 30, 20));
     tmpRootVBox.prefHeightProperty().bind(gridPane.heightProperty().subtract(30));
+    tmpRootVBox.prefWidthProperty().bind(gridPane.widthProperty().subtract(30));
     tmpRootVBox.setMaxWidth(Double.MAX_VALUE);
+    tmpRootVBox.setMaxHeight(Double.MAX_VALUE);
+    tmpRootVBox.setFillWidth(true);
 
     javafx.scene.layout.VBox tmpCard = new javafx.scene.layout.VBox(20);
     tmpCard.setAlignment(javafx.geometry.Pos.CENTER);

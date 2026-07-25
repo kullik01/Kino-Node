@@ -276,6 +276,12 @@
     -fx-cursor: url("../images/app_logo_cursor.png"), default;
 }
 
+.root .toggle-switch,
+.root .toggle-switch > .thumb-area,
+.root .toggle-switch > .thumb {
+    -fx-cursor: url("../images/app_logo_cursor.png"), default;
+}
+
 .root .button.button-primary, .root .button.button-secondary,
 .root .menu-button.button-primary, .root .menu-button.button-secondary,
 .root .button.button-play, .root .button.button-success,
