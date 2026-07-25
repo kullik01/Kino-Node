@@ -473,6 +473,12 @@ public class MovieDetailController implements Refreshable {
     ButtonType tmpCloseBtnType = new ButtonType("Close", ButtonBar.ButtonData.CANCEL_CLOSE);
     tmpDialog.getDialogPane().getButtonTypes().addAll(tmpCloseBtnType);
 
+    // Style the Close button as blue to match other dialog windows
+    javafx.scene.Node tmpCloseBtn = tmpDialog.getDialogPane().lookupButton(tmpCloseBtnType);
+    if (tmpCloseBtn != null) {
+      tmpCloseBtn.getStyleClass().add("button-primary");
+    }
+
     VBox tmpContentBox = new VBox(15);
     tmpContentBox.setPadding(new Insets(10));
 
@@ -593,8 +599,16 @@ public class MovieDetailController implements Refreshable {
 
     javafx.scene.Node tmpOkButton =
         tmpDialog.getDialogPane().lookupButton(tmpOkButtonType);
-    tmpOkButton
-        .setDisable(defaultText.trim().isEmpty() || defaultText.length() > 30);
+    if (tmpOkButton != null) {
+      tmpOkButton.getStyleClass().add("button-primary");
+      tmpOkButton.setDisable(defaultText.trim().isEmpty() || defaultText.length() > 30);
+    }
+
+    javafx.scene.Node tmpCancelButton =
+        tmpDialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+    if (tmpCancelButton != null) {
+      tmpCancelButton.getStyleClass().add("button-primary");
+    }
 
     tmpTextField.textProperty()
         .addListener((observable, oldValue, newValue) -> {

@@ -40,6 +40,7 @@ package io.github.kullik01.kinonode.controller;
 import io.github.kullik01.kinonode.model.Movie;
 import io.github.kullik01.kinonode.model.Watchlist;
 import io.github.kullik01.kinonode.service.AppContext;
+import io.github.kullik01.kinonode.util.CustomAlert;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -590,18 +591,40 @@ public class AnalyticsController implements Refreshable {
 
   private void showSuccessAlert(String title, String message) {
     Alert tmpAlert = new Alert(Alert.AlertType.INFORMATION);
+    javafx.stage.Stage tmpStage =
+        (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
+    tmpStage.getIcons().add(new javafx.scene.image.Image(getClass()
+        .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
     tmpAlert.setTitle(title);
-    tmpAlert.setHeaderText(null);
+    tmpAlert.setHeaderText(title);
     tmpAlert.setContentText(message);
+
+    tmpAlert.getDialogPane()
+        .setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
     io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
     tmpAlert.showAndWait();
   }
 
   private void showErrorAlert(String title, String message) {
     Alert tmpAlert = new Alert(Alert.AlertType.ERROR);
+    javafx.stage.Stage tmpStage =
+        (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
+    tmpStage.getIcons().add(new javafx.scene.image.Image(getClass()
+        .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
     tmpAlert.setTitle(title);
-    tmpAlert.setHeaderText(null);
+    tmpAlert.setHeaderText(title);
     tmpAlert.setContentText(message);
+
+    javafx.scene.image.ImageView tmpCustomIcon =
+        new javafx.scene.image.ImageView(
+            new javafx.scene.image.Image(getClass().getResourceAsStream(
+                "/io/github/kullik01/kinonode/images/error_icon.png")));
+    tmpCustomIcon.setFitHeight(48);
+    tmpCustomIcon.setFitWidth(48);
+    tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
+
+    tmpAlert.getDialogPane()
+        .setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
     io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
     tmpAlert.showAndWait();
   }

@@ -238,6 +238,16 @@ public class CursorUtils {
           if (dialog.getDialogPane() != null && dialog.getDialogPane().getScene() != null) {
             centerOnOwnerOrScreen(dialog.getDialogPane().getScene().getWindow(), dialog.getOwner());
           }
+          javafx.application.Platform.runLater(() -> {
+            if (dialog.getDialogPane() != null) {
+              for (javafx.scene.control.ButtonType type : dialog.getDialogPane().getButtonTypes()) {
+                javafx.scene.Node button = dialog.getDialogPane().lookupButton(type);
+                if (button != null && !button.getStyleClass().contains("button-primary")) {
+                  button.getStyleClass().add("button-primary");
+                }
+              }
+            }
+          });
         }
       });
     }

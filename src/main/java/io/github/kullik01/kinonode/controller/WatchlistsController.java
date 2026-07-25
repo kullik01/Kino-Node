@@ -352,8 +352,16 @@ public class WatchlistsController implements Refreshable {
 
     javafx.scene.Node tmpOkButton =
         tmpDialog.getDialogPane().lookupButton(tmpOkButtonType);
-    tmpOkButton.setDisable(true); // Always disable initially; user must type or
-                                  // change the name
+    if (tmpOkButton != null) {
+      tmpOkButton.getStyleClass().add("button-primary");
+      tmpOkButton.setDisable(true); // Always disable initially; user must type or change the name
+    }
+
+    javafx.scene.Node tmpCancelButton =
+        tmpDialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+    if (tmpCancelButton != null) {
+      tmpCancelButton.getStyleClass().add("button-primary");
+    }
 
     if (currentId != -1) {
       tmpErrorLabel.setText(

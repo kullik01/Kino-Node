@@ -339,10 +339,7 @@ public class WatchlistRepository {
 
       // Fetch remaining movies in the watchlist to check if it's empty
       List<Movie> tmpRemaining = findMoviesInWatchlist(watchlistId);
-      if (tmpRemaining.isEmpty()) {
-        // If there are no movies left, delete the empty watchlist
-        delete(watchlistId);
-      } else {
+      if (!tmpRemaining.isEmpty()) {
         // Re-sequence remaining movies to maintain continuous position indexes
         // [0, 1, 2...]
         List<Integer> tmpIds = tmpRemaining.stream().map(Movie::getId).toList();

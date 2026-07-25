@@ -81,12 +81,28 @@ public class AnalyticsService {
           .append(",\n");
       tmpBuilder.append("      \"rating\": ").append(tmpMovie.getRating())
           .append(",\n");
+      tmpBuilder.append("      \"duration\": ").append(tmpMovie.getDuration())
+          .append(",\n");
       tmpBuilder.append("      \"genre\": ")
           .append(escapeJson(tmpMovie.getGenre())).append(",\n");
+      tmpBuilder.append("      \"description\": ")
+          .append(escapeJson(tmpMovie.getDescription())).append(",\n");
       tmpBuilder.append("      \"director\": ")
           .append(escapeJson(tmpMovie.getDirector())).append(",\n");
+      tmpBuilder.append("      \"writer\": ")
+          .append(escapeJson(tmpMovie.getWriter())).append(",\n");
+      tmpBuilder.append("      \"producer\": ")
+          .append(escapeJson(tmpMovie.getProducer())).append(",\n");
+      tmpBuilder.append("      \"cinematographer\": ")
+          .append(escapeJson(tmpMovie.getCinematographer())).append(",\n");
+      tmpBuilder.append("      \"composer\": ")
+          .append(escapeJson(tmpMovie.getComposer())).append(",\n");
       tmpBuilder.append("      \"actors\": ")
           .append(escapeJson(tmpMovie.getActors())).append(",\n");
+      tmpBuilder.append("      \"trailerUrl\": ")
+          .append(escapeJson(tmpMovie.getTrailerUrl())).append(",\n");
+      tmpBuilder.append("      \"coverImagePath\": ")
+          .append(escapeJson(tmpMovie.getCoverImagePath())).append(",\n");
       tmpBuilder.append("      \"filePath\": ")
           .append(escapeJson(tmpMovie.getFilePath())).append("\n");
       tmpBuilder.append("    }");
@@ -111,7 +127,10 @@ public class AnalyticsService {
   public void exportToCsv(Path targetFile, List<Movie> movies)
       throws IOException {
     StringBuilder tmpBuilder = new StringBuilder();
-    tmpBuilder.append("ID,Title,Year,Rating,Genre,Director,Actors,FilePath\n");
+    tmpBuilder.append(
+        "ID,Title,Year,Rating,Duration,Genre,Description,Director,Writer,"
+            + "Producer,Cinematographer,Composer,Actors,TrailerUrl,"
+            + "CoverImagePath,FilePath\n");
     for (Movie tmpMovie : movies) {
       tmpBuilder.append(tmpMovie.getId() != null ? tmpMovie.getId() : "")
           .append(",");
@@ -121,9 +140,19 @@ public class AnalyticsService {
       tmpBuilder
           .append(tmpMovie.getRating() != null ? tmpMovie.getRating() : "")
           .append(",");
+      tmpBuilder
+          .append(tmpMovie.getDuration() != null ? tmpMovie.getDuration() : "")
+          .append(",");
       tmpBuilder.append(escapeCsv(tmpMovie.getGenre())).append(",");
+      tmpBuilder.append(escapeCsv(tmpMovie.getDescription())).append(",");
       tmpBuilder.append(escapeCsv(tmpMovie.getDirector())).append(",");
+      tmpBuilder.append(escapeCsv(tmpMovie.getWriter())).append(",");
+      tmpBuilder.append(escapeCsv(tmpMovie.getProducer())).append(",");
+      tmpBuilder.append(escapeCsv(tmpMovie.getCinematographer())).append(",");
+      tmpBuilder.append(escapeCsv(tmpMovie.getComposer())).append(",");
       tmpBuilder.append(escapeCsv(tmpMovie.getActors())).append(",");
+      tmpBuilder.append(escapeCsv(tmpMovie.getTrailerUrl())).append(",");
+      tmpBuilder.append(escapeCsv(tmpMovie.getCoverImagePath())).append(",");
       tmpBuilder.append(escapeCsv(tmpMovie.getFilePath())).append("\n");
     }
     Files.writeString(targetFile, tmpBuilder.toString(),
@@ -162,7 +191,7 @@ public class AnalyticsService {
             .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
         .append(" — Total Titles: ").append(movies.size()).append("</p>\n");
     tmpBuilder.append(
-        "  <table>\n    <thead>\n      <tr>\n        <th>Title</th>\n        <th>Year</th>\n        <th>Rating</th>\n        <th>Genre</th>\n        <th>Director</th>\n        <th>Actors</th>\n      </tr>\n    </thead>\n    <tbody>\n");
+        "  <table>\n    <thead>\n      <tr>\n        <th>Title</th>\n        <th>Year</th>\n        <th>Rating</th>\n        <th>Duration</th>\n        <th>Genre</th>\n        <th>Director</th>\n        <th>Writer</th>\n        <th>Producer</th>\n        <th>Cinematographer</th>\n        <th>Composer</th>\n        <th>Actors</th>\n        <th>Description</th>\n      </tr>\n    </thead>\n    <tbody>\n");
     for (Movie tmpMovie : movies) {
       tmpBuilder.append("      <tr>\n");
       tmpBuilder.append("        <td>").append(escapeHtml(tmpMovie.getTitle()))
@@ -174,12 +203,27 @@ public class AnalyticsService {
           .append(
               tmpMovie.getRating() != null ? tmpMovie.getRating() + "/10" : "—")
           .append("</td>\n");
+      tmpBuilder.append("        <td>")
+          .append(
+              tmpMovie.getDuration() != null ? tmpMovie.getDuration() + " min"
+                  : "—")
+          .append("</td>\n");
       tmpBuilder.append("        <td>").append(escapeHtml(tmpMovie.getGenre()))
           .append("</td>\n");
       tmpBuilder.append("        <td>")
           .append(escapeHtml(tmpMovie.getDirector())).append("</td>\n");
+      tmpBuilder.append("        <td>")
+          .append(escapeHtml(tmpMovie.getWriter())).append("</td>\n");
+      tmpBuilder.append("        <td>")
+          .append(escapeHtml(tmpMovie.getProducer())).append("</td>\n");
+      tmpBuilder.append("        <td>")
+          .append(escapeHtml(tmpMovie.getCinematographer())).append("</td>\n");
+      tmpBuilder.append("        <td>")
+          .append(escapeHtml(tmpMovie.getComposer())).append("</td>\n");
       tmpBuilder.append("        <td>").append(escapeHtml(tmpMovie.getActors()))
           .append("</td>\n");
+      tmpBuilder.append("        <td>")
+          .append(escapeHtml(tmpMovie.getDescription())).append("</td>\n");
       tmpBuilder.append("      </tr>\n");
     }
     tmpBuilder.append("    </tbody>\n  </table>\n</body>\n</html>\n");
