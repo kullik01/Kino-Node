@@ -224,6 +224,15 @@ public class CursorUtils {
   public static void applyCursor(javafx.scene.control.Dialog<?> dialog) {
     if (dialog != null && dialog.getDialogPane() != null) {
       javafx.scene.Node pane = dialog.getDialogPane();
+
+      try {
+        String themeCss = CursorUtils.class.getResource("/io/github/kullik01/kinonode/css/theme.css").toExternalForm();
+        if (!dialog.getDialogPane().getStylesheets().contains(themeCss)) {
+          dialog.getDialogPane().getStylesheets().add(themeCss);
+        }
+      } catch (Exception ignored) {
+      }
+
       if (pane.getScene() != null) {
         pane.getScene().setCursor(getAppLogoCursor());
       } else {
@@ -242,8 +251,19 @@ public class CursorUtils {
             if (dialog.getDialogPane() != null) {
               for (javafx.scene.control.ButtonType type : dialog.getDialogPane().getButtonTypes()) {
                 javafx.scene.Node button = dialog.getDialogPane().lookupButton(type);
-                if (button != null && !button.getStyleClass().contains("button-primary")) {
-                  button.getStyleClass().add("button-primary");
+                if (button != null) {
+                  boolean isCancel = (type == javafx.scene.control.ButtonType.CANCEL)
+                      || (type.getButtonData() == javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
+                  if (isCancel) {
+                    button.getStyleClass().remove("button-primary");
+                    button.getStyleClass().add("button-secondary");
+                    button.setStyle("-fx-background-color: -color-bg-subtle; -fx-text-fill: -color-fg-default; -fx-opacity: 1.0; -fx-effect: none; -fx-border-color: -color-border-default; -fx-font-weight: normal; -fx-background-radius: 4px; -fx-border-radius: 4px;");
+                  } else {
+                    if (!button.getStyleClass().contains("button-primary")) {
+                      button.getStyleClass().add("button-primary");
+                    }
+                    button.setStyle("-fx-background-color: #2178dd; -fx-text-fill: white; -fx-opacity: 1.0; -fx-effect: none; -fx-border-color: transparent; -fx-font-weight: bold; -fx-background-radius: 4px;");
+                  }
                 }
               }
             }

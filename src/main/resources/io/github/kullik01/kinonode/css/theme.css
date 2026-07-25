@@ -264,6 +264,11 @@
     -fx-text-fill: -color-fg-muted;
 }
 
+.button:hover, .menu-button:hover, .toggle-button:hover {
+    -fx-opacity: 1.0;
+    -fx-effect: none;
+}
+
 .root .button.button-primary, .root .button.button-secondary,
 .root .menu-button.button-primary, .root .menu-button.button-secondary,
 .root .button.button-play, .root .button.button-success,
@@ -429,8 +434,8 @@
 }
 
 .window-button:hover {
-    -fx-background-color: -color-bg-overlay;
-    -fx-text-fill: -color-fg-default;
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-fg-muted;
     -fx-opacity: 1.0;
     -fx-effect: none;
     -fx-border-color: transparent;
@@ -445,8 +450,8 @@
 }
 
 .close-button:hover {
-    -fx-background-color: #e81123;
-    -fx-text-fill: white;
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-fg-muted;
 }
 
 .close-button:pressed {
@@ -565,7 +570,7 @@
 }
 
 .analytics-action-button:hover {
-    -fx-background-color: #1a64bd;
+    -fx-background-color: #2178dd;
 }
 
 .analytics-action-button-secondary {
@@ -581,8 +586,8 @@
 }
 
 .analytics-action-button-secondary:hover {
-    -fx-border-color: #2178dd;
-    -fx-text-fill: #2178dd;
+    -fx-border-color: -color-border-default;
+    -fx-text-fill: -color-fg-default;
 }
 
 /* JavaFX Chart Custom Styling with Palette Harmony */

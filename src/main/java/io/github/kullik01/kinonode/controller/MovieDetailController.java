@@ -462,21 +462,25 @@ public class MovieDetailController implements Refreshable {
     tmpDialog.setTitle("Manage Watchlists");
     tmpDialog.setHeaderText("Add or Remove \"" + movie.getTitle() + "\" from Watchlists");
 
-    // Set custom icon
+    // Set custom logo icon on stage
     javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpDialog.getDialogPane().getScene().getWindow();
     tmpStage.getIcons().add(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
 
-    // Dialog size
-    tmpDialog.getDialogPane().setPrefSize(420, 360);
-    tmpDialog.getDialogPane().setMinSize(420, 360);
+    // Dialog size matching standard dialog width
+    tmpDialog.getDialogPane().setPrefSize(480, 320);
+    tmpDialog.getDialogPane().setMinSize(480, 320);
 
-    ButtonType tmpCloseBtnType = new ButtonType("Close", ButtonBar.ButtonData.CANCEL_CLOSE);
-    tmpDialog.getDialogPane().getButtonTypes().addAll(tmpCloseBtnType);
+    ButtonType tmpOkBtnType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+    tmpDialog.getDialogPane().getButtonTypes().addAll(tmpOkBtnType, ButtonType.CANCEL);
 
-    // Style the Close button as blue to match other dialog windows
-    javafx.scene.Node tmpCloseBtn = tmpDialog.getDialogPane().lookupButton(tmpCloseBtnType);
-    if (tmpCloseBtn != null) {
-      tmpCloseBtn.getStyleClass().add("button-primary");
+    // Style both OK and Cancel buttons as blue primary buttons
+    javafx.scene.Node tmpOkBtn = tmpDialog.getDialogPane().lookupButton(tmpOkBtnType);
+    if (tmpOkBtn != null) {
+      tmpOkBtn.getStyleClass().add("button-primary");
+    }
+    javafx.scene.Node tmpCancelBtn = tmpDialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+    if (tmpCancelBtn != null) {
+      tmpCancelBtn.getStyleClass().add("button-primary");
     }
 
     VBox tmpContentBox = new VBox(15);
@@ -485,7 +489,7 @@ public class MovieDetailController implements Refreshable {
     // ScrollPane for watchlists list
     ScrollPane tmpScrollPane = new ScrollPane();
     tmpScrollPane.setFitToWidth(true);
-    tmpScrollPane.setPrefHeight(200);
+    tmpScrollPane.setPrefHeight(180);
     tmpScrollPane.setStyle("-fx-background-color: transparent; -fx-border-color: -color-border-default; -fx-border-radius: 4px;");
 
     VBox tmpWatchlistsListVBox = new VBox(10);
@@ -524,38 +528,25 @@ public class MovieDetailController implements Refreshable {
 
     populateWatchlists.run();
 
-    // Create New Watchlist inline area
-    HBox tmpCreateBox = new HBox(8);
-    tmpCreateBox.setAlignment(Pos.CENTER_LEFT);
-    TextField tmpNewNameField = new TextField();
-    tmpNewNameField.setPromptText("New Watchlist Name");
-    HBox.setHgrow(tmpNewNameField, javafx.scene.layout.Priority.ALWAYS);
-
-    Button tmpCreateBtn = new Button("Create");
+    // Create New Watchlist button
+    Button tmpCreateBtn = new Button("+ Create New Watchlist");
     tmpCreateBtn.getStyleClass().add("button-primary");
-    tmpCreateBtn.setDisable(true);
-
-    tmpNewNameField.textProperty().addListener((obs, oldVal, newVal) -> {
-      tmpCreateBtn.setDisable(newVal.trim().isEmpty() || newVal.length() > 30);
-    });
-
     tmpCreateBtn.setOnAction(e -> {
-      String cleanName = tmpNewNameField.getText().trim();
-      if (!cleanName.isEmpty()) {
-        if (validateWatchlistName(cleanName, -1)) {
-          Watchlist nw = watchlistRepository.insert(new Watchlist(cleanName));
-          if (nw != null && nw.getId() != null) {
-            watchlistRepository.addMovieToWatchlist(nw.getId(), movie.getId());
-            refreshWatchlistStatus();
-            populateWatchlists.run();
-            tmpNewNameField.clear();
-            showStatus("Created watchlist and added movie.");
-          }
+      Optional<String> result = showWatchlistDialog("New Watchlist", "Create a new watchlist", "", -1);
+      if (result.isPresent() && !result.get().trim().isEmpty()) {
+        String cleanName = result.get().trim();
+        Watchlist nw = watchlistRepository.insert(new Watchlist(cleanName));
+        if (nw != null && nw.getId() != null) {
+          watchlistRepository.addMovieToWatchlist(nw.getId(), movie.getId());
+          refreshWatchlistStatus();
+          populateWatchlists.run();
+          showStatus("Created watchlist and added movie.");
         }
       }
     });
 
-    tmpCreateBox.getChildren().addAll(tmpNewNameField, tmpCreateBtn);
+    HBox tmpCreateBox = new HBox(tmpCreateBtn);
+    tmpCreateBox.setAlignment(Pos.CENTER_LEFT);
 
     tmpContentBox.getChildren().addAll(tmpScrollPane, tmpCreateBox);
     tmpDialog.getDialogPane().setContent(tmpContentBox);
