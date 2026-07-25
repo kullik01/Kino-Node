@@ -44,6 +44,7 @@ import javafx.scene.Cursor;
 import javafx.scene.ImageCursor;
 import javafx.scene.image.Image;
 import javafx.stage.Window;
+import javafx.stage.Stage;
 
 /**
  * Utility class to provide custom mouse cursors across the application.
@@ -124,33 +125,93 @@ public class CursorUtils {
    */
   public static void centerOnOwnerOrScreen(Window window, Window owner) {
     if (window == null) return;
-    Runnable positioner = () -> {
+
+    javafx.beans.value.ChangeListener<Number> positioner = new javafx.beans.value.ChangeListener<Number>() {
+      private boolean adjusting = false;
+      @Override
+      public void changed(javafx.beans.value.ObservableValue<? extends Number> obs, Number oldVal, Number newVal) {
+        if (adjusting) return;
+        adjusting = true;
+        try {
+          Window activeOwner = owner;
+          if (activeOwner == null && window instanceof javafx.stage.Stage stageWin) {
+            activeOwner = stageWin.getOwner();
+          }
+          if (activeOwner == null) {
+            for (Window win : Window.getWindows()) {
+              if (win != window && win instanceof Stage stage && stage.isShowing()) {
+                activeOwner = stage;
+                break;
+              }
+            }
+          }
+          if (activeOwner != null && activeOwner.isShowing() && activeOwner.getWidth() > 0 && activeOwner.getHeight() > 0) {
+            double ownerX = activeOwner.getX();
+            double ownerY = activeOwner.getY();
+            double ownerWidth = activeOwner.getWidth();
+            double ownerHeight = activeOwner.getHeight();
+
+            double winWidth = window.getWidth();
+            double winHeight = window.getHeight();
+
+            if (winWidth > 0 && winHeight > 0) {
+              window.setX(ownerX + (ownerWidth - winWidth) / 2.0);
+              window.setY(ownerY + (ownerHeight - winHeight) / 2.0);
+              return;
+            }
+          }
+          window.centerOnScreen();
+        } finally {
+          adjusting = false;
+        }
+      }
+    };
+
+    window.widthProperty().addListener(positioner);
+    window.heightProperty().addListener(positioner);
+
+    // Initial check to attach owner listeners
+    Runnable attachOwnerListeners = () -> {
       Window activeOwner = owner;
       if (activeOwner == null && window instanceof javafx.stage.Stage stageWin) {
         activeOwner = stageWin.getOwner();
       }
-      if (activeOwner != null && activeOwner.isShowing() && activeOwner.getWidth() > 0 && activeOwner.getHeight() > 0) {
-        double ownerX = activeOwner.getX();
-        double ownerY = activeOwner.getY();
-        double ownerWidth = activeOwner.getWidth();
-        double ownerHeight = activeOwner.getHeight();
-
-        double winWidth = window.getWidth();
-        double winHeight = window.getHeight();
-
-        if (winWidth > 0 && winHeight > 0) {
-          window.setX(ownerX + (ownerWidth - winWidth) / 2.0);
-          window.setY(ownerY + (ownerHeight - winHeight) / 2.0);
-          return;
+      if (activeOwner == null) {
+        for (Window win : Window.getWindows()) {
+          if (win != window && win instanceof Stage stage && stage.isShowing()) {
+            activeOwner = stage;
+            break;
+          }
         }
       }
-      window.centerOnScreen();
+      if (activeOwner != null) {
+        activeOwner.xProperty().addListener(positioner);
+        activeOwner.yProperty().addListener(positioner);
+        activeOwner.widthProperty().addListener(positioner);
+        activeOwner.heightProperty().addListener(positioner);
+
+        Window finalOwner = activeOwner;
+        window.showingProperty().addListener((obs, wasShowing, isShowing) -> {
+          if (!isShowing) {
+            window.widthProperty().removeListener(positioner);
+            window.heightProperty().removeListener(positioner);
+            finalOwner.xProperty().removeListener(positioner);
+            finalOwner.yProperty().removeListener(positioner);
+            finalOwner.widthProperty().removeListener(positioner);
+            finalOwner.heightProperty().removeListener(positioner);
+          }
+        });
+      }
     };
 
     if (window.isShowing()) {
-      positioner.run();
+      attachOwnerListeners.run();
+      positioner.changed(null, null, null);
     } else {
-      window.setOnShown(e -> positioner.run());
+      window.setOnShown(e -> {
+        attachOwnerListeners.run();
+        positioner.changed(null, null, null);
+      });
     }
   }
 
@@ -172,9 +233,11 @@ public class CursorUtils {
           }
         });
       }
-      dialog.setOnShown(e -> {
-        if (dialog.getDialogPane() != null && dialog.getDialogPane().getScene() != null) {
-          centerOnOwnerOrScreen(dialog.getDialogPane().getScene().getWindow(), dialog.getOwner());
+      dialog.showingProperty().addListener((obs, wasShowing, isShowing) -> {
+        if (isShowing) {
+          if (dialog.getDialogPane() != null && dialog.getDialogPane().getScene() != null) {
+            centerOnOwnerOrScreen(dialog.getDialogPane().getScene().getWindow(), dialog.getOwner());
+          }
         }
       });
     }
