@@ -276,11 +276,33 @@ public class MovieDetailController {
     SVGPath tmpIcon = (SVGPath) reelLabel.getGraphic();
     if (tmpIcon != null) {
       if (active) {
-        tmpIcon.setStyle("-fx-fill: #ED8B00; -fx-opacity: 1.0;");
+        tmpIcon.setStyle(
+            "-fx-fill: #ED8B00; -fx-opacity: 1.0; -fx-effect: dropshadow(three-pass-box, rgba(237, 139, 0, 0.4), 6, 0, 0, 0);");
       } else {
-        tmpIcon.setStyle("-fx-fill: #666666; -fx-opacity: 0.35;");
+        tmpIcon.setStyle(
+            "-fx-fill: #666666; -fx-opacity: 0.35; -fx-effect: none;");
       }
     }
+  }
+
+  private int detectHoveredScore(double mouseX) {
+    for (int tmpIndex = 0; tmpIndex < 10
+        && tmpIndex < ratingContainer.getChildren().size(); tmpIndex++) {
+      javafx.scene.Node tmpChild = ratingContainer.getChildren().get(tmpIndex);
+      double tmpMinX = tmpChild.getBoundsInParent().getMinX();
+      double tmpMaxX = tmpChild.getBoundsInParent().getMaxX();
+      if (mouseX >= tmpMinX && mouseX <= tmpMaxX) {
+        return tmpIndex + 1;
+      }
+    }
+    if (ratingContainer.getChildren().size() >= 10) {
+      double tmpLastMaxX = ratingContainer.getChildren().get(9)
+          .getBoundsInParent().getMaxX();
+      if (mouseX > tmpLastMaxX) {
+        return 10;
+      }
+    }
+    return 1;
   }
 
   private void buildRatingWidget() {
@@ -319,34 +341,34 @@ public class MovieDetailController {
       tmpReel.setOnMousePressed(e -> applyRating.run());
       tmpReel.setOnMouseClicked(e -> applyRating.run());
       tmpReel.setOnMouseEntered(e -> previewRatingHover(tmpScore));
+      tmpReel.setOnMouseMoved(e -> previewRatingHover(tmpScore));
       tmpReels.add(tmpReel);
       ratingContainer.getChildren().add(tmpReel);
     }
 
+    ratingContainer.setOnMouseMoved(e -> {
+      int score = detectHoveredScore(e.getX());
+      previewRatingHover(score);
+    });
+
     ratingContainer.setOnMouseDragged(e -> {
-      double mouseX = e.getX();
-      int hoveredIndex = (int) Math.ceil(mouseX / 28.0);
-      if (hoveredIndex >= 1 && hoveredIndex <= 10) {
-        previewRatingHover(hoveredIndex);
-      }
+      int score = detectHoveredScore(e.getX());
+      previewRatingHover(score);
     });
 
     ratingContainer.setOnMouseReleased(e -> {
-      double mouseX = e.getX();
-      if (mouseX >= 0 && mouseX <= 280) {
-        int score = (int) Math.ceil(mouseX / 28.0);
-        if (score >= 1 && score <= 10) {
-          if (currentRating != null && currentRating == score) {
-            currentRating = null;
-          } else {
-            currentRating = score;
-          }
-          if (movie != null) {
-            movie.setRating(currentRating);
-            movieRepository.update(movie);
-          }
-          updateRatingUI();
+      if (e.getX() >= 0 && e.getX() <= 320) {
+        int score = detectHoveredScore(e.getX());
+        if (currentRating != null && currentRating == score) {
+          currentRating = null;
+        } else {
+          currentRating = score;
         }
+        if (movie != null) {
+          movie.setRating(currentRating);
+          movieRepository.update(movie);
+        }
+        updateRatingUI();
       }
     });
 
@@ -450,6 +472,7 @@ public class MovieDetailController {
 
           tmpAlert.getDialogPane()
               .setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+          io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
           Optional<ButtonType> tmpAlertResult = tmpAlert.showAndWait();
           if (tmpAlertResult.isPresent()
               && tmpAlertResult.get() == ButtonType.OK) {
@@ -568,6 +591,7 @@ public class MovieDetailController {
       return null;
     });
 
+    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpDialog);
     return tmpDialog.showAndWait();
   }
 
@@ -597,6 +621,7 @@ public class MovieDetailController {
 
           tmpAlert.getDialogPane()
               .setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+          io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
           tmpAlert.showAndWait();
           return false;
         }
@@ -683,6 +708,7 @@ public class MovieDetailController {
       tmpCustomIcon.setFitWidth(48);
       tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
 
+      io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
       tmpAlert.showAndWait();
     }
   }
@@ -873,6 +899,7 @@ public class MovieDetailController {
       return null;
     });
 
+    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpDialog);
     java.util.Optional<String> tmpResult = tmpDialog.showAndWait();
     tmpResult.ifPresent(val -> {
       String newVal = val.trim();
@@ -1078,6 +1105,7 @@ public class MovieDetailController {
       return null;
     });
 
+    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpDialog);
     java.util.Optional<String> tmpResult = tmpDialog.showAndWait();
     tmpResult.ifPresent(url -> {
       String newUrl = url.trim();

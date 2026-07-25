@@ -160,6 +160,7 @@ public class CustomAlert {
 
     Scene tmpScene = new Scene(tmpWrapper);
     tmpScene.setFill(Color.TRANSPARENT);
+    tmpScene.setCursor(CursorUtils.getAppLogoCursor());
     tmpStage.setScene(tmpScene);
 
     tmpStage.setWidth(450);

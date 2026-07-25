@@ -87,4 +87,43 @@ public class CursorUtils {
   public static Cursor getCameraCursor() {
     return getAppLogoCursor();
   }
+
+  /**
+   * Applies the high-resolution application logo cursor to a dialog window.
+   *
+   * @param dialog the JavaFX {@link javafx.scene.control.Dialog} to configure
+   */
+  public static void applyCursor(javafx.scene.control.Dialog<?> dialog) {
+    if (dialog != null && dialog.getDialogPane() != null) {
+      javafx.scene.Node pane = dialog.getDialogPane();
+      if (pane.getScene() != null) {
+        pane.getScene().setCursor(getAppLogoCursor());
+      } else {
+        pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
+          if (newScene != null) {
+            newScene.setCursor(getAppLogoCursor());
+          }
+        });
+      }
+    }
+  }
+
+  /**
+   * Applies the high-resolution application logo cursor to a stage window.
+   *
+   * @param stage the JavaFX {@link javafx.stage.Stage} to configure
+   */
+  public static void applyCursor(javafx.stage.Stage stage) {
+    if (stage != null) {
+      if (stage.getScene() != null) {
+        stage.getScene().setCursor(getAppLogoCursor());
+      } else {
+        stage.sceneProperty().addListener((obs, oldScene, newScene) -> {
+          if (newScene != null) {
+            newScene.setCursor(getAppLogoCursor());
+          }
+        });
+      }
+    }
+  }
 }

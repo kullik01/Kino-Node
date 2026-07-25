@@ -414,6 +414,7 @@ public class WatchlistsController implements Refreshable {
       return null;
     });
 
+    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpDialog);
     return tmpDialog.showAndWait();
   }
 
@@ -484,6 +485,7 @@ public class WatchlistsController implements Refreshable {
 
           tmpAlert.getDialogPane()
               .setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+          io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
           tmpAlert.showAndWait();
           return false;
         }
@@ -518,6 +520,7 @@ public class WatchlistsController implements Refreshable {
     tmpAlert.getDialogPane()
         .setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
 
+    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
     Optional<ButtonType> tmpResult = tmpAlert.showAndWait();
     if (tmpResult.isPresent() && tmpResult.get() == ButtonType.OK) {
       watchlistRepository.delete(selectedWatchlist.getId());
@@ -551,6 +554,7 @@ public class WatchlistsController implements Refreshable {
 
     tmpAlert.getDialogPane()
         .setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
     Optional<ButtonType> tmpResult = tmpAlert.showAndWait();
 
     if (tmpResult.isPresent() && tmpResult.get() == ButtonType.OK) {
@@ -586,6 +590,7 @@ public class WatchlistsController implements Refreshable {
 
       tmpAlert.getDialogPane()
           .setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+      io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
       tmpAlert.showAndWait();
     }
   }

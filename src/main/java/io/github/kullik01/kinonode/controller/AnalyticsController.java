@@ -576,6 +576,7 @@ public class AnalyticsController implements Refreshable {
     tmpAlert.setTitle(title);
     tmpAlert.setHeaderText(null);
     tmpAlert.setContentText(message);
+    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
     tmpAlert.showAndWait();
   }
 
@@ -584,6 +585,7 @@ public class AnalyticsController implements Refreshable {
     tmpAlert.setTitle(title);
     tmpAlert.setHeaderText(null);
     tmpAlert.setContentText(message);
+    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
     tmpAlert.showAndWait();
   }
 }

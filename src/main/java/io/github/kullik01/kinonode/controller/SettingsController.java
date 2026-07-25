@@ -202,6 +202,7 @@ public class SettingsController implements Refreshable {
       tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
 
       tmpAlert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+      io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
 
       Optional<ButtonType> tmpResult = tmpAlert.showAndWait();
       if (tmpResult.isPresent() && tmpResult.get() == ButtonType.OK) {
