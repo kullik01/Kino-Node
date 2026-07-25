@@ -170,8 +170,8 @@
     -fx-background-radius: 10px;
     -fx-padding: 10px;
     -fx-spacing: 8px;
-    -fx-pref-width: 200px;
-    -fx-pref-height: 330px;
+    -fx-pref-width: 240px;
+    -fx-pref-height: 390px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 6, 0.0, 0, 3);
     -fx-alignment: top-center;
     -fx-border-color: -color-border-default;
@@ -190,14 +190,14 @@
 .movie-poster-container {
     -fx-background-color: -color-bg-subtle;
     -fx-background-radius: 8px;
-    -fx-pref-width: 184px;
-    -fx-pref-height: 270px;
+    -fx-pref-width: 220px;
+    -fx-pref-height: 320px;
     -fx-alignment: center;
 }
 
 .movie-poster {
-    -fx-fit-width: 184px;
-    -fx-fit-height: 270px;
+    -fx-fit-width: 220px;
+    -fx-fit-height: 320px;
     -fx-preserve-ratio: false;
 }
 
@@ -207,7 +207,7 @@
     -fx-text-fill: -color-fg-default;
     -fx-wrap-text: false;
     -fx-text-overrun: ellipsis;
-    -fx-max-width: 184px;
+    -fx-max-width: 220px;
 }
 
 .movie-year-label {

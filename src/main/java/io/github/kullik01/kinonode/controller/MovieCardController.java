@@ -112,8 +112,8 @@ public class MovieCardController {
           // Construct URL and load image with backgroundLoading set to true
           // (6th argument)
           // to avoid freezing the JavaFX application UI thread.
-          tmpImage = new Image(tmpFile.toURI().toURL().toExternalForm(), 130,
-              190, false, true, true);
+          tmpImage = new Image(tmpFile.toURI().toURL().toExternalForm(), 220,
+              320, false, true, true);
         } catch (MalformedURLException tmpException) {
           LOGGER.log(Level.WARNING, "Failed to load poster image: " + tmpPath,
               tmpException);
@@ -129,8 +129,8 @@ public class MovieCardController {
           var tmpResource = getClass().getResource(
               "/io/github/kullik01/kinonode/images/placeholder_cover.jpg");
           if (tmpResource != null) {
-            PLACEHOLDER_IMAGE = new Image(tmpResource.toExternalForm(), 130,
-                190, false, true, true);
+            PLACEHOLDER_IMAGE = new Image(tmpResource.toExternalForm(), 220,
+                320, false, true, true);
           }
         } catch (Exception tmpException) {
           LOGGER.log(Level.WARNING, "Failed to load placeholder cover resource",

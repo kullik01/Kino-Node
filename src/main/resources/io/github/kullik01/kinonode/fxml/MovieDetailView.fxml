@@ -70,7 +70,42 @@
     <ScrollPane fitToWidth="true" styleClass="edge-to-edge" style="-fx-background-color: transparent; -fx-control-inner-background: transparent;" VBox.vgrow="ALWAYS">
         <HBox spacing="30.0" style="-fx-padding: 0 10px 0 0;">
             
-            <!-- Left Side: Editable details and custom rating -->
+            <!-- Left Side: Bigger Movie Poster and Watch/Play Actions -->
+            <VBox alignment="TOP_CENTER" prefWidth="360.0" spacing="15.0">
+                <VBox style="-fx-pref-width: 350px; -fx-pref-height: 525px; -fx-background-radius: 12px;" styleClass="movie-poster-container">
+                    <ImageView fx:id="imgPoster" fitHeight="525.0" fitWidth="350.0" styleClass="detail-cover" />
+                </VBox>
+                
+                <Button onAction="#changePoster" styleClass="button-secondary, button-icon" minWidth="36.0" maxWidth="36.0" minHeight="36.0" maxHeight="36.0">
+                    <graphic>
+                        <SVGPath content="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6c-.55 0-1-.45-1-1V6c0-.55.45-1 1-1h12c.55 0 1 .45 1 1v12c0 .55-.45 1-1 1zm-4.44-6.23L11.2 15.4l-2.45-3.07c-.2-.25-.59-.25-.79 0l-2.71 3.39c-.26.33-.02.81.39.81h12.7c.41 0 .65-.48.39-.81l-3.84-4.8c-.2-.26-.6-.26-.8 0z" fill="white"/>
+                    </graphic>
+                    <tooltip><Tooltip showDelay="250ms" text="Change Poster"/></tooltip>
+                </Button>
+                
+                <VBox alignment="CENTER" spacing="15.0" style="-fx-padding: 10px 0 0 0;">
+                    <Button fx:id="btnPlay" onAction="#playMovie" styleClass="button-play, button-icon" minWidth="36.0" maxWidth="36.0" minHeight="36.0" maxHeight="36.0">
+                        <graphic>
+                            <SVGPath content="M8 5v14l11-7z" fill="white"/>
+                        </graphic>
+                        <tooltip><Tooltip showDelay="250ms" text="Play Movie"/></tooltip>
+                    </Button>
+                    <Button fx:id="btnTrailer" onAction="#watchTrailer" styleClass="button-secondary, button-icon" minWidth="36.0" maxWidth="36.0" minHeight="36.0" maxHeight="36.0">
+                        <graphic>
+                            <SVGPath content="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12zm-5-6l-7 4V7z" fill="white"/>
+                        </graphic>
+                        <tooltip><Tooltip showDelay="250ms" text="Watch Trailer"/></tooltip>
+                    </Button>
+                    <Button fx:id="btnImdbPage" onAction="#openImdbPage" styleClass="button-imdb, button-icon" minWidth="36.0" maxWidth="36.0" minHeight="36.0" maxHeight="36.0">
+                        <graphic>
+                            <SVGPath content="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="white"/>
+                        </graphic>
+                        <tooltip><Tooltip showDelay="250ms" text="Open in IMDb"/></tooltip>
+                    </Button>
+                </VBox>
+            </VBox>
+
+            <!-- Right Side: Editable details and custom rating -->
             <VBox spacing="15.0" HBox.hgrow="ALWAYS">
             
             <GridPane hgap="15.0" vgap="15.0" VBox.vgrow="ALWAYS">
@@ -238,9 +273,12 @@
                 <Label style="-fx-font-weight: bold;" text="Watchlists:" GridPane.columnIndex="0" GridPane.rowIndex="12" />
                 <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="12">
                     <Label fx:id="lblWatchlistsList" style="-fx-text-fill: -color-fg-muted;" text="None" HBox.hgrow="ALWAYS" />
-                    <MenuButton fx:id="menuWatchlists" styleClass="button-secondary" text="➕" minWidth="-Infinity">
-                        <tooltip><Tooltip showDelay="250ms" text="Add to Watchlist"/></tooltip>
-                    </MenuButton>
+                    <Button fx:id="btnWatchlists" styleClass="button-secondary, button-icon" minWidth="36.0" maxWidth="36.0" minHeight="36.0" onAction="#manageMovieWatchlists">
+                        <graphic>
+                            <SVGPath content="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 9H10V9h8v2zm-4 4h-4v-2h4v2zm4-8h-8V5h8v2z" fill="white" scaleX="0.75" scaleY="0.75" />
+                        </graphic>
+                        <tooltip><Tooltip showDelay="250ms" text="Manage Watchlists"/></tooltip>
+                    </Button>
                 </HBox>
 
                 <!-- Description -->
@@ -253,40 +291,6 @@
 
                 <!-- Feedback status -->
                 <Label fx:id="lblStatus" style="-fx-text-fill: -color-success-fg;" text="" />
-            </VBox>
-
-            <!-- Upper Right Corner: Bigger Movie Poster and Watch/Play Actions -->
-            <VBox alignment="TOP_CENTER" prefWidth="330.0" spacing="15.0">
-                <VBox style="-fx-pref-width: 320px; -fx-pref-height: 480px; -fx-background-radius: 12px;" styleClass="movie-poster-container">
-                    <ImageView fx:id="imgPoster" fitHeight="480.0" fitWidth="320.0" styleClass="detail-cover" />
-                </VBox>
-                <Button onAction="#changePoster" styleClass="button-secondary" minWidth="-Infinity">
-                    <graphic>
-                        <SVGPath content="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6c-.55 0-1-.45-1-1V6c0-.55.45-1 1-1h12c.55 0 1 .45 1 1v12c0 .55-.45 1-1 1zm-4.44-6.23L11.2 15.4l-2.45-3.07c-.2-.25-.59-.25-.79 0l-2.71 3.39c-.26.33-.02.81.39.81h12.7c.41 0 .65-.48.39-.81l-3.84-4.8c-.2-.26-.6-.26-.8 0z" fill="white"/>
-                    </graphic>
-                    <tooltip><Tooltip showDelay="250ms" text="Change Poster"/></tooltip>
-                </Button>
-                
-                <VBox alignment="CENTER" spacing="10.0" style="-fx-padding: 15px 0 0 0;">
-                    <Button fx:id="btnPlay" onAction="#playMovie" styleClass="button-play" minWidth="-Infinity">
-                        <graphic>
-                            <SVGPath content="M8 5v14l11-7z" fill="white"/>
-                        </graphic>
-                        <tooltip><Tooltip showDelay="250ms" text="Play Movie"/></tooltip>
-                    </Button>
-                    <Button fx:id="btnTrailer" onAction="#watchTrailer" styleClass="button-secondary" minWidth="-Infinity">
-                        <graphic>
-                            <SVGPath content="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12zm-5-6l-7 4V7z" fill="white"/>
-                        </graphic>
-                        <tooltip><Tooltip showDelay="250ms" text="Watch Trailer"/></tooltip>
-                    </Button>
-                    <Button fx:id="btnImdbPage" onAction="#openImdbPage" styleClass="button-imdb" minWidth="-Infinity">
-                        <graphic>
-                            <SVGPath content="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="white"/>
-                        </graphic>
-                        <tooltip><Tooltip showDelay="250ms" text="Open in IMDb"/></tooltip>
-                    </Button>
-                </VBox>
             </VBox>
         </HBox>
     </ScrollPane>

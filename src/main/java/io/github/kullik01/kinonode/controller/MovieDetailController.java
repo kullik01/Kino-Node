@@ -43,6 +43,8 @@ import io.github.kullik01.kinonode.repository.MovieRepository;
 import io.github.kullik01.kinonode.repository.WatchlistRepository;
 import io.github.kullik01.kinonode.service.AppContext;
 import io.github.kullik01.kinonode.util.PathUtils;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -75,7 +77,7 @@ import javafx.stage.FileChooser;
  * Supports playing the movie via external player and opening trailer links in a
  * web browser.
  */
-public class MovieDetailController {
+public class MovieDetailController implements Refreshable {
   private static final Logger LOGGER =
       Logger.getLogger(MovieDetailController.class.getName());
   private static Image PLACEHOLDER_IMAGE;
@@ -133,7 +135,7 @@ public class MovieDetailController {
   @FXML
   private Label lblWatchlistsList;
   @FXML
-  private MenuButton menuWatchlists;
+  private Button btnWatchlists;
   @FXML
   private Label lblStatus;
 
@@ -435,7 +437,12 @@ public class MovieDetailController {
     }
   }
 
-  private void refreshWatchlistStatus() {
+  @Override
+  public void refresh() {
+    refreshWatchlistStatus();
+  }
+
+  public void refreshWatchlistStatus() {
     List<Watchlist> tmpAll = watchlistRepository.findAll();
     List<String> tmpInWatchlists = tmpAll.stream()
         .filter(w -> w.getMovies().stream()
@@ -447,82 +454,108 @@ public class MovieDetailController {
     } else {
       lblWatchlistsList.setText(String.join(", ", tmpInWatchlists));
     }
+  }
 
-    // Rebuild Watchlists Context Menu
-    menuWatchlists.getItems().clear();
-    for (Watchlist tmpW : tmpAll) {
-      boolean tmpAlreadyIn = tmpW.getMovies().stream()
-          .anyMatch(m -> m.getId().equals(movie.getId()));
-      if (!tmpAlreadyIn) {
-        MenuItem tmpItem = new MenuItem("Add to: " + tmpW.getName());
-        tmpItem.setOnAction(e -> {
-          watchlistRepository.addMovieToWatchlist(tmpW.getId(), movie.getId());
-          refreshWatchlistStatus();
-          showStatus("Added to watchlist " + tmpW.getName());
-        });
-        menuWatchlists.getItems().add(tmpItem);
+  @FXML
+  private void manageMovieWatchlists() {
+    Dialog<Void> tmpDialog = new Dialog<>();
+    tmpDialog.setTitle("Manage Watchlists");
+    tmpDialog.setHeaderText("Add or Remove \"" + movie.getTitle() + "\" from Watchlists");
+
+    // Set custom icon
+    javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpDialog.getDialogPane().getScene().getWindow();
+    tmpStage.getIcons().add(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
+
+    // Dialog size
+    tmpDialog.getDialogPane().setPrefSize(420, 360);
+    tmpDialog.getDialogPane().setMinSize(420, 360);
+
+    ButtonType tmpCloseBtnType = new ButtonType("Close", ButtonBar.ButtonData.CANCEL_CLOSE);
+    tmpDialog.getDialogPane().getButtonTypes().addAll(tmpCloseBtnType);
+
+    VBox tmpContentBox = new VBox(15);
+    tmpContentBox.setPadding(new Insets(10));
+
+    // ScrollPane for watchlists list
+    ScrollPane tmpScrollPane = new ScrollPane();
+    tmpScrollPane.setFitToWidth(true);
+    tmpScrollPane.setPrefHeight(200);
+    tmpScrollPane.setStyle("-fx-background-color: transparent; -fx-border-color: -color-border-default; -fx-border-radius: 4px;");
+
+    VBox tmpWatchlistsListVBox = new VBox(10);
+    tmpWatchlistsListVBox.setPadding(new Insets(10));
+    tmpScrollPane.setContent(tmpWatchlistsListVBox);
+
+    // Populate method
+    Runnable populateWatchlists = () -> {
+      tmpWatchlistsListVBox.getChildren().clear();
+      List<Watchlist> allW = watchlistRepository.findAll();
+      if (allW.isEmpty()) {
+        Label emptyLbl = new Label("No watchlists available.");
+        emptyLbl.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-style: italic;");
+        tmpWatchlistsListVBox.getChildren().add(emptyLbl);
       } else {
-        MenuItem tmpItem = new MenuItem("➖ Remove from: " + tmpW.getName());
-        tmpItem.setOnAction(e -> {
-          // Confirm removal with warning dialog
-          Alert tmpAlert = new Alert(Alert.AlertType.CONFIRMATION);
-          javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpAlert
-              .getDialogPane().getScene().getWindow();
-          tmpStage.getIcons()
-              .add(new javafx.scene.image.Image(getClass().getResourceAsStream(
-                  "/io/github/kullik01/kinonode/images/logo.png")));
-          tmpAlert.setTitle("Remove Movie");
-          tmpAlert.setHeaderText("Remove from Watchlist");
-          tmpAlert
-              .setContentText("Are you sure you want to remove this movie from "
-                  + tmpW.getName() + "?");
+        for (Watchlist w : allW) {
+          CheckBox cb = new CheckBox(w.getName());
+          cb.setStyle("-fx-font-size: 14px; -fx-padding: 4px 0;");
+          boolean isMovieIn = w.getMovies().stream().anyMatch(m -> m.getId().equals(movie.getId()));
+          cb.setSelected(isMovieIn);
 
-          javafx.scene.image.ImageView tmpCustomIcon =
-              new javafx.scene.image.ImageView(
-                  new javafx.scene.image.Image(getClass().getResourceAsStream(
-                      "/io/github/kullik01/kinonode/images/removal_icon.png")));
-          tmpCustomIcon.setFitHeight(48);
-          tmpCustomIcon.setFitWidth(48);
-          tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
-
-          tmpAlert.getDialogPane()
-              .setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-          io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
-          Optional<ButtonType> tmpAlertResult = tmpAlert.showAndWait();
-          if (tmpAlertResult.isPresent()
-              && tmpAlertResult.get() == ButtonType.OK) {
-            watchlistRepository.removeMovieFromWatchlist(tmpW.getId(),
-                movie.getId());
-            refreshWatchlistStatus();
-            showStatus("Removed from watchlist " + tmpW.getName());
-          }
-        });
-        menuWatchlists.getItems().add(tmpItem);
-      }
-    }
-
-    // Option to create new watchlist on the fly
-    MenuItem tmpCreateNew = new MenuItem("➕ Create New Watchlist...");
-    tmpCreateNew.setOnAction(e -> {
-      Optional<String> tmpResult = showWatchlistDialog("New Watchlist",
-          "Create a new watchlist", "", -1);
-      tmpResult.ifPresent(name -> {
-        String tmpCleanName = name.trim();
-        if (!tmpCleanName.isEmpty()) {
-          if (validateWatchlistName(tmpCleanName, -1)) {
-            Watchlist tmpNw =
-                watchlistRepository.insert(new Watchlist(tmpCleanName));
-            if (tmpNw.getId() != null) {
-              watchlistRepository.addMovieToWatchlist(tmpNw.getId(),
-                  movie.getId());
-              refreshWatchlistStatus();
-              showStatus("Created watchlist and added movie.");
+          cb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+            if (isSelected) {
+              watchlistRepository.addMovieToWatchlist(w.getId(), movie.getId());
+              showStatus("Added to watchlist " + w.getName());
+            } else {
+              watchlistRepository.removeMovieFromWatchlist(w.getId(), movie.getId());
+              showStatus("Removed from watchlist " + w.getName());
             }
+            refreshWatchlistStatus();
+          });
+          tmpWatchlistsListVBox.getChildren().add(cb);
+        }
+      }
+    };
+
+    populateWatchlists.run();
+
+    // Create New Watchlist inline area
+    HBox tmpCreateBox = new HBox(8);
+    tmpCreateBox.setAlignment(Pos.CENTER_LEFT);
+    TextField tmpNewNameField = new TextField();
+    tmpNewNameField.setPromptText("New Watchlist Name");
+    HBox.setHgrow(tmpNewNameField, javafx.scene.layout.Priority.ALWAYS);
+
+    Button tmpCreateBtn = new Button("Create");
+    tmpCreateBtn.getStyleClass().add("button-primary");
+    tmpCreateBtn.setDisable(true);
+
+    tmpNewNameField.textProperty().addListener((obs, oldVal, newVal) -> {
+      tmpCreateBtn.setDisable(newVal.trim().isEmpty() || newVal.length() > 30);
+    });
+
+    tmpCreateBtn.setOnAction(e -> {
+      String cleanName = tmpNewNameField.getText().trim();
+      if (!cleanName.isEmpty()) {
+        if (validateWatchlistName(cleanName, -1)) {
+          Watchlist nw = watchlistRepository.insert(new Watchlist(cleanName));
+          if (nw != null && nw.getId() != null) {
+            watchlistRepository.addMovieToWatchlist(nw.getId(), movie.getId());
+            refreshWatchlistStatus();
+            populateWatchlists.run();
+            tmpNewNameField.clear();
+            showStatus("Created watchlist and added movie.");
           }
         }
-      });
+      }
     });
-    menuWatchlists.getItems().add(tmpCreateNew);
+
+    tmpCreateBox.getChildren().addAll(tmpNewNameField, tmpCreateBtn);
+
+    tmpContentBox.getChildren().addAll(tmpScrollPane, tmpCreateBox);
+    tmpDialog.getDialogPane().setContent(tmpContentBox);
+
+    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpDialog);
+    tmpDialog.showAndWait();
   }
 
   private Optional<String> showWatchlistDialog(String title, String header,

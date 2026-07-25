@@ -141,6 +141,7 @@ public class LibraryController implements Refreshable {
   @Override
   public void refresh() {
     if (currentMovieDetailController != null) {
+      currentMovieDetailController.refresh();
       return; // Preserve the movie detail view when switching tabs
     }
     allMovies = movieRepository.findAll();
