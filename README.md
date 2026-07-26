@@ -24,6 +24,9 @@ KinoNode is a modern, lightweight, personal movie library manager built on a sol
 * **Catalog Export & HTML Reports:** One-click portability allowing you to export your entire movie catalog to structured **JSON**, spreadsheet-ready **CSV**, or generate a styled, standalone **HTML Collection Report** that can be opened in any web browser.
 * **Automated SQLite Snapshot Backups:** Create instant, timestamped backup snapshots of your embedded SQLite database (`kinonode.db`) with a single click from the Analytics toolbar.
 * **External Player Launch:** Seamlessly watch your movies. KinoNode auto-detects system media players (like `mpv` and `VLC`) or launches any custom player executable path.
+* **Dynamic Light/Dark Theme Switcher:** Instantly toggle between a crisp Light mode and a premium Dark mode design natively powered by the AtlantaFX (Primer) styling framework.
+* **Configurable Video File Extensions:** Define exactly which custom video formats (e.g. `.mp4`, `.mkv`, `.avi`, `.webm`) the library scanner should target via the Settings dashboard.
+* **100% Portable Mode Capability:** Run KinoNode entirely self-contained within a single directory without touching OS Application Data folders—perfect for USB drives and portable storage.
 
 ---
 
