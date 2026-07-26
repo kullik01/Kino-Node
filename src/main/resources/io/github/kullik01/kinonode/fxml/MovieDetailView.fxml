@@ -264,7 +264,7 @@
                 </HBox>
                 
                 <!-- Rating -->
-                <Label style="-fx-font-weight: bold;" text="Rating:" GridPane.columnIndex="0" GridPane.rowIndex="11" />
+                <Label style="-fx-font-weight: bold;" text="IMDb Rating:" GridPane.columnIndex="0" GridPane.rowIndex="11" />
                 <FlowPane fx:id="ratingContainer" alignment="CENTER_LEFT" hgap="2.0" vgap="4.0" GridPane.columnIndex="1" GridPane.rowIndex="11">
                     <!-- Rating buttons and text will be populated dynamically -->
                 </FlowPane>

@@ -105,7 +105,7 @@
                 <VBox GridPane.columnIndex="1" GridPane.rowIndex="0" maxWidth="Infinity" styleClass="analytics-kpi-card, kpi-card-orange">
                     <HBox alignment="CENTER_LEFT" spacing="8.0">
                         <SVGPath styleClass="analytics-kpi-svg" scaleX="0.85" scaleY="0.85" content="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
-                        <Label text="AVERAGE RATING" styleClass="analytics-kpi-title"/>
+                        <Label text="AVERAGE IMDb RATING" styleClass="analytics-kpi-title"/>
                     </HBox>
                     <Label fx:id="lblAvgRating" text="—" styleClass="analytics-kpi-value"/>
                     <Label text="out of 10.0 scale" styleClass="analytics-kpi-subtitle"/>
@@ -170,10 +170,10 @@
                 </VBox>
                 
                 <VBox GridPane.columnIndex="1" GridPane.rowIndex="0" maxWidth="Infinity" spacing="16.0" styleClass="analytics-section-card">
-                    <Label text="Rating Breakdown (0-10)" styleClass="analytics-section-header"/>
+                    <Label text="IMDb Rating Breakdown (0-10)" styleClass="analytics-section-header"/>
                     <BarChart fx:id="ratingChart" legendVisible="false" animated="false" prefHeight="260.0">
                         <xAxis>
-                            <CategoryAxis label="Rating"/>
+                            <CategoryAxis label="IMDb Rating"/>
                         </xAxis>
                         <yAxis>
                             <NumberAxis label="Count"/>

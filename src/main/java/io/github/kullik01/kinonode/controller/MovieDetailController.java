@@ -535,6 +535,9 @@ public class MovieDetailController implements Refreshable {
     tmpWatchlistsListVBox.setPadding(new Insets(10));
     tmpScrollPane.setContent(tmpWatchlistsListVBox);
 
+    // Keep track of which watchlists the movie should be in
+    java.util.Map<Integer, Boolean> pendingChanges = new java.util.HashMap<>();
+
     // Populate method
     Runnable populateWatchlists = () -> {
       tmpWatchlistsListVBox.getChildren().clear();
@@ -550,18 +553,14 @@ public class MovieDetailController implements Refreshable {
           cb.setStyle("-fx-font-size: 14px; -fx-padding: 4px 0;");
           boolean isMovieIn = w.getMovies().stream()
               .anyMatch(m -> m.getId().equals(movie.getId()));
-          cb.setSelected(isMovieIn);
+          
+          boolean isSelected = pendingChanges.containsKey(w.getId()) 
+                               ? pendingChanges.get(w.getId()) 
+                               : isMovieIn;
+          cb.setSelected(isSelected);
 
-          cb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
-            if (isSelected) {
-              watchlistRepository.addMovieToWatchlist(w.getId(), movie.getId());
-              showStatus("Added to watchlist " + w.getName());
-            } else {
-              watchlistRepository.removeMovieFromWatchlist(w.getId(),
-                  movie.getId());
-              showStatus("Removed from watchlist " + w.getName());
-            }
-            refreshWatchlistStatus();
+          cb.selectedProperty().addListener((obs, wasSelected, nowSelected) -> {
+            pendingChanges.put(w.getId(), nowSelected);
           });
           tmpWatchlistsListVBox.getChildren().add(cb);
         }
@@ -580,10 +579,10 @@ public class MovieDetailController implements Refreshable {
         String cleanName = result.get().trim();
         Watchlist nw = watchlistRepository.insert(new Watchlist(cleanName));
         if (nw != null && nw.getId() != null) {
-          watchlistRepository.addMovieToWatchlist(nw.getId(), movie.getId());
-          refreshWatchlistStatus();
+          // Add to pending changes as selected
+          pendingChanges.put(nw.getId(), true);
           populateWatchlists.run();
-          showStatus("Created watchlist and added movie.");
+          showStatus("Created watchlist (will add movie upon saving).");
         }
       }
     });
@@ -593,6 +592,28 @@ public class MovieDetailController implements Refreshable {
 
     tmpContentBox.getChildren().addAll(tmpScrollPane, tmpCreateBox);
     tmpDialog.getDialogPane().setContent(tmpContentBox);
+    
+    tmpDialog.setResultConverter(dialogButton -> {
+      if (dialogButton == ButtonType.OK) {
+        for (java.util.Map.Entry<Integer, Boolean> entry : pendingChanges.entrySet()) {
+          int wId = entry.getKey();
+          boolean wantIn = entry.getValue();
+          Watchlist w = watchlistRepository.findById(wId);
+          if (w != null) {
+            boolean isMovieIn = w.getMovies().stream().anyMatch(m -> m.getId().equals(movie.getId()));
+            if (wantIn && !isMovieIn) {
+              watchlistRepository.addMovieToWatchlist(wId, movie.getId());
+            } else if (!wantIn && isMovieIn) {
+              watchlistRepository.removeMovieFromWatchlist(wId, movie.getId());
+            }
+          }
+        }
+        refreshWatchlistStatus();
+        showStatus("Watchlists updated successfully.");
+      }
+      return null;
+    });
+
     tmpDialog.showAndWait();
   }
 
@@ -667,6 +688,9 @@ public class MovieDetailController implements Refreshable {
               tmpErrorLabel.setVisible(false);
               tmpOkButton.setDisable(newValue.trim().isEmpty());
             }
+          }
+          if (tmpDialog.getDialogPane().getScene() != null && tmpDialog.getDialogPane().getScene().getWindow() != null) {
+            tmpDialog.getDialogPane().getScene().getWindow().sizeToScene();
           }
         });
 

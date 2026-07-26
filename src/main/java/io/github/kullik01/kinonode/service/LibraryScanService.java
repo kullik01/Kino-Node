@@ -188,10 +188,14 @@ public class LibraryScanService {
             LOGGER.log(Level.INFO, "Imported movie: {0}", tmpMovie.getTitle());
           } else {
             // Case 2: The movie is already registered, but we check if it is
-            // missing metadata that
-            // can be enriched
+            // missing metadata that can be enriched
             Movie tmpExistingMovie =
                 movieRepository.findByFilePath(tmpAbsolutePath);
+
+            // ALWAYS update the IMDb rating to keep it actual!
+            updateMessage("Updating IMDb Rating for: " + tmpExistingMovie.getTitle());
+            ImdbService.updateRatingOnly(tmpExistingMovie);
+
             boolean tmpNeedsEnrichment = tmpExistingMovie.getDuration() == null
                 || tmpExistingMovie.getDuration() == 0
                 || tmpExistingMovie.getRawRating() == null
@@ -220,11 +224,14 @@ public class LibraryScanService {
               }
 
               // Always update after attempting enrichment to save new fields
-              // (Director, Writer,
-              // etc)
               movieRepository.update(tmpExistingMovie);
               tmpLogs.add("Enriched: " + tmpExistingMovie.getTitle());
               LOGGER.log(Level.INFO, "Enriched existing movie: {0}",
+                  tmpExistingMovie.getTitle());
+            } else {
+              // Even if it didn't need full enrichment, we save it because the rating might have changed
+              movieRepository.update(tmpExistingMovie);
+              LOGGER.log(Level.INFO, "Updated rating for existing movie: {0}",
                   tmpExistingMovie.getTitle());
             }
           }

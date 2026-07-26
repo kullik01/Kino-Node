@@ -57,9 +57,9 @@
 
     <!-- Header Section -->
     <HBox spacing="20.0" alignment="CENTER_LEFT">
-        <ImageView fitHeight="64.0" fitWidth="64.0" preserveRatio="true">
+        <ImageView fitHeight="64.0" fitWidth="64.0" preserveRatio="true" smooth="true">
             <image>
-                <Image url="@../images/logo.png" />
+                <Image url="@../images/logo.png" requestedWidth="128" requestedHeight="128" smooth="true" />
             </image>
         </ImageView>
         <VBox spacing="5.0">

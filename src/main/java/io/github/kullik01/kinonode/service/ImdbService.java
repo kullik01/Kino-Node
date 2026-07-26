@@ -319,6 +319,56 @@ public class ImdbService {
   }
 
   /**
+   * Directly updates the movie's rating using the lightweight IMDb JSONP API.
+   *
+   * @param movie the {@link Movie} object to update
+   */
+  public static void updateRatingOnly(Movie movie) {
+    if (movie.getCoverImagePath() != null) {
+      java.util.regex.Pattern p = java.util.regex.Pattern.compile("tt\\d+");
+      java.util.regex.Matcher m = p.matcher(movie.getCoverImagePath());
+      if (m.find()) {
+        String imdbId = m.group();
+        try {
+          String tmpRatingUrl = "https://p.media-imdb.com/static-content/documents/v1/title/" + imdbId + "/ratings%3Fjsonp=imdb.rating.run:imdb.api.title.ratings/data.json";
+          HttpRequest tmpRatingRequest = HttpRequest.newBuilder().uri(URI.create(tmpRatingUrl))
+              .header("User-Agent", "Mozilla/5.0")
+              .header("Accept-Encoding", "gzip")
+              .GET().build();
+          HttpResponse<java.io.InputStream> tmpRatingResponse = client.send(tmpRatingRequest, HttpResponse.BodyHandlers.ofInputStream());
+          if (tmpRatingResponse.statusCode() == 200) {
+            java.util.Optional<String> encoding = tmpRatingResponse.headers().firstValue("Content-Encoding");
+            String body;
+            if (encoding.isPresent() && encoding.get().equalsIgnoreCase("gzip")) {
+                try (java.util.zip.GZIPInputStream gis = new java.util.zip.GZIPInputStream(tmpRatingResponse.body())) {
+                    body = new String(gis.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                }
+            } else {
+                body = new String(tmpRatingResponse.body().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            }
+            java.util.regex.Pattern ratingPattern = java.util.regex.Pattern.compile("\"rating\"\\s*:\\s*([\\d\\.]+)");
+            java.util.regex.Matcher ratingMatcher = ratingPattern.matcher(body);
+            if (ratingMatcher.find()) {
+              try {
+                double score = Double.parseDouble(ratingMatcher.group(1).replace(",", "."));
+                movie.setRawRating(score);
+                int ratingInt = (int) Math.round(score);
+                if (ratingInt >= 1 && ratingInt <= 10) {
+                  movie.setRating(ratingInt);
+                  LOGGER.info("Updated IMDb rating directly for " + movie.getTitle() + ": " + score + "/10");
+                }
+              } catch (NumberFormatException ignored) {
+              }
+            }
+          }
+        } catch (Exception e) {
+          LOGGER.log(Level.WARNING, "Error updating IMDb JSONP rating for " + imdbId, e);
+        }
+      }
+    }
+  }
+
+  /**
    * Cleans a movie title string by stripping file extensions, year numbers, and
    * video quality tags.
    *

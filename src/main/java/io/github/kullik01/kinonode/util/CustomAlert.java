@@ -72,7 +72,7 @@ public class CustomAlert {
    */
   public static void showInformation(Window owner, String title, String header,
       String content) {
-    showInformation(owner, title, header, content, null);
+    showInformation(owner, title, header, content, "/io/github/kullik01/kinonode/images/info_icon.png");
   }
 
   public static void showInformation(Window owner, String title, String header,
@@ -140,12 +140,7 @@ public class CustomAlert {
     javafx.scene.Node contentNode = tmpTextLabel;
     if (iconPath != null && !iconPath.isEmpty()) {
       try {
-        javafx.scene.image.ImageView tmpIconView =
-            new javafx.scene.image.ImageView(new javafx.scene.image.Image(
-                CustomAlert.class.getResourceAsStream(iconPath)));
-        tmpIconView.setFitHeight(48);
-        tmpIconView.setFitWidth(48);
-        tmpIconView.setSmooth(true);
+        javafx.scene.Node tmpIconView = createIconNode(iconPath);
         HBox tmpIconBox = new HBox(15, tmpTextLabel, tmpIconView);
         tmpIconBox.setAlignment(Pos.CENTER_LEFT);
         contentNode = tmpIconBox;
@@ -267,12 +262,7 @@ public class CustomAlert {
     javafx.scene.Node contentNode = tmpTextLabel;
     if (iconPath != null && !iconPath.isEmpty()) {
       try {
-        javafx.scene.image.ImageView tmpIconView =
-            new javafx.scene.image.ImageView(new javafx.scene.image.Image(
-                CustomAlert.class.getResourceAsStream(iconPath)));
-        tmpIconView.setFitHeight(48);
-        tmpIconView.setFitWidth(48);
-        tmpIconView.setSmooth(true);
+        javafx.scene.Node tmpIconView = createIconNode(iconPath);
         HBox tmpIconBox = new HBox(15, tmpTextLabel, tmpIconView);
         tmpIconBox.setAlignment(Pos.CENTER_LEFT);
         contentNode = tmpIconBox;
@@ -400,12 +390,7 @@ public class CustomAlert {
     javafx.scene.Node contentNode = tmpTextLabel;
     if (iconPath != null && !iconPath.isEmpty()) {
       try {
-        javafx.scene.image.ImageView tmpIconView =
-            new javafx.scene.image.ImageView(new javafx.scene.image.Image(
-                CustomAlert.class.getResourceAsStream(iconPath)));
-        tmpIconView.setFitHeight(48);
-        tmpIconView.setFitWidth(48);
-        tmpIconView.setSmooth(true);
+        javafx.scene.Node tmpIconView = createIconNode(iconPath);
         HBox tmpIconBox = new HBox(15, tmpTextLabel, tmpIconView);
         tmpIconBox.setAlignment(Pos.CENTER_LEFT);
         contentNode = tmpIconBox;
@@ -457,6 +442,36 @@ public class CustomAlert {
 
 
     tmpStage.showAndWait();
+  }
+
+  private static javafx.scene.Node createIconNode(String iconPath) {
+    if (iconPath.contains("info_icon")) {
+      javafx.scene.shape.SVGPath svg = new javafx.scene.shape.SVGPath();
+      svg.setContent("M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z");
+      svg.setStyle("-fx-fill: #2178dd;");
+      svg.setScaleX(4.0);
+      svg.setScaleY(4.0);
+      javafx.scene.layout.StackPane pane = new javafx.scene.layout.StackPane(svg);
+      pane.setPrefSize(96, 96);
+      return pane;
+    } else if (iconPath.contains("removal_icon")) {
+      javafx.scene.shape.SVGPath svg = new javafx.scene.shape.SVGPath();
+      svg.setContent("M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z");
+      svg.setStyle("-fx-fill: #DC3545;");
+      svg.setScaleX(4.0);
+      svg.setScaleY(4.0);
+      javafx.scene.layout.StackPane pane = new javafx.scene.layout.StackPane(svg);
+      pane.setPrefSize(96, 96);
+      return pane;
+    } else {
+      javafx.scene.image.ImageView imgView =
+          new javafx.scene.image.ImageView(new javafx.scene.image.Image(
+              CustomAlert.class.getResourceAsStream(iconPath)));
+      imgView.setFitHeight(96);
+      imgView.setFitWidth(96);
+      imgView.setSmooth(true);
+      return imgView;
+    }
   }
 
 }
