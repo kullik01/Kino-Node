@@ -52,6 +52,9 @@ public class Watchlist {
   private Instant createdAt;
   private List<Movie> movies = new ArrayList<>();
 
+  private boolean isSmart = false;
+  private String smartRulesJson;
+
   /**
    * Constructs a new Watchlist with the current timestamp as the creation time.
    */
@@ -144,6 +147,42 @@ public class Watchlist {
    */
   public void setMovies(List<Movie> movies) {
     this.movies = movies;
+  }
+
+  /**
+   * Gets whether this watchlist is a smart dynamic watchlist.
+   *
+   * @return true if it is a smart watchlist
+   */
+  public boolean isSmart() {
+    return isSmart;
+  }
+
+  /**
+   * Sets whether this watchlist is a smart dynamic watchlist.
+   *
+   * @param smart true if it is a smart watchlist
+   */
+  public void setSmart(boolean smart) {
+    isSmart = smart;
+  }
+
+  /**
+   * Gets the JSON string containing the rules for a smart watchlist.
+   *
+   * @return the rules JSON
+   */
+  public String getSmartRulesJson() {
+    return smartRulesJson;
+  }
+
+  /**
+   * Sets the JSON string containing the rules for a smart watchlist.
+   *
+   * @param smartRulesJson the rules JSON
+   */
+  public void setSmartRulesJson(String smartRulesJson) {
+    this.smartRulesJson = smartRulesJson;
   }
 
   /**

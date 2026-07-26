@@ -46,6 +46,8 @@ import io.github.kullik01.kinonode.model.Movie;
 import io.github.kullik01.kinonode.model.Watchlist;
 import io.github.kullik01.kinonode.repository.WatchlistRepository;
 import io.github.kullik01.kinonode.service.AppContext;
+import io.github.kullik01.kinonode.model.SmartRule;
+import com.google.gson.Gson;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.List;
@@ -84,6 +86,8 @@ public class WatchlistsController implements Refreshable {
   @FXML
   private ListView<Movie> lstMovies;
   @FXML
+  private Button btnCreateWatchlist;
+  @FXML
   private Button btnRenameWatchlist;
   @FXML
   private Button btnDeleteWatchlist;
@@ -110,7 +114,7 @@ public class WatchlistsController implements Refreshable {
         if (empty || item == null) {
           setText(null);
         } else {
-          setText(item.getName());
+          setText(item.isSmart() ? "✨ " + item.getName() : item.getName());
         }
       }
     });
@@ -310,7 +314,9 @@ public class WatchlistsController implements Refreshable {
 
   private void updateButtonStates() {
     boolean selected = lstMovies.getSelectionModel().getSelectedItem() != null;
-    btnRemoveMovie.setDisable(!selected);
+    boolean tmpIsSmart =
+        selectedWatchlist != null && selectedWatchlist.isSmart();
+    btnRemoveMovie.setDisable(!selected || tmpIsSmart);
   }
 
   private void updateWatchlistButtonStates(boolean hasSelection) {
@@ -433,6 +439,21 @@ public class WatchlistsController implements Refreshable {
   }
 
   @FXML
+  private void showCreateMenu(javafx.event.ActionEvent event) {
+    javafx.scene.control.ContextMenu tmpContextMenu =
+        new javafx.scene.control.ContextMenu();
+    javafx.scene.control.MenuItem tmpItemStandard =
+        new javafx.scene.control.MenuItem("New Watchlist");
+    tmpItemStandard.setOnAction(e -> createWatchlist());
+    javafx.scene.control.MenuItem tmpItemSmart =
+        new javafx.scene.control.MenuItem("New Smart Watchlist");
+    tmpItemSmart.setOnAction(e -> createSmartWatchlist());
+    tmpContextMenu.getItems().addAll(tmpItemStandard, tmpItemSmart);
+    javafx.scene.Node tmpSource = (javafx.scene.Node) event.getSource();
+    tmpContextMenu.show(tmpSource, javafx.geometry.Side.TOP, 0, 0);
+  }
+
+  @FXML
   private void createWatchlist() {
     Optional<String> tmpResult =
         showWatchlistDialog("New Watchlist", "Create a new watchlist", "", -1);
@@ -509,7 +530,8 @@ public class WatchlistsController implements Refreshable {
   @FXML
   private void removeMovie() {
     Movie tmpSelectedMovie = lstMovies.getSelectionModel().getSelectedItem();
-    if (tmpSelectedMovie == null || selectedWatchlist == null)
+    if (tmpSelectedMovie == null || selectedWatchlist == null
+        || selectedWatchlist.isSmart())
       return;
 
     boolean tmpConfirm = io.github.kullik01.kinonode.util.CustomAlert
@@ -537,5 +559,259 @@ public class WatchlistsController implements Refreshable {
           "Cannot open media player", tmpException.getMessage(),
           "/io/github/kullik01/kinonode/images/error_icon.png");
     }
+  }
+
+  @FXML
+  private void createSmartWatchlist() {
+    Dialog<Watchlist> tmpDialog = new Dialog<>();
+    tmpDialog.setTitle("New Smart Watchlist");
+    tmpDialog.setHeaderText("Create a dynamic watchlist based on rules");
+
+    tmpDialog.getDialogPane().setPrefSize(480, 320);
+    tmpDialog.getDialogPane().setMinSize(480, 320);
+
+    Stage tmpStage = (Stage) tmpDialog.getDialogPane().getScene().getWindow();
+    tmpStage.getIcons().add(new javafx.scene.image.Image(getClass()
+        .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
+
+    ButtonType tmpOkButtonType =
+        new ButtonType("Create", ButtonBar.ButtonData.OK_DONE);
+    tmpDialog.getDialogPane().getButtonTypes().addAll(tmpOkButtonType,
+        ButtonType.CANCEL);
+
+    VBox tmpVbox = new VBox(10);
+
+    Label tmpErrorLabel = new Label();
+    tmpErrorLabel.setWrapText(true);
+    tmpErrorLabel.setPrefWidth(430);
+    tmpErrorLabel.setMinHeight(Region.USE_PREF_SIZE);
+    tmpErrorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+    tmpErrorLabel.setVisible(false);
+
+    TextField tmpNameField = new TextField();
+    tmpNameField.setPromptText("Smart Watchlist Name");
+    HBox tmpRuleBox = new HBox(5);
+    ComboBox<String> tmpFieldComboBox = new ComboBox<>();
+    tmpFieldComboBox.getItems().addAll("Actors", "Cinematographer", "Composer",
+        "Director", "Duration", "Genre", "IMDb Rating", "Producer", "Writer",
+        "Year");
+    tmpFieldComboBox.getSelectionModel().selectFirst();
+
+    ComboBox<String> tmpOperatorComboBox = new ComboBox<>();
+    Runnable tmpUpdateOperators = () -> {
+      String tmpSelectedField = tmpFieldComboBox.getValue();
+      String tmpCurrentOperator = tmpOperatorComboBox.getValue();
+      boolean tmpIsNumeric = "IMDb Rating".equals(tmpSelectedField)
+          || "Year".equals(tmpSelectedField)
+          || "Duration".equals(tmpSelectedField);
+
+      List<String> tmpAllowedOperators;
+      if (tmpIsNumeric) {
+        tmpAllowedOperators = List.of("EQUALS", "GREATER_THAN", "LESS_THAN");
+      } else {
+        tmpAllowedOperators = List.of("EQUALS", "CONTAINS");
+      }
+
+      if (!tmpOperatorComboBox.getItems().equals(tmpAllowedOperators)) {
+        tmpOperatorComboBox.getItems().setAll(tmpAllowedOperators);
+        if (tmpCurrentOperator != null
+            && tmpAllowedOperators.contains(tmpCurrentOperator)) {
+          tmpOperatorComboBox.getSelectionModel().select(tmpCurrentOperator);
+        } else {
+          tmpOperatorComboBox.getSelectionModel().selectFirst();
+        }
+      }
+    };
+    tmpUpdateOperators.run();
+
+    TextField tmpValueField = new TextField();
+    tmpValueField.setPromptText("Value");
+
+    // Proactive input restriction for Name field
+    tmpNameField.textProperty()
+        .addListener((observable, oldValue, newValue) -> {
+          if (newValue != null && (newValue.length() > 30
+              || !newValue.matches("\\A\\p{ASCII}*\\z"))) {
+            tmpNameField.setText(oldValue);
+          }
+        });
+
+    // Proactive input restriction for Value field based on active filter field
+    tmpValueField.textProperty()
+        .addListener((observable, oldValue, newValue) -> {
+          if (newValue == null || newValue.isEmpty()) {
+            return;
+          }
+          String tmpField = tmpFieldComboBox.getValue();
+          if ("Year".equals(tmpField)) {
+            if (!newValue.matches("\\d{0,4}")) {
+              tmpValueField.setText(oldValue);
+            }
+          } else if ("Duration".equals(tmpField)) {
+            if (!newValue.matches("\\d*")) {
+              tmpValueField.setText(oldValue);
+            }
+          } else if ("IMDb Rating".equals(tmpField)) {
+            if (!newValue.matches("[0-9.,]*")) {
+              tmpValueField.setText(oldValue);
+            } else {
+              try {
+                double tmpVal = Double.parseDouble(newValue.replace(",", "."));
+                if (tmpVal < 0 || tmpVal > 10) {
+                  tmpValueField.setText(oldValue);
+                }
+              } catch (NumberFormatException tmpException) {
+                // Allow intermediate typing like "8." or "8,"
+              }
+            }
+          } else {
+            // Text fields: Genre, Director, Writer, Producer, Cinematographer,
+            // Composer, Actors
+            if (newValue.matches(".*\\d.*")
+                || !newValue.matches("\\A\\p{ASCII}*\\z")) {
+              tmpValueField.setText(oldValue);
+            }
+          }
+        });
+
+    tmpRuleBox.getChildren().addAll(tmpFieldComboBox, tmpOperatorComboBox,
+        tmpValueField);
+    tmpVbox.getChildren().addAll(tmpErrorLabel, new Label("Name:"),
+        tmpNameField, new Label("Rule:"), tmpRuleBox);
+    tmpDialog.getDialogPane().setContent(tmpVbox);
+
+    Node tmpOkButton = tmpDialog.getDialogPane().lookupButton(tmpOkButtonType);
+    if (tmpOkButton != null) {
+      tmpOkButton.getStyleClass().add("button-primary");
+      tmpOkButton.setDisable(true);
+    }
+
+    Node tmpCancelButton =
+        tmpDialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+    if (tmpCancelButton != null) {
+      tmpCancelButton.getStyleClass().add("button-primary");
+    }
+
+    javafx.beans.value.ChangeListener<String> tmpValidationListener =
+        (observable, oldValue, newValue) -> {
+          boolean tmpIsValid = true;
+          String tmpName = tmpNameField.getText().trim();
+          String tmpValue = tmpValueField.getText().trim();
+
+          if (!tmpName.matches("\\A\\p{ASCII}*\\z")) {
+            tmpErrorLabel.setText(
+                "The text you entered is not ASCII code. Only standard English letters, numbers, and basic symbols can be used.");
+            tmpErrorLabel.setVisible(true);
+            tmpIsValid = false;
+          } else {
+            boolean tmpDuplicate = false;
+            List<Watchlist> tmpWatchlists = watchlistRepository.findAll();
+            for (Watchlist tmpWatchlist : tmpWatchlists) {
+              if (tmpWatchlist.getName().equalsIgnoreCase(tmpName)) {
+                tmpDuplicate = true;
+                break;
+              }
+            }
+            if (tmpDuplicate) {
+              tmpErrorLabel.setText(
+                  "A watchlist with this name already exists. Please choose a different name.");
+              tmpErrorLabel.setVisible(true);
+              tmpIsValid = false;
+            } else {
+              String tmpField = tmpFieldComboBox.getValue();
+              if (!tmpValue.isEmpty()) {
+                if ("Year".equals(tmpField) && !tmpValue.matches("\\d{4}")) {
+                  tmpErrorLabel.setText("Year must be exactly 4 digits.");
+                  tmpErrorLabel.setVisible(true);
+                  tmpIsValid = false;
+                } else if ("IMDb Rating".equals(tmpField)) {
+                  try {
+                    double tmpRating =
+                        Double.parseDouble(tmpValue.replace(",", "."));
+                    if (tmpRating < 0 || tmpRating > 10) {
+                      tmpErrorLabel
+                          .setText("IMDb Rating must be between 0 and 10.");
+                      tmpErrorLabel.setVisible(true);
+                      tmpIsValid = false;
+                    }
+                  } catch (NumberFormatException tmpException) {
+                    tmpErrorLabel
+                        .setText("IMDb Rating must be a valid number.");
+                    tmpErrorLabel.setVisible(true);
+                    tmpIsValid = false;
+                  }
+                } else if ("Duration".equals(tmpField)) {
+                  if (!tmpValue.matches("\\d+")) {
+                    tmpErrorLabel
+                        .setText("Duration must be a valid number of minutes.");
+                    tmpErrorLabel.setVisible(true);
+                    tmpIsValid = false;
+                  }
+                } else if (!tmpValue.matches("\\A\\p{ASCII}*\\z")) {
+                  tmpErrorLabel
+                      .setText("The text you entered is not ASCII code.");
+                  tmpErrorLabel.setVisible(true);
+                  tmpIsValid = false;
+                } else if (("Genre".equals(tmpField)
+                    || "Director".equals(tmpField) || "Writer".equals(tmpField)
+                    || "Producer".equals(tmpField)
+                    || "Cinematographer".equals(tmpField)
+                    || "Composer".equals(tmpField) || "Actors".equals(tmpField))
+                    && tmpValue.matches(".*\\d.*")) {
+                  tmpErrorLabel.setText(
+                      tmpField + " must be text and cannot contain numbers.");
+                  tmpErrorLabel.setVisible(true);
+                  tmpIsValid = false;
+                }
+              }
+            }
+          }
+
+          if (tmpIsValid) {
+            tmpErrorLabel.setVisible(false);
+          }
+
+          if (tmpOkButton != null) {
+            tmpOkButton.setDisable(
+                !tmpIsValid || tmpName.isEmpty() || tmpValue.isEmpty());
+          }
+
+          if (tmpDialog.getDialogPane().getScene() != null
+              && tmpDialog.getDialogPane().getScene().getWindow() != null) {
+            tmpDialog.getDialogPane().getScene().getWindow().sizeToScene();
+          }
+        };
+
+    tmpNameField.textProperty().addListener(tmpValidationListener);
+    tmpValueField.textProperty().addListener(tmpValidationListener);
+    tmpFieldComboBox.valueProperty()
+        .addListener((observable, oldValue, newValue) -> {
+          tmpValueField.clear();
+          tmpUpdateOperators.run();
+          tmpValidationListener.changed(null, null, null);
+        });
+    tmpOperatorComboBox.valueProperty().addListener((observable, oldValue,
+        newValue) -> tmpValidationListener.changed(null, null, null));
+
+    tmpDialog.setResultConverter(dialogButton -> {
+      if (dialogButton == tmpOkButtonType) {
+        Watchlist tmpWatchlist = new Watchlist(tmpNameField.getText().trim());
+        tmpWatchlist.setSmart(true);
+        SmartRule tmpRule = new SmartRule(tmpFieldComboBox.getValue(),
+            tmpOperatorComboBox.getValue(), tmpValueField.getText().trim());
+        tmpWatchlist.setSmartRulesJson(new Gson().toJson(List.of(tmpRule)));
+        return tmpWatchlist;
+      }
+      return null;
+    });
+
+    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpDialog);
+    Optional<Watchlist> tmpResult = tmpDialog.showAndWait();
+    tmpResult.ifPresent(watchlist -> {
+      if (validateWatchlistName(watchlist.getName(), -1)) {
+        watchlistRepository.insert(watchlist);
+        refresh();
+      }
+    });
   }
 }

@@ -40,7 +40,14 @@ package io.github.kullik01.kinonode.repository;
 import io.github.kullik01.kinonode.model.Movie;
 import io.github.kullik01.kinonode.model.Watchlist;
 import io.github.kullik01.kinonode.service.DatabaseService;
-import java.sql.*;
+import io.github.kullik01.kinonode.model.SmartRule;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -93,8 +100,19 @@ public class WatchlistRepository {
         // Retrieve the timestamp as epoch seconds and map to Instant
         tmpWatchlist.setCreatedAt(
             Instant.ofEpochSecond(tmpResultSet.getLong("created_at")));
-        // Eagerly fetch and associate movies belonging to this watchlist
-        tmpWatchlist.setMovies(findMoviesInWatchlist(tmpWatchlist.getId()));
+
+        boolean tmpIsSmart = tmpResultSet.getBoolean("is_smart");
+        tmpWatchlist.setSmart(tmpIsSmart);
+        tmpWatchlist
+            .setSmartRulesJson(tmpResultSet.getString("smart_rules_json"));
+
+        if (tmpIsSmart) {
+          tmpWatchlist.setMovies(
+              findMoviesForSmartWatchlist(tmpWatchlist.getSmartRulesJson()));
+        } else {
+          // Eagerly fetch and associate movies belonging to this watchlist
+          tmpWatchlist.setMovies(findMoviesInWatchlist(tmpWatchlist.getId()));
+        }
         tmpWatchlists.add(tmpWatchlist);
       }
     } catch (SQLException tmpException) {
@@ -123,8 +141,19 @@ public class WatchlistRepository {
           // Retrieve the timestamp as epoch seconds and map to Instant
           tmpWatchlist.setCreatedAt(
               Instant.ofEpochSecond(tmpResultSet.getLong("created_at")));
-          // Eagerly fetch and associate movies belonging to this watchlist
-          tmpWatchlist.setMovies(findMoviesInWatchlist(id));
+
+          boolean tmpIsSmart = tmpResultSet.getBoolean("is_smart");
+          tmpWatchlist.setSmart(tmpIsSmart);
+          tmpWatchlist
+              .setSmartRulesJson(tmpResultSet.getString("smart_rules_json"));
+
+          if (tmpIsSmart) {
+            tmpWatchlist.setMovies(
+                findMoviesForSmartWatchlist(tmpWatchlist.getSmartRulesJson()));
+          } else {
+            // Eagerly fetch and associate movies belonging to this watchlist
+            tmpWatchlist.setMovies(findMoviesInWatchlist(id));
+          }
           return tmpWatchlist;
         }
       }
@@ -144,13 +173,16 @@ public class WatchlistRepository {
    *         database ID
    */
   public Watchlist insert(Watchlist watchlist) {
-    String tmpSql = "INSERT INTO watchlists (name, created_at) VALUES (?, ?)";
+    String tmpSql =
+        "INSERT INTO watchlists (name, created_at, is_smart, smart_rules_json) VALUES (?, ?, ?, ?)";
     try (
         PreparedStatement tmpPreparedStatement = databaseService.getConnection()
             .prepareStatement(tmpSql, Statement.RETURN_GENERATED_KEYS)) {
       tmpPreparedStatement.setString(1, watchlist.getName());
       tmpPreparedStatement.setLong(2,
           watchlist.getCreatedAt().getEpochSecond());
+      tmpPreparedStatement.setBoolean(3, watchlist.isSmart());
+      tmpPreparedStatement.setString(4, watchlist.getSmartRulesJson());
       int tmpAffected = tmpPreparedStatement.executeUpdate();
       // Fetch and set generated database key back on the entity if insertion
       // succeeded
@@ -175,11 +207,14 @@ public class WatchlistRepository {
    * @param watchlist the {@link Watchlist} entity to update
    */
   public void update(Watchlist watchlist) {
-    String tmpSql = "UPDATE watchlists SET name = ? WHERE id = ?";
+    String tmpSql =
+        "UPDATE watchlists SET name = ?, is_smart = ?, smart_rules_json = ? WHERE id = ?";
     try (PreparedStatement tmpPreparedStatement =
         databaseService.getConnection().prepareStatement(tmpSql)) {
       tmpPreparedStatement.setString(1, watchlist.getName());
-      tmpPreparedStatement.setInt(2, watchlist.getId());
+      tmpPreparedStatement.setBoolean(2, watchlist.isSmart());
+      tmpPreparedStatement.setString(3, watchlist.getSmartRulesJson());
+      tmpPreparedStatement.setInt(4, watchlist.getId());
       tmpPreparedStatement.executeUpdate();
     } catch (SQLException tmpException) {
       LOGGER.log(Level.SEVERE,
@@ -391,5 +426,123 @@ public class WatchlistRepository {
           "Failed to update movie positions in watchlist: " + watchlistId,
           tmpException);
     }
+  }
+
+  /**
+   * Retrieves all movies dynamically matching the JSON rule criteria for a
+   * Smart Watchlist.
+   *
+   * @param tmpRulesJson the serialized JSON rules string
+   * @return a list of dynamically matched {@link Movie} entities
+   */
+  public List<Movie> findMoviesForSmartWatchlist(String tmpRulesJson) {
+    List<Movie> tmpMovies = new ArrayList<>();
+    if (tmpRulesJson == null || tmpRulesJson.isBlank()) {
+      return tmpMovies;
+    }
+
+    try {
+      Gson tmpGson = new Gson();
+      List<SmartRule> tmpRules = tmpGson.fromJson(tmpRulesJson,
+          new TypeToken<List<SmartRule>>() {}.getType());
+
+      StringBuilder tmpQueryBuilder =
+          new StringBuilder("SELECT * FROM movies WHERE 1=1 ");
+      List<Object> tmpParameters = new ArrayList<>();
+
+      for (SmartRule tmpRule : tmpRules) {
+        String tmpField = tmpRule.getField().toLowerCase();
+        String tmpValue = tmpRule.getValue();
+
+        String tmpDbField = switch (tmpField) {
+          case "imdb rating" -> "raw_rating";
+          case "rating" -> "rating";
+          case "year" -> "year";
+          case "genre" -> "genre";
+          case "director" -> "director";
+          case "actors" -> "actors";
+          case "writer" -> "writer";
+          case "producer" -> "producer";
+          case "cinematographer" -> "cinematographer";
+          case "composer" -> "composer";
+          case "duration" -> "duration";
+          default -> "title";
+        };
+
+        switch (tmpRule.getOperator()) {
+          case "EQUALS" -> {
+            tmpQueryBuilder.append(" AND ").append(tmpDbField).append(" = ?");
+            tmpParameters.add(tmpValue);
+          }
+          case "GREATER_THAN" -> {
+            tmpQueryBuilder.append(" AND ").append(tmpDbField).append(" > ?");
+            try {
+              if (tmpValue.contains(".") || tmpValue.contains(",")) {
+                tmpParameters
+                    .add(Double.parseDouble(tmpValue.replace(",", ".")));
+              } else {
+                tmpParameters.add(Integer.parseInt(tmpValue));
+              }
+            } catch (NumberFormatException tmpException) {
+              tmpParameters.add(0);
+            }
+          }
+          case "LESS_THAN" -> {
+            tmpQueryBuilder.append(" AND ").append(tmpDbField).append(" < ?");
+            try {
+              if (tmpValue.contains(".") || tmpValue.contains(",")) {
+                tmpParameters
+                    .add(Double.parseDouble(tmpValue.replace(",", ".")));
+              } else {
+                tmpParameters.add(Integer.parseInt(tmpValue));
+              }
+            } catch (NumberFormatException tmpException) {
+              tmpParameters.add(0);
+            }
+          }
+          case "CONTAINS" -> {
+            tmpQueryBuilder.append(" AND ").append(tmpDbField)
+                .append(" LIKE ?");
+            tmpParameters.add("%" + tmpValue + "%");
+          }
+        }
+      }
+
+      try (PreparedStatement tmpPreparedStatement = databaseService
+          .getConnection().prepareStatement(tmpQueryBuilder.toString())) {
+        for (int tmpIndex = 0; tmpIndex < tmpParameters.size(); tmpIndex++) {
+          tmpPreparedStatement.setObject(tmpIndex + 1,
+              tmpParameters.get(tmpIndex));
+        }
+        try (ResultSet tmpResultSet = tmpPreparedStatement.executeQuery()) {
+          while (tmpResultSet.next()) {
+            Movie tmpMovie = new Movie();
+            tmpMovie.setId(tmpResultSet.getInt("id"));
+            tmpMovie.setFilePath(tmpResultSet.getString("file_path"));
+            tmpMovie.setTitle(tmpResultSet.getString("title"));
+
+            int tmpYear = tmpResultSet.getInt("year");
+            tmpMovie.setYear(tmpResultSet.wasNull() ? null : tmpYear);
+
+            tmpMovie.setGenre(tmpResultSet.getString("genre"));
+            tmpMovie.setDescription(tmpResultSet.getString("description"));
+
+            int tmpRating = tmpResultSet.getInt("rating");
+            tmpMovie.setRating(tmpResultSet.wasNull() ? null : tmpRating);
+
+            tmpMovie
+                .setCoverImagePath(tmpResultSet.getString("cover_image_path"));
+            tmpMovie.setTrailerUrl(tmpResultSet.getString("trailer_url"));
+            tmpMovie.setDateAdded(
+                Instant.ofEpochSecond(tmpResultSet.getLong("date_added")));
+            tmpMovies.add(tmpMovie);
+          }
+        }
+      }
+    } catch (Exception tmpException) {
+      LOGGER.log(Level.SEVERE, "Failed to evaluate smart watchlist rules",
+          tmpException);
+    }
+    return tmpMovies;
   }
 }
