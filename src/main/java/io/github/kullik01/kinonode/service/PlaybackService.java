@@ -37,6 +37,9 @@
  */
 package io.github.kullik01.kinonode.service;
 
+import java.io.InputStream;
+
+
 import io.github.kullik01.kinonode.repository.SettingsRepository;
 import java.io.BufferedReader;
 import java.io.File;

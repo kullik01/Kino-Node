@@ -37,6 +37,9 @@
  */
 package io.github.kullik01.kinonode.controller;
 
+import javafx.util.Duration;
+
+
 import io.github.kullik01.kinonode.repository.SettingsRepository;
 import io.github.kullik01.kinonode.service.AppContext;
 import java.io.File;
@@ -97,8 +100,7 @@ public class SettingsController implements Refreshable {
     if (statusTimer != null) {
       statusTimer.stop();
     }
-    statusTimer =
-        new javafx.animation.PauseTransition(javafx.util.Duration.seconds(5));
+    statusTimer = new javafx.animation.PauseTransition(Duration.seconds(5));
     statusTimer.setOnFinished(e -> lblStatus.setText(""));
     statusTimer.play();
   }

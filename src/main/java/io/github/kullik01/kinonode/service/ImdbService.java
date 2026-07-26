@@ -37,6 +37,15 @@
  */
 package io.github.kullik01.kinonode.service;
 
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
+
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -158,7 +167,7 @@ public class ImdbService {
               String tmpStarring = tmpResult.get("s").getAsString();
               if (tmpStarring != null && !tmpStarring.isBlank()) {
                 String[] tmpActorArray = tmpStarring.split(",");
-                Set<String> tmpUniqueStarring = new java.util.LinkedHashSet<>();
+                Set<String> tmpUniqueStarring = new LinkedHashSet<>();
                 for (String tmpActor : tmpActorArray) {
                   if (tmpActor != null && !tmpActor.isBlank()) {
                     tmpUniqueStarring.add(tmpActor.trim());
@@ -229,9 +238,9 @@ public class ImdbService {
 
         // 1. ISO 8601 duration in JSON-LD e.g. "duration":"PT2H28M" or
         // "duration":"PT148M"
-        java.util.regex.Pattern durPattern1 = java.util.regex.Pattern
+        Pattern durPattern1 = Pattern
             .compile("\"duration\"\\s*:\\s*\"PT(?:(\\d+)H)?(?:(\\d+)M)?\"");
-        java.util.regex.Matcher durMatcher1 = durPattern1.matcher(body);
+        Matcher durMatcher1 = durPattern1.matcher(body);
         if (durMatcher1.find()) {
           int hours = durMatcher1.group(1) != null
               ? Integer.parseInt(durMatcher1.group(1))
@@ -248,9 +257,9 @@ public class ImdbService {
         }
 
         // 2. Next.js JSON / GraphQL runtime e.g. "runtime":{"seconds":8880}
-        java.util.regex.Pattern durPattern2 = java.util.regex.Pattern
+        Pattern durPattern2 = Pattern
             .compile("\"runtime\"\\s*:\\s*\\{\\s*\"seconds\"\\s*:\\s*(\\d+)");
-        java.util.regex.Matcher durMatcher2 = durPattern2.matcher(body);
+        Matcher durMatcher2 = durPattern2.matcher(body);
         if (durMatcher2.find()) {
           int seconds = Integer.parseInt(durMatcher2.group(1));
           int totalMins = seconds / 60;
@@ -262,9 +271,9 @@ public class ImdbService {
         }
 
         // 3. HTML text pattern e.g. "2h 28m" or "1h 45m"
-        java.util.regex.Pattern durPattern3 = java.util.regex.Pattern
+        Pattern durPattern3 = Pattern
             .compile("(\\d+)\\s*h(?:ours?)?\\s*(\\d+)\\s*m(?:in(?:ute)?s?)?");
-        java.util.regex.Matcher durMatcher3 = durPattern3.matcher(body);
+        Matcher durMatcher3 = durPattern3.matcher(body);
         if (durMatcher3.find()) {
           int hours = Integer.parseInt(durMatcher3.group(1));
           int mins = Integer.parseInt(durMatcher3.group(2));
@@ -282,39 +291,48 @@ public class ImdbService {
     }
 
     try {
-      String tmpRatingUrl = "https://p.media-imdb.com/static-content/documents/v1/title/" + imdbId + "/ratings%3Fjsonp=imdb.rating.run:imdb.api.title.ratings/data.json";
-      HttpRequest tmpRatingRequest = HttpRequest.newBuilder().uri(URI.create(tmpRatingUrl))
-          .header("User-Agent", "Mozilla/5.0")
-          .header("Accept-Encoding", "gzip")
-          .GET().build();
-      HttpResponse<InputStream> tmpRatingResponse = client.send(tmpRatingRequest, HttpResponse.BodyHandlers.ofInputStream());
+      String tmpRatingUrl =
+          "https://p.media-imdb.com/static-content/documents/v1/title/" + imdbId
+              + "/ratings%3Fjsonp=imdb.rating.run:imdb.api.title.ratings/data.json";
+      HttpRequest tmpRatingRequest = HttpRequest.newBuilder()
+          .uri(URI.create(tmpRatingUrl)).header("User-Agent", "Mozilla/5.0")
+          .header("Accept-Encoding", "gzip").GET().build();
+      HttpResponse<InputStream> tmpRatingResponse = client
+          .send(tmpRatingRequest, HttpResponse.BodyHandlers.ofInputStream());
       if (tmpRatingResponse.statusCode() == 200) {
-        java.util.Optional<String> encoding = tmpRatingResponse.headers().firstValue("Content-Encoding");
+        Optional<String> encoding =
+            tmpRatingResponse.headers().firstValue("Content-Encoding");
         String body;
         if (encoding.isPresent() && encoding.get().equalsIgnoreCase("gzip")) {
-            try (java.util.zip.GZIPInputStream gis = new java.util.zip.GZIPInputStream(tmpRatingResponse.body())) {
-                body = new String(gis.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
-            }
+          try (GZIPInputStream gis =
+              new GZIPInputStream(tmpRatingResponse.body())) {
+            body = new String(gis.readAllBytes(), StandardCharsets.UTF_8);
+          }
         } else {
-            body = new String(tmpRatingResponse.body().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+          body = new String(tmpRatingResponse.body().readAllBytes(),
+              StandardCharsets.UTF_8);
         }
-        java.util.regex.Pattern ratingPattern = java.util.regex.Pattern.compile("\"rating\"\\s*:\\s*([\\d\\.]+)");
-        java.util.regex.Matcher ratingMatcher = ratingPattern.matcher(body);
+        Pattern ratingPattern =
+            Pattern.compile("\"rating\"\\s*:\\s*([\\d\\.]+)");
+        Matcher ratingMatcher = ratingPattern.matcher(body);
         if (ratingMatcher.find()) {
           try {
-            double score = Double.parseDouble(ratingMatcher.group(1).replace(",", "."));
+            double score =
+                Double.parseDouble(ratingMatcher.group(1).replace(",", "."));
             movie.setRawRating(score);
             int ratingInt = (int) Math.round(score);
             if (ratingInt >= 1 && ratingInt <= 10) {
               movie.setRating(ratingInt);
-              LOGGER.info("Extracted IMDb rating from JSONP API for " + movie.getTitle() + ": " + score + "/10");
+              LOGGER.info("Extracted IMDb rating from JSONP API for "
+                  + movie.getTitle() + ": " + score + "/10");
             }
           } catch (NumberFormatException ignored) {
           }
         }
       }
     } catch (Exception e) {
-      LOGGER.log(Level.WARNING, "Error fetching IMDb JSONP rating for " + imdbId, e);
+      LOGGER.log(Level.WARNING,
+          "Error fetching IMDb JSONP rating for " + imdbId, e);
     }
   }
 
@@ -325,44 +343,55 @@ public class ImdbService {
    */
   public static void updateRatingOnly(Movie movie) {
     if (movie.getCoverImagePath() != null) {
-      java.util.regex.Pattern p = java.util.regex.Pattern.compile("tt\\d+");
-      java.util.regex.Matcher m = p.matcher(movie.getCoverImagePath());
+      Pattern p = Pattern.compile("tt\\d+");
+      Matcher m = p.matcher(movie.getCoverImagePath());
       if (m.find()) {
         String imdbId = m.group();
         try {
-          String tmpRatingUrl = "https://p.media-imdb.com/static-content/documents/v1/title/" + imdbId + "/ratings%3Fjsonp=imdb.rating.run:imdb.api.title.ratings/data.json";
-          HttpRequest tmpRatingRequest = HttpRequest.newBuilder().uri(URI.create(tmpRatingUrl))
-              .header("User-Agent", "Mozilla/5.0")
-              .header("Accept-Encoding", "gzip")
-              .GET().build();
-          HttpResponse<java.io.InputStream> tmpRatingResponse = client.send(tmpRatingRequest, HttpResponse.BodyHandlers.ofInputStream());
+          String tmpRatingUrl =
+              "https://p.media-imdb.com/static-content/documents/v1/title/"
+                  + imdbId
+                  + "/ratings%3Fjsonp=imdb.rating.run:imdb.api.title.ratings/data.json";
+          HttpRequest tmpRatingRequest = HttpRequest.newBuilder()
+              .uri(URI.create(tmpRatingUrl)).header("User-Agent", "Mozilla/5.0")
+              .header("Accept-Encoding", "gzip").GET().build();
+          HttpResponse<InputStream> tmpRatingResponse = client.send(
+              tmpRatingRequest, HttpResponse.BodyHandlers.ofInputStream());
           if (tmpRatingResponse.statusCode() == 200) {
-            java.util.Optional<String> encoding = tmpRatingResponse.headers().firstValue("Content-Encoding");
+            Optional<String> encoding =
+                tmpRatingResponse.headers().firstValue("Content-Encoding");
             String body;
-            if (encoding.isPresent() && encoding.get().equalsIgnoreCase("gzip")) {
-                try (java.util.zip.GZIPInputStream gis = new java.util.zip.GZIPInputStream(tmpRatingResponse.body())) {
-                    body = new String(gis.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
-                }
+            if (encoding.isPresent()
+                && encoding.get().equalsIgnoreCase("gzip")) {
+              try (GZIPInputStream gis =
+                  new GZIPInputStream(tmpRatingResponse.body())) {
+                body = new String(gis.readAllBytes(), StandardCharsets.UTF_8);
+              }
             } else {
-                body = new String(tmpRatingResponse.body().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+              body = new String(tmpRatingResponse.body().readAllBytes(),
+                  StandardCharsets.UTF_8);
             }
-            java.util.regex.Pattern ratingPattern = java.util.regex.Pattern.compile("\"rating\"\\s*:\\s*([\\d\\.]+)");
-            java.util.regex.Matcher ratingMatcher = ratingPattern.matcher(body);
+            Pattern ratingPattern =
+                Pattern.compile("\"rating\"\\s*:\\s*([\\d\\.]+)");
+            Matcher ratingMatcher = ratingPattern.matcher(body);
             if (ratingMatcher.find()) {
               try {
-                double score = Double.parseDouble(ratingMatcher.group(1).replace(",", "."));
+                double score = Double
+                    .parseDouble(ratingMatcher.group(1).replace(",", "."));
                 movie.setRawRating(score);
                 int ratingInt = (int) Math.round(score);
                 if (ratingInt >= 1 && ratingInt <= 10) {
                   movie.setRating(ratingInt);
-                  LOGGER.info("Updated IMDb rating directly for " + movie.getTitle() + ": " + score + "/10");
+                  LOGGER.info("Updated IMDb rating directly for "
+                      + movie.getTitle() + ": " + score + "/10");
                 }
               } catch (NumberFormatException ignored) {
               }
             }
           }
         } catch (Exception e) {
-          LOGGER.log(Level.WARNING, "Error updating IMDb JSONP rating for " + imdbId, e);
+          LOGGER.log(Level.WARNING,
+              "Error updating IMDb JSONP rating for " + imdbId, e);
         }
       }
     }
@@ -523,13 +552,13 @@ public class ImdbService {
             if (tmpRow.has("duration")
                 && (movie.getDuration() == null || movie.getDuration() <= 0)) {
               try {
-                double tmpDurVal = Double.parseDouble(tmpRow
+                double tmpDurationValue = Double.parseDouble(tmpRow
                     .getAsJsonObject("duration").get("value").getAsString());
-                int tmpDurMins = (int) Math.round(tmpDurVal);
-                if (tmpDurMins > 0) {
-                  movie.setDuration(tmpDurMins);
+                int tmpDurationMinutes = (int) Math.round(tmpDurationValue);
+                if (tmpDurationMinutes > 0) {
+                  movie.setDuration(tmpDurationMinutes);
                   LOGGER.info("Extracted duration from Wikidata for "
-                      + movie.getTitle() + ": " + tmpDurMins + " mins");
+                      + movie.getTitle() + ": " + tmpDurationMinutes + " mins");
                 }
               } catch (Exception ignored) {
               }
@@ -537,7 +566,7 @@ public class ImdbService {
 
             if (tmpRow.has("ratingVal")) {
               try {
-                String tmpRatStr = tmpRow.getAsJsonObject("ratingVal")
+                String tmpRatingString = tmpRow.getAsJsonObject("ratingVal")
                     .get("value").getAsString();
                 String tmpCritics =
                     tmpRow.has("critics")
@@ -550,9 +579,9 @@ public class ImdbService {
                     || tmpCritics.toLowerCase().contains("imdb")
                     || tmpCritics.contains("Q37312");
                 if (isImdb) {
-                  java.util.regex.Matcher m = java.util.regex.Pattern
+                  Matcher m = Pattern
                       .compile("([\\d\\.,]+)(?:\\s*/\\s*([\\d\\.,]+)|%)?")
-                      .matcher(tmpRatStr);
+                      .matcher(tmpRatingString);
                   if (m.find()) {
                     double score =
                         Double.parseDouble(m.group(1).replace(",", "."));
@@ -609,20 +638,23 @@ public class ImdbService {
                         .replaceAll("\\s+", " ").trim();
                 if (!tmpCleaned.isEmpty()) {
                   String[] tmpWords = tmpCleaned.split("\\s+");
-                  StringBuilder tmpSb = new StringBuilder();
-                  for (int tmpI = 0; tmpI < tmpWords.length; tmpI++) {
-                    String tmpWord = tmpWords[tmpI];
+                  StringBuilder tmpStringBuilder = new StringBuilder();
+                  for (int tmpIndex =
+                      0; tmpIndex < tmpWords.length; tmpIndex++) {
+                    String tmpWord = tmpWords[tmpIndex];
                     if (!tmpWord.isEmpty()) {
-                      tmpSb.append(Character.toUpperCase(tmpWord.charAt(0)));
+                      tmpStringBuilder
+                          .append(Character.toUpperCase(tmpWord.charAt(0)));
                       if (tmpWord.length() > 1) {
-                        tmpSb.append(tmpWord.substring(1).toLowerCase());
+                        tmpStringBuilder
+                            .append(tmpWord.substring(1).toLowerCase());
                       }
-                      if (tmpI < tmpWords.length - 1) {
-                        tmpSb.append(" ");
+                      if (tmpIndex < tmpWords.length - 1) {
+                        tmpStringBuilder.append(" ");
                       }
                     }
                   }
-                  String tmpFinalGenre = tmpSb.toString().trim();
+                  String tmpFinalGenre = tmpStringBuilder.toString().trim();
                   if (!tmpFinalGenre.isEmpty()) {
                     tmpGenres.add(tmpFinalGenre);
                   }
@@ -694,7 +726,7 @@ public class ImdbService {
           JsonArray tmpBindings = tmpJsonObject.getAsJsonObject("results")
               .getAsJsonArray("bindings");
 
-          Set<String> tmpActors = new java.util.LinkedHashSet<>();
+          Set<String> tmpActors = new LinkedHashSet<>();
           for (JsonElement tmpElement : tmpBindings) {
             JsonObject tmpRow = tmpElement.getAsJsonObject();
             if (tmpRow.has("actorLabel")) {
@@ -703,7 +735,7 @@ public class ImdbService {
             }
           }
 
-          java.util.List<String> tmpExistingList = new java.util.ArrayList<>();
+          List<String> tmpExistingList = new ArrayList<>();
           if (movie.getActors() != null && !movie.getActors().isBlank()) {
             for (String val : movie.getActors().split(",")) {
               String trimmed = val.trim();

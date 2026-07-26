@@ -37,6 +37,9 @@
  */
 package io.github.kullik01.kinonode.service;
 
+import java.net.URL;
+
+
 import io.github.kullik01.kinonode.model.Movie;
 import java.net.URI;
 import java.net.URLEncoder;

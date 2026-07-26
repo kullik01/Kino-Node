@@ -37,6 +37,12 @@
  */
 package io.github.kullik01.kinonode.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+import javafx.scene.Node;
+import javafx.util.Duration;
+
+
 import io.github.kullik01.kinonode.model.Movie;
 import io.github.kullik01.kinonode.repository.MovieRepository;
 import io.github.kullik01.kinonode.service.AppContext;
@@ -93,10 +99,9 @@ public class LibraryController implements Refreshable {
   private List<Movie> allMovies = new ArrayList<>();
   private Task<LibraryScanService.ScanResult> activeScanTask;
   private MovieDetailController currentMovieDetailController;
-  private final java.util.Map<Integer, Parent> cardCache =
-      new java.util.HashMap<>();
-  private final java.util.Map<Integer, MovieCardController> controllerCache =
-      new java.util.HashMap<>();
+  private final Map<Integer, Parent> cardCache = new HashMap<>();
+  private final Map<Integer, MovieCardController> controllerCache =
+      new HashMap<>();
 
   /**
    * Initializes the controller. Sets up the sorting combo box, registers search
@@ -243,7 +248,7 @@ public class LibraryController implements Refreshable {
       }
     }
 
-    java.util.List<javafx.scene.Node> tmpNewCards = new java.util.ArrayList<>();
+    List<Node> tmpNewCards = new ArrayList<>();
     for (Movie tmpMovie : tmpFiltered) {
       // Retrieve from cache first to avoid slow FXML loading cycles
       Parent tmpCard = cardCache.get(tmpMovie.getId());
@@ -280,7 +285,7 @@ public class LibraryController implements Refreshable {
     }
   }
 
-  private javafx.scene.Node createEmptyStateNode(boolean isLibraryEmpty) {
+  private Node createEmptyStateNode(boolean isLibraryEmpty) {
     javafx.scene.layout.VBox tmpRootVBox = new javafx.scene.layout.VBox();
     tmpRootVBox.setAlignment(javafx.geometry.Pos.CENTER);
     tmpRootVBox.setPadding(new javafx.geometry.Insets(30, 20, 30, 20));
@@ -360,7 +365,7 @@ public class LibraryController implements Refreshable {
 
         Tooltip tmpSyncTooltip = new Tooltip("Why sync?\n"
             + "Syncing scans your configured workspace folder(s) to discover, index, and catalog your movie files, posters, and metadata into your collection library.");
-        tmpSyncTooltip.setShowDelay(javafx.util.Duration.millis(250));
+        tmpSyncTooltip.setShowDelay(Duration.millis(250));
         tmpSyncTooltip.getStyleClass().add("chart-popup-tooltip");
         Tooltip.install(tmpBtnSync, tmpSyncTooltip);
 
@@ -422,7 +427,7 @@ public class LibraryController implements Refreshable {
 
         Tooltip tmpTooltip = new Tooltip("Why set a workspace?\n"
             + "KinoNode needs at least one workspace folder path to scan, locate, and catalog your movie files, posters, and metadata into your collection library.");
-        tmpTooltip.setShowDelay(javafx.util.Duration.millis(250));
+        tmpTooltip.setShowDelay(Duration.millis(250));
         tmpTooltip.getStyleClass().add("chart-popup-tooltip");
         Tooltip.install(tmpBtnSettings, tmpTooltip);
 

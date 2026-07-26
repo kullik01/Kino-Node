@@ -37,6 +37,11 @@
  */
 package io.github.kullik01.kinonode.controller;
 
+import javafx.scene.Node;
+import javafx.scene.layout.Region;
+import javafx.stage.Stage;
+
+
 import io.github.kullik01.kinonode.model.Movie;
 import io.github.kullik01.kinonode.model.Watchlist;
 import io.github.kullik01.kinonode.repository.WatchlistRepository;
@@ -148,10 +153,8 @@ public class WatchlistsController implements Refreshable {
 
         // Allow title to expand, keeping rating aligned to right
         HBox.setHgrow(titleLabel, Priority.ALWAYS);
-        ratingBox.setMinSize(javafx.scene.layout.Region.USE_PREF_SIZE,
-            javafx.scene.layout.Region.USE_PREF_SIZE);
-        ratingTextLabel.setMinSize(javafx.scene.layout.Region.USE_PREF_SIZE,
-            javafx.scene.layout.Region.USE_PREF_SIZE);
+        ratingBox.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        ratingTextLabel.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
         content.maxWidthProperty()
             .bind(tmpListView.widthProperty().subtract(40));
@@ -326,8 +329,7 @@ public class WatchlistsController implements Refreshable {
     tmpDialog.getDialogPane().setPrefSize(480, 280);
     tmpDialog.getDialogPane().setMinSize(480, 280);
 
-    javafx.stage.Stage tmpStage =
-        (javafx.stage.Stage) tmpDialog.getDialogPane().getScene().getWindow();
+    Stage tmpStage = (Stage) tmpDialog.getDialogPane().getScene().getWindow();
     tmpStage.getIcons().add(new javafx.scene.image.Image(getClass()
         .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
 
@@ -340,7 +342,7 @@ public class WatchlistsController implements Refreshable {
     Label tmpErrorLabel = new Label();
     tmpErrorLabel.setWrapText(true);
     tmpErrorLabel.setPrefWidth(430);
-    tmpErrorLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+    tmpErrorLabel.setMinHeight(Region.USE_PREF_SIZE);
     tmpErrorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
     tmpErrorLabel.setVisible(false);
 
@@ -350,15 +352,14 @@ public class WatchlistsController implements Refreshable {
     tmpVbox.getChildren().addAll(tmpErrorLabel, tmpTextField);
     tmpDialog.getDialogPane().setContent(tmpVbox);
 
-    javafx.scene.Node tmpOkButton =
-        tmpDialog.getDialogPane().lookupButton(tmpOkButtonType);
+    Node tmpOkButton = tmpDialog.getDialogPane().lookupButton(tmpOkButtonType);
     if (tmpOkButton != null) {
       tmpOkButton.getStyleClass().add("button-primary");
       tmpOkButton.setDisable(true); // Always disable initially; user must type
                                     // or change the name
     }
 
-    javafx.scene.Node tmpCancelButton =
+    Node tmpCancelButton =
         tmpDialog.getDialogPane().lookupButton(ButtonType.CANCEL);
     if (tmpCancelButton != null) {
       tmpCancelButton.getStyleClass().add("button-primary");

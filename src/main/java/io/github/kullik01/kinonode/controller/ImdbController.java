@@ -37,6 +37,11 @@
  */
 package io.github.kullik01.kinonode.controller;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+
+
 import javafx.animation.PauseTransition;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -98,16 +103,15 @@ public class ImdbController implements Refreshable {
             + "left:-9999px!important;width:0!important;"
             + "height:0!important;overflow:hidden!important}";
     try {
-      java.io.File tmpCssFile = java.io.File.createTempFile("kino-ot-", ".css");
+      File tmpCssFile = File.createTempFile("kino-ot-", ".css");
       tmpCssFile.deleteOnExit();
-      java.nio.file.Files.write(tmpCssFile.toPath(),
-          tmpCss.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      Files.write(tmpCssFile.toPath(), tmpCss.getBytes(StandardCharsets.UTF_8));
       webEngine.setUserStyleSheetLocation(tmpCssFile.toURI().toString());
     } catch (Exception ignored) {
       // Fallback to data: URI if temp file creation fails
-      webEngine.setUserStyleSheetLocation("data:text/css;base64,"
-          + java.util.Base64.getEncoder().encodeToString(
-              tmpCss.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+      webEngine.setUserStyleSheetLocation(
+          "data:text/css;base64," + java.util.Base64.getEncoder()
+              .encodeToString(tmpCss.getBytes(StandardCharsets.UTF_8)));
     }
 
     // Early cookie + CSS injection + MutationObserver: fires as soon as a

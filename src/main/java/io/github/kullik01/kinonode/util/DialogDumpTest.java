@@ -9,6 +9,9 @@ import javafx.scene.control.Dialog;
 import javafx.stage.Stage;
 
 public class DialogDumpTest extends Application {
+  private static final java.util.logging.Logger LOGGER =
+      java.util.logging.Logger.getLogger(DialogDumpTest.class.getName());
+
   @Override
   public void start(Stage primaryStage) {
     Dialog<ButtonType> d = new Dialog<>();
@@ -22,7 +25,7 @@ public class DialogDumpTest extends Application {
   private void dump(Node n, int level) {
     for (int i = 0; i < level; i++)
       System.out.print("  ");
-    System.out.println(
+    LOGGER.info(
         n.getClass().getName() + " [styleClass=" + n.getStyleClass() + "]");
     if (n instanceof Parent) {
       for (Node child : ((Parent) n).getChildrenUnmodifiable()) {

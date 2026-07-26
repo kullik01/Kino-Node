@@ -37,6 +37,9 @@
  */
 package io.github.kullik01.kinonode.controller;
 
+import java.awt.Desktop;
+
+
 import io.github.kullik01.kinonode.service.AppContext;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -194,9 +197,9 @@ public class AboutController implements Refreshable {
           && Files.exists(tmpPlayerPathOptional.get().getParent())) {
         // Ensure Desktop API is supported on the current platform before
         // opening the explorer
-        if (java.awt.Desktop.isDesktopSupported() && java.awt.Desktop
-            .getDesktop().isSupported(java.awt.Desktop.Action.OPEN)) {
-          java.awt.Desktop.getDesktop()
+        if (Desktop.isDesktopSupported()
+            && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
+          Desktop.getDesktop()
               .open(tmpPlayerPathOptional.get().getParent().toFile());
         }
       }
@@ -214,10 +217,9 @@ public class AboutController implements Refreshable {
       if (tmpDatabasePath != null
           && Files.exists(tmpDatabasePath.getParent())) {
         // Open the database folder using system's default file browser
-        if (java.awt.Desktop.isDesktopSupported() && java.awt.Desktop
-            .getDesktop().isSupported(java.awt.Desktop.Action.OPEN)) {
-          java.awt.Desktop.getDesktop()
-              .open(tmpDatabasePath.getParent().toFile());
+        if (Desktop.isDesktopSupported()
+            && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
+          Desktop.getDesktop().open(tmpDatabasePath.getParent().toFile());
         }
       }
     } catch (Exception tmpException) {

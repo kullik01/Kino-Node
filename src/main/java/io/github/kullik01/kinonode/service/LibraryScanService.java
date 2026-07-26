@@ -193,7 +193,8 @@ public class LibraryScanService {
                 movieRepository.findByFilePath(tmpAbsolutePath);
 
             // ALWAYS update the IMDb rating to keep it actual!
-            updateMessage("Updating IMDb Rating for: " + tmpExistingMovie.getTitle());
+            updateMessage(
+                "Updating IMDb Rating for: " + tmpExistingMovie.getTitle());
             ImdbService.updateRatingOnly(tmpExistingMovie);
 
             boolean tmpNeedsEnrichment = tmpExistingMovie.getDuration() == null
@@ -229,7 +230,8 @@ public class LibraryScanService {
               LOGGER.log(Level.INFO, "Enriched existing movie: {0}",
                   tmpExistingMovie.getTitle());
             } else {
-              // Even if it didn't need full enrichment, we save it because the rating might have changed
+              // Even if it didn't need full enrichment, we save it because the
+              // rating might have changed
               movieRepository.update(tmpExistingMovie);
               LOGGER.log(Level.INFO, "Updated rating for existing movie: {0}",
                   tmpExistingMovie.getTitle());

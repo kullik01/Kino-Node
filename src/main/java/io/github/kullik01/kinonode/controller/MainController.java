@@ -37,6 +37,10 @@
  */
 package io.github.kullik01.kinonode.controller;
 
+import javafx.application.Platform;
+import javafx.util.Duration;
+
+
 import atlantafx.base.controls.ToggleSwitch;
 import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
@@ -111,16 +115,14 @@ public class MainController {
       btnThemeToggle.setText("🌙");
       if (btnThemeToggle.getTooltip() != null) {
         btnThemeToggle.getTooltip().setText("Dark Mode");
-        btnThemeToggle.getTooltip()
-            .setShowDelay(javafx.util.Duration.millis(250));
+        btnThemeToggle.getTooltip().setShowDelay(Duration.millis(250));
       }
     } else {
       btnThemeToggle.setSelected(false);
       btnThemeToggle.setText("☀");
       if (btnThemeToggle.getTooltip() != null) {
         btnThemeToggle.getTooltip().setText("Light Mode");
-        btnThemeToggle.getTooltip()
-            .setShowDelay(javafx.util.Duration.millis(250));
+        btnThemeToggle.getTooltip().setShowDelay(Duration.millis(250));
       }
     }
 
@@ -151,7 +153,7 @@ public class MainController {
     preloadView("IMDb", "/io/github/kullik01/kinonode/fxml/ImdbView.fxml");
 
     // Apply application logo cursor globally to scene
-    javafx.application.Platform.runLater(() -> {
+    Platform.runLater(() -> {
       javafx.scene.Scene tmpScene = rootPane.getScene();
       if (tmpScene != null) {
         tmpScene.setCursor(tmpLogoCursor);

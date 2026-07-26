@@ -6,6 +6,9 @@ import javafx.stage.Stage;
 import javafx.application.Platform;
 
 public class GradientTest extends Application {
+  private static final java.util.logging.Logger LOGGER =
+      java.util.logging.Logger.getLogger(GradientTest.class.getName());
+
   public static void main(String[] args) {
     launch(args);
   }
@@ -17,7 +20,7 @@ public class GradientTest extends Application {
         "M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z");
     tmpIcon.setStyle(
         "-fx-fill: linear-gradient(to right, #ED8B00 50%, #666666 50%);");
-    System.out.println("Gradient test compiled and ran.");
+    LOGGER.info("Gradient test compiled and ran.");
     Platform.exit();
   }
 }

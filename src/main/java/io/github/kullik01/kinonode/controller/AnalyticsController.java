@@ -37,6 +37,12 @@
  */
 package io.github.kullik01.kinonode.controller;
 
+import javafx.scene.Node;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.util.Duration;
+
+
 import io.github.kullik01.kinonode.model.Movie;
 import io.github.kullik01.kinonode.model.Watchlist;
 import io.github.kullik01.kinonode.service.AppContext;
@@ -311,12 +317,12 @@ public class AnalyticsController implements Refreshable {
   private void installChartTooltip(XYChart.Data<String, Number> data,
       String tooltipText) {
     Runnable attacher = () -> {
-      javafx.scene.Node node = data.getNode();
+      Node node = data.getNode();
       if (node != null) {
         javafx.scene.control.Tooltip tmpTooltip =
             new javafx.scene.control.Tooltip(tooltipText);
-        tmpTooltip.setShowDelay(javafx.util.Duration.millis(150));
-        tmpTooltip.setShowDuration(javafx.util.Duration.seconds(15));
+        tmpTooltip.setShowDelay(Duration.millis(150));
+        tmpTooltip.setShowDuration(Duration.seconds(15));
         tmpTooltip.getStyleClass().add("chart-popup-tooltip");
         javafx.scene.control.Tooltip.install(node, tmpTooltip);
 
@@ -458,7 +464,7 @@ public class AnalyticsController implements Refreshable {
       tmpName
           .setStyle("-fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
 
-      javafx.scene.layout.Region tmpSpacer = new javafx.scene.layout.Region();
+      Region tmpSpacer = new Region();
       HBox.setHgrow(tmpSpacer, javafx.scene.layout.Priority.ALWAYS);
 
       int count = entry.getValue();
@@ -468,13 +474,12 @@ public class AnalyticsController implements Refreshable {
       tmpHeader.getChildren().addAll(tmpBadge, tmpName, tmpSpacer, tmpCount);
 
       // Relative visual bar track & fill
-      javafx.scene.layout.StackPane tmpTrack =
-          new javafx.scene.layout.StackPane();
+      StackPane tmpTrack = new StackPane();
       tmpTrack.getStyleClass().add("ranking-bar-track");
       tmpTrack.setMaxWidth(Double.MAX_VALUE);
 
       double tmpRatio = (double) count / tmpMaxCount;
-      javafx.scene.layout.Region tmpFill = new javafx.scene.layout.Region();
+      Region tmpFill = new Region();
       tmpFill.getStyleClass().add("ranking-bar-fill");
       if (rank == 1) {
         tmpFill.getStyleClass().add("ranking-bar-fill-top1");
@@ -487,8 +492,7 @@ public class AnalyticsController implements Refreshable {
           .bind(tmpTrack.widthProperty().multiply(tmpRatio));
 
       tmpTrack.getChildren().add(tmpFill);
-      javafx.scene.layout.StackPane.setAlignment(tmpFill,
-          javafx.geometry.Pos.CENTER_LEFT);
+      StackPane.setAlignment(tmpFill, javafx.geometry.Pos.CENTER_LEFT);
 
       tmpCard.getChildren().addAll(tmpHeader, tmpTrack);
 
@@ -496,8 +500,8 @@ public class AnalyticsController implements Refreshable {
           personMovies.getOrDefault(entry.getKey(), Collections.emptyList());
       javafx.scene.control.Tooltip tmpTooltip =
           new javafx.scene.control.Tooltip(buildMovieListText(titles));
-      tmpTooltip.setShowDelay(javafx.util.Duration.millis(150));
-      tmpTooltip.setShowDuration(javafx.util.Duration.seconds(15));
+      tmpTooltip.setShowDelay(Duration.millis(150));
+      tmpTooltip.setShowDuration(Duration.seconds(15));
       tmpTooltip.getStyleClass().add("chart-popup-tooltip");
       javafx.scene.control.Tooltip.install(tmpCard, tmpTooltip);
 

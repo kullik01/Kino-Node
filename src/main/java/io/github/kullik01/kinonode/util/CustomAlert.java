@@ -37,6 +37,9 @@
  */
 package io.github.kullik01.kinonode.util;
 
+import javafx.scene.Node;
+
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -72,7 +75,8 @@ public class CustomAlert {
    */
   public static void showInformation(Window owner, String title, String header,
       String content) {
-    showInformation(owner, title, header, content, "/io/github/kullik01/kinonode/images/info_icon.png");
+    showInformation(owner, title, header, content,
+        "/io/github/kullik01/kinonode/images/info_icon.png");
   }
 
   public static void showInformation(Window owner, String title, String header,
@@ -135,12 +139,12 @@ public class CustomAlert {
     tmpTextLabel.setWrapText(true);
     tmpTextLabel.setStyle("-fx-text-fill: -color-fg-muted;");
     tmpTextLabel.setPrefWidth(350);
-    tmpTextLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+    tmpTextLabel.setMinHeight(Region.USE_PREF_SIZE);
 
-    javafx.scene.Node contentNode = tmpTextLabel;
+    Node contentNode = tmpTextLabel;
     if (iconPath != null && !iconPath.isEmpty()) {
       try {
-        javafx.scene.Node tmpIconView = createIconNode(iconPath);
+        Node tmpIconView = createIconNode(iconPath);
         HBox tmpIconBox = new HBox(15, tmpTextLabel, tmpIconView);
         tmpIconBox.setAlignment(Pos.CENTER_LEFT);
         contentNode = tmpIconBox;
@@ -155,7 +159,7 @@ public class CustomAlert {
     HBox tmpButtonBox = new HBox(tmpOkButton);
     tmpButtonBox.setAlignment(Pos.CENTER_RIGHT);
 
-    javafx.scene.layout.Region tmpVSpacer = new javafx.scene.layout.Region();
+    Region tmpVSpacer = new Region();
     javafx.scene.layout.VBox.setVgrow(tmpVSpacer,
         javafx.scene.layout.Priority.ALWAYS);
 
@@ -257,12 +261,12 @@ public class CustomAlert {
     tmpTextLabel.setWrapText(true);
     tmpTextLabel.setStyle("-fx-text-fill: -color-fg-muted;");
     tmpTextLabel.setPrefWidth(350);
-    tmpTextLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+    tmpTextLabel.setMinHeight(Region.USE_PREF_SIZE);
 
-    javafx.scene.Node contentNode = tmpTextLabel;
+    Node contentNode = tmpTextLabel;
     if (iconPath != null && !iconPath.isEmpty()) {
       try {
-        javafx.scene.Node tmpIconView = createIconNode(iconPath);
+        Node tmpIconView = createIconNode(iconPath);
         HBox tmpIconBox = new HBox(15, tmpTextLabel, tmpIconView);
         tmpIconBox.setAlignment(Pos.CENTER_LEFT);
         contentNode = tmpIconBox;
@@ -284,7 +288,7 @@ public class CustomAlert {
     HBox tmpButtonBox = new HBox(10, tmpCancelButton, tmpOkButton);
     tmpButtonBox.setAlignment(Pos.CENTER_RIGHT);
 
-    javafx.scene.layout.Region tmpVSpacer = new javafx.scene.layout.Region();
+    Region tmpVSpacer = new Region();
     javafx.scene.layout.VBox.setVgrow(tmpVSpacer,
         javafx.scene.layout.Priority.ALWAYS);
 
@@ -385,12 +389,12 @@ public class CustomAlert {
     tmpTextLabel.setWrapText(true);
     tmpTextLabel.setStyle("-fx-text-fill: -color-fg-muted;");
     tmpTextLabel.setPrefWidth(350);
-    tmpTextLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+    tmpTextLabel.setMinHeight(Region.USE_PREF_SIZE);
 
-    javafx.scene.Node contentNode = tmpTextLabel;
+    Node contentNode = tmpTextLabel;
     if (iconPath != null && !iconPath.isEmpty()) {
       try {
-        javafx.scene.Node tmpIconView = createIconNode(iconPath);
+        Node tmpIconView = createIconNode(iconPath);
         HBox tmpIconBox = new HBox(15, tmpTextLabel, tmpIconView);
         tmpIconBox.setAlignment(Pos.CENTER_LEFT);
         contentNode = tmpIconBox;
@@ -405,7 +409,7 @@ public class CustomAlert {
     HBox tmpButtonBox = new HBox(tmpOkButton);
     tmpButtonBox.setAlignment(Pos.CENTER_RIGHT);
 
-    javafx.scene.layout.Region tmpVSpacer = new javafx.scene.layout.Region();
+    Region tmpVSpacer = new Region();
     javafx.scene.layout.VBox.setVgrow(tmpVSpacer,
         javafx.scene.layout.Priority.ALWAYS);
 
@@ -444,23 +448,25 @@ public class CustomAlert {
     tmpStage.showAndWait();
   }
 
-  private static javafx.scene.Node createIconNode(String iconPath) {
+  private static Node createIconNode(String iconPath) {
     if (iconPath.contains("info_icon")) {
       javafx.scene.shape.SVGPath svg = new javafx.scene.shape.SVGPath();
-      svg.setContent("M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z");
+      svg.setContent(
+          "M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z");
       svg.setStyle("-fx-fill: #2178dd;");
       svg.setScaleX(4.0);
       svg.setScaleY(4.0);
-      javafx.scene.layout.StackPane pane = new javafx.scene.layout.StackPane(svg);
+      StackPane pane = new StackPane(svg);
       pane.setPrefSize(96, 96);
       return pane;
     } else if (iconPath.contains("removal_icon")) {
       javafx.scene.shape.SVGPath svg = new javafx.scene.shape.SVGPath();
-      svg.setContent("M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z");
+      svg.setContent(
+          "M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z");
       svg.setStyle("-fx-fill: #DC3545;");
       svg.setScaleX(4.0);
       svg.setScaleY(4.0);
-      javafx.scene.layout.StackPane pane = new javafx.scene.layout.StackPane(svg);
+      StackPane pane = new StackPane(svg);
       pane.setPrefSize(96, 96);
       return pane;
     } else {

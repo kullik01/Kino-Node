@@ -37,6 +37,12 @@
  */
 package io.github.kullik01.kinonode.util;
 
+import javafx.application.Platform;
+import javafx.scene.Node;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+
+
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -143,8 +149,7 @@ public class CursorUtils {
             adjusting = true;
             try {
               Window activeOwner = owner;
-              if (activeOwner == null
-                  && window instanceof javafx.stage.Stage stageWin) {
+              if (activeOwner == null && window instanceof Stage stageWin) {
                 activeOwner = stageWin.getOwner();
               }
               if (activeOwner == null) {
@@ -186,8 +191,7 @@ public class CursorUtils {
     // Initial check to attach owner listeners
     Runnable attachOwnerListeners = () -> {
       Window activeOwner = owner;
-      if (activeOwner == null
-          && window instanceof javafx.stage.Stage stageWin) {
+      if (activeOwner == null && window instanceof Stage stageWin) {
         activeOwner = stageWin.getOwner();
       }
       if (activeOwner == null) {
@@ -234,16 +238,16 @@ public class CursorUtils {
    * Applies the high-resolution application logo cursor to a dialog window and
    * centers it over the owner window or screen.
    *
-   * @param dialog the JavaFX {@link javafx.scene.control.Dialog} to configure
+   * @param dialog the JavaFX {@link Dialog} to configure
    */
-  public static void applyCursor(javafx.scene.control.Dialog<?> dialog) {
+  public static void applyCursor(Dialog<?> dialog) {
     if (dialog != null && dialog.getDialogPane() != null) {
       try {
         dialog.initStyle(javafx.stage.StageStyle.TRANSPARENT);
       } catch (Exception ignored) {
       }
 
-      javafx.scene.Node pane = dialog.getDialogPane();
+      Node pane = dialog.getDialogPane();
 
       try {
         String themeCss = CursorUtils.class
@@ -281,12 +285,10 @@ public class CursorUtils {
                 dialog.getDialogPane().getScene().getWindow();
             centerOnOwnerOrScreen(window, dialog.getOwner());
           }
-          javafx.application.Platform.runLater(() -> {
+          Platform.runLater(() -> {
             if (dialog.getDialogPane() != null) {
-              for (javafx.scene.control.ButtonType type : dialog.getDialogPane()
-                  .getButtonTypes()) {
-                javafx.scene.Node button =
-                    dialog.getDialogPane().lookupButton(type);
+              for (ButtonType type : dialog.getDialogPane().getButtonTypes()) {
+                Node button = dialog.getDialogPane().lookupButton(type);
                 if (button != null) {
                   if (!button.getStyleClass().contains("button-primary")) {
                     button.getStyleClass().add("button-primary");
@@ -306,9 +308,9 @@ public class CursorUtils {
    * Applies the high-resolution application logo cursor to a stage window and
    * centers it over the owner window or screen.
    *
-   * @param stage the JavaFX {@link javafx.stage.Stage} to configure
+   * @param stage the JavaFX {@link Stage} to configure
    */
-  public static void applyCursor(javafx.stage.Stage stage) {
+  public static void applyCursor(Stage stage) {
     if (stage != null) {
       if (stage.getScene() != null) {
         stage.getScene().setCursor(getAppLogoCursor());
