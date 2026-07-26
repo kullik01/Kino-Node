@@ -508,6 +508,7 @@ public class LibraryController implements Refreshable {
       progressBar.setProgress(0);
       progressArea.setVisible(false);
       refresh();
+      AppContext.getInstance().notifyLibraryChanged();
 
       CustomAlert.showInformation(gridPane.getScene().getWindow(),
           "Sync Completed", "Sync Completed Successfully",

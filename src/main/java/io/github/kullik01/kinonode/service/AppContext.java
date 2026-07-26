@@ -37,9 +37,13 @@
  */
 package io.github.kullik01.kinonode.service;
 
+import io.github.kullik01.kinonode.controller.MainController;
 import io.github.kullik01.kinonode.repository.MovieRepository;
 import io.github.kullik01.kinonode.repository.SettingsRepository;
 import io.github.kullik01.kinonode.repository.WatchlistRepository;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import javafx.application.Platform;
 
 /**
  * Registry/Context containing all singletons and repositories. Simplifies
@@ -56,6 +60,18 @@ public class AppContext {
   private final LibraryScanService libraryScanService;
   private final PlaybackService playbackService;
   private final AnalyticsService analyticsService;
+  private final List<Runnable> libraryChangeListeners =
+      new CopyOnWriteArrayList<>();
+
+  public void addLibraryChangeListener(Runnable listener) {
+    libraryChangeListeners.add(listener);
+  }
+
+  public void notifyLibraryChanged() {
+    for (Runnable listener : libraryChangeListeners) {
+      Platform.runLater(listener);
+    }
+  }
 
   private AppContext() {
     this.databaseService = new DatabaseService();
@@ -146,26 +162,23 @@ public class AppContext {
     return analyticsService;
   }
 
-  private io.github.kullik01.kinonode.controller.MainController mainController;
+  private MainController mainController;
 
   /**
    * Gets the main controller instance.
    *
-   * @return the {@link io.github.kullik01.kinonode.controller.MainController}
-   *         instance
+   * @return the {@link MainController} instance
    */
-  public io.github.kullik01.kinonode.controller.MainController getMainController() {
+  public MainController getMainController() {
     return mainController;
   }
 
   /**
    * Sets the main controller instance.
    *
-   * @param mainController the
-   *        {@link io.github.kullik01.kinonode.controller.MainController} to set
+   * @param mainController the {@link MainController} to set
    */
-  public void setMainController(
-      io.github.kullik01.kinonode.controller.MainController mainController) {
+  public void setMainController(MainController mainController) {
     this.mainController = mainController;
   }
 

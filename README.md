@@ -18,7 +18,8 @@ KinoNode is a modern, lightweight, personal movie library manager built on a sol
 * **Embedded IMDb Web Browser:** A built-in, tab-integrated browser preloaded on startup, complete with custom back, forward, reload, and home buttons for seamless movie exploration.
 * **YouTube Trailer Integration:** Automatically scrapes and saves official YouTube trailer URLs, allowing you to watch them in your default web browser with a single click.
 * **Clapperboard Rating System:** Rate your favorite films on a sliding 0–10 scale using custom film-reel clapperboard graphics.
-* **Playlists & Watchlists:** Build, rename, and manage multiple watchlists. Drag, reorder, or organize movies exactly the way you want them.
+* **Smart Watchlists & Dynamic Queries:** Build automated watchlists using an interactive rule builder. Define conditions (e.g., Year > 2000, IMDb Rating > 8.0) and watch the list instantly populate. The UI reacts in real-time, automatically updating smart watchlists whenever new movies match or metadata changes.
+* **Playlists & Watchlists:** Build, rename, and manage multiple standard watchlists. Drag, reorder, or organize movies exactly the way you want them.
 * **Library Analytics Dashboard:** A dedicated interactive Analytics view displaying real-time library KPIs (Total Movies, Average Rating, Year Span, Total Watchlists, Top Genre, and Unique Directors count), dynamic decade distribution bar charts, and clapperboard rating frequency charts.
 * **Top Cast & Crew Leaderboards:** Automatically calculates and displays ranked leaderboards of your collection's most featured Directors and Actors/Cast members.
 * **Catalog Export & HTML Reports:** One-click portability allowing you to export your entire movie catalog to structured **JSON**, spreadsheet-ready **CSV**, or generate a styled, standalone **HTML Collection Report** that can be opened in any web browser.

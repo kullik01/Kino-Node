@@ -41,8 +41,10 @@ import java.awt.Desktop;
 
 
 import io.github.kullik01.kinonode.service.AppContext;
+import io.github.kullik01.kinonode.model.Watchlist;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -163,10 +165,16 @@ public class AboutController implements Refreshable {
       lblMovieCount
           .setText(tmpMovieCount + (tmpMovieCount == 1 ? " movie" : " movies"));
 
-      int tmpWatchlistCount =
-          AppContext.getInstance().getWatchlistRepository().findAll().size();
+      List<Watchlist> allWatchlists =
+          AppContext.getInstance().getWatchlistRepository().findAll();
+      int tmpWatchlistCount = allWatchlists.size();
+      long tmpSmartCount =
+          allWatchlists.stream().filter(Watchlist::isSmart).count();
+      long tmpRegularCount = tmpWatchlistCount - tmpSmartCount;
+
       lblWatchlistCount.setText(tmpWatchlistCount
-          + (tmpWatchlistCount == 1 ? " watchlist" : " watchlists"));
+          + (tmpWatchlistCount == 1 ? " watchlist (" : " watchlists (")
+          + tmpRegularCount + " standard, " + tmpSmartCount + " smart)");
     } catch (Exception tmpException) {
       lblMovieCount.setText("Unknown");
       lblWatchlistCount.setText("Unknown");

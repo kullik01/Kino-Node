@@ -656,7 +656,15 @@ public class MovieDetailController implements Refreshable {
     TextField tmpTextField = new TextField(defaultText);
     tmpTextField.setPromptText("Watchlist Name");
 
-    tmpVbox.getChildren().addAll(tmpErrorLabel, tmpTextField);
+    Label tmpAsciiInfo = new Label(
+        "Only ASCII characters allowed: standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space).");
+    tmpAsciiInfo.setStyle(
+        "-fx-text-fill: gray; -fx-font-size: 12px; -fx-padding: 10 0 5 0;");
+    tmpAsciiInfo.setWrapText(true);
+    tmpAsciiInfo.setPrefWidth(430);
+    tmpAsciiInfo.setMinHeight(Region.USE_PREF_SIZE);
+
+    tmpVbox.getChildren().addAll(tmpErrorLabel, tmpTextField, tmpAsciiInfo);
     tmpDialog.getDialogPane().setContent(tmpVbox);
 
     Node tmpOkButton = tmpDialog.getDialogPane().lookupButton(ButtonType.OK);
@@ -680,10 +688,8 @@ public class MovieDetailController implements Refreshable {
           }
           // Enforce ASCII-only characters in watchlist names
           if (!newValue.matches("\\A\\p{ASCII}*\\z")) {
-            tmpErrorLabel.setText(
-                "The text you entered is not ASCII code. Only standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space) can be used.");
-            tmpErrorLabel.setVisible(true);
-            tmpOkButton.setDisable(true);
+            tmpTextField.setText(oldValue);
+            return;
           } else {
             boolean tmpDuplicate = false;
             List<Watchlist> tmpWatchlists = watchlistRepository.findAll();
@@ -935,8 +941,16 @@ public class MovieDetailController implements Refreshable {
       }));
     }
 
+    Label tmpAsciiInfo = new Label(
+        "Only ASCII characters allowed: standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space).");
+    tmpAsciiInfo.setStyle(
+        "-fx-text-fill: gray; -fx-font-size: 12px; -fx-padding: 10 0 5 0;");
+    tmpAsciiInfo.setWrapText(true);
+    tmpAsciiInfo.setPrefWidth(430);
+    tmpAsciiInfo.setMinHeight(Region.USE_PREF_SIZE);
+
     tmpVbox.getChildren().addAll(new Label("Enter the new " + fieldName + ":"),
-        tmpErrorLabel, tmpInputField);
+        tmpErrorLabel, tmpInputField, tmpAsciiInfo);
     tmpDialog.getDialogPane().setContent(tmpVbox);
 
     Node tmpOkButton = tmpDialog.getDialogPane().lookupButton(ButtonType.OK);
@@ -949,10 +963,8 @@ public class MovieDetailController implements Refreshable {
 
           // Require input content to be ASCII only
           if (!newValue.matches("\\A\\p{ASCII}*\\z")) {
-            tmpErrorLabel.setText(
-                "The text you entered is not ASCII code. Only standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space) can be used.");
-            tmpErrorLabel.setVisible(true);
-            tmpOkButton.setDisable(true);
+            tmpInputField.setText(oldValue);
+            return;
           } else if (tmpIsUnchanged) {
             if (!tmpDefaultText.isEmpty()) {
               tmpErrorLabel.setText("This is the current " + fieldName
@@ -1122,9 +1134,17 @@ public class MovieDetailController implements Refreshable {
     TextField tmpTextField = new TextField(tmpDefaultText);
     tmpTextField.setPromptText("https://www.youtube.com/watch?v=...");
 
+    Label tmpAsciiInfo = new Label(
+        "Only ASCII characters allowed: standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space).");
+    tmpAsciiInfo.setStyle(
+        "-fx-text-fill: gray; -fx-font-size: 12px; -fx-padding: 10 0 5 0;");
+    tmpAsciiInfo.setWrapText(true);
+    tmpAsciiInfo.setPrefWidth(430);
+    tmpAsciiInfo.setMinHeight(Region.USE_PREF_SIZE);
+
     tmpVbox.getChildren().addAll(
         new Label("Enter the new YouTube Trailer Link:"), tmpErrorLabel,
-        tmpTextField);
+        tmpTextField, tmpAsciiInfo);
     tmpDialog.getDialogPane().setContent(tmpVbox);
 
     Node tmpOkButton = tmpDialog.getDialogPane().lookupButton(ButtonType.OK);
@@ -1132,15 +1152,14 @@ public class MovieDetailController implements Refreshable {
 
     tmpTextField.textProperty()
         .addListener((observable, oldValue, newValue) -> {
+          if (!newValue.matches("\\A\\p{ASCII}*\\z")) {
+            tmpTextField.setText(oldValue);
+            return;
+          }
           String tmpUrl = newValue.trim();
           boolean tmpIsUnchanged = tmpUrl.equalsIgnoreCase(tmpDefaultText);
 
-          if (!newValue.matches("\\A\\p{ASCII}*\\z")) {
-            tmpErrorLabel.setText(
-                "The text you entered is not ASCII code. Only standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space) can be used.");
-            tmpErrorLabel.setVisible(true);
-            tmpOkButton.setDisable(true);
-          } else if (tmpIsUnchanged && !tmpDefaultText.isEmpty()) {
+          if (tmpIsUnchanged && !tmpDefaultText.isEmpty()) {
             tmpErrorLabel.setText(
                 "This is the current YouTube link and must be updated by a new one.");
             tmpErrorLabel.setVisible(true);
@@ -1302,6 +1321,7 @@ public class MovieDetailController implements Refreshable {
 
     movieRepository.update(movie);
     showStatus("Movie details saved successfully.");
+    AppContext.getInstance().notifyLibraryChanged();
     return true;
   }
 

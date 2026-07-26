@@ -53,5 +53,6 @@ module io.github.kullik01.kinonode {
   opens io.github.kullik01.kinonode.controller to
       javafx.fxml;
   opens io.github.kullik01.kinonode.model to
-      javafx.base;
+      javafx.base,
+      com.google.gson;
 }

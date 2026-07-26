@@ -41,9 +41,9 @@ import javafx.scene.Node;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
-
 import io.github.kullik01.kinonode.model.Movie;
 import io.github.kullik01.kinonode.model.Watchlist;
+import javafx.application.Platform;
 import io.github.kullik01.kinonode.repository.WatchlistRepository;
 import io.github.kullik01.kinonode.service.AppContext;
 import io.github.kullik01.kinonode.model.SmartRule;
@@ -105,6 +105,12 @@ public class WatchlistsController implements Refreshable {
   @FXML
   public void initialize() {
     watchlistRepository = AppContext.getInstance().getWatchlistRepository();
+
+    // Subscribe to reactive library updates to automatically refresh smart
+    // watchlists
+    AppContext.getInstance().addLibraryChangeListener(() -> {
+      Platform.runLater(this::refresh);
+    });
 
     // Custom Cell Factory for Watchlists
     lstWatchlists.setCellFactory(tmpListView -> new ListCell<>() {
@@ -332,8 +338,8 @@ public class WatchlistsController implements Refreshable {
     tmpDialog.setTitle(title);
     tmpDialog.setHeaderText(header);
 
-    tmpDialog.getDialogPane().setPrefSize(480, 280);
-    tmpDialog.getDialogPane().setMinSize(480, 280);
+    tmpDialog.getDialogPane().setPrefSize(480, Region.USE_COMPUTED_SIZE);
+    tmpDialog.getDialogPane().setMinSize(480, Region.USE_COMPUTED_SIZE);
 
     Stage tmpStage = (Stage) tmpDialog.getDialogPane().getScene().getWindow();
     tmpStage.getIcons().add(new javafx.scene.image.Image(getClass()
@@ -354,8 +360,23 @@ public class WatchlistsController implements Refreshable {
 
     TextField tmpTextField = new TextField(defaultText);
     tmpTextField.setPromptText("Watchlist Name");
+    tmpTextField.textProperty()
+        .addListener((observable, oldValue, newValue) -> {
+          if (newValue != null && (newValue.length() > 33
+              || !newValue.matches("\\A\\p{ASCII}*\\z"))) {
+            tmpTextField.setText(oldValue);
+          }
+        });
 
-    tmpVbox.getChildren().addAll(tmpErrorLabel, tmpTextField);
+    Label tmpAsciiInfo = new Label(
+        "Only ASCII characters allowed: standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space).");
+    tmpAsciiInfo.setStyle(
+        "-fx-text-fill: gray; -fx-font-size: 12px; -fx-padding: 10 0 5 0;");
+    tmpAsciiInfo.setWrapText(true);
+    tmpAsciiInfo.setPrefWidth(430);
+    tmpAsciiInfo.setMinHeight(Region.USE_PREF_SIZE);
+
+    tmpVbox.getChildren().addAll(tmpErrorLabel, tmpTextField, tmpAsciiInfo);
     tmpDialog.getDialogPane().setContent(tmpVbox);
 
     Node tmpOkButton = tmpDialog.getDialogPane().lookupButton(tmpOkButtonType);
@@ -567,8 +588,8 @@ public class WatchlistsController implements Refreshable {
     tmpDialog.setTitle("New Smart Watchlist");
     tmpDialog.setHeaderText("Create a dynamic watchlist based on rules");
 
-    tmpDialog.getDialogPane().setPrefSize(480, 320);
-    tmpDialog.getDialogPane().setMinSize(480, 320);
+    tmpDialog.getDialogPane().setPrefSize(480, Region.USE_COMPUTED_SIZE);
+    tmpDialog.getDialogPane().setMinSize(480, Region.USE_COMPUTED_SIZE);
 
     Stage tmpStage = (Stage) tmpDialog.getDialogPane().getScene().getWindow();
     tmpStage.getIcons().add(new javafx.scene.image.Image(getClass()
@@ -597,6 +618,7 @@ public class WatchlistsController implements Refreshable {
         "Year");
     tmpFieldComboBox.getSelectionModel().selectFirst();
 
+    TextField tmpValueField = new TextField();
     ComboBox<String> tmpOperatorComboBox = new ComboBox<>();
     Runnable tmpUpdateOperators = () -> {
       String tmpSelectedField = tmpFieldComboBox.getValue();
@@ -604,6 +626,12 @@ public class WatchlistsController implements Refreshable {
       boolean tmpIsNumeric = "IMDb Rating".equals(tmpSelectedField)
           || "Year".equals(tmpSelectedField)
           || "Duration".equals(tmpSelectedField);
+
+      if (tmpIsNumeric) {
+        tmpValueField.setPromptText("Value");
+      } else {
+        tmpValueField.setPromptText("Text");
+      }
 
       List<String> tmpAllowedOperators;
       if (tmpIsNumeric) {
@@ -624,13 +652,10 @@ public class WatchlistsController implements Refreshable {
     };
     tmpUpdateOperators.run();
 
-    TextField tmpValueField = new TextField();
-    tmpValueField.setPromptText("Value");
-
     // Proactive input restriction for Name field
     tmpNameField.textProperty()
         .addListener((observable, oldValue, newValue) -> {
-          if (newValue != null && (newValue.length() > 30
+          if (newValue != null && (newValue.length() > 33
               || !newValue.matches("\\A\\p{ASCII}*\\z"))) {
             tmpNameField.setText(oldValue);
           }
@@ -640,6 +665,10 @@ public class WatchlistsController implements Refreshable {
     tmpValueField.textProperty()
         .addListener((observable, oldValue, newValue) -> {
           if (newValue == null || newValue.isEmpty()) {
+            return;
+          }
+          if (newValue.length() > 33) {
+            tmpValueField.setText(oldValue);
             return;
           }
           String tmpField = tmpFieldComboBox.getValue();
@@ -676,8 +705,17 @@ public class WatchlistsController implements Refreshable {
 
     tmpRuleBox.getChildren().addAll(tmpFieldComboBox, tmpOperatorComboBox,
         tmpValueField);
+
+    Label tmpAsciiInfo = new Label(
+        "Only ASCII characters allowed: standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space).");
+    tmpAsciiInfo.setStyle(
+        "-fx-text-fill: gray; -fx-font-size: 12px; -fx-padding: 10 0 5 0;");
+    tmpAsciiInfo.setWrapText(true);
+    tmpAsciiInfo.setPrefWidth(430);
+    tmpAsciiInfo.setMinHeight(Region.USE_PREF_SIZE);
+
     tmpVbox.getChildren().addAll(tmpErrorLabel, new Label("Name:"),
-        tmpNameField, new Label("Rule:"), tmpRuleBox);
+        tmpNameField, new Label("Rule:"), tmpRuleBox, tmpAsciiInfo);
     tmpDialog.getDialogPane().setContent(tmpVbox);
 
     Node tmpOkButton = tmpDialog.getDialogPane().lookupButton(tmpOkButtonType);

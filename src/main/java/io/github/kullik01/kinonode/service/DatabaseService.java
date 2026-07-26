@@ -213,6 +213,17 @@ public class DatabaseService {
         }
       }
 
+      // Performance Optimization: Create Indexes for faster Smart Watchlist
+      // querying
+      tmpStatement.execute(
+          "CREATE INDEX IF NOT EXISTS idx_movies_year ON movies(year);");
+      tmpStatement.execute(
+          "CREATE INDEX IF NOT EXISTS idx_movies_rating ON movies(rating);");
+      tmpStatement.execute(
+          "CREATE INDEX IF NOT EXISTS idx_movies_raw_rating ON movies(raw_rating);");
+      tmpStatement.execute(
+          "CREATE INDEX IF NOT EXISTS idx_movies_genre ON movies(genre);");
+
       LOGGER.info("Database tables verified/created successfully.");
     }
   }
