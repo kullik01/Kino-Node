@@ -57,6 +57,16 @@ import javafx.stage.Stage;
  */
 public class KinoNodeApp extends Application {
 
+  private static KinoNodeApp instance;
+
+  public KinoNodeApp() {
+    instance = this;
+  }
+
+  public static KinoNodeApp getInstance() {
+    return instance;
+  }
+
   /**
    * Starts the primary stage of the JavaFX application. This method initializes
    * the application context, reads the user's preferred theme, configures the

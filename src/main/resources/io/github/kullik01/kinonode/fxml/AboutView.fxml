@@ -56,17 +56,22 @@
     </padding>
 
     <!-- Header Section -->
-    <HBox spacing="20.0" alignment="CENTER_LEFT">
-        <ImageView fitHeight="64.0" fitWidth="64.0" preserveRatio="true" smooth="true">
+    <VBox spacing="10.0" alignment="CENTER">
+        <ImageView fitHeight="100.0" fitWidth="100.0" preserveRatio="true" smooth="true">
             <image>
-                <Image url="@../images/logo.png" requestedWidth="128" requestedHeight="128" smooth="true" />
+                <Image url="@../images/logo.png" requestedWidth="200" requestedHeight="200" smooth="true" />
             </image>
         </ImageView>
-        <VBox spacing="5.0">
-            <Label text="About KinoNode" styleClass="detail-title" />
-            <Label text="Personal Movie Library Manager" style="-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;" />
-        </VBox>
-    </HBox>
+        <Label text="KinoNode" styleClass="title-1" />
+        <Label text="Personal Movie Library Manager" styleClass="text-muted" style="-fx-font-size: 16px;" />
+        
+        <HBox spacing="15.0" alignment="CENTER">
+            <padding><Insets top="15.0" bottom="15.0"/></padding>
+            <Button text="GitHub Repository" onAction="#openRepository" styleClass="accent" style="-fx-text-fill: white;" />
+            <Button text="Report a Bug" onAction="#openIssueTracker" style="-fx-text-fill: white;" />
+            <Button text="Check for Updates" onAction="#checkForUpdates" style="-fx-text-fill: white;" />
+        </HBox>
+    </VBox>
 
     <!-- Cards Row -->
     <HBox spacing="20.0" alignment="TOP_LEFT">
@@ -113,6 +118,7 @@
 
                 <Label text="Operating System:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                 <Label fx:id="lblOsDetails" text="Unknown" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
             </GridPane>
             
             <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
@@ -123,6 +129,7 @@
                 <Label text="• JavaFX 25 — UI framework" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" />
                 <Label text="• SQLite — Data persistence" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" />
                 <Label text="• AtlantaFX — Modern CSS theme" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" />
+                <Label text="• Google Gson — JSON parsing" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" />
             </VBox>
         </VBox>
         
@@ -144,8 +151,11 @@
                 <Label text="Database Size:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                 <Label fx:id="lblDbSize" text="Unknown" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                <Label text="Active Watchlists:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                <Label fx:id="lblWatchlistCount" text="0 watchlists" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <Label text="Regular Watchlists:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <Label fx:id="lblRegularWatchlistCount" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                <Label text="Smart Watchlists:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <Label fx:id="lblSmartWatchlistCount" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
             </GridPane>
             
@@ -164,7 +174,7 @@
                 <TextField fx:id="lblPlayerPath" text="None" editable="false" focusTraversable="false"
                           style="-fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-text-fill: -color-fg-default; -fx-control-inner-background: -color-bg-default; -fx-background-radius: 6px; -fx-border-color: -color-border-default; -fx-border-radius: 6px;"
                           HBox.hgrow="ALWAYS" maxWidth="Infinity" />
-                <Button onAction="#openPlayerLocation" styleClass="button-secondary" text="📂" minWidth="-Infinity">
+                <Button onAction="#openPlayerLocation" styleClass="button-secondary" text="📂" minWidth="-Infinity" style="-fx-text-fill: white;">
                     <tooltip><Tooltip showDelay="250ms" text="Open Location"/></tooltip>
                 </Button>
             </HBox>
@@ -190,7 +200,7 @@
                 <TextField fx:id="lblDbPath" text="" editable="false" focusTraversable="false"
                           style="-fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-text-fill: -color-fg-default; -fx-control-inner-background: -color-bg-default; -fx-background-radius: 6px; -fx-border-color: -color-border-default; -fx-border-radius: 6px;"
                           HBox.hgrow="ALWAYS" maxWidth="Infinity" />
-                <Button onAction="#openDatabaseLocation" styleClass="button-secondary" text="📂" minWidth="-Infinity">
+                <Button onAction="#openDatabaseLocation" styleClass="button-secondary" text="📂" minWidth="-Infinity" style="-fx-text-fill: white;">
                     <tooltip><Tooltip showDelay="250ms" text="Open Location"/></tooltip>
                 </Button>
             </HBox>

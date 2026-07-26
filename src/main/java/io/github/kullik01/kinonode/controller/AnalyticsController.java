@@ -173,9 +173,15 @@ public class AnalyticsController implements Refreshable {
               ? tmpMovie.getTitle()
               : "Untitled";
 
-      if (tmpMovie.getRating() != null) {
+      if (tmpMovie.getRawRating() != null) {
+        tmpTotalRating += tmpMovie.getRawRating();
+        tmpRatedCount++;
+      } else if (tmpMovie.getRating() != null) {
         tmpTotalRating += tmpMovie.getRating();
         tmpRatedCount++;
+      }
+
+      if (tmpMovie.getRating() != null) {
         String tmpRatingKey = tmpMovie.getRating() + "/10";
         tmpRatings.put(tmpRatingKey,
             tmpRatings.getOrDefault(tmpRatingKey, 0) + 1);

@@ -40,10 +40,12 @@ package io.github.kullik01.kinonode.controller;
 import java.awt.Desktop;
 
 
+import io.github.kullik01.kinonode.KinoNodeApp;
 import io.github.kullik01.kinonode.service.AppContext;
 import io.github.kullik01.kinonode.model.Watchlist;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import javafx.fxml.FXML;
@@ -72,12 +74,16 @@ public class AboutController implements Refreshable {
   private Label lblJavaRuntime;
   @FXML
   private Label lblOsDetails;
+
+
   @FXML
   private Label lblMovieCount;
   @FXML
   private Label lblDbSize;
   @FXML
-  private Label lblWatchlistCount;
+  private Label lblRegularWatchlistCount;
+  @FXML
+  private Label lblSmartWatchlistCount;
   @FXML
   private TextField lblPlayerPath;
 
@@ -153,6 +159,7 @@ public class AboutController implements Refreshable {
       lblOsDetails
           .setText(tmpOperatingSystemName + " " + tmpOperatingSystemVersion
               + " (" + tmpOperatingSystemArchitecture + ")");
+
     } catch (Exception tmpException) {
       lblJavaRuntime.setText("Unknown");
       lblOsDetails.setText("Unknown");
@@ -167,17 +174,16 @@ public class AboutController implements Refreshable {
 
       List<Watchlist> allWatchlists =
           AppContext.getInstance().getWatchlistRepository().findAll();
-      int tmpWatchlistCount = allWatchlists.size();
       long tmpSmartCount =
           allWatchlists.stream().filter(Watchlist::isSmart).count();
-      long tmpRegularCount = tmpWatchlistCount - tmpSmartCount;
+      long tmpRegularCount = allWatchlists.size() - tmpSmartCount;
 
-      lblWatchlistCount.setText(tmpWatchlistCount
-          + (tmpWatchlistCount == 1 ? " watchlist (" : " watchlists (")
-          + tmpRegularCount + " standard, " + tmpSmartCount + " smart)");
+      lblRegularWatchlistCount.setText(String.valueOf(tmpRegularCount));
+      lblSmartWatchlistCount.setText(String.valueOf(tmpSmartCount));
     } catch (Exception tmpException) {
       lblMovieCount.setText("Unknown");
-      lblWatchlistCount.setText("Unknown");
+      lblRegularWatchlistCount.setText("Unknown");
+      lblSmartWatchlistCount.setText("Unknown");
     }
 
     // 5. Media Player Executable
@@ -233,5 +239,28 @@ public class AboutController implements Refreshable {
     } catch (Exception tmpException) {
       // Ignore if it cannot be opened
     }
+  }
+
+  @FXML
+  private void openRepository() {
+    openWebpage("https://github.com/kullik01/Kino-Node");
+  }
+
+  @FXML
+  private void openIssueTracker() {
+    openWebpage("https://github.com/kullik01/Kino-Node/issues/new");
+  }
+
+  private void openWebpage(String url) {
+    try {
+      KinoNodeApp.getInstance().getHostServices().showDocument(url);
+    } catch (Exception tmpException) {
+      // Ignore errors opening browser
+    }
+  }
+
+  @FXML
+  private void checkForUpdates() {
+    openWebpage("https://github.com/kullik01/Kino-Node/releases");
   }
 }
