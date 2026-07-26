@@ -212,8 +212,8 @@ public class AnalyticsService {
           .append("</td>\n");
       tmpBuilder.append("        <td>")
           .append(escapeHtml(tmpMovie.getDirector())).append("</td>\n");
-      tmpBuilder.append("        <td>")
-          .append(escapeHtml(tmpMovie.getWriter())).append("</td>\n");
+      tmpBuilder.append("        <td>").append(escapeHtml(tmpMovie.getWriter()))
+          .append("</td>\n");
       tmpBuilder.append("        <td>")
           .append(escapeHtml(tmpMovie.getProducer())).append("</td>\n");
       tmpBuilder.append("        <td>")

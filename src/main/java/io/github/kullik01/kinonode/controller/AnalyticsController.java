@@ -162,8 +162,10 @@ public class AnalyticsController implements Refreshable {
     Map<String, List<String>> tmpActorMovies = new HashMap<>();
 
     for (Movie tmpMovie : tmpMovies) {
-      String title = (tmpMovie.getTitle() != null && !tmpMovie.getTitle().isBlank())
-          ? tmpMovie.getTitle() : "Untitled";
+      String title =
+          (tmpMovie.getTitle() != null && !tmpMovie.getTitle().isBlank())
+              ? tmpMovie.getTitle()
+              : "Untitled";
 
       if (tmpMovie.getRating() != null) {
         tmpTotalRating += tmpMovie.getRating();
@@ -171,7 +173,8 @@ public class AnalyticsController implements Refreshable {
         String tmpRatingKey = tmpMovie.getRating() + "/10";
         tmpRatings.put(tmpRatingKey,
             tmpRatings.getOrDefault(tmpRatingKey, 0) + 1);
-        ratingMovies.computeIfAbsent(tmpRatingKey, k -> new ArrayList<>()).add(title);
+        ratingMovies.computeIfAbsent(tmpRatingKey, k -> new ArrayList<>())
+            .add(title);
       }
 
       if (tmpMovie.getYear() != null) {
@@ -181,7 +184,8 @@ public class AnalyticsController implements Refreshable {
         String tmpDecadeKey = tmpDecadeStart + "s";
         tmpDecades.put(tmpDecadeKey,
             tmpDecades.getOrDefault(tmpDecadeKey, 0) + 1);
-        decadeMovies.computeIfAbsent(tmpDecadeKey, k -> new ArrayList<>()).add(title);
+        decadeMovies.computeIfAbsent(tmpDecadeKey, k -> new ArrayList<>())
+            .add(title);
       }
 
       if (tmpMovie.getGenre() != null && !tmpMovie.getGenre().isBlank()) {
@@ -189,17 +193,24 @@ public class AnalyticsController implements Refreshable {
           String tmpClean = tmpGenre.trim();
           if (!tmpClean.isEmpty() && !tmpClean.equalsIgnoreCase("Unknown")) {
             tmpGenres.put(tmpClean, tmpGenres.getOrDefault(tmpClean, 0) + 1);
-            genreMovies.computeIfAbsent(tmpClean, k -> new ArrayList<>()).add(title);
+            genreMovies.computeIfAbsent(tmpClean, k -> new ArrayList<>())
+                .add(title);
           }
         }
       }
 
-      parseAndCountWithTitle(tmpMovie.getDirector(), tmpDirectors, tmpDirectorMovies, title);
-      parseAndCountWithTitle(tmpMovie.getWriter(), tmpWriters, tmpWriterMovies, title);
-      parseAndCountWithTitle(tmpMovie.getProducer(), tmpProducers, tmpProducerMovies, title);
-      parseAndCountWithTitle(tmpMovie.getCinematographer(), tmpCinematographers, tmpCinematographerMovies, title);
-      parseAndCountWithTitle(tmpMovie.getComposer(), tmpComposers, tmpComposerMovies, title);
-      parseAndCountWithTitle(tmpMovie.getActors(), tmpActors, tmpActorMovies, title);
+      parseAndCountWithTitle(tmpMovie.getDirector(), tmpDirectors,
+          tmpDirectorMovies, title);
+      parseAndCountWithTitle(tmpMovie.getWriter(), tmpWriters, tmpWriterMovies,
+          title);
+      parseAndCountWithTitle(tmpMovie.getProducer(), tmpProducers,
+          tmpProducerMovies, title);
+      parseAndCountWithTitle(tmpMovie.getCinematographer(), tmpCinematographers,
+          tmpCinematographerMovies, title);
+      parseAndCountWithTitle(tmpMovie.getComposer(), tmpComposers,
+          tmpComposerMovies, title);
+      parseAndCountWithTitle(tmpMovie.getActors(), tmpActors, tmpActorMovies,
+          title);
     }
 
     roleFrequencies.put("Director(s)", tmpDirectors);
@@ -248,15 +259,17 @@ public class AnalyticsController implements Refreshable {
     updateTopPeople();
   }
 
-  private void parseAndCountWithTitle(String rawField, Map<String, Integer> targetMap,
-      Map<String, List<String>> targetMovieMap, String movieTitle) {
+  private void parseAndCountWithTitle(String rawField,
+      Map<String, Integer> targetMap, Map<String, List<String>> targetMovieMap,
+      String movieTitle) {
     if (rawField != null && !rawField.isBlank()) {
       for (String token : rawField.split(",")) {
         String tmpClean = token.trim();
         if (!tmpClean.isEmpty() && !tmpClean.equals("...")
             && !tmpClean.equalsIgnoreCase("Unknown")) {
           targetMap.put(tmpClean, targetMap.getOrDefault(tmpClean, 0) + 1);
-          targetMovieMap.computeIfAbsent(tmpClean, k -> new ArrayList<>()).add(movieTitle);
+          targetMovieMap.computeIfAbsent(tmpClean, k -> new ArrayList<>())
+              .add(movieTitle);
         }
       }
     }
@@ -295,8 +308,8 @@ public class AnalyticsController implements Refreshable {
     populateRankingList(topPeopleBox, frequencies, 5);
   }
 
-  private void installChartTooltip(
-      XYChart.Data<String, Number> data, String tooltipText) {
+  private void installChartTooltip(XYChart.Data<String, Number> data,
+      String tooltipText) {
     Runnable attacher = () -> {
       javafx.scene.Node node = data.getNode();
       if (node != null) {
@@ -348,7 +361,8 @@ public class AnalyticsController implements Refreshable {
           new XYChart.Data<>(tmpEntry.getKey(), tmpEntry.getValue());
       tmpSeries.getData().add(tmpData);
 
-      List<String> titles = decadeMovies.getOrDefault(tmpEntry.getKey(), Collections.emptyList());
+      List<String> titles =
+          decadeMovies.getOrDefault(tmpEntry.getKey(), Collections.emptyList());
       installChartTooltip(tmpData, buildMovieListText(titles));
     }
     decadeChart.getData().add(tmpSeries);
@@ -367,7 +381,8 @@ public class AnalyticsController implements Refreshable {
           new XYChart.Data<>(tmpEntry.getKey(), tmpEntry.getValue());
       tmpSeries.getData().add(tmpData);
 
-      List<String> titles = ratingMovies.getOrDefault(tmpEntry.getKey(), Collections.emptyList());
+      List<String> titles =
+          ratingMovies.getOrDefault(tmpEntry.getKey(), Collections.emptyList());
       installChartTooltip(tmpData, buildMovieListText(titles));
     }
     ratingChart.getData().add(tmpSeries);
@@ -388,7 +403,8 @@ public class AnalyticsController implements Refreshable {
               new XYChart.Data<>(entry.getKey(), entry.getValue());
           tmpSeries.getData().add(tmpData);
 
-          List<String> titles = genreMovies.getOrDefault(entry.getKey(), Collections.emptyList());
+          List<String> titles =
+              genreMovies.getOrDefault(entry.getKey(), Collections.emptyList());
           installChartTooltip(tmpData, buildMovieListText(titles));
         });
     genreChart.getData().add(tmpSeries);
@@ -408,7 +424,8 @@ public class AnalyticsController implements Refreshable {
       return;
     }
 
-    String selectedRole = comboRoleFilter != null ? comboRoleFilter.getValue() : "Director(s)";
+    String selectedRole =
+        comboRoleFilter != null ? comboRoleFilter.getValue() : "Director(s)";
     Map<String, List<String>> personMovies =
         rolePersonMovies.getOrDefault(selectedRole, Collections.emptyMap());
 
@@ -475,7 +492,8 @@ public class AnalyticsController implements Refreshable {
 
       tmpCard.getChildren().addAll(tmpHeader, tmpTrack);
 
-      List<String> titles = personMovies.getOrDefault(entry.getKey(), Collections.emptyList());
+      List<String> titles =
+          personMovies.getOrDefault(entry.getKey(), Collections.emptyList());
       javafx.scene.control.Tooltip tmpTooltip =
           new javafx.scene.control.Tooltip(buildMovieListText(titles));
       tmpTooltip.setShowDelay(javafx.util.Duration.millis(150));
@@ -590,42 +608,12 @@ public class AnalyticsController implements Refreshable {
   }
 
   private void showSuccessAlert(String title, String message) {
-    Alert tmpAlert = new Alert(Alert.AlertType.INFORMATION);
-    javafx.stage.Stage tmpStage =
-        (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
-    tmpStage.getIcons().add(new javafx.scene.image.Image(getClass()
-        .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
-    tmpAlert.setTitle(title);
-    tmpAlert.setHeaderText(title);
-    tmpAlert.setContentText(message);
-
-    tmpAlert.getDialogPane()
-        .setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
-    tmpAlert.showAndWait();
+    io.github.kullik01.kinonode.util.CustomAlert.showInformation(
+        lblTotalMovies.getScene().getWindow(), title, title, message);
   }
 
   private void showErrorAlert(String title, String message) {
-    Alert tmpAlert = new Alert(Alert.AlertType.ERROR);
-    javafx.stage.Stage tmpStage =
-        (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
-    tmpStage.getIcons().add(new javafx.scene.image.Image(getClass()
-        .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
-    tmpAlert.setTitle(title);
-    tmpAlert.setHeaderText(title);
-    tmpAlert.setContentText(message);
-
-    javafx.scene.image.ImageView tmpCustomIcon =
-        new javafx.scene.image.ImageView(
-            new javafx.scene.image.Image(getClass().getResourceAsStream(
-                "/io/github/kullik01/kinonode/images/error_icon.png")));
-    tmpCustomIcon.setFitHeight(48);
-    tmpCustomIcon.setFitWidth(48);
-    tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
-
-    tmpAlert.getDialogPane()
-        .setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
-    tmpAlert.showAndWait();
+    io.github.kullik01.kinonode.util.CustomAlert.showError(
+        lblTotalMovies.getScene().getWindow(), title, title, message);
   }
 }

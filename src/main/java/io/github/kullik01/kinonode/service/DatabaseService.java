@@ -186,12 +186,13 @@ public class DatabaseService {
 
       // Schema migration for new columns
       String[] tmpNewColumns = {"director", "writer", "producer",
-          "cinematographer", "composer", "actors", "duration"};
+          "cinematographer", "composer", "actors", "duration", "raw_rating"};
       for (String tmpColumn : tmpNewColumns) {
         try {
-          String colType = tmpColumn.equals("duration") ? "INTEGER" : "TEXT";
-          tmpStatement
-              .execute("ALTER TABLE movies ADD COLUMN " + tmpColumn + " " + colType + ";");
+          String colType = tmpColumn.equals("duration") ? "INTEGER"
+              : (tmpColumn.equals("raw_rating") ? "REAL" : "TEXT");
+          tmpStatement.execute("ALTER TABLE movies ADD COLUMN " + tmpColumn
+              + " " + colType + ";");
           LOGGER.info("Added new column to movies: " + tmpColumn);
         } catch (SQLException tmpException) {
           // Ignore, column likely already exists.

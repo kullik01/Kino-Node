@@ -354,7 +354,8 @@ public class WatchlistsController implements Refreshable {
         tmpDialog.getDialogPane().lookupButton(tmpOkButtonType);
     if (tmpOkButton != null) {
       tmpOkButton.getStyleClass().add("button-primary");
-      tmpOkButton.setDisable(true); // Always disable initially; user must type or change the name
+      tmpOkButton.setDisable(true); // Always disable initially; user must type
+                                    // or change the name
     }
 
     javafx.scene.Node tmpCancelButton =
@@ -412,6 +413,10 @@ public class WatchlistsController implements Refreshable {
                 tmpOkButton.setDisable(newValue.trim().isEmpty());
               }
             }
+          }
+          if (tmpDialog.getDialogPane().getScene() != null
+              && tmpDialog.getDialogPane().getScene().getWindow() != null) {
+            tmpDialog.getDialogPane().getScene().getWindow().sizeToScene();
           }
         });
 
@@ -472,29 +477,10 @@ public class WatchlistsController implements Refreshable {
     for (Watchlist tmpWatchlist : tmpWatchlists) {
       if (tmpWatchlist.getName().equalsIgnoreCase(cleanName)) {
         if (tmpWatchlist.getId() != null && tmpWatchlist.getId() != currentId) {
-          Alert tmpAlert = new Alert(Alert.AlertType.ERROR);
-          javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpAlert
-              .getDialogPane().getScene().getWindow();
-          tmpStage.getIcons()
-              .add(new javafx.scene.image.Image(getClass().getResourceAsStream(
-                  "/io/github/kullik01/kinonode/images/logo.png")));
-          tmpAlert.setTitle("Validation Error");
-          tmpAlert.setHeaderText("Duplicate Watchlist");
-          tmpAlert.setContentText(
-              "A watchlist with this name already exists. Please choose a different name.");
-
-          javafx.scene.image.ImageView tmpCustomIcon =
-              new javafx.scene.image.ImageView(
-                  new javafx.scene.image.Image(getClass().getResourceAsStream(
-                      "/io/github/kullik01/kinonode/images/error_icon.png")));
-          tmpCustomIcon.setFitHeight(48);
-          tmpCustomIcon.setFitWidth(48);
-          tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
-
-          tmpAlert.getDialogPane()
-              .setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-          io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
-          tmpAlert.showAndWait();
+          io.github.kullik01.kinonode.util.CustomAlert.showError(null,
+              "Validation Error", "Duplicate Watchlist",
+              "A watchlist with this name already exists. Please choose a different name.",
+              "/io/github/kullik01/kinonode/images/error_icon.png");
           return false;
         }
       }
@@ -507,30 +493,13 @@ public class WatchlistsController implements Refreshable {
     if (selectedWatchlist == null)
       return;
 
-    Alert tmpAlert = new Alert(Alert.AlertType.CONFIRMATION);
-    javafx.stage.Stage tmpStage =
-        (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
-    tmpStage.getIcons().add(new javafx.scene.image.Image(getClass()
-        .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
-    tmpAlert.setTitle("Delete Watchlist");
-    tmpAlert.setHeaderText("Delete watchlist: " + selectedWatchlist.getName());
-    tmpAlert.setContentText(
-        "Are you sure you want to delete this watchlist? Movies will not be deleted from your disk or library.");
+    boolean tmpConfirm = io.github.kullik01.kinonode.util.CustomAlert
+        .showConfirmation(lstMovies.getScene().getWindow(), "Delete Watchlist",
+            "Delete watchlist: " + selectedWatchlist.getName(),
+            "Are you sure you want to delete this watchlist? Movies will not be deleted from your disk or library.",
+            "/io/github/kullik01/kinonode/images/removal_icon.png");
 
-    javafx.scene.image.ImageView tmpCustomIcon =
-        new javafx.scene.image.ImageView(
-            new javafx.scene.image.Image(getClass().getResourceAsStream(
-                "/io/github/kullik01/kinonode/images/removal_icon.png")));
-    tmpCustomIcon.setFitHeight(48);
-    tmpCustomIcon.setFitWidth(48);
-    tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
-
-    tmpAlert.getDialogPane()
-        .setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-
-    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
-    Optional<ButtonType> tmpResult = tmpAlert.showAndWait();
-    if (tmpResult.isPresent() && tmpResult.get() == ButtonType.OK) {
+    if (tmpConfirm) {
       watchlistRepository.delete(selectedWatchlist.getId());
       refresh();
     }
@@ -542,30 +511,14 @@ public class WatchlistsController implements Refreshable {
     if (tmpSelectedMovie == null || selectedWatchlist == null)
       return;
 
-    Alert tmpAlert = new Alert(Alert.AlertType.CONFIRMATION);
-    javafx.stage.Stage tmpStage =
-        (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
-    tmpStage.getIcons().add(new javafx.scene.image.Image(getClass()
-        .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
-    tmpAlert.setTitle("Remove Movie");
-    tmpAlert.setHeaderText("Remove from Watchlist");
-    tmpAlert.setContentText("Are you sure you want to remove this movie from "
-        + selectedWatchlist.getName() + "?");
+    boolean tmpConfirm = io.github.kullik01.kinonode.util.CustomAlert
+        .showConfirmation(lstMovies.getScene().getWindow(), "Remove Movie",
+            "Remove from Watchlist",
+            "Are you sure you want to remove this movie from "
+                + selectedWatchlist.getName() + "?",
+            "/io/github/kullik01/kinonode/images/removal_icon.png");
 
-    javafx.scene.image.ImageView tmpCustomIcon =
-        new javafx.scene.image.ImageView(
-            new javafx.scene.image.Image(getClass().getResourceAsStream(
-                "/io/github/kullik01/kinonode/images/removal_icon.png")));
-    tmpCustomIcon.setFitHeight(48);
-    tmpCustomIcon.setFitWidth(48);
-    tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
-
-    tmpAlert.getDialogPane()
-        .setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
-    Optional<ButtonType> tmpResult = tmpAlert.showAndWait();
-
-    if (tmpResult.isPresent() && tmpResult.get() == ButtonType.OK) {
+    if (tmpConfirm) {
       watchlistRepository.removeMovieFromWatchlist(selectedWatchlist.getId(),
           tmpSelectedMovie.getId());
       refresh();
@@ -578,28 +531,10 @@ public class WatchlistsController implements Refreshable {
     } catch (Exception tmpException) {
       LOGGER.log(Level.SEVERE, "Failed to play movie from watchlist",
           tmpException);
-      Alert tmpAlert = new Alert(Alert.AlertType.ERROR);
-      javafx.stage.Stage tmpStage =
-          (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
-      tmpStage.getIcons()
-          .add(new javafx.scene.image.Image(getClass().getResourceAsStream(
-              "/io/github/kullik01/kinonode/images/logo.png")));
-      tmpAlert.setTitle("Playback Failed");
-      tmpAlert.setHeaderText("Cannot open media player");
-      tmpAlert.setContentText(tmpException.getMessage());
-
-      javafx.scene.image.ImageView tmpCustomIcon =
-          new javafx.scene.image.ImageView(
-              new javafx.scene.image.Image(getClass().getResourceAsStream(
-                  "/io/github/kullik01/kinonode/images/error_icon.png")));
-      tmpCustomIcon.setFitHeight(48);
-      tmpCustomIcon.setFitWidth(48);
-      tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
-
-      tmpAlert.getDialogPane()
-          .setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-      io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
-      tmpAlert.showAndWait();
+      io.github.kullik01.kinonode.util.CustomAlert.showError(
+          lstMovies.getScene().getWindow(), "Playback Failed",
+          "Cannot open media player", tmpException.getMessage(),
+          "/io/github/kullik01/kinonode/images/error_icon.png");
     }
   }
 }

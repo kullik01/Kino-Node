@@ -59,7 +59,8 @@ public class CursorUtils {
   /**
    * Gets the transparent application logo mouse cursor.
    *
-   * @return custom application logo {@link Cursor}, or {@link Cursor#DEFAULT} as fallback
+   * @return custom application logo {@link Cursor}, or {@link Cursor#DEFAULT}
+   *         as fallback
    */
   public static Cursor getAppLogoCursor() {
     if (appLogoCursor == null) {
@@ -85,7 +86,8 @@ public class CursorUtils {
   /**
    * Gets the transparent application logo mouse cursor centered at the image.
    *
-   * @return custom centered application logo {@link Cursor}, or {@link Cursor#DEFAULT} as fallback
+   * @return custom centered application logo {@link Cursor}, or
+   *         {@link Cursor#DEFAULT} as fallback
    */
   public static Cursor getCenteredAppLogoCursor() {
     if (centeredAppLogoCursor == null) {
@@ -94,14 +96,15 @@ public class CursorUtils {
             "/io/github/kullik01/kinonode/images/app_logo_cursor.png");
         if (tmpStream != null) {
           Image tmpImage = new Image(tmpStream);
-          centeredAppLogoCursor = new ImageCursor(tmpImage, tmpImage.getWidth() / 2.0,
-              tmpImage.getHeight() / 2.0);
+          centeredAppLogoCursor = new ImageCursor(tmpImage,
+              tmpImage.getWidth() / 2.0, tmpImage.getHeight() / 2.0);
         } else {
           centeredAppLogoCursor = Cursor.DEFAULT;
         }
       } catch (Exception tmpException) {
         LOGGER.log(Level.WARNING,
-            "Failed to load centered application logo cursor image", tmpException);
+            "Failed to load centered application logo cursor image",
+            tmpException);
         centeredAppLogoCursor = Cursor.DEFAULT;
       }
     }
@@ -124,48 +127,58 @@ public class CursorUtils {
    * @param owner the owner {@link Window} to center over
    */
   public static void centerOnOwnerOrScreen(Window window, Window owner) {
-    if (window == null) return;
+    if (window == null)
+      return;
 
-    javafx.beans.value.ChangeListener<Number> positioner = new javafx.beans.value.ChangeListener<Number>() {
-      private boolean adjusting = false;
-      @Override
-      public void changed(javafx.beans.value.ObservableValue<? extends Number> obs, Number oldVal, Number newVal) {
-        if (adjusting) return;
-        adjusting = true;
-        try {
-          Window activeOwner = owner;
-          if (activeOwner == null && window instanceof javafx.stage.Stage stageWin) {
-            activeOwner = stageWin.getOwner();
-          }
-          if (activeOwner == null) {
-            for (Window win : Window.getWindows()) {
-              if (win != window && win instanceof Stage stage && stage.isShowing()) {
-                activeOwner = stage;
-                break;
-              }
-            }
-          }
-          if (activeOwner != null && activeOwner.isShowing() && activeOwner.getWidth() > 0 && activeOwner.getHeight() > 0) {
-            double ownerX = activeOwner.getX();
-            double ownerY = activeOwner.getY();
-            double ownerWidth = activeOwner.getWidth();
-            double ownerHeight = activeOwner.getHeight();
+    javafx.beans.value.ChangeListener<Number> positioner =
+        new javafx.beans.value.ChangeListener<Number>() {
+          private boolean adjusting = false;
 
-            double winWidth = window.getWidth();
-            double winHeight = window.getHeight();
-
-            if (winWidth > 0 && winHeight > 0) {
-              window.setX(ownerX + (ownerWidth - winWidth) / 2.0);
-              window.setY(ownerY + (ownerHeight - winHeight) / 2.0);
+          @Override
+          public void changed(
+              javafx.beans.value.ObservableValue<? extends Number> obs,
+              Number oldVal, Number newVal) {
+            if (adjusting)
               return;
+            adjusting = true;
+            try {
+              Window activeOwner = owner;
+              if (activeOwner == null
+                  && window instanceof javafx.stage.Stage stageWin) {
+                activeOwner = stageWin.getOwner();
+              }
+              if (activeOwner == null) {
+                for (Window win : Window.getWindows()) {
+                  if (win != window && win instanceof Stage stage
+                      && stage.isShowing()) {
+                    activeOwner = stage;
+                    break;
+                  }
+                }
+              }
+              if (activeOwner != null && activeOwner.isShowing()
+                  && activeOwner.getWidth() > 0
+                  && activeOwner.getHeight() > 0) {
+                double ownerX = activeOwner.getX();
+                double ownerY = activeOwner.getY();
+                double ownerWidth = activeOwner.getWidth();
+                double ownerHeight = activeOwner.getHeight();
+
+                double winWidth = window.getWidth();
+                double winHeight = window.getHeight();
+
+                if (winWidth > 0 && winHeight > 0) {
+                  window.setX(ownerX + (ownerWidth - winWidth) / 2.0);
+                  window.setY(ownerY + (ownerHeight - winHeight) / 2.0);
+                  return;
+                }
+              }
+              window.centerOnScreen();
+            } finally {
+              adjusting = false;
             }
           }
-          window.centerOnScreen();
-        } finally {
-          adjusting = false;
-        }
-      }
-    };
+        };
 
     window.widthProperty().addListener(positioner);
     window.heightProperty().addListener(positioner);
@@ -173,12 +186,14 @@ public class CursorUtils {
     // Initial check to attach owner listeners
     Runnable attachOwnerListeners = () -> {
       Window activeOwner = owner;
-      if (activeOwner == null && window instanceof javafx.stage.Stage stageWin) {
+      if (activeOwner == null
+          && window instanceof javafx.stage.Stage stageWin) {
         activeOwner = stageWin.getOwner();
       }
       if (activeOwner == null) {
         for (Window win : Window.getWindows()) {
-          if (win != window && win instanceof Stage stage && stage.isShowing()) {
+          if (win != window && win instanceof Stage stage
+              && stage.isShowing()) {
             activeOwner = stage;
             break;
           }
@@ -216,17 +231,24 @@ public class CursorUtils {
   }
 
   /**
-   * Applies the high-resolution application logo cursor to a dialog window
-   * and centers it over the owner window or screen.
+   * Applies the high-resolution application logo cursor to a dialog window and
+   * centers it over the owner window or screen.
    *
    * @param dialog the JavaFX {@link javafx.scene.control.Dialog} to configure
    */
   public static void applyCursor(javafx.scene.control.Dialog<?> dialog) {
     if (dialog != null && dialog.getDialogPane() != null) {
+      try {
+        dialog.initStyle(javafx.stage.StageStyle.TRANSPARENT);
+      } catch (Exception ignored) {
+      }
+
       javafx.scene.Node pane = dialog.getDialogPane();
 
       try {
-        String themeCss = CursorUtils.class.getResource("/io/github/kullik01/kinonode/css/theme.css").toExternalForm();
+        String themeCss = CursorUtils.class
+            .getResource("/io/github/kullik01/kinonode/css/theme.css")
+            .toExternalForm();
         if (!dialog.getDialogPane().getStylesheets().contains(themeCss)) {
           dialog.getDialogPane().getStylesheets().add(themeCss);
         }
@@ -235,35 +257,42 @@ public class CursorUtils {
 
       if (pane.getScene() != null) {
         pane.getScene().setCursor(getAppLogoCursor());
+        pane.getScene().setFill(javafx.scene.paint.Color.TRANSPARENT);
+        if (pane.getScene().getRoot() != pane) {
+          pane.getScene().getRoot()
+              .setStyle("-fx-background-color: transparent;");
+        }
       } else {
         pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
           if (newScene != null) {
             newScene.setCursor(getAppLogoCursor());
+            newScene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            if (newScene.getRoot() != pane) {
+              newScene.getRoot().setStyle("-fx-background-color: transparent;");
+            }
           }
         });
       }
       dialog.showingProperty().addListener((obs, wasShowing, isShowing) -> {
         if (isShowing) {
-          if (dialog.getDialogPane() != null && dialog.getDialogPane().getScene() != null) {
-            centerOnOwnerOrScreen(dialog.getDialogPane().getScene().getWindow(), dialog.getOwner());
+          if (dialog.getDialogPane() != null
+              && dialog.getDialogPane().getScene() != null) {
+            javafx.stage.Window window =
+                dialog.getDialogPane().getScene().getWindow();
+            centerOnOwnerOrScreen(window, dialog.getOwner());
           }
           javafx.application.Platform.runLater(() -> {
             if (dialog.getDialogPane() != null) {
-              for (javafx.scene.control.ButtonType type : dialog.getDialogPane().getButtonTypes()) {
-                javafx.scene.Node button = dialog.getDialogPane().lookupButton(type);
+              for (javafx.scene.control.ButtonType type : dialog.getDialogPane()
+                  .getButtonTypes()) {
+                javafx.scene.Node button =
+                    dialog.getDialogPane().lookupButton(type);
                 if (button != null) {
-                  boolean isCancel = (type == javafx.scene.control.ButtonType.CANCEL)
-                      || (type.getButtonData() == javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
-                  if (isCancel) {
-                    button.getStyleClass().remove("button-primary");
-                    button.getStyleClass().add("button-secondary");
-                    button.setStyle("-fx-background-color: -color-bg-subtle; -fx-text-fill: -color-fg-default; -fx-opacity: 1.0; -fx-effect: none; -fx-border-color: -color-border-default; -fx-font-weight: normal; -fx-background-radius: 4px; -fx-border-radius: 4px;");
-                  } else {
-                    if (!button.getStyleClass().contains("button-primary")) {
-                      button.getStyleClass().add("button-primary");
-                    }
-                    button.setStyle("-fx-background-color: #2178dd; -fx-text-fill: white; -fx-opacity: 1.0; -fx-effect: none; -fx-border-color: transparent; -fx-font-weight: bold; -fx-background-radius: 4px;");
+                  if (!button.getStyleClass().contains("button-primary")) {
+                    button.getStyleClass().add("button-primary");
                   }
+                  button.setStyle(
+                      "-fx-background-color: #2178dd; -fx-text-fill: white; -fx-opacity: 1.0; -fx-effect: none; -fx-border-color: transparent; -fx-font-weight: bold; -fx-background-radius: 4px;");
                 }
               }
             }
@@ -274,8 +303,8 @@ public class CursorUtils {
   }
 
   /**
-   * Applies the high-resolution application logo cursor to a stage window
-   * and centers it over the owner window or screen.
+   * Applies the high-resolution application logo cursor to a stage window and
+   * centers it over the owner window or screen.
    *
    * @param stage the JavaFX {@link javafx.stage.Stage} to configure
    */

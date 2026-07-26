@@ -48,7 +48,9 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -182,30 +184,12 @@ public class SettingsController implements Refreshable {
   private void removeWorkspace() {
     String tmpSelected = lstWorkspaces.getSelectionModel().getSelectedItem();
     if (tmpSelected != null) {
-      Alert tmpAlert = new Alert(Alert.AlertType.CONFIRMATION);
-      javafx.stage.Stage tmpStage =
-          (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
-      tmpStage.getIcons()
-          .add(new javafx.scene.image.Image(getClass().getResourceAsStream(
-              "/io/github/kullik01/kinonode/images/logo.png")));
-      tmpAlert.setTitle("Remove Workspace");
-      tmpAlert.setHeaderText("Remove workspace: " + tmpSelected);
-      tmpAlert.setContentText(
-          "Are you sure you want to remove this workspace? Movies from this workspace will be removed from your library, but files will not be deleted from your disk.");
-
-      javafx.scene.image.ImageView tmpCustomIcon =
-          new javafx.scene.image.ImageView(
-              new javafx.scene.image.Image(getClass().getResourceAsStream(
-                  "/io/github/kullik01/kinonode/images/removal_icon.png")));
-      tmpCustomIcon.setFitHeight(48);
-      tmpCustomIcon.setFitWidth(48);
-      tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
-
-      tmpAlert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-      io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
-
-      Optional<ButtonType> tmpResult = tmpAlert.showAndWait();
-      if (tmpResult.isPresent() && tmpResult.get() == ButtonType.OK) {
+      boolean confirmed = io.github.kullik01.kinonode.util.CustomAlert
+          .showConfirmation(lstWorkspaces.getScene().getWindow(),
+              "Remove Workspace", "Remove workspace: " + tmpSelected,
+              "Are you sure you want to remove this workspace? Movies from this workspace will be removed from your library, but files will not be deleted from your disk.",
+              "/io/github/kullik01/kinonode/images/removal_icon.png");
+      if (confirmed) {
         lstWorkspaces.getItems().remove(tmpSelected);
         saveWorkspacesOnly();
         showStatus("Workspace folder removed.");

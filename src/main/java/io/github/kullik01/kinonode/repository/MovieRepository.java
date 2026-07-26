@@ -205,8 +205,8 @@ public class MovieRepository {
   public Movie insert(Movie movie) {
     String tmpSql =
         """
-            INSERT INTO movies (file_path, title, year, genre, description, rating, cover_image_path, trailer_url, director, writer, producer, cinematographer, composer, actors, duration, date_added)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            INSERT INTO movies (file_path, title, year, genre, description, rating, cover_image_path, trailer_url, director, writer, producer, cinematographer, composer, actors, duration, date_added, raw_rating)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """;
     // Prepare statement requesting generated keys to retrieve the
     // auto-incremented ID
@@ -248,6 +248,11 @@ public class MovieRepository {
       // Store Instant timestamp as epoch seconds in the database
       tmpPreparedStatement.setLong(16, movie.getDateAdded().getEpochSecond());
 
+      if (movie.getRawRating() != null)
+        tmpPreparedStatement.setDouble(17, movie.getRawRating());
+      else
+        tmpPreparedStatement.setNull(17, Types.DOUBLE);
+
       int tmpAffectedRows = tmpPreparedStatement.executeUpdate();
       // If the row was successfully inserted, fetch the auto-generated ID
       if (tmpAffectedRows > 0) {
@@ -273,7 +278,7 @@ public class MovieRepository {
   public void update(Movie movie) {
     String tmpSql =
         """
-            UPDATE movies SET file_path = ?, title = ?, year = ?, genre = ?, description = ?, rating = ?, cover_image_path = ?, trailer_url = ?, director = ?, writer = ?, producer = ?, cinematographer = ?, composer = ?, actors = ?, duration = ?, date_added = ?
+            UPDATE movies SET file_path = ?, title = ?, year = ?, genre = ?, description = ?, rating = ?, cover_image_path = ?, trailer_url = ?, director = ?, writer = ?, producer = ?, cinematographer = ?, composer = ?, actors = ?, duration = ?, date_added = ?, raw_rating = ?
             WHERE id = ?;
             """;
     try (PreparedStatement tmpPreparedStatement =
@@ -312,7 +317,13 @@ public class MovieRepository {
 
       // Store Instant timestamp as epoch seconds in the database
       tmpPreparedStatement.setLong(16, movie.getDateAdded().getEpochSecond());
-      tmpPreparedStatement.setInt(17, movie.getId());
+
+      if (movie.getRawRating() != null)
+        tmpPreparedStatement.setDouble(17, movie.getRawRating());
+      else
+        tmpPreparedStatement.setNull(17, Types.DOUBLE);
+
+      tmpPreparedStatement.setInt(18, movie.getId());
 
       tmpPreparedStatement.executeUpdate();
     } catch (SQLException tmpException) {
@@ -360,7 +371,8 @@ public class MovieRepository {
 
   /**
    * Maps a single row from a database ResultSet to a Movie object. Handles
-   * retrieving nullable integer values (year, rating, duration) by checking wasNull().
+   * retrieving nullable integer values (year, rating, duration) by checking
+   * wasNull().
    *
    * @param rs the ResultSet containing the database row
    * @return a mapped {@link Movie} object
@@ -399,6 +411,13 @@ public class MovieRepository {
       tmpMovie.setDuration(resultSet.wasNull() ? null : tmpDuration);
     } catch (SQLException e) {
       tmpMovie.setDuration(null);
+    }
+
+    try {
+      double tmpRawRating = resultSet.getDouble("raw_rating");
+      tmpMovie.setRawRating(resultSet.wasNull() ? null : tmpRawRating);
+    } catch (SQLException e) {
+      tmpMovie.setRawRating(null);
     }
 
     // Re-construct the Instant object using the epoch second retrieved from the

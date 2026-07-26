@@ -33,7 +33,7 @@
 .root {
     -fx-font-family: 'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
     -fx-font-smoothing-type: lcd;
-    -fx-background-color: -color-bg-default;
+    -fx-background-color: transparent;
     -fx-text-fill: -color-fg-default;
 }
 
@@ -737,5 +737,54 @@
 .ranking-bar-fill-top3 {
     -fx-background-color: #ED8B00;
 }
+
+/* Dialog Pane & Alert Styles (Dark Mode Compatibility) */
+.dialog-pane {
+    -fx-background-color: -color-bg-default;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 1px;
+    -fx-padding: 0px;
+}
+
+.dialog-pane > .header-panel {
+    -fx-background-color: -color-bg-subtle;
+    -fx-background-radius: 8px 8px 0 0;
+    -fx-padding: 14px 16px;
+}
+
+.dialog-pane > .header-panel > .label {
+    -fx-text-fill: -color-fg-default;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.dialog-pane > .content {
+    -fx-text-fill: -color-fg-default;
+    -fx-padding: 16px;
+}
+
+.dialog-pane > .content > .label {
+    -fx-text-fill: -color-fg-default;
+}
+
+.dialog-pane > .button-bar {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0px;
+    -fx-padding: 10px 16px 14px 16px;
+}
+
+.dialog-pane .text-input,
+.dialog-pane .text-field,
+.dialog-pane .text-area {
+    -fx-background-color: -color-bg-subtle;
+    -fx-text-fill: -color-fg-default;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+
 
 

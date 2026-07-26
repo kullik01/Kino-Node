@@ -109,8 +109,9 @@ public class LibraryController implements Refreshable {
 
     // Setup sort and filter options
     cmbSort.getItems().addAll("Cinematographer", "Composer", "Director",
-        "Genre", "Longest Movie", "Producer", "Rating (Highest)", "Recently Added",
-        "Release Year", "Shortest Movie", "Title (A-Z)", "Writer");
+        "Genre", "Longest Movie", "Producer", "Rating (Highest)",
+        "Recently Added", "Release Year", "Shortest Movie", "Title (A-Z)",
+        "Writer");
 
     cmbSort.setValue("Title (A-Z)");
 
@@ -193,44 +194,52 @@ public class LibraryController implements Refreshable {
       };
     }).collect(Collectors.toList());
 
-    // Sort movies according to selected sorting criteria with deterministic tie-breakers
+    // Sort movies according to selected sorting criteria with deterministic
+    // tie-breakers
     if (tmpSortOption != null) {
-      Comparator<String> strComp = Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER);
-      Comparator<Integer> idComp = Comparator.nullsLast(Comparator.naturalOrder());
+      Comparator<String> strComp =
+          Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER);
+      Comparator<Integer> idComp =
+          Comparator.nullsLast(Comparator.naturalOrder());
 
       switch (tmpSortOption) {
-        case "Title (A-Z)" -> tmpFiltered.sort(Comparator
-            .comparing(Movie::getTitle, strComp)
-            .thenComparing(Movie::getId, idComp));
+        case "Title (A-Z)" ->
+          tmpFiltered.sort(Comparator.comparing(Movie::getTitle, strComp)
+              .thenComparing(Movie::getId, idComp));
 
-        case "Title (Z-A)" -> tmpFiltered.sort(Comparator
-            .comparing(Movie::getTitle, strComp).reversed()
-            .thenComparing(Movie::getId, idComp));
+        case "Title (Z-A)" ->
+          tmpFiltered.sort(Comparator.comparing(Movie::getTitle, strComp)
+              .reversed().thenComparing(Movie::getId, idComp));
 
         case "Release Year" -> tmpFiltered.sort(Comparator
-            .comparing(Movie::getYear, Comparator.nullsLast(Comparator.reverseOrder()))
+            .comparing(Movie::getYear,
+                Comparator.nullsLast(Comparator.reverseOrder()))
             .thenComparing(Movie::getTitle, strComp)
             .thenComparing(Movie::getId, idComp));
 
         case "Rating (Highest)" -> tmpFiltered.sort(Comparator
-            .comparing(Movie::getRating, Comparator.nullsLast(Comparator.reverseOrder()))
+            .comparing(Movie::getRating,
+                Comparator.nullsLast(Comparator.reverseOrder()))
             .thenComparing(Movie::getTitle, strComp)
             .thenComparing(Movie::getId, idComp));
 
         case "Longest Movie" -> tmpFiltered.sort(Comparator
-            .comparing(Movie::getDuration, Comparator.nullsLast(Comparator.reverseOrder()))
+            .comparing(Movie::getDuration,
+                Comparator.nullsLast(Comparator.reverseOrder()))
             .thenComparing(Movie::getTitle, strComp)
             .thenComparing(Movie::getId, idComp));
 
         case "Shortest Movie" -> tmpFiltered.sort(Comparator
-            .comparing(Movie::getDuration, Comparator.nullsLast(Comparator.naturalOrder()))
+            .comparing(Movie::getDuration,
+                Comparator.nullsLast(Comparator.naturalOrder()))
             .thenComparing(Movie::getTitle, strComp)
             .thenComparing(Movie::getId, idComp));
 
         default -> tmpFiltered.sort(Comparator
-            .comparing(Movie::getDateAdded, Comparator.nullsLast(Comparator.reverseOrder()))
-            .thenComparing(Movie::getTitle, strComp)
-            .thenComparing(Movie::getId, Comparator.nullsLast(Comparator.reverseOrder())));
+            .comparing(Movie::getDateAdded,
+                Comparator.nullsLast(Comparator.reverseOrder()))
+            .thenComparing(Movie::getTitle, strComp).thenComparing(Movie::getId,
+                Comparator.nullsLast(Comparator.reverseOrder())));
       }
     }
 
@@ -275,7 +284,8 @@ public class LibraryController implements Refreshable {
     javafx.scene.layout.VBox tmpRootVBox = new javafx.scene.layout.VBox();
     tmpRootVBox.setAlignment(javafx.geometry.Pos.CENTER);
     tmpRootVBox.setPadding(new javafx.geometry.Insets(30, 20, 30, 20));
-    tmpRootVBox.prefHeightProperty().bind(gridPane.heightProperty().subtract(30));
+    tmpRootVBox.prefHeightProperty()
+        .bind(gridPane.heightProperty().subtract(30));
     tmpRootVBox.prefWidthProperty().bind(gridPane.widthProperty().subtract(30));
     tmpRootVBox.setMaxWidth(Double.MAX_VALUE);
     tmpRootVBox.setMaxHeight(Double.MAX_VALUE);
@@ -285,30 +295,26 @@ public class LibraryController implements Refreshable {
     tmpCard.setAlignment(javafx.geometry.Pos.CENTER);
     tmpCard.setMaxWidth(520);
     tmpCard.setPadding(new javafx.geometry.Insets(36, 40, 36, 40));
-    tmpCard.setStyle(
-        "-fx-background-color: -color-bg-overlay; "
-            + "-fx-background-radius: 16px; "
-            + "-fx-border-color: -color-border-default; "
-            + "-fx-border-radius: 16px; "
-            + "-fx-effect: dropshadow(three-pass-box, rgba(33, 120, 221, 0.18), 24, 0.0, 0, 8);");
+    tmpCard.setStyle("-fx-background-color: -color-bg-overlay; "
+        + "-fx-background-radius: 16px; "
+        + "-fx-border-color: -color-border-default; "
+        + "-fx-border-radius: 16px; "
+        + "-fx-effect: dropshadow(three-pass-box, rgba(33, 120, 221, 0.18), 24, 0.0, 0, 8);");
 
     if (isLibraryEmpty) {
       // Check if workspaces are already configured
       String tmpWorkspaces = AppContext.getInstance().getSettingsRepository()
           .get("workspace_folders", "");
-      boolean tmpHasWorkspaces = tmpWorkspaces != null
-          && !tmpWorkspaces.isBlank();
+      boolean tmpHasWorkspaces =
+          tmpWorkspaces != null && !tmpWorkspaces.isBlank();
 
       if (tmpHasWorkspaces) {
         // Workspaces configured but library not yet synced
         Label tmpBadge = new Label("LIBRARY SYNC REQUIRED");
-        tmpBadge.setStyle(
-            "-fx-background-color: rgba(237, 139, 0, 0.15); "
-                + "-fx-text-fill: #ED8B00; "
-                + "-fx-font-weight: bold; "
-                + "-fx-font-size: 11px; "
-                + "-fx-padding: 4px 14px; "
-                + "-fx-background-radius: 12px;");
+        tmpBadge.setStyle("-fx-background-color: rgba(237, 139, 0, 0.15); "
+            + "-fx-text-fill: #ED8B00; " + "-fx-font-weight: bold; "
+            + "-fx-font-size: 11px; " + "-fx-padding: 4px 14px; "
+            + "-fx-background-radius: 12px;");
 
         SVGPath tmpSyncIcon = new SVGPath();
         tmpSyncIcon.setContent(
@@ -320,8 +326,7 @@ public class LibraryController implements Refreshable {
         javafx.scene.layout.VBox tmpSyncIconWrapper =
             new javafx.scene.layout.VBox(tmpSyncIcon);
         tmpSyncIconWrapper.setAlignment(javafx.geometry.Pos.CENTER);
-        tmpSyncIconWrapper.setPadding(
-            new javafx.geometry.Insets(10, 0, 10, 0));
+        tmpSyncIconWrapper.setPadding(new javafx.geometry.Insets(10, 0, 10, 0));
 
         Label tmpTitle = new Label("Sync Your Library");
         tmpTitle.setStyle(
@@ -332,11 +337,10 @@ public class LibraryController implements Refreshable {
         tmpText.setWrapText(true);
         tmpText.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         tmpText.setMaxWidth(420);
-        tmpText.setStyle(
-            "-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
+        tmpText
+            .setStyle("-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
 
-        javafx.scene.layout.HBox tmpBtnBox =
-            new javafx.scene.layout.HBox(14);
+        javafx.scene.layout.HBox tmpBtnBox = new javafx.scene.layout.HBox(14);
         tmpBtnBox.setAlignment(javafx.geometry.Pos.CENTER);
 
         Button tmpBtnSync = new Button("Sync Library");
@@ -354,9 +358,8 @@ public class LibraryController implements Refreshable {
         tmpSyncBtnIcon.setStyle("-fx-fill: white;");
         tmpBtnSync.setGraphic(tmpSyncBtnIcon);
 
-        Tooltip tmpSyncTooltip = new Tooltip(
-            "Why sync?\n"
-                + "Syncing scans your configured workspace folder(s) to discover, index, and catalog your movie files, posters, and metadata into your collection library.");
+        Tooltip tmpSyncTooltip = new Tooltip("Why sync?\n"
+            + "Syncing scans your configured workspace folder(s) to discover, index, and catalog your movie files, posters, and metadata into your collection library.");
         tmpSyncTooltip.setShowDelay(javafx.util.Duration.millis(250));
         tmpSyncTooltip.getStyleClass().add("chart-popup-tooltip");
         Tooltip.install(tmpBtnSync, tmpSyncTooltip);
@@ -364,18 +367,15 @@ public class LibraryController implements Refreshable {
         tmpBtnSync.setOnAction(e -> syncLibrary());
 
         tmpBtnBox.getChildren().add(tmpBtnSync);
-        tmpCard.getChildren().addAll(tmpBadge, tmpSyncIconWrapper,
-            tmpTitle, tmpText, tmpBtnBox);
+        tmpCard.getChildren().addAll(tmpBadge, tmpSyncIconWrapper, tmpTitle,
+            tmpText, tmpBtnBox);
       } else {
         // No workspaces configured yet
         Label tmpBadge = new Label("WORKSPACE CONFIGURATION");
-        tmpBadge.setStyle(
-            "-fx-background-color: rgba(33, 120, 221, 0.15); "
-                + "-fx-text-fill: #2178dd; "
-                + "-fx-font-weight: bold; "
-                + "-fx-font-size: 11px; "
-                + "-fx-padding: 4px 14px; "
-                + "-fx-background-radius: 12px;");
+        tmpBadge.setStyle("-fx-background-color: rgba(33, 120, 221, 0.15); "
+            + "-fx-text-fill: #2178dd; " + "-fx-font-weight: bold; "
+            + "-fx-font-size: 11px; " + "-fx-padding: 4px 14px; "
+            + "-fx-background-radius: 12px;");
 
         SVGPath tmpCameraIcon = new SVGPath();
         tmpCameraIcon.setContent(
@@ -387,8 +387,8 @@ public class LibraryController implements Refreshable {
         javafx.scene.layout.VBox tmpCameraIconWrapper =
             new javafx.scene.layout.VBox(tmpCameraIcon);
         tmpCameraIconWrapper.setAlignment(javafx.geometry.Pos.CENTER);
-        tmpCameraIconWrapper.setPadding(
-            new javafx.geometry.Insets(10, 0, 10, 0));
+        tmpCameraIconWrapper
+            .setPadding(new javafx.geometry.Insets(10, 0, 10, 0));
 
         Label tmpTitle = new Label("Start Your Movie Library");
         tmpTitle.setStyle(
@@ -399,11 +399,10 @@ public class LibraryController implements Refreshable {
         tmpText.setWrapText(true);
         tmpText.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         tmpText.setMaxWidth(420);
-        tmpText.setStyle(
-            "-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
+        tmpText
+            .setStyle("-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
 
-        javafx.scene.layout.HBox tmpBtnBox =
-            new javafx.scene.layout.HBox(14);
+        javafx.scene.layout.HBox tmpBtnBox = new javafx.scene.layout.HBox(14);
         tmpBtnBox.setAlignment(javafx.geometry.Pos.CENTER);
 
         Button tmpBtnSettings = new Button("Configure Workspaces");
@@ -421,16 +420,14 @@ public class LibraryController implements Refreshable {
         tmpGear.setStyle("-fx-fill: white;");
         tmpBtnSettings.setGraphic(tmpGear);
 
-        Tooltip tmpTooltip = new Tooltip(
-            "Why set a workspace?\n"
-                + "KinoNode needs at least one workspace folder path to scan, locate, and catalog your movie files, posters, and metadata into your collection library.");
+        Tooltip tmpTooltip = new Tooltip("Why set a workspace?\n"
+            + "KinoNode needs at least one workspace folder path to scan, locate, and catalog your movie files, posters, and metadata into your collection library.");
         tmpTooltip.setShowDelay(javafx.util.Duration.millis(250));
         tmpTooltip.getStyleClass().add("chart-popup-tooltip");
         Tooltip.install(tmpBtnSettings, tmpTooltip);
 
         tmpBtnSettings.setOnAction(e -> {
-          MainController tmpMain =
-              AppContext.getInstance().getMainController();
+          MainController tmpMain = AppContext.getInstance().getMainController();
           if (tmpMain != null) {
             tmpMain.showSettings();
           }
@@ -453,8 +450,7 @@ public class LibraryController implements Refreshable {
           "-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
       Label tmpSub = new Label(
           "Try clearing your search query or choosing a different filter.");
-      tmpSub.setStyle(
-          "-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
+      tmpSub.setStyle("-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
       tmpCard.getChildren().addAll(tmpSearchIcon, tmpTitle, tmpSub);
     }
 

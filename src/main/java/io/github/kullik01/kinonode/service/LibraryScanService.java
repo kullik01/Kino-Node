@@ -171,7 +171,11 @@ public class LibraryScanService {
             // Check and enrich movie details using IMDb suggestion and Wikidata
             // APIs
             updateMessage("Checking IMDB for: " + tmpMovie.getTitle());
-            ImdbService.enrichMovieData(tmpMovie);
+            boolean fetchedDirect =
+                ImdbService.fetchImdbDurationDirectly(tmpMovie);
+            if (!fetchedDirect || tmpMovie.getRating() == null) {
+              ImdbService.enrichMovieData(tmpMovie);
+            }
 
             // Fetch and set a trailer URL from YouTube
             updateMessage(
@@ -188,32 +192,24 @@ public class LibraryScanService {
             // can be enriched
             Movie tmpExistingMovie =
                 movieRepository.findByFilePath(tmpAbsolutePath);
-            boolean tmpNeedsEnrichment = tmpExistingMovie != null
-                && (tmpExistingMovie.getCoverImagePath() == null
-                    || tmpExistingMovie.getCoverImagePath().isBlank()
-                    || tmpExistingMovie.getDirector() == null
-                    || tmpExistingMovie.getDirector().isBlank()
-                    || tmpExistingMovie.getWriter() == null
-                    || tmpExistingMovie.getWriter().isBlank()
-                    || tmpExistingMovie.getGenre() == null
-                    || tmpExistingMovie.getGenre().isBlank()
-                    || tmpExistingMovie.getTrailerUrl() == null
-                    || tmpExistingMovie.getTrailerUrl().isBlank()
-                    || tmpExistingMovie.getActors() == null
-                    || tmpExistingMovie.getActors().isBlank()
-                    || hasOnlyThreeActors(tmpExistingMovie.getActors()));
+            boolean tmpNeedsEnrichment = tmpExistingMovie.getDuration() == null
+                || tmpExistingMovie.getDuration() == 0
+                || tmpExistingMovie.getRawRating() == null
+                || tmpExistingMovie.getRawRating() <= 1.0
+                || tmpExistingMovie.getRawRating() > 10.0
+                || tmpExistingMovie.getYear() == null
+                || tmpExistingMovie.getGenre() == null
+                || tmpExistingMovie.getActors() == null;
 
             if (tmpNeedsEnrichment) {
               updateMessage("Checking IMDB for existing movie: "
                   + tmpExistingMovie.getTitle());
               String tmpOriginalTitle = tmpExistingMovie.getTitle();
 
-              // Re-parse the title from the filename just in case the stored
-              // title is full of
-              // garbage tags
-              Movie tmpFreshlyParsed = parseMovieFromFile(tmpFile.toFile());
-              tmpExistingMovie.setTitle(tmpFreshlyParsed.getTitle());
+              // Do not overwrite existing title here since the user might have
+              // manually corrected it.
 
+              ImdbService.fetchImdbDurationDirectly(tmpExistingMovie);
               ImdbService.enrichMovieData(tmpExistingMovie);
 
               if (tmpExistingMovie.getTrailerUrl() == null

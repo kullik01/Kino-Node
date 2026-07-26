@@ -53,6 +53,7 @@ public class Movie {
   private String genre;
   private String description;
   private Integer rating; // 0-10 or null
+  private Double rawRating; // e.g., 4.9, 8.8 or null
   private String coverImagePath;
   private String trailerUrl;
   private String director;
@@ -208,6 +209,24 @@ public class Movie {
    */
   public void setRating(Integer rating) {
     this.rating = rating;
+  }
+
+  /**
+   * Gets the exact raw decimal rating of the movie (e.g. 4.9, 8.8).
+   *
+   * @return the raw decimal rating, or null if not set
+   */
+  public Double getRawRating() {
+    return rawRating;
+  }
+
+  /**
+   * Sets the exact raw decimal rating of the movie.
+   *
+   * @param rawRating the decimal rating to set
+   */
+  public void setRawRating(Double rawRating) {
+    this.rawRating = rawRating;
   }
 
   /**
@@ -405,7 +424,8 @@ public class Movie {
   }
 
   /**
-   * Formats the movie duration into a human-readable string (e.g., "148 min (2h 28m)").
+   * Formats the movie duration into a human-readable string (e.g., "148 min (2h
+   * 28m)").
    *
    * @return formatted duration string, or "—" if unknown
    */

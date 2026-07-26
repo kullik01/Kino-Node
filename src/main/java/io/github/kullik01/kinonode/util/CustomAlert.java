@@ -72,6 +72,11 @@ public class CustomAlert {
    */
   public static void showInformation(Window owner, String title, String header,
       String content) {
+    showInformation(owner, title, header, content, null);
+  }
+
+  public static void showInformation(Window owner, String title, String header,
+      String content, String iconPath) {
     Stage tmpStage = new Stage();
 
     // Inherit the owner stage characteristics if available
@@ -82,7 +87,7 @@ public class CustomAlert {
 
     // Configure stage modality and remove default OS decorations
     tmpStage.initModality(Modality.WINDOW_MODAL);
-    tmpStage.initStyle(StageStyle.UNDECORATED);
+    tmpStage.initStyle(StageStyle.TRANSPARENT);
 
     BorderPane tmpRoot = new BorderPane();
     tmpRoot.setStyle(
@@ -103,8 +108,11 @@ public class CustomAlert {
     javafx.scene.image.ImageView tmpLogoView = new javafx.scene.image.ImageView(
         new javafx.scene.image.Image(CustomAlert.class.getResourceAsStream(
             "/io/github/kullik01/kinonode/images/logo.png")));
-    tmpLogoView.setFitHeight(16);
-    tmpLogoView.setFitWidth(16);
+    tmpLogoView.setFitHeight(24);
+    tmpLogoView.setSmooth(true);
+    tmpLogoView.setFitWidth(24);
+    javafx.scene.layout.HBox.setMargin(tmpLogoView,
+        new javafx.geometry.Insets(0, 0, 0, -5));
 
     tmpTitleBar.getChildren().add(tmpLogoView);
     tmpTitleBar.setSpacing(5);
@@ -112,11 +120,7 @@ public class CustomAlert {
     Region tmpSpacer = new Region();
     HBox.setHgrow(tmpSpacer, Priority.ALWAYS);
 
-    Button tmpCloseButton = new Button("✕");
-    tmpCloseButton.getStyleClass().addAll("window-button", "close-button");
-    tmpCloseButton.setOnAction(tmpEvent -> tmpStage.close());
-
-    tmpTitleBar.getChildren().addAll(tmpTitleLabel, tmpSpacer, tmpCloseButton);
+    tmpTitleBar.getChildren().addAll(tmpTitleLabel, tmpSpacer);
 
     // Build the Content Area
     VBox tmpContentBox = new VBox(15);
@@ -130,14 +134,37 @@ public class CustomAlert {
     Label tmpTextLabel = new Label(content);
     tmpTextLabel.setWrapText(true);
     tmpTextLabel.setStyle("-fx-text-fill: -color-fg-muted;");
+    tmpTextLabel.setPrefWidth(350);
+    tmpTextLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+
+    javafx.scene.Node contentNode = tmpTextLabel;
+    if (iconPath != null && !iconPath.isEmpty()) {
+      try {
+        javafx.scene.image.ImageView tmpIconView =
+            new javafx.scene.image.ImageView(new javafx.scene.image.Image(
+                CustomAlert.class.getResourceAsStream(iconPath)));
+        tmpIconView.setFitHeight(48);
+        tmpIconView.setFitWidth(48);
+        tmpIconView.setSmooth(true);
+        HBox tmpIconBox = new HBox(15, tmpTextLabel, tmpIconView);
+        tmpIconBox.setAlignment(Pos.CENTER_LEFT);
+        contentNode = tmpIconBox;
+      } catch (Exception ignored) {
+      }
+    }
 
     Button tmpOkButton = new Button("OK");
     tmpOkButton.getStyleClass().add("button-primary");
     tmpOkButton.setOnAction(tmpEvent -> tmpStage.close());
+
     HBox tmpButtonBox = new HBox(tmpOkButton);
     tmpButtonBox.setAlignment(Pos.CENTER_RIGHT);
 
-    tmpContentBox.getChildren().addAll(tmpHeaderLabel, tmpTextLabel,
+    javafx.scene.layout.Region tmpVSpacer = new javafx.scene.layout.Region();
+    javafx.scene.layout.VBox.setVgrow(tmpVSpacer,
+        javafx.scene.layout.Priority.ALWAYS);
+
+    tmpContentBox.getChildren().addAll(tmpHeaderLabel, contentNode, tmpVSpacer,
         tmpButtonBox);
 
     tmpRoot.setTop(tmpTitleBar);
@@ -164,10 +191,272 @@ public class CustomAlert {
     tmpStage.setScene(tmpScene);
 
     tmpStage.setWidth(450);
-    tmpStage.setHeight(250);
+
+    tmpStage.sizeToScene();
 
     CursorUtils.centerOnOwnerOrScreen(tmpStage, owner);
 
+
     tmpStage.showAndWait();
   }
+
+  public static boolean showConfirmation(Window owner, String title,
+      String header, String content) {
+    return showConfirmation(owner, title, header, content, null);
+  }
+
+  public static boolean showConfirmation(Window owner, String title,
+      String header, String content, String iconPath) {
+    Stage tmpStage = new Stage();
+    final boolean[] result = {false};
+
+    if (owner instanceof Stage ownerStage) {
+      tmpStage.initOwner(ownerStage);
+      tmpStage.getIcons().addAll(ownerStage.getIcons());
+    }
+
+    tmpStage.initModality(Modality.WINDOW_MODAL);
+    tmpStage.initStyle(StageStyle.TRANSPARENT);
+
+    BorderPane tmpRoot = new BorderPane();
+    tmpRoot.setStyle(
+        "-fx-background-color: -color-bg-default; -fx-border-color: -color-border-default; -fx-border-width: 1px; -fx-border-radius: 8px; -fx-background-radius: 8px;");
+    tmpRoot.getStylesheets()
+        .add(CustomAlert.class
+            .getResource("/io/github/kullik01/kinonode/css/theme.css")
+            .toExternalForm());
+
+    HBox tmpTitleBar = new HBox();
+    tmpTitleBar.getStyleClass().add("title-bar");
+    tmpTitleBar.setAlignment(Pos.CENTER_LEFT);
+
+    Label tmpTitleLabel = new Label(title);
+    tmpTitleLabel.getStyleClass().add("title-bar-label");
+
+    javafx.scene.image.ImageView tmpLogoView = new javafx.scene.image.ImageView(
+        new javafx.scene.image.Image(CustomAlert.class.getResourceAsStream(
+            "/io/github/kullik01/kinonode/images/logo.png")));
+    tmpLogoView.setFitHeight(24);
+    tmpLogoView.setSmooth(true);
+    tmpLogoView.setFitWidth(24);
+    javafx.scene.layout.HBox.setMargin(tmpLogoView,
+        new javafx.geometry.Insets(0, 0, 0, -5));
+
+    tmpTitleBar.getChildren().add(tmpLogoView);
+    tmpTitleBar.setSpacing(5);
+
+    Region tmpSpacer = new Region();
+    HBox.setHgrow(tmpSpacer, Priority.ALWAYS);
+
+    tmpTitleBar.getChildren().addAll(tmpTitleLabel, tmpSpacer);
+
+    VBox tmpContentBox = new VBox(15);
+    tmpContentBox.setPadding(new Insets(20));
+    tmpContentBox.setStyle("-fx-background-radius: 0 0 8px 8px;");
+
+    Label tmpHeaderLabel = new Label(header);
+    tmpHeaderLabel.setStyle(
+        "-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
+
+    Label tmpTextLabel = new Label(content);
+    tmpTextLabel.setWrapText(true);
+    tmpTextLabel.setStyle("-fx-text-fill: -color-fg-muted;");
+    tmpTextLabel.setPrefWidth(350);
+    tmpTextLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+
+    javafx.scene.Node contentNode = tmpTextLabel;
+    if (iconPath != null && !iconPath.isEmpty()) {
+      try {
+        javafx.scene.image.ImageView tmpIconView =
+            new javafx.scene.image.ImageView(new javafx.scene.image.Image(
+                CustomAlert.class.getResourceAsStream(iconPath)));
+        tmpIconView.setFitHeight(48);
+        tmpIconView.setFitWidth(48);
+        tmpIconView.setSmooth(true);
+        HBox tmpIconBox = new HBox(15, tmpTextLabel, tmpIconView);
+        tmpIconBox.setAlignment(Pos.CENTER_LEFT);
+        contentNode = tmpIconBox;
+      } catch (Exception ignored) {
+      }
+    }
+
+    Button tmpOkButton = new Button("OK");
+    tmpOkButton.getStyleClass().add("button-primary");
+    tmpOkButton.setOnAction(tmpEvent -> {
+      result[0] = true;
+      tmpStage.close();
+    });
+
+    Button tmpCancelButton = new Button("Cancel");
+    tmpCancelButton.getStyleClass().add("button-primary");
+    tmpCancelButton.setOnAction(tmpEvent -> tmpStage.close());
+
+    HBox tmpButtonBox = new HBox(10, tmpCancelButton, tmpOkButton);
+    tmpButtonBox.setAlignment(Pos.CENTER_RIGHT);
+
+    javafx.scene.layout.Region tmpVSpacer = new javafx.scene.layout.Region();
+    javafx.scene.layout.VBox.setVgrow(tmpVSpacer,
+        javafx.scene.layout.Priority.ALWAYS);
+
+    tmpContentBox.getChildren().addAll(tmpHeaderLabel, contentNode, tmpVSpacer,
+        tmpButtonBox);
+
+    tmpRoot.setTop(tmpTitleBar);
+    tmpRoot.setCenter(tmpContentBox);
+
+    final double[] tmpXOffset = {0};
+    final double[] tmpYOffset = {0};
+    tmpTitleBar.setOnMousePressed(event -> {
+      tmpXOffset[0] = tmpStage.getX() - event.getScreenX();
+      tmpYOffset[0] = tmpStage.getY() - event.getScreenY();
+    });
+    tmpTitleBar.setOnMouseDragged(event -> {
+      tmpStage.setX(event.getScreenX() + tmpXOffset[0]);
+      tmpStage.setY(event.getScreenY() + tmpYOffset[0]);
+    });
+
+    StackPane tmpWrapper = new StackPane(tmpRoot);
+    tmpWrapper.setStyle("-fx-background-color: transparent; -fx-padding: 0px;");
+
+    Scene tmpScene = new Scene(tmpWrapper);
+    tmpScene.setFill(Color.TRANSPARENT);
+    tmpScene.setCursor(CursorUtils.getAppLogoCursor());
+    tmpStage.setScene(tmpScene);
+
+    tmpStage.setWidth(450);
+
+    tmpStage.sizeToScene();
+
+    CursorUtils.centerOnOwnerOrScreen(tmpStage, owner);
+
+
+    tmpStage.showAndWait();
+    return result[0];
+  }
+
+  public static void showError(Window owner, String title, String header,
+      String content) {
+    showError(owner, title, header, content, null);
+  }
+
+  public static void showError(Window owner, String title, String header,
+      String content, String iconPath) {
+    Stage tmpStage = new Stage();
+
+    if (owner instanceof Stage ownerStage) {
+      tmpStage.initOwner(ownerStage);
+      tmpStage.getIcons().addAll(ownerStage.getIcons());
+    }
+
+    tmpStage.initModality(Modality.WINDOW_MODAL);
+    tmpStage.initStyle(StageStyle.TRANSPARENT);
+
+    BorderPane tmpRoot = new BorderPane();
+    tmpRoot.setStyle(
+        "-fx-background-color: -color-bg-default; -fx-border-color: -color-border-default; -fx-border-width: 1px; -fx-border-radius: 8px; -fx-background-radius: 8px;");
+    tmpRoot.getStylesheets()
+        .add(CustomAlert.class
+            .getResource("/io/github/kullik01/kinonode/css/theme.css")
+            .toExternalForm());
+
+    HBox tmpTitleBar = new HBox();
+    tmpTitleBar.getStyleClass().add("title-bar");
+    tmpTitleBar.setAlignment(Pos.CENTER_LEFT);
+
+    Label tmpTitleLabel = new Label(title);
+    tmpTitleLabel.getStyleClass().add("title-bar-label");
+
+    javafx.scene.image.ImageView tmpLogoView = new javafx.scene.image.ImageView(
+        new javafx.scene.image.Image(CustomAlert.class.getResourceAsStream(
+            "/io/github/kullik01/kinonode/images/error_icon.png")));
+    tmpLogoView.setFitHeight(24);
+    tmpLogoView.setSmooth(true);
+    tmpLogoView.setFitWidth(24);
+    javafx.scene.layout.HBox.setMargin(tmpLogoView,
+        new javafx.geometry.Insets(0, 0, 0, -5));
+
+    tmpTitleBar.getChildren().add(tmpLogoView);
+    tmpTitleBar.setSpacing(5);
+
+    Region tmpSpacer = new Region();
+    HBox.setHgrow(tmpSpacer, Priority.ALWAYS);
+
+    tmpTitleBar.getChildren().addAll(tmpTitleLabel, tmpSpacer);
+
+    VBox tmpContentBox = new VBox(15);
+    tmpContentBox.setPadding(new Insets(20));
+    tmpContentBox.setStyle("-fx-background-radius: 0 0 8px 8px;");
+
+    Label tmpHeaderLabel = new Label(header);
+    tmpHeaderLabel.setStyle(
+        "-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
+
+    Label tmpTextLabel = new Label(content);
+    tmpTextLabel.setWrapText(true);
+    tmpTextLabel.setStyle("-fx-text-fill: -color-fg-muted;");
+    tmpTextLabel.setPrefWidth(350);
+    tmpTextLabel.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+
+    javafx.scene.Node contentNode = tmpTextLabel;
+    if (iconPath != null && !iconPath.isEmpty()) {
+      try {
+        javafx.scene.image.ImageView tmpIconView =
+            new javafx.scene.image.ImageView(new javafx.scene.image.Image(
+                CustomAlert.class.getResourceAsStream(iconPath)));
+        tmpIconView.setFitHeight(48);
+        tmpIconView.setFitWidth(48);
+        tmpIconView.setSmooth(true);
+        HBox tmpIconBox = new HBox(15, tmpTextLabel, tmpIconView);
+        tmpIconBox.setAlignment(Pos.CENTER_LEFT);
+        contentNode = tmpIconBox;
+      } catch (Exception ignored) {
+      }
+    }
+
+    Button tmpOkButton = new Button("OK");
+    tmpOkButton.getStyleClass().add("button-primary");
+    tmpOkButton.setOnAction(tmpEvent -> tmpStage.close());
+
+    HBox tmpButtonBox = new HBox(tmpOkButton);
+    tmpButtonBox.setAlignment(Pos.CENTER_RIGHT);
+
+    javafx.scene.layout.Region tmpVSpacer = new javafx.scene.layout.Region();
+    javafx.scene.layout.VBox.setVgrow(tmpVSpacer,
+        javafx.scene.layout.Priority.ALWAYS);
+
+    tmpContentBox.getChildren().addAll(tmpHeaderLabel, contentNode, tmpVSpacer,
+        tmpButtonBox);
+
+    tmpRoot.setTop(tmpTitleBar);
+    tmpRoot.setCenter(tmpContentBox);
+
+    final double[] tmpXOffset = {0};
+    final double[] tmpYOffset = {0};
+    tmpTitleBar.setOnMousePressed(event -> {
+      tmpXOffset[0] = tmpStage.getX() - event.getScreenX();
+      tmpYOffset[0] = tmpStage.getY() - event.getScreenY();
+    });
+    tmpTitleBar.setOnMouseDragged(event -> {
+      tmpStage.setX(event.getScreenX() + tmpXOffset[0]);
+      tmpStage.setY(event.getScreenY() + tmpYOffset[0]);
+    });
+
+    StackPane tmpWrapper = new StackPane(tmpRoot);
+    tmpWrapper.setStyle("-fx-background-color: transparent; -fx-padding: 0px;");
+
+    Scene tmpScene = new Scene(tmpWrapper);
+    tmpScene.setFill(Color.TRANSPARENT);
+    tmpScene.setCursor(CursorUtils.getAppLogoCursor());
+    tmpStage.setScene(tmpScene);
+
+    tmpStage.setWidth(450);
+
+    tmpStage.sizeToScene();
+
+    CursorUtils.centerOnOwnerOrScreen(tmpStage, owner);
+
+
+    tmpStage.showAndWait();
+  }
+
 }

@@ -186,26 +186,52 @@ public class MovieDetailController implements Refreshable {
     txtTitle.setText(movie.getTitle());
     txtYear.setText(
         movie.getYear() != null ? String.valueOf(movie.getYear()) : "");
-    if (movie.getDuration() != null && movie.getDuration() > 0) {
+    loadPoster();
+    buildRatingWidget();
+    refreshWatchlistStatus();
+
+    boolean missingDuration =
+        movie.getDuration() == null || movie.getDuration() <= 0;
+    boolean missingRating =
+        movie.getRating() == null && movie.getRawRating() == null;
+
+    if (missingDuration) {
+      txtDuration.setText("Fetching IMDb duration (imdb.com)...");
+      txtDuration
+          .setStyle("-fx-text-fill: -color-fg-muted; -fx-font-style: italic;");
+    } else {
       txtDuration.setText(movie.getFormattedDuration());
       txtDuration.setStyle("-fx-text-fill: -color-fg-default;");
-    } else {
-      txtDuration.setText("Fetching IMDb duration (imdb.com)...");
-      txtDuration.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-style: italic;");
+    }
+
+    if (missingDuration || missingRating) {
       java.util.concurrent.CompletableFuture.runAsync(() -> {
-        boolean fetched = io.github.kullik01.kinonode.service.ImdbService.fetchImdbDurationDirectly(movie);
-        if (!fetched) {
-          io.github.kullik01.kinonode.service.ImdbService.enrichMovieData(movie);
+        if (missingDuration) {
+          io.github.kullik01.kinonode.service.ImdbService
+              .fetchImdbDurationDirectly(movie);
+        }
+        if (movie.getDuration() == null || movie.getDuration() <= 0
+            || (movie.getRating() == null && movie.getRawRating() == null)) {
+          io.github.kullik01.kinonode.service.ImdbService
+              .enrichMovieData(movie);
         }
         javafx.application.Platform.runLater(() -> {
           if (movie.getDuration() != null && movie.getDuration() > 0) {
             txtDuration.setText(movie.getFormattedDuration());
             txtDuration.setStyle("-fx-text-fill: -color-fg-default;");
-            movieRepository.update(movie);
-            showStatus("IMDb Duration loaded from imdb.com!");
           } else {
             txtDuration.setText("Not specified (Click 📝 to set duration)");
-            txtDuration.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-style: italic;");
+            txtDuration.setStyle(
+                "-fx-text-fill: -color-fg-muted; -fx-font-style: italic;");
+          }
+          if (movie.getRating() != null || movie.getRawRating() != null) {
+            this.currentRating = movie.getRating();
+            updateRatingUI();
+          }
+          movieRepository.update(movie);
+          if ((movie.getDuration() != null && movie.getDuration() > 0)
+              || movie.getRating() != null || movie.getRawRating() != null) {
+            showStatus("IMDb Metadata loaded!");
           }
         });
       });
@@ -228,10 +254,6 @@ public class MovieDetailController implements Refreshable {
     String tmpFilePath = movie.getFilePath();
     btnPlay.setDisable(tmpFilePath == null || tmpFilePath.trim().isEmpty()
         || !new File(tmpFilePath).exists());
-
-    loadPoster();
-    buildRatingWidget();
-    refreshWatchlistStatus();
 
     // Auto-save when changing tabs (which removes the view from the scene)
     lblHeaderTitle.sceneProperty().addListener((obs, oldVal, newVal) -> {
@@ -292,16 +314,40 @@ public class MovieDetailController implements Refreshable {
     return tmpIcon;
   }
 
-  private void setReelState(Label reelLabel, boolean active) {
-    SVGPath tmpIcon = (SVGPath) reelLabel.getGraphic();
-    if (tmpIcon != null) {
-      if (active) {
-        tmpIcon.setStyle(
-            "-fx-fill: #ED8B00; -fx-opacity: 1.0; -fx-effect: dropshadow(three-pass-box, rgba(237, 139, 0, 0.4), 6, 0, 0, 0);");
-      } else {
-        tmpIcon.setStyle(
-            "-fx-fill: #666666; -fx-opacity: 0.35; -fx-effect: none;");
-      }
+  private void setReelState(Label reelLabel, double fillAmount) {
+    if (fillAmount >= 1.0) {
+      SVGPath tmpIcon = createCameraSvg();
+      tmpIcon.setStyle(
+          "-fx-fill: #ED8B00; -fx-opacity: 1.0; -fx-effect: dropshadow(three-pass-box, rgba(237, 139, 0, 0.4), 6, 0, 0, 0);");
+      reelLabel.setGraphic(tmpIcon);
+    } else if (fillAmount <= 0.0) {
+      SVGPath tmpIcon = createCameraSvg();
+      tmpIcon
+          .setStyle("-fx-fill: #666666; -fx-opacity: 0.35; -fx-effect: none;");
+      reelLabel.setGraphic(tmpIcon);
+    } else {
+      // Create stacked layered icon: background unfilled camera + half-filled
+      // foreground camera
+      SVGPath bgIcon = createCameraSvg();
+      bgIcon
+          .setStyle("-fx-fill: #666666; -fx-opacity: 0.35; -fx-effect: none;");
+
+      SVGPath fillIcon = createCameraSvg();
+      // Use a linear gradient to perfectly fill the exact percentage of the
+      // icon's bounds
+      double pct = fillAmount * 100.0;
+      String gradient = String.format(java.util.Locale.US,
+          "linear-gradient(to right, #ED8B00 0%%, #ED8B00 %.1f%%, transparent %.1f%%, transparent 100%%)",
+          pct, pct);
+      fillIcon.setStyle("-fx-fill: " + gradient
+          + "; -fx-opacity: 1.0; -fx-effect: dropshadow(three-pass-box, rgba(237, 139, 0, 0.4), 6, 0, 0, 0);");
+
+      javafx.scene.layout.StackPane comboPane =
+          new javafx.scene.layout.StackPane(bgIcon, fillIcon);
+      comboPane.setPrefSize(28.0, 28.0);
+      comboPane.setMinSize(28.0, 28.0);
+      comboPane.setMaxSize(28.0, 28.0);
+      reelLabel.setGraphic(comboPane);
     }
   }
 
@@ -309,14 +355,18 @@ public class MovieDetailController implements Refreshable {
     if (ratingContainer == null || ratingContainer.getChildren().isEmpty()) {
       return 1;
     }
-    for (int tmpIndex = 0; tmpIndex < 10 && tmpIndex < ratingContainer.getChildren().size(); tmpIndex++) {
+    for (int tmpIndex = 0; tmpIndex < 10
+        && tmpIndex < ratingContainer.getChildren().size(); tmpIndex++) {
       javafx.scene.Node tmpChild = ratingContainer.getChildren().get(tmpIndex);
-      javafx.geometry.Point2D localPt = tmpChild.sceneToLocal(e.getSceneX(), e.getSceneY());
-      if (localPt.getX() >= 0 && localPt.getX() <= 28.0 && localPt.getY() >= 0 && localPt.getY() <= 28.0) {
+      javafx.geometry.Point2D localPt =
+          tmpChild.sceneToLocal(e.getSceneX(), e.getSceneY());
+      if (localPt.getX() >= 0 && localPt.getX() <= 28.0 && localPt.getY() >= 0
+          && localPt.getY() <= 28.0) {
         return tmpIndex + 1;
       }
     }
-    javafx.geometry.Point2D containerPt = ratingContainer.sceneToLocal(e.getSceneX(), e.getSceneY());
+    javafx.geometry.Point2D containerPt =
+        ratingContainer.sceneToLocal(e.getSceneX(), e.getSceneY());
     int index = (int) Math.ceil(containerPt.getX() / 28.0);
     return Math.max(1, Math.min(10, index));
   }
@@ -344,8 +394,14 @@ public class MovieDetailController implements Refreshable {
       Runnable applyRating = () -> {
         if (currentRating != null && currentRating == tmpScore) {
           currentRating = null; // Toggle off to unrated
+          if (movie != null) {
+            movie.setRawRating(null);
+          }
         } else {
           currentRating = tmpScore;
+          if (movie != null) {
+            movie.setRawRating((double) tmpScore);
+          }
         }
         if (movie != null) {
           movie.setRating(currentRating);
@@ -354,42 +410,14 @@ public class MovieDetailController implements Refreshable {
         updateRatingUI();
       };
 
-      tmpReel.setOnMousePressed(e -> applyRating.run());
       tmpReel.setOnMouseClicked(e -> applyRating.run());
       tmpReel.setOnMouseEntered(e -> previewRatingHover(tmpScore));
       tmpReel.setOnMouseMoved(e -> previewRatingHover(tmpScore));
-      tmpReel.hoverProperty().addListener((obs, wasHovered, isHovered) -> {
-        if (isHovered) {
-          previewRatingHover(tmpScore);
-        }
-      });
       tmpReels.add(tmpReel);
       ratingContainer.getChildren().add(tmpReel);
     }
 
-    ratingContainer.setOnMouseMoved(e -> previewRatingHover(detectHoveredScore(e)));
-    ratingContainer.setOnMouseDragged(e -> previewRatingHover(detectHoveredScore(e)));
-
-    ratingContainer.setOnMouseReleased(e -> {
-      int score = detectHoveredScore(e);
-      if (currentRating != null && currentRating == score) {
-        currentRating = null;
-      } else {
-        currentRating = score;
-      }
-      if (movie != null) {
-        movie.setRating(currentRating);
-        movieRepository.update(movie);
-      }
-      updateRatingUI();
-    });
-
     ratingContainer.setOnMouseExited(e -> updateRatingUI());
-    ratingContainer.hoverProperty().addListener((obs, wasHovered, isHovered) -> {
-      if (!isHovered) {
-        updateRatingUI();
-      }
-    });
 
     // Numerical display label positioned at the end of the rating container
     Label tmpLblRatingVal = new Label();
@@ -407,7 +435,7 @@ public class MovieDetailController implements Refreshable {
         .get(ratingContainer.getChildren().size() - 1);
     for (int tmpIndex = 1; tmpIndex <= 10; tmpIndex++) {
       Label tmpReel = (Label) ratingContainer.getChildren().get(tmpIndex - 1);
-      setReelState(tmpReel, tmpIndex <= hoverScore);
+      setReelState(tmpReel, tmpIndex <= hoverScore ? 1.0 : 0.0);
     }
     tmpLblRatingVal.setText(hoverScore + "/10");
     tmpLblRatingVal.setStyle(
@@ -418,10 +446,14 @@ public class MovieDetailController implements Refreshable {
     Label tmpLblRatingVal = (Label) ratingContainer.getChildren()
         .get(ratingContainer.getChildren().size() - 1);
 
-    if (currentRating == null) {
+    Double displayRating =
+        (movie != null && movie.getRawRating() != null) ? movie.getRawRating()
+            : (currentRating != null ? currentRating.doubleValue() : null);
+
+    if (displayRating == null) {
       for (int tmpIndex = 1; tmpIndex <= 10; tmpIndex++) {
         Label tmpReel = (Label) ratingContainer.getChildren().get(tmpIndex - 1);
-        setReelState(tmpReel, false);
+        setReelState(tmpReel, 0.0);
       }
       tmpLblRatingVal.setText("Unrated");
       tmpLblRatingVal.setStyle(
@@ -429,9 +461,19 @@ public class MovieDetailController implements Refreshable {
     } else {
       for (int tmpIndex = 1; tmpIndex <= 10; tmpIndex++) {
         Label tmpReel = (Label) ratingContainer.getChildren().get(tmpIndex - 1);
-        setReelState(tmpReel, tmpIndex <= currentRating);
+        if (displayRating >= tmpIndex) {
+          setReelState(tmpReel, 1.0);
+        } else if (displayRating > tmpIndex - 1) {
+          double fraction = displayRating - (tmpIndex - 1);
+          setReelState(tmpReel, fraction);
+        } else {
+          setReelState(tmpReel, 0.0);
+        }
       }
-      tmpLblRatingVal.setText(currentRating + "/10");
+      String formattedRating =
+          (displayRating % 1.0 == 0) ? String.format("%.0f", displayRating)
+              : String.format(java.util.Locale.US, "%.1f", displayRating);
+      tmpLblRatingVal.setText(formattedRating + "/10");
       tmpLblRatingVal.setStyle(
           "-fx-text-fill: #ED8B00; -fx-font-weight: bold; -fx-padding: 0 0 0 10px;");
     }
@@ -458,27 +500,23 @@ public class MovieDetailController implements Refreshable {
 
   @FXML
   private void manageMovieWatchlists() {
-    Dialog<Void> tmpDialog = new Dialog<>();
-    tmpDialog.setTitle("Manage Watchlists");
-    tmpDialog.setHeaderText("Add or Remove \"" + movie.getTitle() + "\" from Watchlists");
-
-    // Set custom logo icon on stage
-    javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpDialog.getDialogPane().getScene().getWindow();
-    tmpStage.getIcons().add(new javafx.scene.image.Image(getClass().getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
+    Dialog<Void> tmpDialog = io.github.kullik01.kinonode.util.DialogBuilder
+        .createDialog("Manage Watchlists",
+            "Add or Remove \"" + movie.getTitle() + "\" from Watchlists", null);
 
     // Dialog size matching standard dialog width
-    tmpDialog.getDialogPane().setPrefSize(480, 320);
-    tmpDialog.getDialogPane().setMinSize(480, 320);
 
-    ButtonType tmpOkBtnType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-    tmpDialog.getDialogPane().getButtonTypes().addAll(tmpOkBtnType, ButtonType.CANCEL);
+    tmpDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK,
+        ButtonType.CANCEL);
 
     // Style both OK and Cancel buttons as blue primary buttons
-    javafx.scene.Node tmpOkBtn = tmpDialog.getDialogPane().lookupButton(tmpOkBtnType);
+    javafx.scene.Node tmpOkBtn =
+        tmpDialog.getDialogPane().lookupButton(ButtonType.OK);
     if (tmpOkBtn != null) {
       tmpOkBtn.getStyleClass().add("button-primary");
     }
-    javafx.scene.Node tmpCancelBtn = tmpDialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+    javafx.scene.Node tmpCancelBtn =
+        tmpDialog.getDialogPane().lookupButton(ButtonType.CANCEL);
     if (tmpCancelBtn != null) {
       tmpCancelBtn.getStyleClass().add("button-primary");
     }
@@ -490,7 +528,8 @@ public class MovieDetailController implements Refreshable {
     ScrollPane tmpScrollPane = new ScrollPane();
     tmpScrollPane.setFitToWidth(true);
     tmpScrollPane.setPrefHeight(180);
-    tmpScrollPane.setStyle("-fx-background-color: transparent; -fx-border-color: -color-border-default; -fx-border-radius: 4px;");
+    tmpScrollPane.setStyle(
+        "-fx-background-color: transparent; -fx-border-color: -color-border-default; -fx-border-radius: 4px;");
 
     VBox tmpWatchlistsListVBox = new VBox(10);
     tmpWatchlistsListVBox.setPadding(new Insets(10));
@@ -502,13 +541,15 @@ public class MovieDetailController implements Refreshable {
       List<Watchlist> allW = watchlistRepository.findAll();
       if (allW.isEmpty()) {
         Label emptyLbl = new Label("No watchlists available.");
-        emptyLbl.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-style: italic;");
+        emptyLbl.setStyle(
+            "-fx-text-fill: -color-fg-muted; -fx-font-style: italic;");
         tmpWatchlistsListVBox.getChildren().add(emptyLbl);
       } else {
         for (Watchlist w : allW) {
           CheckBox cb = new CheckBox(w.getName());
           cb.setStyle("-fx-font-size: 14px; -fx-padding: 4px 0;");
-          boolean isMovieIn = w.getMovies().stream().anyMatch(m -> m.getId().equals(movie.getId()));
+          boolean isMovieIn = w.getMovies().stream()
+              .anyMatch(m -> m.getId().equals(movie.getId()));
           cb.setSelected(isMovieIn);
 
           cb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
@@ -516,7 +557,8 @@ public class MovieDetailController implements Refreshable {
               watchlistRepository.addMovieToWatchlist(w.getId(), movie.getId());
               showStatus("Added to watchlist " + w.getName());
             } else {
-              watchlistRepository.removeMovieFromWatchlist(w.getId(), movie.getId());
+              watchlistRepository.removeMovieFromWatchlist(w.getId(),
+                  movie.getId());
               showStatus("Removed from watchlist " + w.getName());
             }
             refreshWatchlistStatus();
@@ -532,7 +574,8 @@ public class MovieDetailController implements Refreshable {
     Button tmpCreateBtn = new Button("+ Create New Watchlist");
     tmpCreateBtn.getStyleClass().add("button-primary");
     tmpCreateBtn.setOnAction(e -> {
-      Optional<String> result = showWatchlistDialog("New Watchlist", "Create a new watchlist", "", -1);
+      Optional<String> result = showWatchlistDialog("New Watchlist",
+          "Create a new watchlist", "", -1);
       if (result.isPresent() && !result.get().trim().isEmpty()) {
         String cleanName = result.get().trim();
         Watchlist nw = watchlistRepository.insert(new Watchlist(cleanName));
@@ -550,28 +593,17 @@ public class MovieDetailController implements Refreshable {
 
     tmpContentBox.getChildren().addAll(tmpScrollPane, tmpCreateBox);
     tmpDialog.getDialogPane().setContent(tmpContentBox);
-
-    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpDialog);
     tmpDialog.showAndWait();
   }
 
   private Optional<String> showWatchlistDialog(String title, String header,
       String defaultText, int currentId) {
-    Dialog<String> tmpDialog = new Dialog<>();
-    tmpDialog.setTitle(title);
-    tmpDialog.setHeaderText(header);
+    Dialog<String> tmpDialog = io.github.kullik01.kinonode.util.DialogBuilder
+        .createDialog(title, header, null);
 
-    tmpDialog.getDialogPane().setPrefSize(480, 280);
-    tmpDialog.getDialogPane().setMinSize(480, 280);
 
-    javafx.stage.Stage tmpStage =
-        (javafx.stage.Stage) tmpDialog.getDialogPane().getScene().getWindow();
-    tmpStage.getIcons().add(new javafx.scene.image.Image(getClass()
-        .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
 
-    ButtonType tmpOkButtonType =
-        new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-    tmpDialog.getDialogPane().getButtonTypes().addAll(tmpOkButtonType,
+    tmpDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK,
         ButtonType.CANCEL);
 
     VBox tmpVbox = new VBox(5);
@@ -589,10 +621,11 @@ public class MovieDetailController implements Refreshable {
     tmpDialog.getDialogPane().setContent(tmpVbox);
 
     javafx.scene.Node tmpOkButton =
-        tmpDialog.getDialogPane().lookupButton(tmpOkButtonType);
+        tmpDialog.getDialogPane().lookupButton(ButtonType.OK);
     if (tmpOkButton != null) {
       tmpOkButton.getStyleClass().add("button-primary");
-      tmpOkButton.setDisable(defaultText.trim().isEmpty() || defaultText.length() > 30);
+      tmpOkButton.setDisable(
+          defaultText.trim().isEmpty() || defaultText.length() > 30);
     }
 
     javafx.scene.Node tmpCancelButton =
@@ -638,13 +671,13 @@ public class MovieDetailController implements Refreshable {
         });
 
     tmpDialog.setResultConverter(dialogButton -> {
-      if (dialogButton == tmpOkButtonType) {
+      if (dialogButton == ButtonType.OK) {
         return tmpTextField.getText();
       }
       return null;
     });
 
-    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpDialog);
+    tmpDialog.getDialogPane().setContent(tmpVbox);
     return tmpDialog.showAndWait();
   }
 
@@ -653,29 +686,9 @@ public class MovieDetailController implements Refreshable {
     for (Watchlist tmpW : tmpWatchlists) {
       if (tmpW.getName().equalsIgnoreCase(cleanName)) {
         if (tmpW.getId() != null && tmpW.getId() != currentId) {
-          Alert tmpAlert = new Alert(Alert.AlertType.ERROR);
-          javafx.stage.Stage tmpStage = (javafx.stage.Stage) tmpAlert
-              .getDialogPane().getScene().getWindow();
-          tmpStage.getIcons()
-              .add(new javafx.scene.image.Image(getClass().getResourceAsStream(
-                  "/io/github/kullik01/kinonode/images/logo.png")));
-          tmpAlert.setTitle("Validation Error");
-          tmpAlert.setHeaderText("Duplicate Watchlist");
-          tmpAlert.setContentText(
+          io.github.kullik01.kinonode.util.DialogBuilder.showError(
+              "Validation Error", "Duplicate Watchlist",
               "A watchlist with this name already exists. Please choose a different name.");
-
-          javafx.scene.image.ImageView tmpCustomIcon =
-              new javafx.scene.image.ImageView(
-                  new javafx.scene.image.Image(getClass().getResourceAsStream(
-                      "/io/github/kullik01/kinonode/images/error_icon.png")));
-          tmpCustomIcon.setFitHeight(48);
-          tmpCustomIcon.setFitWidth(48);
-          tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
-
-          tmpAlert.getDialogPane()
-              .setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-          io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
-          tmpAlert.showAndWait();
           return false;
         }
       }
@@ -743,26 +756,9 @@ public class MovieDetailController implements Refreshable {
     } catch (Exception tmpException) {
       LOGGER.log(Level.SEVERE, "Failed to launch external media player",
           tmpException);
-      Alert tmpAlert = new Alert(Alert.AlertType.ERROR);
-      javafx.stage.Stage tmpStage =
-          (javafx.stage.Stage) tmpAlert.getDialogPane().getScene().getWindow();
-      tmpStage.getIcons()
-          .add(new javafx.scene.image.Image(getClass().getResourceAsStream(
-              "/io/github/kullik01/kinonode/images/logo.png")));
-      tmpAlert.setTitle("Playback Failed");
-      tmpAlert.setHeaderText("Could not launch external media player");
-      tmpAlert.setContentText(tmpException.getMessage());
-
-      javafx.scene.image.ImageView tmpCustomIcon =
-          new javafx.scene.image.ImageView(
-              new javafx.scene.image.Image(getClass().getResourceAsStream(
-                  "/io/github/kullik01/kinonode/images/error_icon.png")));
-      tmpCustomIcon.setFitHeight(48);
-      tmpCustomIcon.setFitWidth(48);
-      tmpAlert.getDialogPane().setGraphic(tmpCustomIcon);
-
-      io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpAlert);
-      tmpAlert.showAndWait();
+      io.github.kullik01.kinonode.util.DialogBuilder.showError(
+          "Playback Failed", "Could not launch external media player",
+          tmpException.getMessage());
     }
   }
 
@@ -843,29 +839,13 @@ public class MovieDetailController implements Refreshable {
   private void showEditDialog(String title, String fieldName,
       TextInputControl control, InputConstraint constraint,
       java.util.function.Consumer<String> updater) {
-    Dialog<String> tmpDialog = new Dialog<>();
-    tmpDialog.setTitle("Edit " + title);
-    tmpDialog.setHeaderText("Edit " + fieldName);
+    Dialog<String> tmpDialog = io.github.kullik01.kinonode.util.DialogBuilder
+        .createDialog("Edit " + title, "Edit " + fieldName,
+            "/io/github/kullik01/kinonode/images/question_mark.png");
 
-    tmpDialog.getDialogPane().setPrefSize(480, 280);
-    tmpDialog.getDialogPane().setMinSize(480, 280);
+    // Removed fixed sizing to let the dialog size to its content
 
-    javafx.stage.Stage tmpStage =
-        (javafx.stage.Stage) tmpDialog.getDialogPane().getScene().getWindow();
-    tmpStage.getIcons().add(new javafx.scene.image.Image(getClass()
-        .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
-
-    javafx.scene.image.ImageView tmpCustomIcon =
-        new javafx.scene.image.ImageView(
-            new javafx.scene.image.Image(getClass().getResourceAsStream(
-                "/io/github/kullik01/kinonode/images/question_mark.png")));
-    tmpCustomIcon.setFitHeight(48);
-    tmpCustomIcon.setFitWidth(48);
-    tmpDialog.getDialogPane().setGraphic(tmpCustomIcon);
-
-    ButtonType tmpOkButtonType =
-        new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-    tmpDialog.getDialogPane().getButtonTypes().addAll(tmpOkButtonType,
+    tmpDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK,
         ButtonType.CANCEL);
 
     VBox tmpVbox = new VBox(5);
@@ -918,7 +898,7 @@ public class MovieDetailController implements Refreshable {
     tmpDialog.getDialogPane().setContent(tmpVbox);
 
     javafx.scene.Node tmpOkButton =
-        tmpDialog.getDialogPane().lookupButton(tmpOkButtonType);
+        tmpDialog.getDialogPane().lookupButton(ButtonType.OK);
     tmpOkButton.setDisable(true);
 
     tmpInputField.textProperty()
@@ -946,13 +926,13 @@ public class MovieDetailController implements Refreshable {
         });
 
     tmpDialog.setResultConverter(dialogButton -> {
-      if (dialogButton == tmpOkButtonType) {
+      if (dialogButton == ButtonType.OK) {
         return tmpInputField.getText();
       }
       return null;
     });
 
-    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpDialog);
+
     java.util.Optional<String> tmpResult = tmpDialog.showAndWait();
     tmpResult.ifPresent(val -> {
       String newVal = val.trim();
@@ -989,7 +969,8 @@ public class MovieDetailController implements Refreshable {
             if (val.isEmpty()) {
               movie.setDuration(null);
               txtDuration.setText("Not specified (Click 📝 to set duration)");
-              txtDuration.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-style: italic;");
+              txtDuration.setStyle(
+                  "-fx-text-fill: -color-fg-muted; -fx-font-style: italic;");
             } else {
               movie.setDuration(Integer.parseInt(val));
               txtDuration.setText(movie.getFormattedDuration());
@@ -1071,29 +1052,13 @@ public class MovieDetailController implements Refreshable {
 
   @FXML
   private void editTrailerUrl() {
-    Dialog<String> tmpDialog = new Dialog<>();
-    tmpDialog.setTitle("Edit Trailer Link");
-    tmpDialog.setHeaderText("YouTube Trailer URL");
+    Dialog<String> tmpDialog = io.github.kullik01.kinonode.util.DialogBuilder
+        .createDialog("Edit Trailer Link", "YouTube Trailer URL",
+            "/io/github/kullik01/kinonode/images/question_mark.png");
 
-    tmpDialog.getDialogPane().setPrefSize(480, 280);
-    tmpDialog.getDialogPane().setMinSize(480, 280);
 
-    javafx.stage.Stage tmpStage =
-        (javafx.stage.Stage) tmpDialog.getDialogPane().getScene().getWindow();
-    tmpStage.getIcons().add(new javafx.scene.image.Image(getClass()
-        .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
 
-    javafx.scene.image.ImageView tmpCustomIcon =
-        new javafx.scene.image.ImageView(
-            new javafx.scene.image.Image(getClass().getResourceAsStream(
-                "/io/github/kullik01/kinonode/images/question_mark.png")));
-    tmpCustomIcon.setFitHeight(48);
-    tmpCustomIcon.setFitWidth(48);
-    tmpDialog.getDialogPane().setGraphic(tmpCustomIcon);
-
-    ButtonType tmpOkButtonType =
-        new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-    tmpDialog.getDialogPane().getButtonTypes().addAll(tmpOkButtonType,
+    tmpDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK,
         ButtonType.CANCEL);
 
     VBox tmpVbox = new VBox(5);
@@ -1122,7 +1087,7 @@ public class MovieDetailController implements Refreshable {
     tmpDialog.getDialogPane().setContent(tmpVbox);
 
     javafx.scene.Node tmpOkButton =
-        tmpDialog.getDialogPane().lookupButton(tmpOkButtonType);
+        tmpDialog.getDialogPane().lookupButton(ButtonType.OK);
     tmpOkButton.setDisable(true);
 
     tmpTextField.textProperty()
@@ -1152,13 +1117,13 @@ public class MovieDetailController implements Refreshable {
         });
 
     tmpDialog.setResultConverter(dialogButton -> {
-      if (dialogButton == tmpOkButtonType) {
+      if (dialogButton == ButtonType.OK) {
         return tmpTextField.getText();
       }
       return null;
     });
 
-    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpDialog);
+
     java.util.Optional<String> tmpResult = tmpDialog.showAndWait();
     tmpResult.ifPresent(url -> {
       String newUrl = url.trim();
