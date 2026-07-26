@@ -786,5 +786,26 @@
     -fx-background-radius: 6px;
 }
 
-
-
+/* Aggressively remove lines from Watchlists list and Movies list by wiping backgrounds */
+.borderless-list {
+    -fx-background-color: transparent !important;
+    -fx-padding: 0 !important;
+}
+.borderless-list .list-cell,
+.borderless-list .list-cell:empty,
+.borderless-list .list-cell:filled,
+.borderless-list .list-cell:even,
+.borderless-list .list-cell:odd {
+    -fx-background-color: transparent !important;
+    -fx-border-width: 0 !important;
+    -fx-border-color: transparent !important;
+    -fx-background-insets: 0 !important;
+}
+.borderless-list .list-cell:filled:hover {
+    -fx-background-color: rgba(33, 120, 221, 0.1) !important;
+}
+.borderless-list .list-cell:filled:selected,
+.borderless-list .list-cell:filled:selected:hover {
+    -fx-background-color: #2178dd !important;
+    -fx-text-fill: white !important;
+}
