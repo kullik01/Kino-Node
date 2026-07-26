@@ -171,7 +171,8 @@ public class ImdbService {
               }
             }
 
-            // Fetch additional details from IMDb title page (duration & rating) and Wikidata
+            // Fetch additional details from IMDb title page (duration & rating)
+            // and Wikidata
             String tmpImdbIdentifierString = tmpResult.get("id").getAsString();
             fetchImdbTitleDetails(tmpImdbIdentifierString, movie);
             fetchWikidataDetails(tmpImdbIdentifierString, movie);
@@ -195,13 +196,15 @@ public class ImdbService {
   }
 
   /**
-   * Fetches title page details directly from IMDb to extract movie duration and IMDb rating.
+   * Fetches title page details directly from IMDb to extract movie duration and
+   * IMDb rating.
    *
    * @param imdbId the IMDb identifier of the movie (starting with 'tt')
    * @param movie the {@link Movie} object to enrich
    */
   /**
-   * Fetches title page details directly from IMDb to extract movie duration and IMDb rating.
+   * Fetches title page details directly from IMDb to extract movie duration and
+   * IMDb rating.
    *
    * @param imdbId the IMDb identifier of the movie (starting with 'tt')
    * @param movie the {@link Movie} object to enrich
@@ -209,94 +212,130 @@ public class ImdbService {
   private static void fetchImdbTitleDetails(String imdbId, Movie movie) {
     try {
       String tmpUrl = "https://www.imdb.com/title/" + imdbId + "/";
-      HttpRequest tmpRequest = HttpRequest.newBuilder()
-          .uri(URI.create(tmpUrl))
-          .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+      HttpRequest tmpRequest = HttpRequest.newBuilder().uri(URI.create(tmpUrl))
+          .header("User-Agent",
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+          .header("Accept",
+              "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
           .header("Accept-Language", "en-US,en;q=0.9")
-          .GET().build();
+          .header("Sec-Fetch-Dest", "document")
+          .header("Sec-Fetch-Mode", "navigate").header("Sec-Fetch-Site", "none")
+          .header("Sec-Fetch-User", "?1").GET().build();
 
-      HttpResponse<String> tmpResponse = client.send(tmpRequest, HttpResponse.BodyHandlers.ofString());
+      HttpResponse<String> tmpResponse =
+          client.send(tmpRequest, HttpResponse.BodyHandlers.ofString());
       if (tmpResponse.statusCode() == 200) {
         String body = tmpResponse.body();
 
-        // 1. ISO 8601 duration in JSON-LD e.g. "duration":"PT2H28M" or "duration":"PT148M"
-        if (movie.getDuration() == null || movie.getDuration() <= 0) {
-          java.util.regex.Pattern durPattern1 = java.util.regex.Pattern.compile("\"duration\"\\s*:\\s*\"PT(?:(\\d+)H)?(?:(\\d+)M)?\"");
-          java.util.regex.Matcher durMatcher1 = durPattern1.matcher(body);
-          if (durMatcher1.find()) {
-            int hours = durMatcher1.group(1) != null ? Integer.parseInt(durMatcher1.group(1)) : 0;
-            int mins = durMatcher1.group(2) != null ? Integer.parseInt(durMatcher1.group(2)) : 0;
-            int totalMins = (hours * 60) + mins;
-            if (totalMins > 0) {
-              movie.setDuration(totalMins);
-              LOGGER.info("Extracted IMDb ISO duration for " + movie.getTitle() + ": " + totalMins + " mins");
-            }
+        // 1. ISO 8601 duration in JSON-LD e.g. "duration":"PT2H28M" or
+        // "duration":"PT148M"
+        java.util.regex.Pattern durPattern1 = java.util.regex.Pattern
+            .compile("\"duration\"\\s*:\\s*\"PT(?:(\\d+)H)?(?:(\\d+)M)?\"");
+        java.util.regex.Matcher durMatcher1 = durPattern1.matcher(body);
+        if (durMatcher1.find()) {
+          int hours = durMatcher1.group(1) != null
+              ? Integer.parseInt(durMatcher1.group(1))
+              : 0;
+          int mins = durMatcher1.group(2) != null
+              ? Integer.parseInt(durMatcher1.group(2))
+              : 0;
+          int totalMins = (hours * 60) + mins;
+          if (totalMins > 0) {
+            movie.setDuration(totalMins);
+            LOGGER.info("Extracted IMDb ISO duration for " + movie.getTitle()
+                + ": " + totalMins + " mins");
           }
         }
 
         // 2. Next.js JSON / GraphQL runtime e.g. "runtime":{"seconds":8880}
-        if (movie.getDuration() == null || movie.getDuration() <= 0) {
-          java.util.regex.Pattern durPattern2 = java.util.regex.Pattern.compile("\"runtime\"\\s*:\\s*\\{\\s*\"seconds\"\\s*:\\s*(\\d+)");
-          java.util.regex.Matcher durMatcher2 = durPattern2.matcher(body);
-          if (durMatcher2.find()) {
-            int seconds = Integer.parseInt(durMatcher2.group(1));
-            int totalMins = seconds / 60;
-            if (totalMins > 0) {
-              movie.setDuration(totalMins);
-              LOGGER.info("Extracted IMDb runtime seconds for " + movie.getTitle() + ": " + totalMins + " mins");
-            }
+        java.util.regex.Pattern durPattern2 = java.util.regex.Pattern
+            .compile("\"runtime\"\\s*:\\s*\\{\\s*\"seconds\"\\s*:\\s*(\\d+)");
+        java.util.regex.Matcher durMatcher2 = durPattern2.matcher(body);
+        if (durMatcher2.find()) {
+          int seconds = Integer.parseInt(durMatcher2.group(1));
+          int totalMins = seconds / 60;
+          if (totalMins > 0) {
+            movie.setDuration(totalMins);
+            LOGGER.info("Extracted IMDb runtime seconds for " + movie.getTitle()
+                + ": " + totalMins + " mins");
           }
         }
 
         // 3. HTML text pattern e.g. "2h 28m" or "1h 45m"
-        if (movie.getDuration() == null || movie.getDuration() <= 0) {
-          java.util.regex.Pattern durPattern3 = java.util.regex.Pattern.compile("(\\d+)\\s*h(?:ours?)?\\s*(\\d+)\\s*m(?:in(?:ute)?s?)?");
-          java.util.regex.Matcher durMatcher3 = durPattern3.matcher(body);
-          if (durMatcher3.find()) {
-            int hours = Integer.parseInt(durMatcher3.group(1));
-            int mins = Integer.parseInt(durMatcher3.group(2));
-            int totalMins = (hours * 60) + mins;
-            if (totalMins > 0) {
-              movie.setDuration(totalMins);
-              LOGGER.info("Extracted IMDb text duration for " + movie.getTitle() + ": " + totalMins + " mins");
-            }
-          }
-        }
-
-        // 4. Rating parsing: JSON-LD aggregateRating ratingValue e.g. "ratingValue":8.8 or "ratingValue": "8.8"
-        if (movie.getRating() == null) {
-          java.util.regex.Pattern ratingPattern = java.util.regex.Pattern.compile("\"ratingValue\"\\s*:\\s*\"?([\\d\\.]+)\"?");
-          java.util.regex.Matcher ratingMatcher = ratingPattern.matcher(body);
-          if (ratingMatcher.find()) {
-            try {
-              double score = Double.parseDouble(ratingMatcher.group(1));
-              int ratingInt = (int) Math.round(score);
-              if (ratingInt >= 1 && ratingInt <= 10) {
-                movie.setRating(ratingInt);
-                LOGGER.info("Extracted IMDb rating for " + movie.getTitle() + ": " + ratingInt + "/10");
-              }
-            } catch (NumberFormatException ignored) {}
+        java.util.regex.Pattern durPattern3 = java.util.regex.Pattern
+            .compile("(\\d+)\\s*h(?:ours?)?\\s*(\\d+)\\s*m(?:in(?:ute)?s?)?");
+        java.util.regex.Matcher durMatcher3 = durPattern3.matcher(body);
+        if (durMatcher3.find()) {
+          int hours = Integer.parseInt(durMatcher3.group(1));
+          int mins = Integer.parseInt(durMatcher3.group(2));
+          int totalMins = (hours * 60) + mins;
+          if (totalMins > 0) {
+            movie.setDuration(totalMins);
+            LOGGER.info("Extracted IMDb text duration for " + movie.getTitle()
+                + ": " + totalMins + " mins");
           }
         }
       }
     } catch (Exception e) {
-      LOGGER.log(Level.WARNING, "Error fetching IMDb title page for " + imdbId, e);
+      LOGGER.log(Level.WARNING, "Error fetching IMDb title page for " + imdbId,
+          e);
+    }
+
+    try {
+      String tmpRatingUrl = "https://p.media-imdb.com/static-content/documents/v1/title/" + imdbId + "/ratings%3Fjsonp=imdb.rating.run:imdb.api.title.ratings/data.json";
+      HttpRequest tmpRatingRequest = HttpRequest.newBuilder().uri(URI.create(tmpRatingUrl))
+          .header("User-Agent", "Mozilla/5.0")
+          .header("Accept-Encoding", "gzip")
+          .GET().build();
+      HttpResponse<InputStream> tmpRatingResponse = client.send(tmpRatingRequest, HttpResponse.BodyHandlers.ofInputStream());
+      if (tmpRatingResponse.statusCode() == 200) {
+        java.util.Optional<String> encoding = tmpRatingResponse.headers().firstValue("Content-Encoding");
+        String body;
+        if (encoding.isPresent() && encoding.get().equalsIgnoreCase("gzip")) {
+            try (java.util.zip.GZIPInputStream gis = new java.util.zip.GZIPInputStream(tmpRatingResponse.body())) {
+                body = new String(gis.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            }
+        } else {
+            body = new String(tmpRatingResponse.body().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        }
+        java.util.regex.Pattern ratingPattern = java.util.regex.Pattern.compile("\"rating\"\\s*:\\s*([\\d\\.]+)");
+        java.util.regex.Matcher ratingMatcher = ratingPattern.matcher(body);
+        if (ratingMatcher.find()) {
+          try {
+            double score = Double.parseDouble(ratingMatcher.group(1).replace(",", "."));
+            movie.setRawRating(score);
+            int ratingInt = (int) Math.round(score);
+            if (ratingInt >= 1 && ratingInt <= 10) {
+              movie.setRating(ratingInt);
+              LOGGER.info("Extracted IMDb rating from JSONP API for " + movie.getTitle() + ": " + score + "/10");
+            }
+          } catch (NumberFormatException ignored) {
+          }
+        }
+      }
+    } catch (Exception e) {
+      LOGGER.log(Level.WARNING, "Error fetching IMDb JSONP rating for " + imdbId, e);
     }
   }
 
   /**
-   * Cleans a movie title string by stripping file extensions, year numbers, and video quality tags.
+   * Cleans a movie title string by stripping file extensions, year numbers, and
+   * video quality tags.
    *
    * @param rawTitle the raw movie title string
    * @return cleaned movie title for IMDb queries
    */
   public static String cleanMovieTitle(String rawTitle) {
-    if (rawTitle == null) return "";
+    if (rawTitle == null)
+      return "";
     String cleaned = rawTitle;
-    cleaned = cleaned.replaceAll("(?i)\\.(mkv|mp4|avi|mov|wmv|flv|webm|m4v)$", "");
+    cleaned =
+        cleaned.replaceAll("(?i)\\.(mkv|mp4|avi|mov|wmv|flv|webm|m4v)$", "");
     cleaned = cleaned.replaceAll("[._-]", " ");
     cleaned = cleaned.replaceAll("(?i)\\b(19|20)\\d{2}\\b", "");
-    cleaned = cleaned.replaceAll("(?i)\\b(1080p|720p|2160p|4k|uhd|bluray|web-?dl|h264|x264|hevc|x265|dvdrip|brrip|repack|proper)\\b", "");
+    cleaned = cleaned.replaceAll(
+        "(?i)\\b(1080p|720p|2160p|4k|uhd|bluray|web-?dl|h264|x264|hevc|x265|dvdrip|brrip|repack|proper)\\b",
+        "");
     cleaned = cleaned.replaceAll("\\s+", " ").trim();
     return cleaned.isEmpty() ? rawTitle.trim() : cleaned;
   }
@@ -305,23 +344,26 @@ public class ImdbService {
    * Directly fetches and fills the movie duration from IMDb (imdb.com).
    *
    * @param movie the {@link Movie} object to fetch duration for
-   * @return true if duration was successfully fetched from IMDb and set, false otherwise
+   * @return true if duration was successfully fetched from IMDb and set, false
+   *         otherwise
    */
   public static boolean fetchImdbDurationDirectly(Movie movie) {
-    if (movie == null || movie.getTitle() == null || movie.getTitle().isBlank()) {
+    if (movie == null || movie.getTitle() == null
+        || movie.getTitle().isBlank()) {
       return false;
     }
-    String[] queriesToTry = new String[] {
-        cleanMovieTitle(movie.getTitle()),
-        movie.getTitle().trim()
-    };
+    String[] queriesToTry = new String[] {cleanMovieTitle(movie.getTitle()),
+        movie.getTitle().trim()};
 
     for (String tmpQuery : queriesToTry) {
-      if (tmpQuery.isEmpty()) continue;
+      if (tmpQuery.isEmpty())
+        continue;
       try {
-        String tmpCleanedQuery = tmpQuery.replaceAll("[^a-zA-Z0-9 äöüÄÖÜß-]", " ")
-            .trim().replaceAll("\\s+", " ");
-        if (tmpCleanedQuery.isEmpty()) continue;
+        String tmpCleanedQuery =
+            tmpQuery.replaceAll("[^a-zA-Z0-9 äöüÄÖÜß-]", " ").trim()
+                .replaceAll("\\s+", " ");
+        if (tmpCleanedQuery.isEmpty())
+          continue;
 
         String tmpEncodedQuery = URLEncoder
             .encode(tmpCleanedQuery.toLowerCase(), StandardCharsets.UTF_8)
@@ -360,7 +402,8 @@ public class ImdbService {
           }
         }
       } catch (Exception e) {
-        LOGGER.log(Level.WARNING, "Failed to fetch IMDb duration for: " + tmpQuery, e);
+        LOGGER.log(Level.WARNING,
+            "Failed to fetch IMDb duration for: " + tmpQuery, e);
       }
     }
     return movie.getDuration() != null && movie.getDuration() > 0;
@@ -378,11 +421,13 @@ public class ImdbService {
       // Build a SPARQL query searching for a movie containing the specified
       // IMDb ID (P345)
       // and optionally fetch directors, writers, producers, cinematographers,
-      // composers, and genres.
+      // composers, genres, duration, and ratings.
       String tmpSparqlQuery =
-          "SELECT ?duration ?directorLabel ?writerLabel ?producerLabel ?cinematographerLabel ?composerLabel ?genreLabel WHERE { "
+          "SELECT ?duration ?ratingVal ?critics ?directorLabel ?writerLabel ?producerLabel ?cinematographerLabel ?composerLabel ?genreLabel WHERE { "
               + "?movie wdt:P345 '" + imdbId + "'. "
               + "OPTIONAL { ?movie wdt:P2047 ?duration. } "
+              + "OPTIONAL { ?movie p:P444 ?ratingStatement. ?ratingStatement ps:P444 ?ratingVal. OPTIONAL { ?ratingStatement pq:P447 ?critics. } } "
+              + "OPTIONAL { ?movie wdt:P57 ?director. } "
               + "OPTIONAL { ?movie wdt:P57 ?director. } "
               + "OPTIONAL { ?movie wdt:P58 ?writer. } "
               + "OPTIONAL { ?movie wdt:P162 ?producer. } "
@@ -424,16 +469,71 @@ public class ImdbService {
 
           for (JsonElement tmpElement : tmpBindings) {
             JsonObject tmpRow = tmpElement.getAsJsonObject();
-            if ((movie.getDuration() == null || movie.getDuration() <= 0) && tmpRow.has("duration")) {
+
+            if (tmpRow.has("duration")
+                && (movie.getDuration() == null || movie.getDuration() <= 0)) {
               try {
-                double tmpDurVal = Double.parseDouble(tmpRow.getAsJsonObject("duration").get("value").getAsString());
+                double tmpDurVal = Double.parseDouble(tmpRow
+                    .getAsJsonObject("duration").get("value").getAsString());
                 int tmpDurMins = (int) Math.round(tmpDurVal);
                 if (tmpDurMins > 0) {
                   movie.setDuration(tmpDurMins);
-                  LOGGER.info("Extracted duration from Wikidata for " + movie.getTitle() + ": " + tmpDurMins + " mins");
+                  LOGGER.info("Extracted duration from Wikidata for "
+                      + movie.getTitle() + ": " + tmpDurMins + " mins");
                 }
-              } catch (Exception ignored) {}
+              } catch (Exception ignored) {
+              }
             }
+
+            if (tmpRow.has("ratingVal")) {
+              try {
+                String tmpRatStr = tmpRow.getAsJsonObject("ratingVal")
+                    .get("value").getAsString();
+                String tmpCritics =
+                    tmpRow.has("critics")
+                        ? tmpRow.getAsJsonObject("critics").get("value")
+                            .getAsString()
+                        : "";
+
+                boolean isImdb = "IMDb".equalsIgnoreCase(tmpCritics)
+                    || "Internet Movie Database".equalsIgnoreCase(tmpCritics)
+                    || tmpCritics.toLowerCase().contains("imdb")
+                    || tmpCritics.contains("Q37312");
+                if (isImdb) {
+                  java.util.regex.Matcher m = java.util.regex.Pattern
+                      .compile("([\\d\\.,]+)(?:\\s*/\\s*([\\d\\.,]+)|%)?")
+                      .matcher(tmpRatStr);
+                  if (m.find()) {
+                    double score =
+                        Double.parseDouble(m.group(1).replace(",", "."));
+                    if (m.group(0).contains("%")) {
+                      score = score / 10.0;
+                    } else if (m.group(2) != null) {
+                      double denom =
+                          Double.parseDouble(m.group(2).replace(",", "."));
+                      if (denom > 0) {
+                        score = (score / denom) * 10.0;
+                      }
+                    } else if (score > 10.0) {
+                      score = score / 10.0;
+                    }
+
+                    if (isImdb) {
+                      movie.setRawRating(score);
+                      int ratingInt = (int) Math.round(score);
+                      if (ratingInt >= 1 && ratingInt <= 10) {
+                        movie.setRating(ratingInt);
+                        LOGGER.info("Extracted rating from Wikidata for "
+                            + movie.getTitle() + ": " + score + "/10 (IMDb: "
+                            + isImdb + ")");
+                      }
+                    }
+                  }
+                }
+              } catch (Exception ignored) {
+              }
+            }
+
             if (tmpRow.has("directorLabel"))
               tmpDirectors.add(tmpRow.getAsJsonObject("directorLabel")
                   .get("value").getAsString());
