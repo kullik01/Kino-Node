@@ -48,6 +48,16 @@ import javafx.stage.StageStyle;
 
 public class DialogBuilder {
 
+  /**
+   * Creates a customized JavaFX Dialog with application branding, transparent window styling,
+   * and draggable/resizable behavior.
+   *
+   * @param <T>        The return type of the dialog.
+   * @param title      The window title.
+   * @param headerText The primary header text.
+   * @param iconPath   The classpath route to an optional icon graphic.
+   * @return The configured Dialog instance.
+   */
   public static <T> Dialog<T> createDialog(String title, String headerText,
       String iconPath) {
     Dialog<T> tmpDialog = new Dialog<>();
@@ -96,6 +106,13 @@ public class DialogBuilder {
     return tmpDialog;
   }
 
+  /**
+   * Displays a simple, branded informational alert dialog.
+   *
+   * @param title       The window title.
+   * @param headerText  The primary header text.
+   * @param contentText The detailed message body.
+   */
   public static void showInfo(String title, String headerText,
       String contentText) {
     Dialog<ButtonType> tmpDialog = createDialog(title, headerText,
@@ -105,6 +122,13 @@ public class DialogBuilder {
     tmpDialog.showAndWait();
   }
 
+  /**
+   * Displays a branded error alert dialog with an error icon.
+   *
+   * @param title       The window title.
+   * @param headerText  The primary header text.
+   * @param contentText The detailed error message body.
+   */
   public static void showError(String title, String headerText,
       String contentText) {
     Dialog<ButtonType> tmpDialog = createDialog(title, headerText,

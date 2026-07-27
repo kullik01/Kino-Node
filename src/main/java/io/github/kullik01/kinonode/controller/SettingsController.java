@@ -95,6 +95,12 @@ public class SettingsController implements Refreshable {
 
   private javafx.animation.PauseTransition statusTimer;
 
+  /**
+   * Displays a temporary status message in the UI that automatically disappears
+   * after a few seconds.
+   *
+   * @param message The text to display.
+   */
   private void showStatus(String message) {
     lblStatus.setText(message);
     if (statusTimer != null) {
@@ -141,6 +147,10 @@ public class SettingsController implements Refreshable {
     lblStatus.setText("");
   }
 
+  /**
+   * Loads the current settings from the repository and populates the UI fields.
+   * Also captures a snapshot of the loaded state to enable dirty checking for unsaved changes.
+   */
   private void loadSettings() {
     // Load workspaces
     lstWorkspaces.getItems().clear();
@@ -164,6 +174,10 @@ public class SettingsController implements Refreshable {
     validateAll();
   }
 
+  /**
+   * Opens a directory chooser dialog to let the user select a new workspace folder.
+   * If a valid, non-duplicate directory is selected, it is added to the list and saved.
+   */
   @FXML
   private void addWorkspace() {
     DirectoryChooser tmpChooser = new DirectoryChooser();
@@ -182,6 +196,11 @@ public class SettingsController implements Refreshable {
     }
   }
 
+  /**
+   * Prompts for confirmation and removes the currently selected workspace from the settings.
+   * Also triggers the deletion of all movie records associated with that workspace
+   * from the local database.
+   */
   @FXML
   private void removeWorkspace() {
     String tmpSelected = lstWorkspaces.getSelectionModel().getSelectedItem();
@@ -205,6 +224,10 @@ public class SettingsController implements Refreshable {
     }
   }
 
+  /**
+   * Opens a file chooser dialog to select an external media player executable.
+   * Restricts file types based on the underlying operating system.
+   */
   @FXML
   private void browsePlayer() {
     FileChooser tmpChooser = new FileChooser();
@@ -227,6 +250,10 @@ public class SettingsController implements Refreshable {
     }
   }
 
+  /**
+   * Persists all current settings from the UI to the repository and updates
+   * the local snapshots for dirty checking.
+   */
   private void saveSettings() {
     // Save paths
     saveWorkspacesOnly();
@@ -241,12 +268,20 @@ public class SettingsController implements Refreshable {
     showStatus("Settings saved successfully.");
   }
 
+  /**
+   * Saves only the workspace folder list to the repository.
+   * Used for immediate persistence when adding or removing folders.
+   */
   private void saveWorkspacesOnly() {
     String tmpPathsStr = String.join(";", lstWorkspaces.getItems());
     settingsRepository.set("workspace_folders", tmpPathsStr);
     loadedWorkspaces = tmpPathsStr;
   }
 
+  /**
+   * Initializes listeners on input fields and lists to trigger real-time validation
+   * and change detection.
+   */
   private void setupValidationListeners() {
     txtPlayerPath.textProperty()
         .addListener((observable, oldValue, newValue) -> {
@@ -259,10 +294,19 @@ public class SettingsController implements Refreshable {
     });
   }
 
+  /**
+   * Triggers a full validation pass across all configurable settings.
+   */
   private void validateAll() {
     validatePlayerPath(txtPlayerPath.getText());
   }
 
+  /**
+   * Validates the provided file path to ensure it points to an existing file if it is not empty.
+   * Updates the visual validation state of the player path input field.
+   *
+   * @param path The absolute path to the executable file.
+   */
   private void validatePlayerPath(String path) {
     if (path == null || path.isBlank()) {
       // Empty path is considered valid (meaning no custom external player
@@ -281,6 +325,15 @@ public class SettingsController implements Refreshable {
     }
   }
 
+  /**
+   * Updates the UI styling and feedback labels of an input field based on its validity.
+   *
+   * @param field        The TextField being validated.
+   * @param statusLabel  The Label used to display validation icons (e.g., cross).
+   * @param errorLabel   The Label used to display the textual error message.
+   * @param isValid      True if the input is valid, false otherwise.
+   * @param errorMessage The message to show if the input is invalid.
+   */
   private void setValidationStatus(TextField field, Label statusLabel,
       Label errorLabel, boolean isValid, String errorMessage) {
     if (isValid) {
@@ -343,6 +396,11 @@ public class SettingsController implements Refreshable {
         || !tmpCurrentPlayer.equals(loadedPlayerPath);
   }
 
+  /**
+   * Configures the visual presentation of the workspace list items.
+   * Displays the folder path along with an icon, and adds a warning indicator if
+   * the configured directory no longer exists on the filesystem.
+   */
   private void setupWorkspaceCellFactory() {
     lstWorkspaces.setCellFactory(
         tmpListView -> new javafx.scene.control.ListCell<String>() {

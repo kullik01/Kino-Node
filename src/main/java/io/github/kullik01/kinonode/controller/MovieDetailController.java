@@ -287,6 +287,10 @@ public class MovieDetailController implements Refreshable {
     });
   }
 
+  /**
+   * Loads the poster image for the current movie.
+   * If the file is not found or path is empty, falls back to a default placeholder image.
+   */
   private void loadPoster() {
     String tmpPath = movie.getCoverImagePath();
     Image tmpImage = null;
@@ -325,6 +329,11 @@ public class MovieDetailController implements Refreshable {
     }
   }
 
+  /**
+   * Creates an SVGPath instance representing a camera icon used in the rating widget.
+   *
+   * @return A styled SVGPath of a camera.
+   */
   private SVGPath createCameraSvg() {
     SVGPath tmpIcon = new SVGPath();
     tmpIcon.setContent(
@@ -336,6 +345,13 @@ public class MovieDetailController implements Refreshable {
     return tmpIcon;
   }
 
+  /**
+   * Sets the visual fill state of a single camera rating icon.
+   * Uses gradient filling to support fractional ratings (e.g., 8.5/10).
+   *
+   * @param reelLabel  The label containing the SVG icon.
+   * @param fillAmount The fill fraction between 0.0 and 1.0.
+   */
   private void setReelState(Label reelLabel, double fillAmount) {
     if (fillAmount >= 1.0) {
       SVGPath tmpIcon = createCameraSvg();
@@ -372,6 +388,12 @@ public class MovieDetailController implements Refreshable {
     }
   }
 
+  /**
+   * Detects the numerical score associated with a mouse hover event over the rating widget.
+   *
+   * @param e The mouse event.
+   * @return The rating score (1-10) corresponding to the hovered position.
+   */
   private int detectHoveredScore(MouseEvent e) {
     if (ratingContainer == null || ratingContainer.getChildren().isEmpty()) {
       return 1;
@@ -391,6 +413,10 @@ public class MovieDetailController implements Refreshable {
     return Math.max(1, Math.min(10, index));
   }
 
+  /**
+   * Constructs the interactive 10-camera rating widget.
+   * Wires up hover effects, click actions, and dynamic fractional filling.
+   */
   private void buildRatingWidget() {
     ratingContainer.getChildren().clear();
 
@@ -449,6 +475,11 @@ public class MovieDetailController implements Refreshable {
     updateRatingUI();
   }
 
+  /**
+   * Temporarily updates the rating UI to show the projected score when hovering over a rating icon.
+   *
+   * @param hoverScore The score being previewed.
+   */
   private void previewRatingHover(int hoverScore) {
     Label tmpLblRatingVal = (Label) ratingContainer.getChildren()
         .get(ratingContainer.getChildren().size() - 1);
@@ -461,6 +492,10 @@ public class MovieDetailController implements Refreshable {
         "-fx-text-fill: #ED8B00; -fx-font-weight: bold; -fx-padding: 0 0 0 10px;");
   }
 
+  /**
+   * Re-applies the actual saved rating score to the rating UI, clearing any hover preview.
+   * Shows fractional values appropriately using gradient SVGs.
+   */
   private void updateRatingUI() {
     Label tmpLblRatingVal = (Label) ratingContainer.getChildren()
         .get(ratingContainer.getChildren().size() - 1);
@@ -503,6 +538,10 @@ public class MovieDetailController implements Refreshable {
     refreshWatchlistStatus();
   }
 
+  /**
+   * Scans the repository to identify which watchlists contain the current movie
+   * and updates the displayed watchlist summary label.
+   */
   public void refreshWatchlistStatus() {
     List<Watchlist> tmpAll = watchlistRepository.findAll();
     List<String> tmpInWatchlists = tmpAll.stream()
@@ -517,6 +556,10 @@ public class MovieDetailController implements Refreshable {
     }
   }
 
+  /**
+   * Displays a multi-select dialog allowing the user to add or remove the current
+   * movie from various watchlists simultaneously.
+   */
   @FXML
   private void manageMovieWatchlists() {
     Dialog<Void> tmpDialog = io.github.kullik01.kinonode.util.DialogBuilder
@@ -747,6 +790,10 @@ public class MovieDetailController implements Refreshable {
     return true;
   }
 
+  /**
+   * Opens a file chooser to let the user select a custom poster image.
+   * Copies the chosen file to the app's covers directory and updates the movie.
+   */
   @FXML
   private void changePoster() {
     FileChooser tmpChooser = new FileChooser();
@@ -796,6 +843,10 @@ public class MovieDetailController implements Refreshable {
     }
   }
 
+  /**
+   * Invokes the PlaybackService to open the movie's media file in the configured
+   * external media player.
+   */
   @FXML
   private void playMovie() {
     try {
@@ -813,6 +864,9 @@ public class MovieDetailController implements Refreshable {
     }
   }
 
+  /**
+   * Opens the configured YouTube trailer URL in the user's default web browser.
+   */
   @FXML
   private void watchTrailer() {
     String tmpUrl = txtTrailerUrl.getText().trim();
@@ -839,6 +893,10 @@ public class MovieDetailController implements Refreshable {
     }
   }
 
+  /**
+   * Attempts to determine the IMDb URL for the current movie and opens it in the
+   * internal IMDb web browser tab. Uses the cover filename's 'tt' id if possible.
+   */
   @FXML
   private void openImdbPage() {
     if (movie == null) {
@@ -1398,6 +1456,14 @@ public class MovieDetailController implements Refreshable {
     searchPersonOnImdb(comboActors, txtActors);
   }
 
+  /**
+   * Orchestrates an intelligent IMDb search for a cast/crew member by name.
+   * Attempts to resolve the exact IMDb person ID via a Wikidata SPARQL query,
+   * before falling back to a general IMDb text search.
+   *
+   * @param combo The ComboBox containing multiple parsed names.
+   * @param txt   The TextField containing a single name.
+   */
   private void searchPersonOnImdb(ComboBox<String> combo, TextField txt) {
     String name = null;
     if (combo != null && combo.isVisible()) {
@@ -1493,6 +1559,14 @@ public class MovieDetailController implements Refreshable {
     });
   }
 
+  /**
+   * Executes a SPARQL query against the public Wikidata endpoint to retrieve linked data.
+   * Used to resolve human-readable names to IMDb identifiers.
+   *
+   * @param sparql The query string.
+   * @return The first extracted IMDb ID, or null if not found.
+   * @throws Exception If network or parsing errors occur.
+   */
   private String executeSparql(String sparql) throws Exception {
     String urlStr = "https://query.wikidata.org/sparql?query="
         + URLEncoder.encode(sparql, StandardCharsets.UTF_8).replace("+", "%20")
@@ -1518,6 +1592,14 @@ public class MovieDetailController implements Refreshable {
     return null;
   }
 
+  /**
+   * Configures the layout for fields that may contain multiple values (e.g. Actors).
+   * Switches to a ComboBox view if multiple comma-separated names are detected.
+   *
+   * @param value The raw string value from the database.
+   * @param txt   The TextField representation for a single name.
+   * @param combo The ComboBox representation for multiple names.
+   */
   private void setupMultiField(String value, TextField txt,
       ComboBox<String> combo) {
     List<String> names = parseNames(value);

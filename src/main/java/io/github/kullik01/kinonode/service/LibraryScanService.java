@@ -318,6 +318,13 @@ public class LibraryScanService {
    */
   public record ScanResult(int totalScanned, int newAdded, List<String> logs) {}
 
+  /**
+   * Checks whether the actor list strings contain exactly three names followed by an ellipsis,
+   * indicating an incomplete/truncated actors list that might need enrichment.
+   *
+   * @param actors the comma-separated actors string
+   * @return true if it matches the three-actor truncated pattern, false otherwise
+   */
   private boolean hasOnlyThreeActors(String actors) {
     if (actors == null || !actors.endsWith(", ...")) {
       return false;

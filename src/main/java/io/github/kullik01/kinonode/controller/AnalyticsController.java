@@ -104,6 +104,10 @@ public class AnalyticsController implements Refreshable {
   private final Map<String, Map<String, List<String>>> rolePersonMovies =
       new HashMap<>();
 
+  /**
+   * Initializes the analytics view by disabling unwanted chart animations
+   * and populating the role filter dropdown with default values.
+   */
   @FXML
   public void initialize() {
     if (decadeChart != null) {
@@ -271,6 +275,14 @@ public class AnalyticsController implements Refreshable {
     updateTopPeople();
   }
 
+  /**
+   * Parses comma-separated names from a movie field and updates frequency/movie tracking maps.
+   *
+   * @param rawField       The raw string from the database (e.g. "Director1, Director2").
+   * @param targetMap      The map to increment frequencies in.
+   * @param targetMovieMap The map tracking which movies a person is associated with.
+   * @param movieTitle     The title of the movie being processed.
+   */
   private void parseAndCountWithTitle(String rawField,
       Map<String, Integer> targetMap, Map<String, List<String>> targetMovieMap,
       String movieTitle) {
@@ -287,6 +299,13 @@ public class AnalyticsController implements Refreshable {
     }
   }
 
+  /**
+   * Constructs a formatted, newline-separated bullet list of movie titles
+   * to be displayed inside tooltips.
+   *
+   * @param rawMovies List of raw movie titles.
+   * @return A formatted string of titles.
+   */
   private String buildMovieListText(List<String> rawMovies) {
     if (rawMovies == null || rawMovies.isEmpty()) {
       return "No movies found";
@@ -302,11 +321,18 @@ public class AnalyticsController implements Refreshable {
     return sb.toString();
   }
 
+  /**
+   * Event handler triggered when the user changes the selected role filter
+   * (e.g., from Directors to Actors). Re-populates the Top People ranking.
+   */
   @FXML
   private void handleRoleFilterChange() {
     updateTopPeople();
   }
 
+  /**
+   * Updates the Top People ranking list based on the currently selected role filter.
+   */
   private void updateTopPeople() {
     if (comboRoleFilter == null || topPeopleBox == null) {
       return;
@@ -320,6 +346,12 @@ public class AnalyticsController implements Refreshable {
     populateRankingList(topPeopleBox, frequencies, 5);
   }
 
+  /**
+   * Attaches an interactive tooltip and hover styling to a specific chart data node.
+   *
+   * @param data        The XYChart data point.
+   * @param tooltipText The text to display in the tooltip.
+   */
   private void installChartTooltip(XYChart.Data<String, Number> data,
       String tooltipText) {
     Runnable attacher = () -> {
@@ -360,6 +392,11 @@ public class AnalyticsController implements Refreshable {
     }
   }
 
+  /**
+   * Populates the "Movies per Decade" bar chart.
+   *
+   * @param decades A map of decade labels to their corresponding movie counts.
+   */
   private void populateDecadeChart(Map<String, Integer> decades) {
     if (decadeChart == null) {
       return;
@@ -380,6 +417,11 @@ public class AnalyticsController implements Refreshable {
     decadeChart.getData().add(tmpSeries);
   }
 
+  /**
+   * Populates the "Rating Distribution" bar chart.
+   *
+   * @param ratings A map of rating labels to their corresponding movie counts.
+   */
   private void populateRatingChart(Map<String, Integer> ratings) {
     if (ratingChart == null) {
       return;
@@ -400,6 +442,11 @@ public class AnalyticsController implements Refreshable {
     ratingChart.getData().add(tmpSeries);
   }
 
+  /**
+   * Populates the "Movies per Genre" bar chart, displaying the top 10 genres.
+   *
+   * @param genres A map of genre labels to their corresponding movie counts.
+   */
   private void populateGenreChart(Map<String, Integer> genres) {
     if (genreChart == null) {
       return;
@@ -422,6 +469,14 @@ public class AnalyticsController implements Refreshable {
     genreChart.getData().add(tmpSeries);
   }
 
+  /**
+   * Populates a VBox container with visually rich ranking rows showing
+   * the top individuals for a selected role.
+   *
+   * @param container   The VBox layout to populate.
+   * @param frequencies A map of person names to their occurrence counts.
+   * @param limit       The maximum number of top results to display.
+   */
   private void populateRankingList(VBox container,
       Map<String, Integer> frequencies, int limit) {
     if (container == null) {
@@ -516,6 +571,9 @@ public class AnalyticsController implements Refreshable {
     }
   }
 
+  /**
+   * Prompts the user for a save location and exports the entire movie catalog as a JSON file.
+   */
   @FXML
   private void handleExportJson() {
     FileChooser tmpChooser = new FileChooser();
@@ -541,6 +599,9 @@ public class AnalyticsController implements Refreshable {
     }
   }
 
+  /**
+   * Prompts the user for a save location and exports the entire movie catalog as a CSV file.
+   */
   @FXML
   private void handleExportCsv() {
     FileChooser tmpChooser = new FileChooser();
@@ -566,6 +627,9 @@ public class AnalyticsController implements Refreshable {
     }
   }
 
+  /**
+   * Prompts the user for a save location and exports the entire movie catalog as a styled HTML report.
+   */
   @FXML
   private void handleExportHtml() {
     FileChooser tmpChooser = new FileChooser();
@@ -591,6 +655,9 @@ public class AnalyticsController implements Refreshable {
     }
   }
 
+  /**
+   * Prompts the user for a save location and creates a snapshot backup of the underlying SQLite database.
+   */
   @FXML
   private void handleBackupDatabase() {
     FileChooser tmpChooser = new FileChooser();

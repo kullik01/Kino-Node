@@ -173,24 +173,37 @@ public class MainController {
     });
   }
 
+  /**
+   * Switches the main view to the Library section.
+   */
   @FXML
   private void showLibrary() {
     navigate("Library", "/io/github/kullik01/kinonode/fxml/LibraryView.fxml",
         btnLibrary);
   }
 
+  /**
+   * Switches the main view to the Watchlists section.
+   */
   @FXML
   private void showWatchlists() {
     navigate("Watchlists",
         "/io/github/kullik01/kinonode/fxml/WatchlistsView.fxml", btnWatchlists);
   }
 
+  /**
+   * Switches the main view to the Analytics section.
+   */
   @FXML
   private void showAnalytics() {
     navigate("Analytics",
         "/io/github/kullik01/kinonode/fxml/AnalyticsView.fxml", btnAnalytics);
   }
 
+  /**
+   * Switches the main view to the IMDb search section.
+   * If already active, it triggers a refresh on the IMDb view.
+   */
   @FXML
   private void showImdb() {
     if (activeButton == btnImdb) {
@@ -204,18 +217,31 @@ public class MainController {
         btnImdb);
   }
 
+  /**
+   * Switches the main view to the Settings section.
+   */
   @FXML
   public void showSettings() {
     navigate("Settings", "/io/github/kullik01/kinonode/fxml/SettingsView.fxml",
         btnSettings);
   }
 
+  /**
+   * Switches the main view to the About section.
+   */
   @FXML
   private void showAbout() {
     navigate("About", "/io/github/kullik01/kinonode/fxml/AboutView.fxml",
         btnAbout);
   }
 
+  /**
+   * Handles the common logic for navigating between major views in the main shell.
+   *
+   * @param name         The unique name identifier for the view.
+   * @param fxmlPath     The classpath URL to the FXML layout file.
+   * @param targetButton The sidebar button corresponding to this view.
+   */
   private void navigate(String name, String fxmlPath, Button targetButton) {
     if (activeButton == targetButton) {
       return; // Already on this tab
@@ -225,6 +251,12 @@ public class MainController {
     setActiveButton(targetButton);
   }
 
+  /**
+   * Toggles the application's visual theme between Light and Dark modes.
+   * Saves the selection to user settings.
+   *
+   * @param dark True to apply the dark theme, false for the light theme.
+   */
   private void toggleTheme(boolean dark) {
     var tmpSettingsRepository =
         AppContext.getInstance().getSettingsRepository();
@@ -247,6 +279,12 @@ public class MainController {
     }
   }
 
+  /**
+   * Updates the visual state of the sidebar buttons to highlight the currently
+   * active selection.
+   *
+   * @param button The button to mark as active.
+   */
   private void setActiveButton(Button button) {
     if (activeButton != null) {
       activeButton.getStyleClass().remove("active");
@@ -257,6 +295,14 @@ public class MainController {
     }
   }
 
+  /**
+   * Loads an FXML view into the main content area. Caches loaded views and
+   * controllers to optimize performance on subsequent navigations.
+   * If the controller implements {@link Refreshable}, it triggers a refresh.
+   *
+   * @param name     The unique name identifier for the view.
+   * @param fxmlPath The classpath URL to the FXML layout file.
+   */
   private void loadView(String name, String fxmlPath) {
     try {
       Parent tmpView = views.get(name);
@@ -285,6 +331,11 @@ public class MainController {
     }
   }
 
+  /**
+   * Navigates directly to the IMDb view and loads a specific URL.
+   *
+   * @param url The IMDb URL to open in the integrated browser.
+   */
   public void showImdbWithUrl(String url) {
     if (activeButton != btnImdb) {
       navigate("IMDb", "/io/github/kullik01/kinonode/fxml/ImdbView.fxml",
@@ -296,6 +347,13 @@ public class MainController {
     }
   }
 
+  /**
+   * Pre-loads an FXML view in the background without displaying it.
+   * Useful for heavy views like the web browser that cause lag on first load.
+   *
+   * @param name     The unique name identifier for the view.
+   * @param fxmlPath The classpath URL to the FXML layout file.
+   */
   private void preloadView(String name, String fxmlPath) {
     try {
       Parent tmpView = views.get(name);

@@ -251,6 +251,12 @@ public class AnalyticsService {
     }
   }
 
+  /**
+   * Escapes a string for safe inclusion in a JSON structure.
+   *
+   * @param str the raw string to escape
+   * @return the escaped JSON string, or "null" if the input is null
+   */
   private String escapeJson(String str) {
     if (str == null) {
       return "null";
@@ -260,6 +266,13 @@ public class AnalyticsService {
     return "\"" + tmpEscaped + "\"";
   }
 
+  /**
+   * Escapes a string for safe inclusion in a CSV file format. Quotes values
+   * containing commas, quotes, or newlines.
+   *
+   * @param str the raw string to escape
+   * @return the escaped CSV string
+   */
   private String escapeCsv(String str) {
     if (str == null) {
       return "";
@@ -272,6 +285,12 @@ public class AnalyticsService {
     return tmpValue;
   }
 
+  /**
+   * Escapes HTML special characters in a string for safe rendering in an HTML report.
+   *
+   * @param str the raw string to escape
+   * @return the escaped HTML string, or "—" if the input is empty/null
+   */
   private String escapeHtml(String str) {
     if (str == null || str.isBlank()) {
       return "—";

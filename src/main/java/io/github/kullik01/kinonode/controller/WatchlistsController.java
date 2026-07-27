@@ -294,6 +294,10 @@ public class WatchlistsController implements Refreshable {
     }
   }
 
+  /**
+   * Loads the movies associated with the currently selected watchlist and updates
+   * the UI. If no watchlist is selected, it clears the movie list and disables the details pane.
+   */
   private void loadWatchlistMovies() {
     if (selectedWatchlist == null) {
       lblWatchlistName.setText("Select a Movie");
@@ -318,6 +322,11 @@ public class WatchlistsController implements Refreshable {
     updateButtonStates();
   }
 
+  /**
+   * Updates the enabled/disabled state of the movie management buttons
+   * (e.g., Remove Movie) based on the current selection and whether the active
+   * watchlist is a Smart Watchlist (which cannot be manually edited).
+   */
   private void updateButtonStates() {
     boolean selected = lstMovies.getSelectionModel().getSelectedItem() != null;
     boolean tmpIsSmart =
@@ -325,6 +334,12 @@ public class WatchlistsController implements Refreshable {
     btnRemoveMovie.setDisable(!selected || tmpIsSmart);
   }
 
+  /**
+   * Updates the enabled/disabled state of the watchlist management buttons
+   * (Rename, Delete) based on whether a watchlist is currently selected.
+   *
+   * @param hasSelection True if a watchlist is selected, false otherwise.
+   */
   private void updateWatchlistButtonStates(boolean hasSelection) {
     if (btnRenameWatchlist != null)
       btnRenameWatchlist.setDisable(!hasSelection);
@@ -332,6 +347,17 @@ public class WatchlistsController implements Refreshable {
       btnDeleteWatchlist.setDisable(!hasSelection);
   }
 
+  /**
+   * Displays a customized dialog for creating or renaming a standard watchlist.
+   * Features real-time input validation to enforce character limits and ASCII-only
+   * names, and prevents duplicate names.
+   *
+   * @param title       The dialog window title.
+   * @param header      The dialog header text.
+   * @param defaultText The initial text to populate in the input field.
+   * @param currentId   The database ID of the current watchlist being renamed (-1 if creating new).
+   * @return An Optional containing the validated watchlist name input, or empty if cancelled.
+   */
   private Optional<String> showWatchlistDialog(String title, String header,
       String defaultText, int currentId) {
     Dialog<String> tmpDialog = new Dialog<>();
@@ -459,6 +485,12 @@ public class WatchlistsController implements Refreshable {
     return tmpDialog.showAndWait();
   }
 
+  /**
+   * Displays a context menu to let the user choose between creating a standard
+   * watchlist or a smart watchlist.
+   *
+   * @param event The action event that triggered the menu, used to position the popup.
+   */
   @FXML
   private void showCreateMenu(javafx.event.ActionEvent event) {
     javafx.scene.control.ContextMenu tmpContextMenu =
@@ -474,6 +506,10 @@ public class WatchlistsController implements Refreshable {
     tmpContextMenu.show(tmpSource, javafx.geometry.Side.TOP, 0, 0);
   }
 
+  /**
+   * Triggers the creation flow for a new standard watchlist.
+   * Shows the input dialog, validates the result, and inserts it into the repository.
+   */
   @FXML
   private void createWatchlist() {
     Optional<String> tmpResult =
@@ -490,6 +526,10 @@ public class WatchlistsController implements Refreshable {
     });
   }
 
+  /**
+   * Triggers the renaming flow for the currently selected watchlist.
+   * Shows the input dialog, validates the new name, and updates the repository.
+   */
   @FXML
   private void renameWatchlist() {
     if (selectedWatchlist == null)
@@ -515,6 +555,14 @@ public class WatchlistsController implements Refreshable {
     });
   }
 
+  /**
+   * Validates that a newly proposed watchlist name does not conflict with an existing one.
+   * Shows an error alert if a duplicate is detected.
+   *
+   * @param cleanName The proposed watchlist name to check.
+   * @param currentId The ID of the watchlist being checked (to ignore itself), or -1 if new.
+   * @return True if the name is valid (unique), false if it's a duplicate.
+   */
   private boolean validateWatchlistName(String cleanName, int currentId) {
     List<Watchlist> tmpWatchlists = watchlistRepository.findAll();
     for (Watchlist tmpWatchlist : tmpWatchlists) {
@@ -531,6 +579,9 @@ public class WatchlistsController implements Refreshable {
     return true;
   }
 
+  /**
+   * Deletes the currently selected watchlist after seeking confirmation from the user.
+   */
   @FXML
   private void deleteWatchlist() {
     if (selectedWatchlist == null)
@@ -548,6 +599,10 @@ public class WatchlistsController implements Refreshable {
     }
   }
 
+  /**
+   * Removes the currently selected movie from the active watchlist after seeking confirmation.
+   * This action is disabled for Smart Watchlists.
+   */
   @FXML
   private void removeMovie() {
     Movie tmpSelectedMovie = lstMovies.getSelectionModel().getSelectedItem();
@@ -569,6 +624,12 @@ public class WatchlistsController implements Refreshable {
     }
   }
 
+  /**
+   * Opens the specified movie in the system's default media player.
+   * Shows an error alert if playback fails.
+   *
+   * @param movie The movie to play.
+   */
   private void playMovie(Movie movie) {
     try {
       AppContext.getInstance().getPlaybackService().play(movie.getFilePath());
@@ -582,6 +643,11 @@ public class WatchlistsController implements Refreshable {
     }
   }
 
+  /**
+   * Triggers the creation flow for a new Smart Watchlist.
+   * Displays a complex dialog allowing the user to name the watchlist and define a
+   * dynamic filtering rule (e.g., "IMDb Rating GREATER_THAN 8.0").
+   */
   @FXML
   private void createSmartWatchlist() {
     Dialog<Watchlist> tmpDialog = new Dialog<>();

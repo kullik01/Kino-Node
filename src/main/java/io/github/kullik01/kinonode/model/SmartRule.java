@@ -45,34 +45,74 @@ public class SmartRule {
   private String operator;
   private String value;
 
+  /**
+   * Default constructor for Jackson JSON deserialization.
+   */
   public SmartRule() {}
 
+  /**
+   * Constructs a new SmartRule with the specified condition parameters.
+   *
+   * @param field    The movie property to evaluate (e.g., "Genre", "Year").
+   * @param operator The comparison operator (e.g., "Equals", "Greater Than").
+   * @param value    The target value to match against.
+   */
   public SmartRule(String field, String operator, String value) {
     this.field = field;
     this.operator = operator;
     this.value = value;
   }
 
+  /**
+   * Gets the movie property field this rule evaluates.
+   *
+   * @return The field name.
+   */
   public String getField() {
     return field;
   }
 
+  /**
+   * Sets the movie property field for this rule.
+   *
+   * @param field The field name.
+   */
   public void setField(String field) {
     this.field = field;
   }
 
+  /**
+   * Gets the comparison operator for this rule.
+   *
+   * @return The operator string.
+   */
   public String getOperator() {
     return operator;
   }
 
+  /**
+   * Sets the comparison operator for this rule.
+   *
+   * @param operator The operator string.
+   */
   public void setOperator(String operator) {
     this.operator = operator;
   }
 
+  /**
+   * Gets the target value this rule evaluates against.
+   *
+   * @return The target value.
+   */
   public String getValue() {
     return value;
   }
 
+  /**
+   * Sets the target value for this rule.
+   *
+   * @param value The target value.
+   */
   public void setValue(String value) {
     this.value = value;
   }

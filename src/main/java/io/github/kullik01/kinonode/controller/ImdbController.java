@@ -302,6 +302,12 @@ public class ImdbController implements Refreshable {
     loadPage(IMDB_HOME);
   }
 
+  /**
+   * Loads a specific URL into the web engine. If the provided URL matches the
+   * current location, a reload is triggered instead.
+   *
+   * @param url The target web address to load.
+   */
   public void loadPage(String url) {
     String tmpCurrent = webEngine.getLocation();
     if (tmpCurrent != null && url != null) {
@@ -318,6 +324,11 @@ public class ImdbController implements Refreshable {
     webEngine.load(url);
   }
 
+  /**
+   * Injects JavaScript logic to aggressively hide ad slots, cookie banners (OneTrust),
+   * and sign-in prompts. Uses a combination of CSS overrides, MutationObservers,
+   * and timed retry scans to ensure a clean browsing experience.
+   */
   private void injectAdSuppression() {
     webEngine.executeScript("(function(){" + "if(window.__kinoInit)return;"
         + "window.__kinoInit=true;"
@@ -444,6 +455,10 @@ public class ImdbController implements Refreshable {
         + "})();");
   }
 
+  /**
+   * Updates the disabled state of the Back and Forward navigation buttons
+   * based on the browser engine's current history stack position.
+   */
   private void updateHistoryButtons() {
     int currentIndex = webEngine.getHistory().getCurrentIndex();
     int historySize = webEngine.getHistory().getEntries().size();
@@ -451,6 +466,9 @@ public class ImdbController implements Refreshable {
     btnForward.setDisable(currentIndex >= historySize - 1);
   }
 
+  /**
+   * Navigates back one step in the browser history, if possible.
+   */
   @FXML
   private void handleBack() {
     pendingTargetUrl = null;
@@ -460,6 +478,9 @@ public class ImdbController implements Refreshable {
     }
   }
 
+  /**
+   * Navigates forward one step in the browser history, if possible.
+   */
   @FXML
   private void handleForward() {
     pendingTargetUrl = null;
@@ -470,17 +491,26 @@ public class ImdbController implements Refreshable {
     }
   }
 
+  /**
+   * Reloads the currently loaded web page.
+   */
   @FXML
   private void handleReload() {
     pendingTargetUrl = null;
     webEngine.reload();
   }
 
+  /**
+   * Returns the browser view to the default IMDb homepage.
+   */
   @FXML
   private void handleHome() {
     loadPage(IMDB_HOME);
   }
 
+  /**
+   * Attempts to reload the current page after a loading failure.
+   */
   @FXML
   private void handleRetry() {
     loadPage(

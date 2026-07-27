@@ -154,6 +154,11 @@ public class LibraryController implements Refreshable {
     filterAndDisplayMovies();
   }
 
+  /**
+   * Filters and sorts the movie library based on the current search text and sort option.
+   * Caches FXML cards and controllers for efficient UI updates and handles displaying
+   * either the filtered movie cards or an empty state view if no movies match.
+   */
   private void filterAndDisplayMovies() {
     String tmpQuery = txtSearch.getText().toLowerCase().trim();
     String tmpSortOption =
@@ -285,6 +290,14 @@ public class LibraryController implements Refreshable {
     }
   }
 
+  /**
+   * Creates an empty state node to display when the library is empty or no movies
+   * match the current search filters. Provides actionable buttons to sync the library
+   * or configure workspaces if none are set.
+   *
+   * @param isLibraryEmpty true if the entire library is empty (no movies), false if movies exist but don't match the search.
+   * @return A styled VBox node containing the empty state message and actions.
+   */
   private Node createEmptyStateNode(boolean isLibraryEmpty) {
     javafx.scene.layout.VBox tmpRootVBox = new javafx.scene.layout.VBox();
     tmpRootVBox.setAlignment(javafx.geometry.Pos.CENTER);
@@ -463,6 +476,12 @@ public class LibraryController implements Refreshable {
     return tmpRootVBox;
   }
 
+  /**
+   * Opens the detailed view for a specific movie, dynamically replacing the library
+   * grid with the movie's detail view in the parent StackPane.
+   *
+   * @param movie The movie object to display details for.
+   */
   private void openMovieDetail(Movie movie) {
     try {
       URL tmpUrl = getClass().getResource(
@@ -490,6 +509,10 @@ public class LibraryController implements Refreshable {
     }
   }
 
+  /**
+   * Initiates a background task to scan configured workspaces and sync the movie library.
+   * Binds UI progress elements to the task and handles success, failure, and cancellation events.
+   */
   @FXML
   private void syncLibrary() {
     if (activeScanTask != null && activeScanTask.isRunning()) {
@@ -540,6 +563,9 @@ public class LibraryController implements Refreshable {
     tmpThread.start();
   }
 
+  /**
+   * Cancels the currently active library sync background task, if one is running.
+   */
   @FXML
   private void cancelSync() {
     if (activeScanTask != null) {

@@ -105,6 +105,10 @@ public class AboutController implements Refreshable {
     loadAboutInfo();
   }
 
+  /**
+   * Retrieves application statistics, configuration details, and system properties,
+   * then updates the corresponding UI labels and text fields.
+   */
   private void loadAboutInfo() {
     lblVersion.setText("1.0.0");
 
@@ -201,6 +205,10 @@ public class AboutController implements Refreshable {
     }
   }
 
+  /**
+   * Opens the directory containing the configured external media player in the system's
+   * default file explorer.
+   */
   @FXML
   private void openPlayerLocation() {
     try {
@@ -222,6 +230,10 @@ public class AboutController implements Refreshable {
     }
   }
 
+  /**
+   * Opens the directory containing the local SQLite database file in the system's
+   * default file explorer.
+   */
   @FXML
   private void openDatabaseLocation() {
     try {
@@ -241,16 +253,28 @@ public class AboutController implements Refreshable {
     }
   }
 
+  /**
+   * Opens the project's GitHub repository in the default web browser.
+   */
   @FXML
   private void openRepository() {
     openWebpage("https://github.com/kullik01/Kino-Node");
   }
 
+  /**
+   * Opens the project's GitHub issue tracker for bug reporting in the default web browser.
+   */
   @FXML
   private void openIssueTracker() {
     openWebpage("https://github.com/kullik01/Kino-Node/issues/new");
   }
 
+  /**
+   * Opens a specified URL using the JavaFX HostServices API, which delegates
+   * to the operating system's default web browser.
+   *
+   * @param url The fully qualified URL to open.
+   */
   private void openWebpage(String url) {
     try {
       KinoNodeApp.getInstance().getHostServices().showDocument(url);
@@ -259,6 +283,10 @@ public class AboutController implements Refreshable {
     }
   }
 
+  /**
+   * Opens the project's GitHub releases page in the default web browser to allow
+   * the user to check for newer application versions.
+   */
   @FXML
   private void checkForUpdates() {
     openWebpage("https://github.com/kullik01/Kino-Node/releases");

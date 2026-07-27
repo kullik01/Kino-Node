@@ -211,13 +211,6 @@ public class ImdbService {
    * @param imdbId the IMDb identifier of the movie (starting with 'tt')
    * @param movie the {@link Movie} object to enrich
    */
-  /**
-   * Fetches title page details directly from IMDb to extract movie duration and
-   * IMDb rating.
-   *
-   * @param imdbId the IMDb identifier of the movie (starting with 'tt')
-   * @param movie the {@link Movie} object to enrich
-   */
   private static void fetchImdbTitleDetails(String imdbId, Movie movie) {
     try {
       String tmpUrl = "https://www.imdb.com/title/" + imdbId + "/";

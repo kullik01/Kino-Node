@@ -102,6 +102,10 @@ public class MovieCardController {
     loadPoster();
   }
 
+  /**
+   * Asynchronously loads the movie poster from the file system.
+   * Falls back to a cached placeholder image if the specified file is missing or invalid.
+   */
   private void loadPoster() {
     String tmpPath = movie.getCoverImagePath();
     Image tmpImage = null;
@@ -145,6 +149,12 @@ public class MovieCardController {
     }
   }
 
+  /**
+   * Handles user clicks on the movie card. Invokes the click handler callback,
+   * passing the associated movie object.
+   *
+   * @param event The mouse click event.
+   */
   @FXML
   private void onCardClicked(MouseEvent event) {
     if (clickHandler != null) {

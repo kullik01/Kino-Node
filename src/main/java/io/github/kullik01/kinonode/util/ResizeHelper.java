@@ -42,6 +42,10 @@ import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
+/**
+ * Utility class providing logic to add manual resizing capabilities to
+ * undecorated/transparent JavaFX Stages (e.g. custom dialogs).
+ */
 public class ResizeHelper {
 
   private static final int RESIZE_MARGIN = 10;
@@ -53,6 +57,12 @@ public class ResizeHelper {
   private static double startWidth = -1;
   private static double startHeight = -1;
 
+  /**
+   * Attaches mouse event listeners to a given Stage's Scene to allow manual
+   * resizing by dragging the right edge, bottom edge, or bottom-right corner.
+   *
+   * @param stage The undecorated JavaFX Stage to make resizable.
+   */
   public static void addResizeListener(Stage stage) {
     Scene scene = stage.getScene();
     if (scene == null)
