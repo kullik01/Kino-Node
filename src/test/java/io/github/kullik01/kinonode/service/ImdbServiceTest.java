@@ -40,10 +40,12 @@ package io.github.kullik01.kinonode.service;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.kullik01.kinonode.model.Movie;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class ImdbServiceTest {
   @Test
+  @Disabled("Fails in GitHub Actions due to IMDb API blocking CI IP addresses")
   public void testEnrich() {
     Movie tmpMovie = new Movie("C:/test/Halloween 5.mp4", "Halloween 5");
     ImdbService.enrichMovieData(tmpMovie);

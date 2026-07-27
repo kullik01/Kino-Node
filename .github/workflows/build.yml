@@ -10,7 +10,7 @@ on:
 
 jobs:
   build-and-package:
-    name: Package for ${{ matrix.os }}
+    name: Package for ${{ matrix.display_name }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -18,17 +18,20 @@ jobs:
         os: [windows-latest, ubuntu-latest, macos-latest]
         include:
           - os: windows-latest
+            display_name: windows-latest
             artifact-path: |
               build/installers/*.exe
               build/installers/*.msi
               build/distributions/*.zip
           - os: ubuntu-latest
+            display_name: linux-latest
             artifact-path: |
               build/installers/*.deb
               build/installers/*.rpm
               build/distributions/*.zip
               build/distributions/*.tar.gz
           - os: macos-latest
+            display_name: macos-latest
             artifact-path: |
               build/installers/*.dmg
               build/installers/*.pkg
