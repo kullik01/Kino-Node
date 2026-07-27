@@ -3,14 +3,10 @@ name: Cross-Platform Build & Package
 on:
   push:
     branches: [ main, master ]
-    tags:
-      - 'v*'
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
 
-permissions:
-  contents: write
 
 jobs:
   build-and-package:
@@ -102,33 +98,4 @@ jobs:
           ./gradlew jpackage -PinstallerType=pkg
           ./gradlew macAppImageZip
 
-      - name: Upload Release Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: kinonode-release-${{ matrix.os }}
-          path: ${{ matrix.artifact-path }}
-          if-no-files-found: error
 
-  release:
-    name: Create GitHub Release
-    needs: build-and-package
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          merge-multiple: true
-
-      - name: Display downloaded artifacts
-        run: ls -laR artifacts/
-
-      - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: artifacts/**/*
-          fail_on_unmatched_files: false
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
