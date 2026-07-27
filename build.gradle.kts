@@ -119,7 +119,8 @@ jlink {
         "--strip-debug",
         "--compress", "zip-6",
         "--no-header-files",
-        "--no-man-pages"
+        "--no-man-pages",
+        "--bind-services"
     ))
     launcher {
         name = "KinoNode"
