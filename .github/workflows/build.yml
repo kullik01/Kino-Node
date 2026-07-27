@@ -101,4 +101,9 @@ jobs:
           ./gradlew jpackage -PinstallerType=pkg
           ./gradlew macAppImageZip
 
-
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: KinoNode-${{ matrix.display_name }}-artifacts
+          path: ${{ matrix.artifact-path }}
+          if-no-files-found: warn
