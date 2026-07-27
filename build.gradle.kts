@@ -148,7 +148,8 @@ jlink {
         val iconArgs = if (file(iconPath).exists()) listOf("--icon", file(iconPath).absolutePath) else emptyList()
         val commonOptions = iconArgs + listOf(
             "--description", "Personal Movie Library Manager",
-            "--vendor", "Hannah Kullik"
+            "--vendor", "Hannah Kullik",
+            "--resource-dir", file("src/main/resources/jpackage").absolutePath
         )
         
         imageOptions = commonOptions
