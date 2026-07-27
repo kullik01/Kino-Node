@@ -1,4 +1,8 @@
-# <img src="src/main/resources/io/github/kullik01/kinonode/images/logo.png" height="40" alt="KinoNode Logo" /> KinoNode
+<h1 align="center">
+  <sub><img src="src/main/resources/io/github/kullik01/kinonode/images/logo.png" height="250" alt="KinoNode Logo" /></sub>
+  <br>
+  KinoNode
+</h1>
 
 [![Build Status](https://github.com/kullik01/Kino-Node/actions/workflows/build.yml/badge.svg)](https://github.com/kullik01/Kino-Node/actions/workflows/build.yml)
 [![Latest Release](https://img.shields.io/github/v/release/kullik01/Kino-Node?style=flat-square&color=success)](https://github.com/kullik01/Kino-Node/releases)
@@ -8,26 +12,38 @@
 
 KinoNode is a modern, lightweight, personal movie library manager built on a solid Java 25 and JavaFX 25 baseline. Featuring a clean MVC (Model-View-Controller) architecture, an embedded SQLite database for persistence, and a premium dark mode design, KinoNode brings a media-center feel to your desktop movie collection.
 
-> **🖼️ Note to Developer:** *Add a screenshot of the application here to showcase the dark mode and UI.*
-> `![KinoNode Screenshot](path/to/screenshot.png)`
-
 ---
 
 ## 📑 Table of Contents
+
 - [📥 Download](#-download)
 - [🌟 Key Features](#-key-features)
-- [🛠️ Technology Stack](#-technology-stack)
+  - [🗃️ Library & Metadata](#️-library--metadata)
+  - [🎨 User Interface & Experience](#-user-interface--experience)
+  - [🎬 Organization & Playback](#-organization--playback)
+  - [💾 Data Management & Configuration](#-data-management--configuration)
+- [🛠️ Technology Stack](#️-technology-stack)
 - [🚀 Getting Started](#-getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Clone and Run](#clone-and-run)
+  - [Running Tests](#running-tests)
+  - [Code Formatting](#code-formatting)
 - [📂 Database & Data Storage](#-database--data-storage)
+  - [Single Directory / Portable Mode (Recommended)](#single-directory--portable-mode-recommended)
+  - [Standard OS Application Data Directory](#standard-os-application-data-directory)
 - [📦 Native Distribution & Packaging](#-native-distribution--packaging)
+  - [Modular Runtime Image](#modular-runtime-image)
+  - [Native OS Installers](#native-os-installers)
+  - [Automated CI/CD Pipelines](#automated-cicd-pipelines)
 - [🤝 Contributing & Feedback](#-contributing--feedback)
 - [📄 License](#-license)
+- [👥 Contributors & Credits](#-contributors--credits)
 
 ---
 
 ## 📥 Download
 
-The easiest way to use KinoNode is to download the latest pre-compiled binaries for your operating system. We provide standalone installers and portable packages for Windows, macOS, and Linux.
+The easiest way to use KinoNode is to download the latest pre-compiled binaries for your operating system. I provide standalone installers and portable packages for Windows, macOS, and Linux.
 
 **[⬇️ Download the Latest Release](https://github.com/kullik01/Kino-Node/releases/latest)**
 
@@ -158,7 +174,7 @@ KinoNode features a GitHub Actions workflow (`.github/workflows/build.yml`) trig
 
 ## 🤝 Contributing & Feedback
 
-We welcome community contributions! Here's how you can help:
+Here's how you can help:
 * **Found a bug?** Open an issue on our [GitHub Issues](https://github.com/kullik01/Kino-Node/issues) page.
 * **Have a feature request?** We'd love to hear it. Start a discussion or open an issue.
 * **Want to contribute code?** Fork the repository, create a new branch for your feature or bugfix, and submit a Pull Request.
