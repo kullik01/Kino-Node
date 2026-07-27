@@ -145,13 +145,14 @@ jlink {
             else -> "src/main/resources/io/github/kullik01/kinonode/images/logo.png"
         }
         val iconArgs = if (file(iconPath).exists()) listOf("--icon", iconPath) else emptyList()
-        
-        imageOptions = iconArgs + listOf(
+        val commonOptions = iconArgs + listOf(
             "--description", "KinoNode - Personal Movie Library Manager",
             "--vendor", "Hannah Kullik"
         )
         
-        installerOptions = when {
+        imageOptions = commonOptions
+        
+        val osSpecificOptions = when {
             isWindows -> listOf(
                 "--win-dir-chooser",
                 "--win-menu",
@@ -178,6 +179,8 @@ jlink {
                 }
             }
         }
+        
+        installerOptions = commonOptions + osSpecificOptions
     }
 }
 
