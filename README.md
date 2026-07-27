@@ -1,33 +1,65 @@
-# 🎬 KinoNode
+# <img src="src/main/resources/io/github/kullik01/kinonode/images/logo.png" height="40" alt="KinoNode Logo" /> KinoNode
 
+[![Build Status](https://github.com/kullik01/Kino-Node/actions/workflows/build.yml/badge.svg)](https://github.com/kullik01/Kino-Node/actions/workflows/build.yml)
+[![Latest Release](https://img.shields.io/github/v/release/kullik01/Kino-Node?style=flat-square&color=success)](https://github.com/kullik01/Kino-Node/releases)
 [![Java Version](https://img.shields.io/badge/Java-25-orange.svg?style=flat-square)](https://jdk.java.net/)
 [![JavaFX](https://img.shields.io/badge/JavaFX-25-blue.svg?style=flat-square)](https://openjfx.io/)
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-green.svg?style=flat-square)](LICENSE)
 
 KinoNode is a modern, lightweight, personal movie library manager built on a solid Java 25 and JavaFX 25 baseline. Featuring a clean MVC (Model-View-Controller) architecture, an embedded SQLite database for persistence, and a premium dark mode design, KinoNode brings a media-center feel to your desktop movie collection.
 
+> **🖼️ Note to Developer:** *Add a screenshot of the application here to showcase the dark mode and UI.*
+> `![KinoNode Screenshot](path/to/screenshot.png)`
+
+---
+
+## 📑 Table of Contents
+- [📥 Download](#-download)
+- [🌟 Key Features](#-key-features)
+- [🛠️ Technology Stack](#-technology-stack)
+- [🚀 Getting Started](#-getting-started)
+- [📂 Database & Data Storage](#-database--data-storage)
+- [📦 Native Distribution & Packaging](#-native-distribution--packaging)
+- [🤝 Contributing & Feedback](#-contributing--feedback)
+- [📄 License](#-license)
+
+---
+
+## 📥 Download
+
+The easiest way to use KinoNode is to download the latest pre-compiled binaries for your operating system. We provide standalone installers and portable packages for Windows, macOS, and Linux.
+
+**[⬇️ Download the Latest Release](https://github.com/kullik01/Kino-Node/releases/latest)**
+
 ---
 
 ## 🌟 Key Features
 
+### 🗃️ Library & Metadata
 * **Workspace Synchronization:** Recursively scan local folders to catalog your movies. Title, year, and metadata are automatically extracted from filenames and synchronized.
-* **Modern Media Hub:** A responsive, poster-centric library grid. Easily replace or custom-set movie cover art at any time.
 * **Smart Metadata Enrichment:** Automatically queries online directories (IMDb Suggestion API & Wikidata SPARQL) to populate missing directors, writers, producers, cinematographers, composers, and all billing-ordered cast members.
 * **Crew & Actor Lookups:** Interactive dropdown controls (ComboBoxes) for multi-person metadata fields (Directors, Writers, Producers, Cinematographers, Composers, and Actors). Select any specific crew member or actor and view their dedicated IMDb profile.
 * **Wikidata-Powered Disambiguation:** Resolves the exact IMDb person ID (`nmXXXXXXX`) for crew and actors in the background via Wikidata SPARQL queries, linking directly to their official biography page instead of a generic name search.
-* **Embedded IMDb Web Browser:** A built-in, tab-integrated browser preloaded on startup, complete with custom back, forward, reload, and home buttons for seamless movie exploration.
-* **YouTube Trailer Integration:** Automatically scrapes and saves official YouTube trailer URLs, allowing you to watch them in your default web browser with a single click.
+
+### 🎨 User Interface & Experience
+* **Modern Media Hub:** A responsive, poster-centric library grid. Easily replace or custom-set movie cover art at any time.
+* **Dynamic Light/Dark Theme Switcher:** Instantly toggle between a crisp Light mode and a premium Dark mode design natively powered by the AtlantaFX (Primer) styling framework.
 * **Clapperboard Rating System:** Rate your favorite films on a sliding 0–10 scale using custom film-reel clapperboard graphics.
+* **Library Analytics Dashboard:** A dedicated interactive Analytics view displaying real-time library KPIs (Total Movies, Average Rating, Year Span, Total Watchlists, Top Genre, and Unique Directors count), dynamic decade distribution bar charts, and clapperboard rating frequency charts.
+* **Embedded IMDb Web Browser:** A built-in, tab-integrated browser preloaded on startup, complete with custom back, forward, reload, and home buttons for seamless movie exploration.
+
+### 🎬 Organization & Playback
 * **Smart Watchlists & Dynamic Queries:** Build automated watchlists using an interactive rule builder. Define conditions (e.g., Year > 2000, IMDb Rating > 8.0) and watch the list instantly populate. The UI reacts in real-time, automatically updating smart watchlists whenever new movies match or metadata changes.
 * **Playlists & Watchlists:** Build, rename, and manage multiple standard watchlists. Drag, reorder, or organize movies exactly the way you want them.
-* **Library Analytics Dashboard:** A dedicated interactive Analytics view displaying real-time library KPIs (Total Movies, Average Rating, Year Span, Total Watchlists, Top Genre, and Unique Directors count), dynamic decade distribution bar charts, and clapperboard rating frequency charts.
 * **Top Cast & Crew Leaderboards:** Automatically calculates and displays ranked leaderboards of your collection's most featured Directors and Actors/Cast members.
+* **External Player Launch:** Seamlessly watch your movies. KinoNode auto-detects system media players (like `mpv` and `VLC`) or launches any custom player executable path.
+* **YouTube Trailer Integration:** Automatically scrapes and saves official YouTube trailer URLs, allowing you to watch them in your default web browser with a single click.
+
+### 💾 Data Management & Configuration
+* **100% Portable Mode Capability:** Run KinoNode entirely self-contained within a single directory without touching OS Application Data folders—perfect for USB drives and portable storage.
 * **Catalog Export & HTML Reports:** One-click portability allowing you to export your entire movie catalog to structured **JSON**, spreadsheet-ready **CSV**, or generate a styled, standalone **HTML Collection Report** that can be opened in any web browser.
 * **Automated SQLite Snapshot Backups:** Create instant, timestamped backup snapshots of your embedded SQLite database (`kinonode.db`) with a single click from the Analytics toolbar.
-* **External Player Launch:** Seamlessly watch your movies. KinoNode auto-detects system media players (like `mpv` and `VLC`) or launches any custom player executable path.
-* **Dynamic Light/Dark Theme Switcher:** Instantly toggle between a crisp Light mode and a premium Dark mode design natively powered by the AtlantaFX (Primer) styling framework.
 * **Configurable Video File Extensions:** Define exactly which custom video formats (e.g. `.mp4`, `.mkv`, `.avi`, `.webm`) the library scanner should target via the Settings dashboard.
-* **100% Portable Mode Capability:** Run KinoNode entirely self-contained within a single directory without touching OS Application Data folders—perfect for USB drives and portable storage.
 
 ---
 
@@ -117,12 +149,19 @@ Generate a native executable installer (Windows `.exe`, macOS `.dmg`, or Linux `
 > Cross-compilation is not supported by `jpackage`. You must run the build command on the target operating system.
 
 ### Automated CI/CD Pipelines
-KinoNode features a GitHub Actions workflow (`.github/workflows/package.yml`) triggered on new release tags (e.g. `v1.0.0`). The workflow builds distribution assets across a multi-OS matrix:
-* **Windows:** Standard `.exe` installer and portable `.zip` archives.
-* **macOS:** Premium `.dmg` and `.pkg` installers.
-* **Linux:** Debian `.deb`, RedHat `.rpm`, and portable `.zip` packages.
+KinoNode features a GitHub Actions workflow (`.github/workflows/build.yml`) triggered on pushes and pull requests to the main branch. The workflow runs automated tests and builds distribution assets across a multi-OS matrix:
+* **Windows:** `.exe` and `.msi` installers, plus portable `.zip` archives.
+* **macOS:** Premium `.dmg` and `.pkg` installers, plus portable `.zip` archives.
+* **Linux:** Debian `.deb` and RedHat `.rpm` packages, plus portable `.zip` and `.tar.gz` archives.
 
-Finished binaries are automatically bundled and uploaded directly as draft assets to the corresponding GitHub Release.
+---
+
+## 🤝 Contributing & Feedback
+
+We welcome community contributions! Here's how you can help:
+* **Found a bug?** Open an issue on our [GitHub Issues](https://github.com/kullik01/Kino-Node/issues) page.
+* **Have a feature request?** We'd love to hear it. Start a discussion or open an issue.
+* **Want to contribute code?** Fork the repository, create a new branch for your feature or bugfix, and submit a Pull Request.
 
 ---
 
