@@ -261,27 +261,7 @@ public class WatchlistRepository {
       tmpPreparedStatement.setInt(1, watchlistId);
       try (ResultSet tmpResultSet = tmpPreparedStatement.executeQuery()) {
         while (tmpResultSet.next()) {
-          // Map the ResultSet row to a new Movie instance locally
-          Movie tmpMovie = new Movie();
-          tmpMovie.setId(tmpResultSet.getInt("id"));
-          tmpMovie.setFilePath(tmpResultSet.getString("file_path"));
-          tmpMovie.setTitle(tmpResultSet.getString("title"));
-
-          int tmpYear = tmpResultSet.getInt("year");
-          tmpMovie.setYear(tmpResultSet.wasNull() ? null : tmpYear);
-
-          tmpMovie.setGenre(tmpResultSet.getString("genre"));
-          tmpMovie.setDescription(tmpResultSet.getString("description"));
-
-          int tmpRating = tmpResultSet.getInt("rating");
-          tmpMovie.setRating(tmpResultSet.wasNull() ? null : tmpRating);
-
-          tmpMovie
-              .setCoverImagePath(tmpResultSet.getString("cover_image_path"));
-          tmpMovie.setTrailerUrl(tmpResultSet.getString("trailer_url"));
-          tmpMovie.setDateAdded(
-              Instant.ofEpochSecond(tmpResultSet.getLong("date_added")));
-          tmpMovies.add(tmpMovie);
+          tmpMovies.add(movieRepository.mapRowToMovie(tmpResultSet));
         }
       }
     } catch (SQLException tmpException) {
@@ -472,38 +452,81 @@ public class WatchlistRepository {
         switch (tmpRule.getOperator()) {
           case "EQUALS" -> {
             tmpQueryBuilder.append(" AND ").append(tmpDbField).append(" = ?");
-            tmpParameters.add(tmpValue);
+            if (tmpDbField.equals("rating")
+                || tmpDbField.equals("raw_rating")) {
+              try {
+                tmpParameters
+                    .add(Double.parseDouble(tmpValue.replace(",", ".")));
+              } catch (NumberFormatException tmpException) {
+                tmpParameters.add(0.0);
+              }
+            } else if (tmpDbField.equals("year")
+                || tmpDbField.equals("duration")) {
+              try {
+                tmpParameters.add(Integer.parseInt(tmpValue));
+              } catch (NumberFormatException tmpException) {
+                tmpParameters.add(0);
+              }
+            } else {
+              tmpParameters.add(tmpValue);
+            }
+          }
+          case "NOT_EQUALS" -> {
+            tmpQueryBuilder.append(" AND ").append(tmpDbField).append(" != ?");
+            if (tmpDbField.equals("rating")
+                || tmpDbField.equals("raw_rating")) {
+              try {
+                tmpParameters
+                    .add(Double.parseDouble(tmpValue.replace(",", ".")));
+              } catch (NumberFormatException tmpException) {
+                tmpParameters.add(0.0);
+              }
+            } else if (tmpDbField.equals("year")
+                || tmpDbField.equals("duration")) {
+              try {
+                tmpParameters.add(Integer.parseInt(tmpValue));
+              } catch (NumberFormatException tmpException) {
+                tmpParameters.add(0);
+              }
+            } else {
+              tmpParameters.add(tmpValue);
+            }
           }
           case "GREATER_THAN" -> {
             tmpQueryBuilder.append(" AND ").append(tmpDbField).append(" > ?");
-            try {
-              if (tmpValue.contains(".") || tmpValue.contains(",")) {
+            if (tmpDbField.equals("rating")
+                || tmpDbField.equals("raw_rating")) {
+              try {
                 tmpParameters
                     .add(Double.parseDouble(tmpValue.replace(",", ".")));
-              } else {
-                tmpParameters.add(Integer.parseInt(tmpValue));
+              } catch (NumberFormatException tmpException) {
+                tmpParameters.add(0.0);
               }
-            } catch (NumberFormatException tmpException) {
-              tmpParameters.add(0);
+            } else {
+              try {
+                tmpParameters.add(Integer.parseInt(tmpValue));
+              } catch (NumberFormatException tmpException) {
+                tmpParameters.add(0);
+              }
             }
           }
           case "LESS_THAN" -> {
             tmpQueryBuilder.append(" AND ").append(tmpDbField).append(" < ?");
-            try {
-              if (tmpValue.contains(".") || tmpValue.contains(",")) {
+            if (tmpDbField.equals("rating")
+                || tmpDbField.equals("raw_rating")) {
+              try {
                 tmpParameters
                     .add(Double.parseDouble(tmpValue.replace(",", ".")));
-              } else {
-                tmpParameters.add(Integer.parseInt(tmpValue));
+              } catch (NumberFormatException tmpException) {
+                tmpParameters.add(0.0);
               }
-            } catch (NumberFormatException tmpException) {
-              tmpParameters.add(0);
+            } else {
+              try {
+                tmpParameters.add(Integer.parseInt(tmpValue));
+              } catch (NumberFormatException tmpException) {
+                tmpParameters.add(0);
+              }
             }
-          }
-          case "CONTAINS" -> {
-            tmpQueryBuilder.append(" AND ").append(tmpDbField)
-                .append(" LIKE ?");
-            tmpParameters.add("%" + tmpValue + "%");
           }
         }
       }
@@ -516,26 +539,7 @@ public class WatchlistRepository {
         }
         try (ResultSet tmpResultSet = tmpPreparedStatement.executeQuery()) {
           while (tmpResultSet.next()) {
-            Movie tmpMovie = new Movie();
-            tmpMovie.setId(tmpResultSet.getInt("id"));
-            tmpMovie.setFilePath(tmpResultSet.getString("file_path"));
-            tmpMovie.setTitle(tmpResultSet.getString("title"));
-
-            int tmpYear = tmpResultSet.getInt("year");
-            tmpMovie.setYear(tmpResultSet.wasNull() ? null : tmpYear);
-
-            tmpMovie.setGenre(tmpResultSet.getString("genre"));
-            tmpMovie.setDescription(tmpResultSet.getString("description"));
-
-            int tmpRating = tmpResultSet.getInt("rating");
-            tmpMovie.setRating(tmpResultSet.wasNull() ? null : tmpRating);
-
-            tmpMovie
-                .setCoverImagePath(tmpResultSet.getString("cover_image_path"));
-            tmpMovie.setTrailerUrl(tmpResultSet.getString("trailer_url"));
-            tmpMovie.setDateAdded(
-                Instant.ofEpochSecond(tmpResultSet.getLong("date_added")));
-            tmpMovies.add(tmpMovie);
+            tmpMovies.add(movieRepository.mapRowToMovie(tmpResultSet));
           }
         }
       }

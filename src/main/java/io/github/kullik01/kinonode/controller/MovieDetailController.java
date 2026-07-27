@@ -253,6 +253,7 @@ public class MovieDetailController implements Refreshable {
           if ((movie.getDuration() != null && movie.getDuration() > 0)
               || movie.getRating() != null || movie.getRawRating() != null) {
             showStatus("IMDb Metadata loaded!");
+            AppContext.getInstance().notifyLibraryChanged();
           }
         });
       });
@@ -558,7 +559,8 @@ public class MovieDetailController implements Refreshable {
     // Populate method
     Runnable populateWatchlists = () -> {
       tmpWatchlistsListVBox.getChildren().clear();
-      List<Watchlist> allW = watchlistRepository.findAll();
+      List<Watchlist> allW = watchlistRepository.findAll().stream()
+          .filter(w -> !w.isSmart()).toList();
       if (allW.isEmpty()) {
         Label emptyLbl = new Label("No watchlists available.");
         emptyLbl.setStyle(

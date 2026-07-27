@@ -588,8 +588,8 @@ public class WatchlistsController implements Refreshable {
     tmpDialog.setTitle("New Smart Watchlist");
     tmpDialog.setHeaderText("Create a dynamic watchlist based on rules");
 
-    tmpDialog.getDialogPane().setPrefSize(480, Region.USE_COMPUTED_SIZE);
-    tmpDialog.getDialogPane().setMinSize(480, Region.USE_COMPUTED_SIZE);
+    tmpDialog.getDialogPane().setPrefSize(700, Region.USE_COMPUTED_SIZE);
+    tmpDialog.getDialogPane().setMinSize(700, Region.USE_COMPUTED_SIZE);
 
     Stage tmpStage = (Stage) tmpDialog.getDialogPane().getScene().getWindow();
     tmpStage.getIcons().add(new javafx.scene.image.Image(getClass()
@@ -604,7 +604,7 @@ public class WatchlistsController implements Refreshable {
 
     Label tmpErrorLabel = new Label();
     tmpErrorLabel.setWrapText(true);
-    tmpErrorLabel.setPrefWidth(430);
+    tmpErrorLabel.setPrefWidth(600);
     tmpErrorLabel.setMinHeight(Region.USE_PREF_SIZE);
     tmpErrorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
     tmpErrorLabel.setVisible(false);
@@ -612,14 +612,21 @@ public class WatchlistsController implements Refreshable {
     TextField tmpNameField = new TextField();
     tmpNameField.setPromptText("Smart Watchlist Name");
     HBox tmpRuleBox = new HBox(5);
+    tmpRuleBox.setDisable(true);
     ComboBox<String> tmpFieldComboBox = new ComboBox<>();
     tmpFieldComboBox.getItems().addAll("Actors", "Cinematographer", "Composer",
         "Director", "Duration", "Genre", "IMDb Rating", "Producer", "Writer",
         "Year");
     tmpFieldComboBox.getSelectionModel().selectFirst();
+    tmpFieldComboBox.setPrefWidth(200);
+    tmpFieldComboBox.setMinWidth(Region.USE_PREF_SIZE);
 
     TextField tmpValueField = new TextField();
+    tmpValueField.setPrefWidth(250);
+    tmpValueField.setMinWidth(Region.USE_PREF_SIZE);
     ComboBox<String> tmpOperatorComboBox = new ComboBox<>();
+    tmpOperatorComboBox.setPrefWidth(200);
+    tmpOperatorComboBox.setMinWidth(Region.USE_PREF_SIZE);
     Runnable tmpUpdateOperators = () -> {
       String tmpSelectedField = tmpFieldComboBox.getValue();
       String tmpCurrentOperator = tmpOperatorComboBox.getValue();
@@ -635,9 +642,10 @@ public class WatchlistsController implements Refreshable {
 
       List<String> tmpAllowedOperators;
       if (tmpIsNumeric) {
-        tmpAllowedOperators = List.of("EQUALS", "GREATER_THAN", "LESS_THAN");
+        tmpAllowedOperators =
+            List.of("EQUALS", "NOT_EQUALS", "GREATER_THAN", "LESS_THAN");
       } else {
-        tmpAllowedOperators = List.of("EQUALS", "CONTAINS");
+        tmpAllowedOperators = List.of("EQUALS", "NOT_EQUALS");
       }
 
       if (!tmpOperatorComboBox.getItems().equals(tmpAllowedOperators)) {
@@ -681,7 +689,7 @@ public class WatchlistsController implements Refreshable {
               tmpValueField.setText(oldValue);
             }
           } else if ("IMDb Rating".equals(tmpField)) {
-            if (!newValue.matches("[0-9.,]*")) {
+            if (!newValue.matches("^\\d{0,2}([.,]\\d{0,1})?$")) {
               tmpValueField.setText(oldValue);
             } else {
               try {
@@ -711,7 +719,7 @@ public class WatchlistsController implements Refreshable {
     tmpAsciiInfo.setStyle(
         "-fx-text-fill: gray; -fx-font-size: 12px; -fx-padding: 10 0 5 0;");
     tmpAsciiInfo.setWrapText(true);
-    tmpAsciiInfo.setPrefWidth(430);
+    tmpAsciiInfo.setPrefWidth(600);
     tmpAsciiInfo.setMinHeight(Region.USE_PREF_SIZE);
 
     tmpVbox.getChildren().addAll(tmpErrorLabel, new Label("Name:"),
@@ -733,14 +741,19 @@ public class WatchlistsController implements Refreshable {
     javafx.beans.value.ChangeListener<String> tmpValidationListener =
         (observable, oldValue, newValue) -> {
           boolean tmpIsValid = true;
+          boolean tmpIsNameValid = true;
           String tmpName = tmpNameField.getText().trim();
           String tmpValue = tmpValueField.getText().trim();
 
-          if (!tmpName.matches("\\A\\p{ASCII}*\\z")) {
+          if (tmpName.isEmpty()) {
+            tmpIsValid = false;
+            tmpIsNameValid = false;
+          } else if (!tmpName.matches("\\A\\p{ASCII}*\\z")) {
             tmpErrorLabel.setText(
                 "The text you entered is not ASCII code. Only standard English letters, numbers, and basic symbols can be used.");
             tmpErrorLabel.setVisible(true);
             tmpIsValid = false;
+            tmpIsNameValid = false;
           } else {
             boolean tmpDuplicate = false;
             List<Watchlist> tmpWatchlists = watchlistRepository.findAll();
@@ -755,6 +768,7 @@ public class WatchlistsController implements Refreshable {
                   "A watchlist with this name already exists. Please choose a different name.");
               tmpErrorLabel.setVisible(true);
               tmpIsValid = false;
+              tmpIsNameValid = false;
             } else {
               String tmpField = tmpFieldComboBox.getValue();
               if (!tmpValue.isEmpty()) {
@@ -805,6 +819,8 @@ public class WatchlistsController implements Refreshable {
             }
           }
 
+          tmpRuleBox.setDisable(!tmpIsNameValid);
+
           if (tmpIsValid) {
             tmpErrorLabel.setVisible(false);
           }
@@ -849,6 +865,12 @@ public class WatchlistsController implements Refreshable {
       if (validateWatchlistName(watchlist.getName(), -1)) {
         watchlistRepository.insert(watchlist);
         refresh();
+        javafx.application.Platform.runLater(() -> {
+          io.github.kullik01.kinonode.util.CustomAlert.showInformation(null,
+              "Smart Watchlist Created",
+              "Sync the library to fill the created smart watchlist.",
+              "Smart watchlists are filled dynamically based on the movies in your library. Please run a Library Sync if your watchlist appears empty.");
+        });
       }
     });
   }

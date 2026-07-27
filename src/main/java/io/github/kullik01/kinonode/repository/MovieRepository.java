@@ -378,7 +378,7 @@ public class MovieRepository {
    * @return a mapped {@link Movie} object
    * @throws SQLException if a database access error occurs
    */
-  private Movie mapRowToMovie(ResultSet resultSet) throws SQLException {
+  public Movie mapRowToMovie(ResultSet resultSet) throws SQLException {
     Movie tmpMovie = new Movie();
     tmpMovie.setId(resultSet.getInt("id"));
     tmpMovie.setFilePath(resultSet.getString("file_path"));
