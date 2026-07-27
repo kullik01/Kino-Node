@@ -143,7 +143,7 @@ jlink {
         val iconPath = when {
             isWindows -> "src/main/resources/io/github/kullik01/kinonode/images/logo.ico"
             isMac -> "src/main/resources/io/github/kullik01/kinonode/images/logo.icns"
-            else -> "src/main/resources/io/github/kullik01/kinonode/images/logo_256.png"
+            else -> "src/main/resources/io/github/kullik01/kinonode/images/logo.png"
         }
         val iconArgs = if (file(iconPath).exists()) listOf("--icon", file(iconPath).absolutePath) else emptyList()
         val commonOptions = iconArgs + listOf(
