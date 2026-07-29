@@ -43,10 +43,17 @@ import io.github.kullik01.kinonode.repository.SettingsRepository;
 import io.github.kullik01.kinonode.util.PathUtils;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -319,11 +326,13 @@ public class LibraryScanService {
   public record ScanResult(int totalScanned, int newAdded, List<String> logs) {}
 
   /**
-   * Checks whether the actor list strings contain exactly three names followed by an ellipsis,
-   * indicating an incomplete/truncated actors list that might need enrichment.
+   * Checks whether the actor list strings contain exactly three names followed
+   * by an ellipsis, indicating an incomplete/truncated actors list that might
+   * need enrichment.
    *
    * @param actors the comma-separated actors string
-   * @return true if it matches the three-actor truncated pattern, false otherwise
+   * @return true if it matches the three-actor truncated pattern, false
+   *         otherwise
    */
   private boolean hasOnlyThreeActors(String actors) {
     if (actors == null || !actors.endsWith(", ...")) {

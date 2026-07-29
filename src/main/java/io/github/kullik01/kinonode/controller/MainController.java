@@ -37,6 +37,18 @@
  */
 package io.github.kullik01.kinonode.controller;
 
+import io.github.kullik01.kinonode.util.CursorUtils;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Control;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.SVGPath;
+
 import javafx.application.Platform;
 import javafx.util.Duration;
 
@@ -52,8 +64,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
@@ -63,29 +74,20 @@ import javafx.stage.Stage;
  * The main shell controller of the application. Manages the layout container
  * (sidebar navigation menu, theme toggle, and main content area). Handles
  * switching between different application views (Library, Watchlists, Settings,
- * and About) and dynamically loads/caches their associated FXML files.
+ * and About) and dynamically loads/caches their associated view nodes.
  */
 public class MainController {
   private static final Logger LOGGER =
       Logger.getLogger(MainController.class.getName());
 
-  @FXML
   private StackPane rootPane;
-  @FXML
   private StackPane contentArea;
-  @FXML
   private Button btnLibrary;
-  @FXML
   private Button btnWatchlists;
-  @FXML
   private Button btnAnalytics;
-  @FXML
-  private Button btnImdb;
-  @FXML
+  private Button buttonImdb;
   private Button btnSettings;
-  @FXML
   private Button btnAbout;
-  @FXML
   private ToggleSwitch btnThemeToggle;
 
   private final Map<String, Parent> views = new HashMap<>();
@@ -94,14 +96,113 @@ public class MainController {
   private double xOffset = 0;
   private double yOffset = 0;
 
+  public Parent buildView() {
+    AppContext.getInstance().setMainController(this);
+
+    rootPane = new StackPane();
+    rootPane.setId("rootPane");
+    rootPane.getStylesheets().add(
+        getClass().getResource("/io/github/kullik01/kinonode/css/theme.css")
+            .toExternalForm());
+    rootPane.setStyle("-fx-background-color: transparent;");
+
+    BorderPane mainContainer = new BorderPane();
+    mainContainer.setId("mainContainer");
+    mainContainer.setPrefHeight(768.0);
+    mainContainer.setPrefWidth(1280.0);
+    mainContainer.getStyleClass().add("main-window");
+
+    VBox sidebar = new VBox();
+    sidebar.getStyleClass().add("sidebar");
+
+    btnLibrary = createSidebarButton("Library", "btnLibrary", "🎬",
+        this::showLibrary, true);
+    btnWatchlists = createSidebarButton("Watchlists", "btnWatchlists",
+        "M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 9H10V9h8v2zm-4 4h-4v-2h4v2zm4-8h-8V5h8v2z",
+        this::showWatchlists, false);
+    btnAnalytics = createSidebarButton("Analytics", "btnAnalytics",
+        "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z",
+        this::showAnalytics, false);
+    buttonImdb = createSidebarButton("IMDb", "buttonImdb",
+        "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z",
+        this::showImdb, false);
+    btnSettings = createSidebarButton("Settings", "btnSettings",
+        "M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z",
+        this::showSettings, false);
+    btnAbout = createSidebarButton("About", "btnAbout",
+        "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z",
+        this::showAbout, false);
+
+    Region spacer = new Region();
+    VBox.setVgrow(spacer, Priority.ALWAYS);
+
+    HBox themeBox = new HBox();
+    themeBox.setAlignment(Pos.CENTER);
+    themeBox.setStyle("-fx-padding: 0 0 10 0;");
+
+    btnThemeToggle = new ToggleSwitch("☀");
+    btnThemeToggle.setId("btnThemeToggle");
+    btnThemeToggle.setMinWidth(Control.USE_PREF_SIZE);
+    Tooltip themeTooltip = new Tooltip("Light Mode");
+    themeTooltip.setShowDelay(Duration.millis(250));
+    btnThemeToggle.setTooltip(themeTooltip);
+    themeBox.getChildren().add(btnThemeToggle);
+
+    sidebar.getChildren().addAll(btnLibrary, btnWatchlists, btnAnalytics,
+        buttonImdb, btnSettings, btnAbout, spacer, themeBox);
+    mainContainer.setLeft(sidebar);
+
+    VBox centerVBox = new VBox();
+    centerVBox.getStyleClass().add("main-content-vbox");
+
+    contentArea = new StackPane();
+    contentArea.setId("contentArea");
+    VBox.setVgrow(contentArea, Priority.ALWAYS);
+
+    centerVBox.getChildren().add(contentArea);
+    mainContainer.setCenter(centerVBox);
+
+    rootPane.getChildren().add(mainContainer);
+
+    return rootPane;
+  }
+
+  private Button createSidebarButton(String text, String id, String svgContent,
+      Runnable action, boolean isTextGraphic) {
+    Button btn = new Button(text);
+    btn.setId(id);
+    btn.getStyleClass().add("sidebar-button");
+    btn.setOnAction(e -> action.run());
+    if (isTextGraphic) {
+      btn.setMinWidth(Control.USE_PREF_SIZE);
+      javafx.scene.text.Text graphic = new javafx.scene.text.Text(svgContent);
+      graphic.getStyleClass().add("settings-svg");
+      graphic.setStyle("-fx-font-size: 16px;");
+      btn.setGraphic(graphic);
+    } else {
+      SVGPath graphic = new SVGPath();
+      graphic.getStyleClass().add("settings-svg");
+      graphic.setScaleX(0.75);
+      graphic.setScaleY(0.75);
+      graphic.setContent(svgContent);
+      if (id.equals("buttonImdb"))
+        graphic.setId("svgImageImdb");
+      if (id.equals("btnSettings"))
+        graphic.setId("svgSettings");
+      btn.setGraphic(graphic);
+      if (id.equals("btnWatchlists") || id.equals("btnAnalytics")) {
+        btn.setMinWidth(Control.USE_PREF_SIZE);
+      }
+    }
+    return btn;
+  }
+
   /**
    * Initializes the main controller layout. Restores the theme selection (light
    * or dark mode) from configuration, establishes window listeners for
    * maximization changes, and triggers navigation to the default Library view.
    */
-  @FXML
   public void initialize() {
-    AppContext.getInstance().setMainController(this);
 
     // Load initial theme button state from settings (Default is light)
     var tmpSettingsRepository =
@@ -134,27 +235,25 @@ public class MainController {
         });
 
     // Apply application logo cursor to sidebar buttons
-    javafx.scene.Cursor tmpLogoCursor =
-        io.github.kullik01.kinonode.util.CursorUtils.getAppLogoCursor();
+    javafx.scene.Cursor tmpLogoCursor = CursorUtils.getAppLogoCursor();
     btnLibrary.setCursor(tmpLogoCursor);
     btnWatchlists.setCursor(tmpLogoCursor);
     btnAnalytics.setCursor(tmpLogoCursor);
-    btnImdb.setCursor(tmpLogoCursor);
+    buttonImdb.setCursor(tmpLogoCursor);
     btnSettings.setCursor(tmpLogoCursor);
     btnAbout.setCursor(tmpLogoCursor);
-    btnThemeToggle.setCursor(io.github.kullik01.kinonode.util.CursorUtils
-        .getCenteredAppLogoCursor());
+    btnThemeToggle.setCursor(CursorUtils.getCenteredAppLogoCursor());
 
     // Show Library by default
     showLibrary();
 
     // Eagerly preload the IMDb view on startup to begin background loading
     // immediately
-    preloadView("IMDb", "/io/github/kullik01/kinonode/fxml/ImdbView.fxml");
+    preloadView("IMDb");
 
     // Apply application logo cursor globally to scene
     Platform.runLater(() -> {
-      javafx.scene.Scene tmpScene = rootPane.getScene();
+      Scene tmpScene = rootPane.getScene();
       if (tmpScene != null) {
         tmpScene.setCursor(tmpLogoCursor);
       }
@@ -176,84 +275,72 @@ public class MainController {
   /**
    * Switches the main view to the Library section.
    */
-  @FXML
   private void showLibrary() {
-    navigate("Library", "/io/github/kullik01/kinonode/fxml/LibraryView.fxml",
-        btnLibrary);
+    navigate("Library", btnLibrary);
   }
 
   /**
    * Switches the main view to the Watchlists section.
    */
-  @FXML
   private void showWatchlists() {
-    navigate("Watchlists",
-        "/io/github/kullik01/kinonode/fxml/WatchlistsView.fxml", btnWatchlists);
+    navigate("Watchlists", btnWatchlists);
   }
 
   /**
    * Switches the main view to the Analytics section.
    */
-  @FXML
   private void showAnalytics() {
-    navigate("Analytics",
-        "/io/github/kullik01/kinonode/fxml/AnalyticsView.fxml", btnAnalytics);
+    navigate("Analytics", btnAnalytics);
   }
 
   /**
-   * Switches the main view to the IMDb search section.
-   * If already active, it triggers a refresh on the IMDb view.
+   * Switches the main view to the IMDb search section. If already active, it
+   * triggers a refresh on the IMDb view.
    */
-  @FXML
   private void showImdb() {
-    if (activeButton == btnImdb) {
-      Object tmpController = controllers.get("IMDb");
-      if (tmpController instanceof Refreshable refreshable) {
+    if (activeButton == buttonImdb) {
+      Object controller = controllers.get("IMDb");
+      if (controller instanceof Refreshable refreshable) {
         refreshable.refresh();
       }
       return;
     }
-    navigate("IMDb", "/io/github/kullik01/kinonode/fxml/ImdbView.fxml",
-        btnImdb);
+    navigate("IMDb", buttonImdb);
   }
 
   /**
    * Switches the main view to the Settings section.
    */
-  @FXML
   public void showSettings() {
-    navigate("Settings", "/io/github/kullik01/kinonode/fxml/SettingsView.fxml",
-        btnSettings);
+    navigate("Settings", btnSettings);
   }
 
   /**
    * Switches the main view to the About section.
    */
-  @FXML
   private void showAbout() {
-    navigate("About", "/io/github/kullik01/kinonode/fxml/AboutView.fxml",
-        btnAbout);
+    navigate("About", btnAbout);
   }
 
   /**
-   * Handles the common logic for navigating between major views in the main shell.
+   * Handles the common logic for navigating between major views in the main
+   * shell.
    *
-   * @param name         The unique name identifier for the view.
-   * @param fxmlPath     The classpath URL to the FXML layout file.
+   * @param name The unique name identifier for the view.
    * @param targetButton The sidebar button corresponding to this view.
    */
-  private void navigate(String name, String fxmlPath, Button targetButton) {
+  private void navigate(String name, Button targetButton) {
     if (activeButton == targetButton) {
       return; // Already on this tab
     }
 
-    loadView(name, fxmlPath);
+    loadView(name);
     setActiveButton(targetButton);
   }
 
   /**
-   * Toggles the application's visual theme between Light and Dark modes.
-   * Saves the selection to user settings.
+   * Toggles the application's visual theme between Light and Dark modes. Saves
+   * the selection to user settings.
    *
    * @param dark True to apply the dark theme, false for the light theme.
    */
@@ -296,39 +383,75 @@ public class MainController {
   }
 
   /**
-   * Loads an FXML view into the main content area. Caches loaded views and
-   * controllers to optimize performance on subsequent navigations.
-   * If the controller implements {@link Refreshable}, it triggers a refresh.
+   * Loads a view into the main content area. Caches loaded views and
+   * controllers to optimize performance on subsequent navigations. If the
+   * controller implements {@link Refreshable}, it triggers a refresh.
    *
-   * @param name     The unique name identifier for the view.
-   * @param fxmlPath The classpath URL to the FXML layout file.
+   * @param name The unique name identifier for the view.
    */
-  private void loadView(String name, String fxmlPath) {
+  private void loadView(String name) {
     try {
-      Parent tmpView = views.get(name);
-      // FXML file is loaded lazily and cached locally to avoid loading overhead
+      Parent view = views.get(name);
+      // View is loaded lazily and cached locally to avoid loading overhead
       // on tab switches
-      if (tmpView == null) {
-        URL tmpUrl = getClass().getResource(fxmlPath);
-        if (tmpUrl == null) {
-          throw new IOException("Cannot find FXML: " + fxmlPath);
-        }
-        FXMLLoader tmpLoader = new FXMLLoader(tmpUrl);
-        tmpView = tmpLoader.load();
-        views.put(name, tmpView);
-        controllers.put(name, tmpLoader.getController());
+      if (view == null) {
+        view = createView(name);
       }
 
-      contentArea.getChildren().setAll(tmpView);
+      contentArea.getChildren().setAll(view);
 
       // Refresh content if controller is refreshable
-      Object tmpController = controllers.get(name);
-      if (tmpController instanceof Refreshable refreshable) {
+      Object controller = controllers.get(name);
+      if (controller instanceof Refreshable refreshable) {
         refreshable.refresh();
       }
-    } catch (IOException tmpException) {
-      LOGGER.log(Level.SEVERE, "Failed to load view " + name, tmpException);
+    } catch (Exception exception) {
+      LOGGER.log(Level.SEVERE, "Failed to load view " + name, exception);
     }
+  }
+
+  private Parent createView(String name) {
+    Parent view = null;
+    if ("Library".equals(name)) {
+      LibraryController controller = new LibraryController();
+      view = controller.buildView();
+      controller.initialize();
+      views.put(name, view);
+      controllers.put(name, controller);
+    } else if ("Watchlists".equals(name)) {
+      WatchlistsController controller = new WatchlistsController();
+      view = controller.buildView();
+      controller.initialize();
+      views.put(name, view);
+      controllers.put(name, controller);
+    } else if ("Settings".equals(name)) {
+      SettingsController controller = new SettingsController();
+      view = controller.buildView();
+      controller.initialize();
+      views.put(name, view);
+      controllers.put(name, controller);
+    } else if ("IMDb".equals(name)) {
+      ImdbController controller = new ImdbController();
+      view = controller.buildView();
+      controller.initialize();
+      views.put(name, view);
+      controllers.put(name, controller);
+    } else if ("About".equals(name)) {
+      AboutController controller = new AboutController();
+      view = controller.buildView();
+      controller.initialize();
+      views.put(name, view);
+      controllers.put(name, controller);
+    } else if ("Analytics".equals(name)) {
+      AnalyticsController controller = new AnalyticsController();
+      view = controller.buildView();
+      controller.initialize();
+      views.put(name, view);
+      controllers.put(name, controller);
+    } else {
+      throw new IllegalArgumentException("Unknown view: " + name);
+    }
+    return view;
   }
 
   /**
@@ -337,38 +460,30 @@ public class MainController {
    * @param url The IMDb URL to open in the integrated browser.
    */
   public void showImdbWithUrl(String url) {
-    if (activeButton != btnImdb) {
-      navigate("IMDb", "/io/github/kullik01/kinonode/fxml/ImdbView.fxml",
-          btnImdb);
+    if (activeButton != buttonImdb) {
+      navigate("IMDb", buttonImdb);
     }
-    Object tmpController = controllers.get("IMDb");
-    if (tmpController instanceof ImdbController imdbController) {
+    Object controller = controllers.get("IMDb");
+    if (controller instanceof ImdbController imdbController) {
       imdbController.loadPage(url);
     }
   }
 
   /**
-   * Pre-loads an FXML view in the background without displaying it.
-   * Useful for heavy views like the web browser that cause lag on first load.
+   * Pre-loads a view in the background without displaying it. Useful for heavy
+   * views like the web browser that cause lag on first load.
    *
-   * @param name     The unique name identifier for the view.
-   * @param fxmlPath The classpath URL to the FXML layout file.
+   * @param name The unique name identifier for the view.
+   * @param name The unique name identifier for the view.
    */
-  private void preloadView(String name, String fxmlPath) {
+  private void preloadView(String name) {
     try {
-      Parent tmpView = views.get(name);
-      if (tmpView == null) {
-        URL tmpUrl = getClass().getResource(fxmlPath);
-        if (tmpUrl == null) {
-          throw new IOException("Cannot find FXML: " + fxmlPath);
-        }
-        FXMLLoader tmpLoader = new FXMLLoader(tmpUrl);
-        tmpView = tmpLoader.load();
-        views.put(name, tmpView);
-        controllers.put(name, tmpLoader.getController());
+      Parent view = views.get(name);
+      if (view == null) {
+        createView(name);
       }
-    } catch (IOException tmpException) {
-      LOGGER.log(Level.SEVERE, "Failed to preload view " + name, tmpException);
+    } catch (Exception exception) {
+      LOGGER.log(Level.SEVERE, "Failed to preload view " + name, exception);
     }
   }
 }

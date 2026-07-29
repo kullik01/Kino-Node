@@ -53,9 +53,9 @@ public class SmartRule {
   /**
    * Constructs a new SmartRule with the specified condition parameters.
    *
-   * @param field    The movie property to evaluate (e.g., "Genre", "Year").
+   * @param field The movie property to evaluate (e.g., "Genre", "Year").
    * @param operator The comparison operator (e.g., "Equals", "Greater Than").
-   * @param value    The target value to match against.
+   * @param value The target value to match against.
    */
   public SmartRule(String field, String operator, String value) {
     this.field = field;

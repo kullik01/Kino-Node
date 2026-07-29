@@ -37,6 +37,22 @@
  */
 package io.github.kullik01.kinonode.controller;
 
+import io.github.kullik01.kinonode.util.DialogBuilder;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextFormatter;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputControl;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.RowConstraints;
+import javafx.scene.paint.Color;
+
 import java.awt.Desktop;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -80,10 +96,14 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+
 import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.Control;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
@@ -104,61 +124,34 @@ public class MovieDetailController implements Refreshable {
       Logger.getLogger(MovieDetailController.class.getName());
   private static Image PLACEHOLDER_IMAGE;
 
-  @FXML
   private Label lblHeaderTitle;
-  @FXML
   private ImageView imgPoster;
-  @FXML
   private Button btnPlay;
-  @FXML
   private Button btnTrailer;
-  @FXML
   private Button btnImdbPage;
 
-  @FXML
   private TextField txtTitle;
-  @FXML
   private TextField txtYear;
-  @FXML
   private TextField txtDuration;
-  @FXML
   private TextField txtGenre;
-  @FXML
   private TextField txtDirector;
-  @FXML
   private TextField txtWriter;
-  @FXML
   private TextField txtProducer;
-  @FXML
   private TextField txtCinematographer;
-  @FXML
   private TextField txtComposer;
-  @FXML
   private TextField txtActors;
-  @FXML
   private ComboBox<String> comboDirector;
-  @FXML
   private ComboBox<String> comboWriter;
-  @FXML
   private ComboBox<String> comboProducer;
-  @FXML
   private ComboBox<String> comboCinematographer;
-  @FXML
   private ComboBox<String> comboComposer;
-  @FXML
   private ComboBox<String> comboActors;
-  @FXML
   private TextArea txtDescription;
-  @FXML
   private TextField txtTrailerUrl;
 
-  @FXML
   private FlowPane ratingContainer;
-  @FXML
   private Label lblWatchlistsList;
-  @FXML
   private Button btnWatchlists;
-  @FXML
   private Label lblStatus;
 
   private Movie movie;
@@ -180,8 +173,386 @@ public class MovieDetailController implements Refreshable {
     statusTimer.play();
   }
 
+  public Parent buildView() {
+    VBox rootPane = new VBox(20.0);
+    rootPane.getStyleClass().add("detail-pane");
+    rootPane.getStylesheets().add(
+        getClass().getResource("/io/github/kullik01/kinonode/css/theme.css")
+            .toExternalForm());
+    rootPane.setPadding(new Insets(25.0));
+
+    // Header / Back button
+    HBox headerBox = new HBox(15.0);
+    headerBox.setAlignment(Pos.CENTER_LEFT);
+
+    Button btnBack = new Button("⬅");
+    btnBack.getStyleClass().add("button-secondary");
+    btnBack.setMinWidth(Region.USE_PREF_SIZE);
+    btnBack.setOnAction(e -> goBack());
+    Tooltip ttBack = new Tooltip("Back to Library");
+    ttBack.setShowDelay(Duration.millis(250));
+    btnBack.setTooltip(ttBack);
+
+    lblHeaderTitle = new Label("Movie Details");
+    lblHeaderTitle.getStyleClass().add("detail-title");
+
+    headerBox.getChildren().addAll(btnBack, lblHeaderTitle);
+
+    ScrollPane scrollPane = new ScrollPane();
+    scrollPane.setFitToWidth(true);
+    scrollPane.getStyleClass().add("edge-to-edge");
+    scrollPane.setStyle(
+        "-fx-background-color: transparent; -fx-control-inner-background: transparent;");
+    VBox.setVgrow(scrollPane, Priority.ALWAYS);
+
+    HBox contentHBox = new HBox(30.0);
+    contentHBox.setStyle("-fx-padding: 0 10px 0 0;");
+
+    // Left Side: Poster and Actions
+    VBox leftBox = new VBox(15.0);
+    leftBox.setAlignment(Pos.TOP_CENTER);
+    leftBox.setPrefWidth(360.0);
+
+    VBox posterContainer = new VBox();
+    posterContainer.setStyle(
+        "-fx-pref-width: 350px; -fx-pref-height: 525px; -fx-background-radius: 12px;");
+    posterContainer.getStyleClass().add("movie-poster-container");
+    imgPoster = new ImageView();
+    imgPoster.setFitHeight(525.0);
+    imgPoster.setFitWidth(350.0);
+    imgPoster.getStyleClass().add("detail-cover");
+    posterContainer.getChildren().add(imgPoster);
+
+    Button btnChangePoster = new Button();
+    btnChangePoster.getStyleClass().addAll("button-secondary", "button-icon");
+    btnChangePoster.setMinSize(36.0, 36.0);
+    btnChangePoster.setMaxSize(36.0, 36.0);
+    btnChangePoster.setOnAction(e -> changePoster());
+    SVGPath svgImageChangePoster = new SVGPath();
+    svgImageChangePoster.setContent(
+        "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6c-.55 0-1-.45-1-1V6c0-.55.45-1 1-1h12c.55 0 1 .45 1 1v12c0 .55-.45 1-1 1zm-4.44-6.23L11.2 15.4l-2.45-3.07c-.2-.25-.59-.25-.79 0l-2.71 3.39c-.26.33-.02.81.39.81h12.7c.41 0 .65-.48.39-.81l-3.84-4.8c-.2-.26-.6-.26-.8 0z");
+    svgImageChangePoster.setFill(Color.WHITE);
+    svgImageChangePoster.setScaleX(0.75);
+    svgImageChangePoster.setScaleY(0.75);
+    btnChangePoster.setGraphic(svgImageChangePoster);
+    Tooltip ttChangePoster = new Tooltip("Change Poster");
+    ttChangePoster.setShowDelay(Duration.millis(250));
+    btnChangePoster.setTooltip(ttChangePoster);
+
+    VBox actionBox = new VBox(15.0);
+    actionBox.setAlignment(Pos.CENTER);
+    actionBox.setStyle("-fx-padding: 10px 0 0 0;");
+
+    btnPlay = new Button();
+    btnPlay.getStyleClass().addAll("button-play", "button-icon");
+    btnPlay.setMinSize(36.0, 36.0);
+    btnPlay.setMaxSize(36.0, 36.0);
+    btnPlay.setOnAction(e -> playMovie());
+    SVGPath svgImagePlay = new SVGPath();
+    svgImagePlay.setContent("M8 5v14l11-7z");
+    svgImagePlay.setFill(Color.WHITE);
+    svgImagePlay.setScaleX(0.75);
+    svgImagePlay.setScaleY(0.75);
+    btnPlay.setGraphic(svgImagePlay);
+    Tooltip ttPlay = new Tooltip("Play Movie");
+    ttPlay.setShowDelay(Duration.millis(250));
+    btnPlay.setTooltip(ttPlay);
+
+    btnTrailer = new Button();
+    btnTrailer.getStyleClass().addAll("button-secondary", "button-icon");
+    btnTrailer.setMinSize(36.0, 36.0);
+    btnTrailer.setMaxSize(36.0, 36.0);
+    btnTrailer.setOnAction(e -> watchTrailer());
+    SVGPath svgImageTrailer = new SVGPath();
+    svgImageTrailer.setContent(
+        "M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12zm-5-6l-7 4V7z");
+    svgImageTrailer.setFill(Color.WHITE);
+    svgImageTrailer.setScaleX(0.75);
+    svgImageTrailer.setScaleY(0.75);
+    btnTrailer.setGraphic(svgImageTrailer);
+    Tooltip ttTrailer = new Tooltip("Watch Trailer");
+    ttTrailer.setShowDelay(Duration.millis(250));
+    btnTrailer.setTooltip(ttTrailer);
+
+    btnImdbPage = new Button();
+    btnImdbPage.getStyleClass().addAll("button-imdb", "button-icon");
+    btnImdbPage.setMinSize(36.0, 36.0);
+    btnImdbPage.setMaxSize(36.0, 36.0);
+    btnImdbPage.setOnAction(e -> openImdbPage());
+    SVGPath svgImdbPage = new SVGPath();
+    svgImdbPage.setContent(
+        "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z");
+    svgImdbPage.setFill(Color.WHITE);
+    svgImdbPage.setScaleX(0.75);
+    svgImdbPage.setScaleY(0.75);
+    btnImdbPage.setGraphic(svgImdbPage);
+    Tooltip ttImdbPage = new Tooltip("Open in IMDb");
+    ttImdbPage.setShowDelay(Duration.millis(250));
+    btnImdbPage.setTooltip(ttImdbPage);
+
+    actionBox.getChildren().addAll(btnPlay, btnTrailer, btnImdbPage);
+    leftBox.getChildren().addAll(posterContainer, btnChangePoster, actionBox);
+
+    // Right Side: Details Grid
+    VBox rightBox = new VBox(15.0);
+    HBox.setHgrow(rightBox, Priority.ALWAYS);
+
+    GridPane grid = new GridPane();
+    grid.setHgap(15.0);
+    grid.setVgap(15.0);
+    VBox.setVgrow(grid, Priority.ALWAYS);
+
+    ColumnConstraints columnConstraint1 = new ColumnConstraints();
+    columnConstraint1.setMinWidth(160.0);
+    columnConstraint1.setPrefWidth(180.0);
+    ColumnConstraints columnConstraint2 = new ColumnConstraints();
+    columnConstraint2.setHgrow(Priority.ALWAYS);
+    grid.getColumnConstraints().addAll(columnConstraint1, columnConstraint2);
+
+    for (int i = 0; i < 13; i++) {
+      RowConstraints rowConstraint = new RowConstraints();
+      rowConstraint.setMinHeight(30.0);
+      grid.getRowConstraints().add(rowConstraint);
+    }
+    RowConstraints rowConstraintDescription = new RowConstraints();
+    rowConstraintDescription.setMinHeight(100.0);
+    grid.getRowConstraints().add(rowConstraintDescription);
+
+    // Helpers for grid rows
+    int row = 0;
+
+    // Title
+    txtTitle = createReadOnlyField();
+    addGridRow(grid, row++, "Title:", txtTitle, e -> editTitle());
+
+    // Year
+    txtYear = createReadOnlyField();
+    addGridRow(grid, row++, "Release Year:", txtYear, e -> editYear());
+
+    // Duration
+    txtDuration = createReadOnlyField();
+    addGridRow(grid, row++, "Duration:", txtDuration, e -> editDuration());
+
+    // Genre
+    txtGenre = createReadOnlyField();
+    addGridRow(grid, row++, "Genre:", txtGenre, e -> editGenre());
+
+    // Director
+    txtDirector = createReadOnlyField();
+    comboDirector = new ComboBox<>();
+    addMultiGridRow(grid, row++, "Director(s):", txtDirector, comboDirector,
+        e -> editDirector(), e -> searchDirectorOnImdb());
+
+    // Writer
+    txtWriter = createReadOnlyField();
+    comboWriter = new ComboBox<>();
+    addMultiGridRow(grid, row++, "Writer(s):", txtWriter, comboWriter,
+        e -> editWriter(), e -> searchWriterOnImdb());
+
+    // Producer
+    txtProducer = createReadOnlyField();
+    comboProducer = new ComboBox<>();
+    addMultiGridRow(grid, row++, "Producer(s):", txtProducer, comboProducer,
+        e -> editProducer(), e -> searchProducerOnImdb());
+
+    // Cinematographer
+    txtCinematographer = createReadOnlyField();
+    comboCinematographer = new ComboBox<>();
+    addMultiGridRow(grid, row++, "Cinematographer(s):", txtCinematographer,
+        comboCinematographer, e -> editCinematographer(),
+        e -> searchCinematographerOnImdb());
+
+    // Composer
+    txtComposer = createReadOnlyField();
+    comboComposer = new ComboBox<>();
+    addMultiGridRow(grid, row++, "Composer(s):", txtComposer, comboComposer,
+        e -> editComposer(), e -> searchComposerOnImdb());
+
+    // Actors
+    txtActors = createReadOnlyField();
+    comboActors = new ComboBox<>();
+    addMultiGridRow(grid, row++, "Actor(s):", txtActors, comboActors,
+        e -> editActors(), e -> searchActorsOnImdb());
+
+    // Trailer URL
+    Label lblTrailer = new Label("Trailer Link:");
+    lblTrailer.setStyle("-fx-font-weight: bold;");
+    grid.add(lblTrailer, 0, row);
+
+    HBox trailerBox = new HBox(5.0);
+    txtTrailerUrl = createReadOnlyField();
+    txtTrailerUrl.setPromptText("https://www.youtube.com/watch?v=...");
+    HBox.setHgrow(txtTrailerUrl, Priority.ALWAYS);
+    Button btnEditTrailer = new Button("📝");
+    btnEditTrailer.getStyleClass().add("button-secondary");
+    btnEditTrailer.setMinWidth(Region.USE_PREF_SIZE);
+    btnEditTrailer.setOnAction(e -> editTrailerUrl());
+    Tooltip ttEditTrailer = new Tooltip("Edit Trailer Link");
+    ttEditTrailer.setShowDelay(Duration.millis(250));
+    btnEditTrailer.setTooltip(ttEditTrailer);
+    trailerBox.getChildren().addAll(txtTrailerUrl, btnEditTrailer);
+    grid.add(trailerBox, 1, row++);
+
+    // Rating
+    Label lblRating = new Label("IMDb Rating:");
+    lblRating.setStyle("-fx-font-weight: bold;");
+    grid.add(lblRating, 0, row);
+
+    ratingContainer = new FlowPane();
+    ratingContainer.setAlignment(Pos.CENTER_LEFT);
+    ratingContainer.setHgap(2.0);
+    ratingContainer.setVgap(4.0);
+    grid.add(ratingContainer, 1, row++);
+
+    // Watchlists
+    Label lblWatchlists = new Label("Watchlists:");
+    lblWatchlists.setStyle("-fx-font-weight: bold;");
+    grid.add(lblWatchlists, 0, row);
+
+    HBox watchlistBox = new HBox(10.0);
+    watchlistBox.setAlignment(Pos.CENTER_LEFT);
+    lblWatchlistsList = new Label("None");
+    lblWatchlistsList.setStyle("-fx-text-fill: -color-fg-muted;");
+    HBox.setHgrow(lblWatchlistsList, Priority.ALWAYS);
+
+    btnWatchlists = new Button();
+    btnWatchlists.getStyleClass().addAll("button-secondary", "button-icon");
+    btnWatchlists.setMinSize(36.0, 36.0);
+    btnWatchlists.setMaxSize(36.0, 36.0);
+    btnWatchlists.setOnAction(e -> manageMovieWatchlists());
+    SVGPath svgImageWatchlist = new SVGPath();
+    svgImageWatchlist.setContent(
+        "M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 9H10V9h8v2zm-4 4h-4v-2h4v2zm4-8h-8V5h8v2z");
+    svgImageWatchlist.setFill(Color.WHITE);
+    svgImageWatchlist.setScaleX(0.75);
+    svgImageWatchlist.setScaleY(0.75);
+    btnWatchlists.setGraphic(svgImageWatchlist);
+    Tooltip ttWatchlist = new Tooltip("Manage Watchlists");
+    ttWatchlist.setShowDelay(Duration.millis(250));
+    btnWatchlists.setTooltip(ttWatchlist);
+    watchlistBox.getChildren().addAll(lblWatchlistsList, btnWatchlists);
+    grid.add(watchlistBox, 1, row++);
+
+    // Description
+    Label lblDesc = new Label("Description:");
+    lblDesc.setStyle("-fx-font-weight: bold;");
+    grid.add(lblDesc, 0, row);
+
+    HBox descriptionBox = new HBox(5.0);
+    descriptionBox.setAlignment(Pos.CENTER_LEFT);
+    txtDescription = new TextArea();
+    txtDescription.setStyle("-fx-text-fill: -color-fg-default;");
+    txtDescription.setEditable(false);
+    txtDescription.setMouseTransparent(true);
+    txtDescription.setFocusTraversable(false);
+    txtDescription.setPrefHeight(100.0);
+    txtDescription.setWrapText(true);
+    HBox.setHgrow(txtDescription, Priority.ALWAYS);
+
+    Button btnEditDesc = new Button("📝");
+    btnEditDesc.getStyleClass().add("button-secondary");
+    btnEditDesc.setMinWidth(Region.USE_PREF_SIZE);
+    btnEditDesc.setOnAction(e -> editDescription());
+    Tooltip ttEditDesc = new Tooltip("Edit Description");
+    ttEditDesc.setShowDelay(Duration.millis(250));
+    btnEditDesc.setTooltip(ttEditDesc);
+    descriptionBox.getChildren().addAll(txtDescription, btnEditDesc);
+    grid.add(descriptionBox, 1, row);
+
+    lblStatus = new Label("");
+    lblStatus.setStyle("-fx-text-fill: -color-success-fg;");
+
+    rightBox.getChildren().addAll(grid, lblStatus);
+    contentHBox.getChildren().addAll(leftBox, rightBox);
+    scrollPane.setContent(contentHBox);
+
+    rootPane.getChildren().addAll(headerBox, scrollPane);
+
+    return rootPane;
+  }
+
+  private TextField createReadOnlyField() {
+    TextField textField = new TextField();
+    textField.setStyle("-fx-text-fill: -color-fg-default;");
+    textField.setEditable(false);
+    textField.setMouseTransparent(true);
+    textField.setFocusTraversable(false);
+    return textField;
+  }
+
+  private void addGridRow(GridPane grid, int row, String label,
+      TextField textField, EventHandler<ActionEvent> editAction) {
+    Label rowLabel = new Label(label);
+    rowLabel.setStyle("-fx-font-weight: bold;");
+    grid.add(rowLabel, 0, row);
+
+    HBox horizontalBox = new HBox(5.0);
+    horizontalBox.setAlignment(Pos.CENTER_LEFT);
+    HBox.setHgrow(textField, Priority.ALWAYS);
+
+    Button buttonEdit = new Button("📝");
+    buttonEdit.getStyleClass().add("button-secondary");
+    buttonEdit.setMinWidth(Region.USE_PREF_SIZE);
+    buttonEdit.setOnAction(editAction);
+    Tooltip tooltip =
+        new Tooltip("Edit " + label.replace(":", "").replace("(s)", ""));
+    tooltip.setShowDelay(Duration.millis(250));
+    buttonEdit.setTooltip(tooltip);
+
+    horizontalBox.getChildren().addAll(textField, buttonEdit);
+    grid.add(horizontalBox, 1, row);
+  }
+
+  private void addMultiGridRow(GridPane grid, int row, String label,
+      TextField textField, ComboBox<String> comboBox,
+      EventHandler<ActionEvent> editAction,
+      EventHandler<ActionEvent> imdbAction) {
+    Label rowLabel = new Label(label);
+    rowLabel.setStyle("-fx-font-weight: bold;");
+    grid.add(rowLabel, 0, row);
+
+    HBox horizontalBox = new HBox(5.0);
+    horizontalBox.setAlignment(Pos.CENTER_LEFT);
+
+    StackPane stackPane = new StackPane();
+    HBox.setHgrow(stackPane, Priority.ALWAYS);
+    textField.setVisible(true);
+    textField.setManaged(true);
+    comboBox.setMaxWidth(Double.MAX_VALUE);
+    comboBox.setVisible(false);
+    comboBox.setManaged(false);
+    stackPane.getChildren().addAll(textField, comboBox);
+
+    Button buttonImdb = new Button();
+    buttonImdb.getStyleClass().add("button-secondary");
+    buttonImdb.setMinWidth(Region.USE_PREF_SIZE);
+    buttonImdb.setOnAction(imdbAction);
+    SVGPath svgImageImdb = new SVGPath();
+    svgImageImdb.setContent(
+        "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z");
+    svgImageImdb.setFill(Color.WHITE);
+    svgImageImdb.setScaleX(0.75);
+    svgImageImdb.setScaleY(0.75);
+    buttonImdb.setGraphic(svgImageImdb);
+    Tooltip ttImdb = new Tooltip(
+        "Open " + label.replace(":", "").replace("(s)", "") + " in IMDb");
+    ttImdb.setShowDelay(Duration.millis(250));
+    buttonImdb.setTooltip(ttImdb);
+
+    Button buttonEdit = new Button("📝");
+    buttonEdit.getStyleClass().add("button-secondary");
+    buttonEdit.setMinWidth(Region.USE_PREF_SIZE);
+    buttonEdit.setOnAction(editAction);
+    Tooltip ttEdit =
+        new Tooltip("Edit " + label.replace(":", "").replace("(s)", ""));
+    ttEdit.setShowDelay(Duration.millis(250));
+    buttonEdit.setTooltip(ttEdit);
+
+    horizontalBox.getChildren().addAll(stackPane, buttonImdb, buttonEdit);
+    grid.add(horizontalBox, 1, row);
+  }
+
   /** Initializes the controller. Sets up search/trailer binding listeners. */
-  @FXML
   public void initialize() {
     movieRepository = AppContext.getInstance().getMovieRepository();
     watchlistRepository = AppContext.getInstance().getWatchlistRepository();
@@ -288,8 +659,8 @@ public class MovieDetailController implements Refreshable {
   }
 
   /**
-   * Loads the poster image for the current movie.
-   * If the file is not found or path is empty, falls back to a default placeholder image.
+   * Loads the poster image for the current movie. If the file is not found or
+   * path is empty, falls back to a default placeholder image.
    */
   private void loadPoster() {
     String tmpPath = movie.getCoverImagePath();
@@ -300,9 +671,9 @@ public class MovieDetailController implements Refreshable {
         try {
           tmpImage = new Image(tmpFile.toURI().toURL().toExternalForm(), 240,
               360, false, true, true);
-        } catch (MalformedURLException tmpException) {
+        } catch (MalformedURLException exception) {
           LOGGER.log(Level.WARNING,
-              "Failed to load poster in details: " + tmpPath, tmpException);
+              "Failed to load poster in details: " + tmpPath, exception);
         }
       }
     }
@@ -316,9 +687,9 @@ public class MovieDetailController implements Refreshable {
             PLACEHOLDER_IMAGE = new Image(tmpResource.toExternalForm(), 240,
                 360, false, true, true);
           }
-        } catch (Exception tmpException) {
+        } catch (Exception exception) {
           LOGGER.log(Level.WARNING, "Failed to load details placeholder cover",
-              tmpException);
+              exception);
         }
       }
       tmpImage = PLACEHOLDER_IMAGE;
@@ -330,7 +701,8 @@ public class MovieDetailController implements Refreshable {
   }
 
   /**
-   * Creates an SVGPath instance representing a camera icon used in the rating widget.
+   * Creates an SVGPath instance representing a camera icon used in the rating
+   * widget.
    *
    * @return A styled SVGPath of a camera.
    */
@@ -346,10 +718,10 @@ public class MovieDetailController implements Refreshable {
   }
 
   /**
-   * Sets the visual fill state of a single camera rating icon.
-   * Uses gradient filling to support fractional ratings (e.g., 8.5/10).
+   * Sets the visual fill state of a single camera rating icon. Uses gradient
+   * filling to support fractional ratings (e.g., 8.5/10).
    *
-   * @param reelLabel  The label containing the SVG icon.
+   * @param reelLabel The label containing the SVG icon.
    * @param fillAmount The fill fraction between 0.0 and 1.0.
    */
   private void setReelState(Label reelLabel, double fillAmount) {
@@ -389,7 +761,8 @@ public class MovieDetailController implements Refreshable {
   }
 
   /**
-   * Detects the numerical score associated with a mouse hover event over the rating widget.
+   * Detects the numerical score associated with a mouse hover event over the
+   * rating widget.
    *
    * @param e The mouse event.
    * @return The rating score (1-10) corresponding to the hovered position.
@@ -414,8 +787,8 @@ public class MovieDetailController implements Refreshable {
   }
 
   /**
-   * Constructs the interactive 10-camera rating widget.
-   * Wires up hover effects, click actions, and dynamic fractional filling.
+   * Constructs the interactive 10-camera rating widget. Wires up hover effects,
+   * click actions, and dynamic fractional filling.
    */
   private void buildRatingWidget() {
     ratingContainer.getChildren().clear();
@@ -430,7 +803,7 @@ public class MovieDetailController implements Refreshable {
       tmpReel.setMinSize(28.0, 28.0);
       tmpReel.setPrefSize(28.0, 28.0);
       tmpReel.setMaxSize(28.0, 28.0);
-      tmpReel.setAlignment(javafx.geometry.Pos.CENTER);
+      tmpReel.setAlignment(Pos.CENTER);
       tmpReel.getStyleClass().add("rating-reel");
       tmpReel.setStyle("-fx-padding: 0;");
       Tooltip tmpReelTooltip = new Tooltip("Rate " + tmpScore + "/10");
@@ -476,7 +849,8 @@ public class MovieDetailController implements Refreshable {
   }
 
   /**
-   * Temporarily updates the rating UI to show the projected score when hovering over a rating icon.
+   * Temporarily updates the rating UI to show the projected score when hovering
+   * over a rating icon.
    *
    * @param hoverScore The score being previewed.
    */
@@ -493,8 +867,8 @@ public class MovieDetailController implements Refreshable {
   }
 
   /**
-   * Re-applies the actual saved rating score to the rating UI, clearing any hover preview.
-   * Shows fractional values appropriately using gradient SVGs.
+   * Re-applies the actual saved rating score to the rating UI, clearing any
+   * hover preview. Shows fractional values appropriately using gradient SVGs.
    */
   private void updateRatingUI() {
     Label tmpLblRatingVal = (Label) ratingContainer.getChildren()
@@ -557,27 +931,24 @@ public class MovieDetailController implements Refreshable {
   }
 
   /**
-   * Displays a multi-select dialog allowing the user to add or remove the current
-   * movie from various watchlists simultaneously.
+   * Displays a multi-select dialog allowing the user to add or remove the
+   * current movie from various watchlists simultaneously.
    */
-  @FXML
   private void manageMovieWatchlists() {
-    Dialog<Void> tmpDialog = io.github.kullik01.kinonode.util.DialogBuilder
-        .createDialog("Manage Watchlists",
-            "Add or Remove \"" + movie.getTitle() + "\" from Watchlists", null);
+    Dialog<Void> dialog = DialogBuilder.createDialog("Manage Watchlists",
+        "Add or Remove \"" + movie.getTitle() + "\" from Watchlists", null);
 
     // Dialog size matching standard dialog width
 
-    tmpDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK,
+    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK,
         ButtonType.CANCEL);
 
     // Style both OK and Cancel buttons as blue primary buttons
-    Node tmpOkBtn = tmpDialog.getDialogPane().lookupButton(ButtonType.OK);
+    Node tmpOkBtn = dialog.getDialogPane().lookupButton(ButtonType.OK);
     if (tmpOkBtn != null) {
       tmpOkBtn.getStyleClass().add("button-primary");
     }
-    Node tmpCancelBtn =
-        tmpDialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+    Node tmpCancelBtn = dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
     if (tmpCancelBtn != null) {
       tmpCancelBtn.getStyleClass().add("button-primary");
     }
@@ -611,20 +982,21 @@ public class MovieDetailController implements Refreshable {
         tmpWatchlistsListVBox.getChildren().add(emptyLbl);
       } else {
         for (Watchlist w : allW) {
-          CheckBox cb = new CheckBox(w.getName());
-          cb.setStyle("-fx-font-size: 14px; -fx-padding: 4px 0;");
+          CheckBox comboBox = new CheckBox(w.getName());
+          comboBox.setStyle("-fx-font-size: 14px; -fx-padding: 4px 0;");
           boolean isMovieIn = w.getMovies().stream()
               .anyMatch(m -> m.getId().equals(movie.getId()));
 
           boolean isSelected = pendingChanges.containsKey(w.getId())
               ? pendingChanges.get(w.getId())
               : isMovieIn;
-          cb.setSelected(isSelected);
+          comboBox.setSelected(isSelected);
 
-          cb.selectedProperty().addListener((obs, wasSelected, nowSelected) -> {
-            pendingChanges.put(w.getId(), nowSelected);
-          });
-          tmpWatchlistsListVBox.getChildren().add(cb);
+          comboBox.selectedProperty()
+              .addListener((obs, wasSelected, nowSelected) -> {
+                pendingChanges.put(w.getId(), nowSelected);
+              });
+          tmpWatchlistsListVBox.getChildren().add(comboBox);
         }
       }
     };
@@ -653,9 +1025,9 @@ public class MovieDetailController implements Refreshable {
     tmpCreateBox.setAlignment(Pos.CENTER_LEFT);
 
     tmpContentBox.getChildren().addAll(tmpScrollPane, tmpCreateBox);
-    tmpDialog.getDialogPane().setContent(tmpContentBox);
+    dialog.getDialogPane().setContent(tmpContentBox);
 
-    tmpDialog.setResultConverter(dialogButton -> {
+    dialog.setResultConverter(dialogButton -> {
       if (dialogButton == ButtonType.OK) {
         for (Entry<Integer, Boolean> entry : pendingChanges.entrySet()) {
           int wId = entry.getKey();
@@ -677,26 +1049,25 @@ public class MovieDetailController implements Refreshable {
       return null;
     });
 
-    tmpDialog.showAndWait();
+    dialog.showAndWait();
   }
 
   private Optional<String> showWatchlistDialog(String title, String header,
       String defaultText, int currentId) {
-    Dialog<String> tmpDialog = io.github.kullik01.kinonode.util.DialogBuilder
-        .createDialog(title, header, null);
+    Dialog<String> dialog = DialogBuilder.createDialog(title, header, null);
 
 
 
-    tmpDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK,
+    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK,
         ButtonType.CANCEL);
 
-    VBox tmpVbox = new VBox(5);
-    Label tmpErrorLabel = new Label();
-    tmpErrorLabel.setWrapText(true);
-    tmpErrorLabel.setPrefWidth(430);
-    tmpErrorLabel.setMinHeight(Region.USE_PREF_SIZE);
-    tmpErrorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
-    tmpErrorLabel.setVisible(false);
+    VBox vBox = new VBox(5);
+    Label errorLabel = new Label();
+    errorLabel.setWrapText(true);
+    errorLabel.setPrefWidth(430);
+    errorLabel.setMinHeight(Region.USE_PREF_SIZE);
+    errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+    errorLabel.setVisible(false);
 
     TextField tmpTextField = new TextField(defaultText);
     tmpTextField.setPromptText("Watchlist Name");
@@ -709,10 +1080,10 @@ public class MovieDetailController implements Refreshable {
     tmpAsciiInfo.setPrefWidth(430);
     tmpAsciiInfo.setMinHeight(Region.USE_PREF_SIZE);
 
-    tmpVbox.getChildren().addAll(tmpErrorLabel, tmpTextField, tmpAsciiInfo);
-    tmpDialog.getDialogPane().setContent(tmpVbox);
+    vBox.getChildren().addAll(errorLabel, tmpTextField, tmpAsciiInfo);
+    dialog.getDialogPane().setContent(vBox);
 
-    Node tmpOkButton = tmpDialog.getDialogPane().lookupButton(ButtonType.OK);
+    Node tmpOkButton = dialog.getDialogPane().lookupButton(ButtonType.OK);
     if (tmpOkButton != null) {
       tmpOkButton.getStyleClass().add("button-primary");
       tmpOkButton.setDisable(
@@ -720,7 +1091,7 @@ public class MovieDetailController implements Refreshable {
     }
 
     Node tmpCancelButton =
-        tmpDialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+        dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
     if (tmpCancelButton != null) {
       tmpCancelButton.getStyleClass().add("button-primary");
     }
@@ -749,30 +1120,30 @@ public class MovieDetailController implements Refreshable {
             }
 
             if (tmpDuplicate) {
-              tmpErrorLabel.setText(
+              errorLabel.setText(
                   "A watchlist with this name already exists. Please choose a different name.");
-              tmpErrorLabel.setVisible(true);
+              errorLabel.setVisible(true);
               tmpOkButton.setDisable(true);
             } else {
-              tmpErrorLabel.setVisible(false);
+              errorLabel.setVisible(false);
               tmpOkButton.setDisable(newValue.trim().isEmpty());
             }
           }
-          if (tmpDialog.getDialogPane().getScene() != null
-              && tmpDialog.getDialogPane().getScene().getWindow() != null) {
-            tmpDialog.getDialogPane().getScene().getWindow().sizeToScene();
+          if (dialog.getDialogPane().getScene() != null
+              && dialog.getDialogPane().getScene().getWindow() != null) {
+            dialog.getDialogPane().getScene().getWindow().sizeToScene();
           }
         });
 
-    tmpDialog.setResultConverter(dialogButton -> {
+    dialog.setResultConverter(dialogButton -> {
       if (dialogButton == ButtonType.OK) {
         return tmpTextField.getText();
       }
       return null;
     });
 
-    tmpDialog.getDialogPane().setContent(tmpVbox);
-    return tmpDialog.showAndWait();
+    dialog.getDialogPane().setContent(vBox);
+    return dialog.showAndWait();
   }
 
   private boolean validateWatchlistName(String cleanName, int currentId) {
@@ -780,8 +1151,7 @@ public class MovieDetailController implements Refreshable {
     for (Watchlist tmpWatchlist : tmpWatchlists) {
       if (tmpWatchlist.getName().equalsIgnoreCase(cleanName)) {
         if (tmpWatchlist.getId() != null && tmpWatchlist.getId() != currentId) {
-          io.github.kullik01.kinonode.util.DialogBuilder.showError(
-              "Validation Error", "Duplicate Watchlist",
+          DialogBuilder.showError("Validation Error", "Duplicate Watchlist",
               "A watchlist with this name already exists. Please choose a different name.");
           return false;
         }
@@ -791,10 +1161,9 @@ public class MovieDetailController implements Refreshable {
   }
 
   /**
-   * Opens a file chooser to let the user select a custom poster image.
-   * Copies the chosen file to the app's covers directory and updates the movie.
+   * Opens a file chooser to let the user select a custom poster image. Copies
+   * the chosen file to the app's covers directory and updates the movie.
    */
-  @FXML
   private void changePoster() {
     FileChooser tmpChooser = new FileChooser();
     tmpChooser.setTitle("Choose Poster Image");
@@ -835,19 +1204,17 @@ public class MovieDetailController implements Refreshable {
             .setImage(new Image(tmpDestPath.toUri().toURL().toExternalForm(),
                 240, 360, false, true, true));
         showStatus("Poster image updated.");
-      } catch (IOException tmpException) {
-        LOGGER.log(Level.SEVERE, "Failed to copy cover poster file",
-            tmpException);
-        showStatus("Error saving poster: " + tmpException.getMessage());
+      } catch (IOException exception) {
+        LOGGER.log(Level.SEVERE, "Failed to copy cover poster file", exception);
+        showStatus("Error saving poster: " + exception.getMessage());
       }
     }
   }
 
   /**
-   * Invokes the PlaybackService to open the movie's media file in the configured
-   * external media player.
+   * Invokes the PlaybackService to open the movie's media file in the
+   * configured external media player.
    */
-  @FXML
   private void playMovie() {
     try {
       // Trigger PlaybackService which handles configuring and executing
@@ -855,85 +1222,83 @@ public class MovieDetailController implements Refreshable {
       // process
       AppContext.getInstance().getPlaybackService().play(movie.getFilePath());
       showStatus("Opening external player...");
-    } catch (Exception tmpException) {
+    } catch (Exception exception) {
       LOGGER.log(Level.SEVERE, "Failed to launch external media player",
-          tmpException);
-      io.github.kullik01.kinonode.util.DialogBuilder.showError(
-          "Playback Failed", "Could not launch external media player",
-          tmpException.getMessage());
+          exception);
+      DialogBuilder.showError("Playback Failed",
+          "Could not launch external media player", exception.getMessage());
     }
   }
 
   /**
    * Opens the configured YouTube trailer URL in the user's default web browser.
    */
-  @FXML
   private void watchTrailer() {
-    String tmpUrl = txtTrailerUrl.getText().trim();
-    if (tmpUrl.isEmpty())
+    String url = txtTrailerUrl.getText().trim();
+    if (url.isEmpty())
       return;
 
-    if (!tmpUrl.startsWith("http://") && !tmpUrl.startsWith("https://")) {
-      tmpUrl = "https://" + tmpUrl;
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      url = "https://" + url;
     }
 
     try {
       // Open default web browser pointing to trailer link
       if (Desktop.isDesktopSupported()
           && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-        Desktop.getDesktop().browse(new URI(tmpUrl));
+        Desktop.getDesktop().browse(new URI(url));
         showStatus("Opening trailer link in browser...");
       } else {
         showStatus("System web browser action not supported on this platform.");
       }
-    } catch (Exception tmpException) {
+    } catch (Exception exception) {
       LOGGER.log(Level.WARNING, "Failed to open browser trailer link",
-          tmpException);
+          exception);
       showStatus("Failed to open browser.");
     }
   }
 
   /**
-   * Attempts to determine the IMDb URL for the current movie and opens it in the
-   * internal IMDb web browser tab. Uses the cover filename's 'tt' id if possible.
+   * Attempts to determine the IMDb URL for the current movie and opens it in
+   * the internal IMDb web browser tab. Uses the cover filename's 'tooltip' id
+   * if possible.
    */
-  @FXML
   private void openImdbPage() {
     if (movie == null) {
       return;
     }
 
-    String tmpUrl = null;
+    String url = null;
     String tmpCover = movie.getCoverImagePath();
     if (tmpCover != null) {
-      Pattern tmpPattern = Pattern.compile("tt\\d+");
+      Pattern tmpPattern = Pattern.compile("tooltip\\d+");
       Matcher tmpMatcher = tmpPattern.matcher(tmpCover);
       if (tmpMatcher.find()) {
-        tmpUrl = "https://www.imdb.com/title/" + tmpMatcher.group() + "/";
+        url = "https://www.imdb.com/title/" + tmpMatcher.group() + "/";
       }
     }
 
-    if (tmpUrl == null) {
+    if (url == null) {
       // Fallback to IMDb search by title
       String tmpTitle = movie.getTitle();
       if (tmpTitle != null && !tmpTitle.isBlank()) {
         try {
-          tmpUrl = "https://www.imdb.com/find/?q="
+          url = "https://www.imdb.com/find/?q="
               + URLEncoder.encode(tmpTitle.trim(), StandardCharsets.UTF_8);
-        } catch (Exception tmpEx) {
+        } catch (Exception exception) {
           LOGGER.log(Level.WARNING, "Failed to encode title for IMDb search",
-              tmpEx);
+              exception);
         }
       }
     }
 
-    if (tmpUrl == null) {
-      tmpUrl = "https://www.imdb.com/";
+    if (url == null) {
+      url = "https://www.imdb.com/";
     }
 
     MainController tmpMain = AppContext.getInstance().getMainController();
     if (tmpMain != null) {
-      tmpMain.showImdbWithUrl(tmpUrl);
+      tmpMain.showImdbWithUrl(url);
       showStatus("Switching to IMDb tab...");
     } else {
       showStatus("Could not switch to IMDb tab.");
@@ -947,53 +1312,53 @@ public class MovieDetailController implements Refreshable {
   private void showEditDialog(String title, String fieldName,
       TextInputControl control, InputConstraint constraint,
       java.util.function.Consumer<String> updater) {
-    Dialog<String> tmpDialog = io.github.kullik01.kinonode.util.DialogBuilder
-        .createDialog("Edit " + title, "Edit " + fieldName,
+    Dialog<String> dialog =
+        DialogBuilder.createDialog("Edit " + title, "Edit " + fieldName,
             "/io/github/kullik01/kinonode/images/question_mark.png");
 
     // Removed fixed sizing to let the dialog size to its content
 
-    tmpDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK,
+    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK,
         ButtonType.CANCEL);
 
-    VBox tmpVbox = new VBox(5);
-    Label tmpErrorLabel = new Label();
-    tmpErrorLabel.setWrapText(true);
-    tmpErrorLabel.setPrefWidth(430);
-    tmpErrorLabel.setMinHeight(Region.USE_PREF_SIZE);
-    tmpErrorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+    VBox vBox = new VBox(5);
+    Label errorLabel = new Label();
+    errorLabel.setWrapText(true);
+    errorLabel.setPrefWidth(430);
+    errorLabel.setMinHeight(Region.USE_PREF_SIZE);
+    errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
 
-    String tmpDefaultText =
+    String defaultText =
         control.getText() != null ? control.getText().trim() : "";
 
-    if (!tmpDefaultText.isEmpty()) {
-      tmpErrorLabel.setText("This is the current " + fieldName
+    if (!defaultText.isEmpty()) {
+      errorLabel.setText("This is the current " + fieldName
           + " and must be updated by a new one.");
-      tmpErrorLabel.setVisible(true);
+      errorLabel.setVisible(true);
     } else {
-      tmpErrorLabel.setVisible(false);
+      errorLabel.setVisible(false);
     }
 
-    TextInputControl tmpInputField;
+    TextInputControl inputField;
     if (control instanceof TextArea) {
-      TextArea tmpTextArea = new TextArea(tmpDefaultText);
-      tmpTextArea.setWrapText(true);
-      tmpTextArea.setPrefHeight(100);
-      tmpInputField = tmpTextArea;
+      TextArea textArea = new TextArea(defaultText);
+      textArea.setWrapText(true);
+      textArea.setPrefHeight(100);
+      inputField = textArea;
     } else {
-      tmpInputField = new TextField(tmpDefaultText);
+      inputField = new TextField(defaultText);
     }
 
     // Set formatting constraints on user input
     if (constraint == InputConstraint.NUMBERS_ONLY) {
-      tmpInputField.setTextFormatter(new TextFormatter<>(change -> {
+      inputField.setTextFormatter(new TextFormatter<>(change -> {
         if (change.getText().matches("\\d*")) {
           return change;
         }
         return null;
       }));
     } else if (constraint == InputConstraint.NO_NUMBERS) {
-      tmpInputField.setTextFormatter(new TextFormatter<>(change -> {
+      inputField.setTextFormatter(new TextFormatter<>(change -> {
         if (change.getText().matches("[^0-9]*")) {
           return change;
         }
@@ -1009,44 +1374,43 @@ public class MovieDetailController implements Refreshable {
     tmpAsciiInfo.setPrefWidth(430);
     tmpAsciiInfo.setMinHeight(Region.USE_PREF_SIZE);
 
-    tmpVbox.getChildren().addAll(new Label("Enter the new " + fieldName + ":"),
-        tmpErrorLabel, tmpInputField, tmpAsciiInfo);
-    tmpDialog.getDialogPane().setContent(tmpVbox);
+    vBox.getChildren().addAll(new Label("Enter the new " + fieldName + ":"),
+        errorLabel, inputField, tmpAsciiInfo);
+    dialog.getDialogPane().setContent(vBox);
 
-    Node tmpOkButton = tmpDialog.getDialogPane().lookupButton(ButtonType.OK);
+    Node tmpOkButton = dialog.getDialogPane().lookupButton(ButtonType.OK);
     tmpOkButton.setDisable(true);
 
-    tmpInputField.textProperty()
-        .addListener((observable, oldValue, newValue) -> {
-          String tmpValue = newValue.trim();
-          boolean tmpIsUnchanged = tmpValue.equals(tmpDefaultText);
+    inputField.textProperty().addListener((observable, oldValue, newValue) -> {
+      String tmpValue = newValue.trim();
+      boolean tmpIsUnchanged = tmpValue.equals(defaultText);
 
-          // Require input content to be ASCII only
-          if (!newValue.matches("\\A\\p{ASCII}*\\z")) {
-            tmpInputField.setText(oldValue);
-            return;
-          } else if (tmpIsUnchanged) {
-            if (!tmpDefaultText.isEmpty()) {
-              tmpErrorLabel.setText("This is the current " + fieldName
-                  + " and must be updated by a new one.");
-              tmpErrorLabel.setVisible(true);
-            }
-            tmpOkButton.setDisable(true);
-          } else {
-            tmpErrorLabel.setVisible(false);
-            tmpOkButton.setDisable(false);
-          }
-        });
+      // Require input content to be ASCII only
+      if (!newValue.matches("\\A\\p{ASCII}*\\z")) {
+        inputField.setText(oldValue);
+        return;
+      } else if (tmpIsUnchanged) {
+        if (!defaultText.isEmpty()) {
+          errorLabel.setText("This is the current " + fieldName
+              + " and must be updated by a new one.");
+          errorLabel.setVisible(true);
+        }
+        tmpOkButton.setDisable(true);
+      } else {
+        errorLabel.setVisible(false);
+        tmpOkButton.setDisable(false);
+      }
+    });
 
-    tmpDialog.setResultConverter(dialogButton -> {
+    dialog.setResultConverter(dialogButton -> {
       if (dialogButton == ButtonType.OK) {
-        return tmpInputField.getText();
+        return inputField.getText();
       }
       return null;
     });
 
 
-    Optional<String> tmpResult = tmpDialog.showAndWait();
+    Optional<String> tmpResult = dialog.showAndWait();
     tmpResult.ifPresent(val -> {
       String newVal = val.trim();
       control.setText(newVal);
@@ -1056,25 +1420,22 @@ public class MovieDetailController implements Refreshable {
     });
   }
 
-  @FXML
   private void editTitle() {
     showEditDialog("Title", "Movie Title", txtTitle, InputConstraint.ANY,
         val -> movie.setTitle(val.isEmpty() ? null : val));
   }
 
-  @FXML
   private void editYear() {
     showEditDialog("Year", "Release Year", txtYear,
         InputConstraint.NUMBERS_ONLY, val -> {
           try {
             movie.setYear(val.isEmpty() ? null : Integer.parseInt(val));
-          } catch (NumberFormatException tmpException) {
+          } catch (NumberFormatException exception) {
             showStatus("Year must be a number!");
           }
         });
   }
 
-  @FXML
   private void editDuration() {
     showEditDialog("Duration", "Duration in minutes", txtDuration,
         InputConstraint.NUMBERS_ONLY, val -> {
@@ -1089,19 +1450,17 @@ public class MovieDetailController implements Refreshable {
               txtDuration.setText(movie.getFormattedDuration());
               txtDuration.setStyle("-fx-text-fill: -color-fg-default;");
             }
-          } catch (NumberFormatException tmpException) {
+          } catch (NumberFormatException exception) {
             showStatus("Duration must be a number!");
           }
         });
   }
 
-  @FXML
   private void editGenre() {
     showEditDialog("Genre", "Genre", txtGenre, InputConstraint.NO_NUMBERS,
         val -> movie.setGenre(val.isEmpty() ? null : val));
   }
 
-  @FXML
   private void editDirector() {
     showEditDialog("Director", "Director(s)", txtDirector,
         InputConstraint.NO_NUMBERS, val -> {
@@ -1110,7 +1469,6 @@ public class MovieDetailController implements Refreshable {
         });
   }
 
-  @FXML
   private void editWriter() {
     showEditDialog("Writer", "Writer(s)", txtWriter, InputConstraint.NO_NUMBERS,
         val -> {
@@ -1119,7 +1477,6 @@ public class MovieDetailController implements Refreshable {
         });
   }
 
-  @FXML
   private void editProducer() {
     showEditDialog("Producer", "Producer(s)", txtProducer,
         InputConstraint.NO_NUMBERS, val -> {
@@ -1128,7 +1485,6 @@ public class MovieDetailController implements Refreshable {
         });
   }
 
-  @FXML
   private void editCinematographer() {
     showEditDialog("Cinematographer", "Cinematographer(s)", txtCinematographer,
         InputConstraint.NO_NUMBERS, val -> {
@@ -1138,7 +1494,6 @@ public class MovieDetailController implements Refreshable {
         });
   }
 
-  @FXML
   private void editComposer() {
     showEditDialog("Composer", "Composer(s)", txtComposer,
         InputConstraint.NO_NUMBERS, val -> {
@@ -1147,7 +1502,6 @@ public class MovieDetailController implements Refreshable {
         });
   }
 
-  @FXML
   private void editActors() {
     showEditDialog("Actor(s)", "Actor(s)", txtActors,
         InputConstraint.NO_NUMBERS, val -> {
@@ -1156,42 +1510,40 @@ public class MovieDetailController implements Refreshable {
         });
   }
 
-  @FXML
   private void editDescription() {
     showEditDialog("Description", "Description", txtDescription,
         InputConstraint.NO_NUMBERS,
         val -> movie.setDescription(val.isEmpty() ? null : val));
   }
 
-  @FXML
   private void editTrailerUrl() {
-    Dialog<String> tmpDialog = io.github.kullik01.kinonode.util.DialogBuilder
-        .createDialog("Edit Trailer Link", "YouTube Trailer URL",
+    Dialog<String> dialog =
+        DialogBuilder.createDialog("Edit Trailer Link", "YouTube Trailer URL",
             "/io/github/kullik01/kinonode/images/question_mark.png");
 
 
 
-    tmpDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK,
+    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK,
         ButtonType.CANCEL);
 
-    VBox tmpVbox = new VBox(5);
-    Label tmpErrorLabel = new Label();
-    tmpErrorLabel.setWrapText(true);
-    tmpErrorLabel.setPrefWidth(430);
-    tmpErrorLabel.setMinHeight(Region.USE_PREF_SIZE);
-    tmpErrorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+    VBox vBox = new VBox(5);
+    Label errorLabel = new Label();
+    errorLabel.setWrapText(true);
+    errorLabel.setPrefWidth(430);
+    errorLabel.setMinHeight(Region.USE_PREF_SIZE);
+    errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
 
-    String tmpDefaultText = txtTrailerUrl.getText().trim();
+    String defaultText = txtTrailerUrl.getText().trim();
 
-    if (!tmpDefaultText.isEmpty()) {
-      tmpErrorLabel.setText(
+    if (!defaultText.isEmpty()) {
+      errorLabel.setText(
           "This is the current YouTube link and must be updated by a new one.");
-      tmpErrorLabel.setVisible(true);
+      errorLabel.setVisible(true);
     } else {
-      tmpErrorLabel.setVisible(false);
+      errorLabel.setVisible(false);
     }
 
-    TextField tmpTextField = new TextField(tmpDefaultText);
+    TextField tmpTextField = new TextField(defaultText);
     tmpTextField.setPromptText("https://www.youtube.com/watch?v=...");
 
     Label tmpAsciiInfo = new Label(
@@ -1202,12 +1554,11 @@ public class MovieDetailController implements Refreshable {
     tmpAsciiInfo.setPrefWidth(430);
     tmpAsciiInfo.setMinHeight(Region.USE_PREF_SIZE);
 
-    tmpVbox.getChildren().addAll(
-        new Label("Enter the new YouTube Trailer Link:"), tmpErrorLabel,
-        tmpTextField, tmpAsciiInfo);
-    tmpDialog.getDialogPane().setContent(tmpVbox);
+    vBox.getChildren().addAll(new Label("Enter the new YouTube Trailer Link:"),
+        errorLabel, tmpTextField, tmpAsciiInfo);
+    dialog.getDialogPane().setContent(vBox);
 
-    Node tmpOkButton = tmpDialog.getDialogPane().lookupButton(ButtonType.OK);
+    Node tmpOkButton = dialog.getDialogPane().lookupButton(ButtonType.OK);
     tmpOkButton.setDisable(true);
 
     tmpTextField.textProperty()
@@ -1216,26 +1567,26 @@ public class MovieDetailController implements Refreshable {
             tmpTextField.setText(oldValue);
             return;
           }
-          String tmpUrl = newValue.trim();
-          boolean tmpIsUnchanged = tmpUrl.equalsIgnoreCase(tmpDefaultText);
+          String url = newValue.trim();
+          boolean tmpIsUnchanged = url.equalsIgnoreCase(defaultText);
 
-          if (tmpIsUnchanged && !tmpDefaultText.isEmpty()) {
-            tmpErrorLabel.setText(
+          if (tmpIsUnchanged && !defaultText.isEmpty()) {
+            errorLabel.setText(
                 "This is the current YouTube link and must be updated by a new one.");
-            tmpErrorLabel.setVisible(true);
+            errorLabel.setVisible(true);
             tmpOkButton.setDisable(true);
-          } else if (!tmpUrl.isEmpty() && !tmpUrl.contains("youtube.com")
-              && !tmpUrl.contains("youtu.be")) {
-            tmpErrorLabel.setText("Trailer Link must be a valid YouTube URL.");
-            tmpErrorLabel.setVisible(true);
+          } else if (!url.isEmpty() && !url.contains("youtube.com")
+              && !url.contains("youtu.be")) {
+            errorLabel.setText("Trailer Link must be a valid YouTube URL.");
+            errorLabel.setVisible(true);
             tmpOkButton.setDisable(true);
           } else {
-            tmpErrorLabel.setVisible(false);
-            tmpOkButton.setDisable(tmpUrl.isEmpty());
+            errorLabel.setVisible(false);
+            tmpOkButton.setDisable(url.isEmpty());
           }
         });
 
-    tmpDialog.setResultConverter(dialogButton -> {
+    dialog.setResultConverter(dialogButton -> {
       if (dialogButton == ButtonType.OK) {
         return tmpTextField.getText();
       }
@@ -1243,7 +1594,7 @@ public class MovieDetailController implements Refreshable {
     });
 
 
-    Optional<String> tmpResult = tmpDialog.showAndWait();
+    Optional<String> tmpResult = dialog.showAndWait();
     tmpResult.ifPresent(url -> {
       String newUrl = url.trim();
       txtTrailerUrl.setText(newUrl);
@@ -1342,7 +1693,7 @@ public class MovieDetailController implements Refreshable {
     if (!txtYear.getText().trim().isEmpty()) {
       try {
         tmpYear = Integer.parseInt(txtYear.getText().trim());
-      } catch (NumberFormatException tmpE) {
+      } catch (NumberFormatException exception) {
         showStatus("Release year must be a valid integer number.");
         return false;
       }
@@ -1385,7 +1736,6 @@ public class MovieDetailController implements Refreshable {
     return true;
   }
 
-  @FXML
   private void goBack() {
     if (hasUnsavedChanges()) {
       performSave();
@@ -1410,48 +1760,41 @@ public class MovieDetailController implements Refreshable {
     } else {
       // Fallback just in case
       try {
-        URL tmpUrl = getClass()
-            .getResource("/io/github/kullik01/kinonode/fxml/LibraryView.fxml");
-        FXMLLoader tmpLoader = new FXMLLoader(tmpUrl);
-        Parent tmpLibraryView = tmpLoader.load();
+        LibraryController controller = new LibraryController();
+        Parent libraryView = controller.buildView();
+        controller.initialize();
 
-        StackPane tmpContentArea =
+        StackPane contentArea =
             (StackPane) lblHeaderTitle.getScene().lookup("#contentArea");
-        if (tmpContentArea != null) {
-          tmpContentArea.getChildren().setAll(tmpLibraryView);
+        if (contentArea != null) {
+          contentArea.getChildren().setAll(libraryView);
         }
-      } catch (IOException tmpE) {
-        LOGGER.log(Level.SEVERE, "Failed to load LibraryView FXML", tmpE);
+      } catch (Exception e) {
+        LOGGER.log(Level.SEVERE, "Failed to create LibraryView view", e);
       }
     }
   }
 
-  @FXML
   private void searchDirectorOnImdb() {
     searchPersonOnImdb(comboDirector, txtDirector);
   }
 
-  @FXML
   private void searchWriterOnImdb() {
     searchPersonOnImdb(comboWriter, txtWriter);
   }
 
-  @FXML
   private void searchProducerOnImdb() {
     searchPersonOnImdb(comboProducer, txtProducer);
   }
 
-  @FXML
   private void searchCinematographerOnImdb() {
     searchPersonOnImdb(comboCinematographer, txtCinematographer);
   }
 
-  @FXML
   private void searchComposerOnImdb() {
     searchPersonOnImdb(comboComposer, txtComposer);
   }
 
-  @FXML
   private void searchActorsOnImdb() {
     searchPersonOnImdb(comboActors, txtActors);
   }
@@ -1462,7 +1805,7 @@ public class MovieDetailController implements Refreshable {
    * before falling back to a general IMDb text search.
    *
    * @param combo The ComboBox containing multiple parsed names.
-   * @param txt   The TextField containing a single name.
+   * @param txt The TextField containing a single name.
    */
   private void searchPersonOnImdb(ComboBox<String> combo, TextField txt) {
     String name = null;
@@ -1484,7 +1827,7 @@ public class MovieDetailController implements Refreshable {
     if (movie != null) {
       String cover = movie.getCoverImagePath();
       if (cover != null) {
-        Pattern p = Pattern.compile("tt\\d+");
+        Pattern p = Pattern.compile("tooltip\\d+");
         Matcher m = p.matcher(cover);
         if (m.find()) {
           tmpMovieImdbId = m.group();
@@ -1560,8 +1903,8 @@ public class MovieDetailController implements Refreshable {
   }
 
   /**
-   * Executes a SPARQL query against the public Wikidata endpoint to retrieve linked data.
-   * Used to resolve human-readable names to IMDb identifiers.
+   * Executes a SPARQL query against the public Wikidata endpoint to retrieve
+   * linked data. Used to resolve human-readable names to IMDb identifiers.
    *
    * @param sparql The query string.
    * @return The first extracted IMDb ID, or null if not found.
@@ -1593,11 +1936,12 @@ public class MovieDetailController implements Refreshable {
   }
 
   /**
-   * Configures the layout for fields that may contain multiple values (e.g. Actors).
-   * Switches to a ComboBox view if multiple comma-separated names are detected.
+   * Configures the layout for fields that may contain multiple values (e.g.
+   * Actors). Switches to a ComboBox view if multiple comma-separated names are
+   * detected.
    *
    * @param value The raw string value from the database.
-   * @param txt   The TextField representation for a single name.
+   * @param txt The TextField representation for a single name.
    * @param combo The ComboBox representation for multiple names.
    */
   private void setupMultiField(String value, TextField txt,

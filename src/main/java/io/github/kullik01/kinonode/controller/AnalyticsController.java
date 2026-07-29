@@ -37,6 +37,17 @@
  */
 package io.github.kullik01.kinonode.controller;
 
+import io.github.kullik01.kinonode.util.CursorUtils;
+import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.shape.SVGPath;
+
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
@@ -49,10 +60,18 @@ import io.github.kullik01.kinonode.service.AppContext;
 import io.github.kullik01.kinonode.util.CustomAlert;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.fxml.FXML;
+
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
@@ -71,29 +90,18 @@ public class AnalyticsController implements Refreshable {
   private static final Logger LOGGER =
       Logger.getLogger(AnalyticsController.class.getName());
 
-  @FXML
   private Label lblTotalMovies;
-  @FXML
   private Label lblAvgRating;
-  @FXML
   private Label lblYearRange;
-  @FXML
   private Label lblTotalWatchlists;
-  @FXML
   private Label lblTopGenre;
-  @FXML
   private Label lblTotalDirectors;
 
-  @FXML
   private BarChart<String, Number> decadeChart;
-  @FXML
   private BarChart<String, Number> ratingChart;
-  @FXML
   private BarChart<String, Number> genreChart;
 
-  @FXML
   private ComboBox<String> comboRoleFilter;
-  @FXML
   private VBox topPeopleBox;
 
   private final Map<String, Map<String, Integer>> roleFrequencies =
@@ -104,11 +112,252 @@ public class AnalyticsController implements Refreshable {
   private final Map<String, Map<String, List<String>>> rolePersonMovies =
       new HashMap<>();
 
+  public Parent buildView() {
+    ScrollPane rootPane = new ScrollPane();
+    rootPane.setFitToWidth(true);
+    rootPane.setStyle("-fx-background-color: transparent; -fx-padding: 0;");
+    rootPane.getStylesheets().add(
+        getClass().getResource("/io/github/kullik01/kinonode/css/theme.css")
+            .toExternalForm());
+
+    VBox mainContent = new VBox(20.0);
+    mainContent.getStyleClass().add("detail-pane");
+    mainContent.setStyle("-fx-padding: 24px;");
+
+    // Page Header & Action Buttons
+    VBox headerCard = new VBox(16.0);
+    headerCard.getStyleClass().add("analytics-header-card");
+
+    VBox headerTitles = new VBox(4.0);
+    Label titleLabel = new Label("Collection Insights & Analytics");
+    titleLabel.getStyleClass().add("analytics-title");
+    Label subtitleLabel = new Label(
+        "Real-time catalog metrics, visual charts, and distribution reports.");
+    subtitleLabel.getStyleClass().add("analytics-subtitle");
+    headerTitles.getChildren().addAll(titleLabel, subtitleLabel);
+
+    FlowPane btnFlow = new FlowPane();
+    btnFlow.setHgap(12.0);
+    btnFlow.setVgap(12.0);
+
+    javafx.scene.control.Button btnJson =
+        new javafx.scene.control.Button("Export JSON");
+    btnJson.getStyleClass().add("analytics-action-button");
+    btnJson.setOnAction(e -> handleExportJson());
+    SVGPath svgJson = new SVGPath();
+    svgJson.getStyleClass().add("analytics-btn-svg");
+    svgJson.setScaleX(0.75);
+    svgJson.setScaleY(0.75);
+    svgJson.setContent("M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z");
+    btnJson.setGraphic(svgJson);
+    Tooltip ttJson = new Tooltip("Export entire movie catalog to JSON format");
+    ttJson.setShowDelay(Duration.millis(100));
+    btnJson.setTooltip(ttJson);
+
+    javafx.scene.control.Button btnCsv =
+        new javafx.scene.control.Button("Export CSV");
+    btnCsv.getStyleClass().add("analytics-action-button");
+    btnCsv.setOnAction(e -> handleExportCsv());
+    SVGPath svgCsv = new SVGPath();
+    svgCsv.getStyleClass().add("analytics-btn-svg");
+    svgCsv.setScaleX(0.75);
+    svgCsv.setScaleY(0.75);
+    svgCsv.setContent(
+        "M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6zm4-8h4v2h-4zm0 4h4v2h-4z");
+    btnCsv.setGraphic(svgCsv);
+    Tooltip ttCsv =
+        new Tooltip("Export movie catalog spreadsheet to CSV format");
+    ttCsv.setShowDelay(Duration.millis(100));
+    btnCsv.setTooltip(ttCsv);
+
+    javafx.scene.control.Button btnHtml =
+        new javafx.scene.control.Button("HTML Visual Report");
+    btnHtml.getStyleClass().add("analytics-action-button");
+    btnHtml.setOnAction(e -> handleExportHtml());
+    SVGPath svgHtml = new SVGPath();
+    svgHtml.getStyleClass().add("analytics-btn-svg");
+    svgHtml.setScaleX(0.75);
+    svgHtml.setScaleY(0.75);
+    svgHtml.setContent(
+        "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z");
+    btnHtml.setGraphic(svgHtml);
+    Tooltip ttHtml =
+        new Tooltip("Generate a styled HTML report of your collection");
+    ttHtml.setShowDelay(Duration.millis(100));
+    btnHtml.setTooltip(ttHtml);
+
+    btnFlow.getChildren().addAll(btnJson, btnCsv, btnHtml);
+    headerCard.getChildren().addAll(headerTitles, btnFlow);
+
+    // KPI Summary Cards
+    GridPane kpiGrid = new GridPane();
+    kpiGrid.setHgap(16.0);
+    kpiGrid.setVgap(16.0);
+    ColumnConstraints columnConstraint1 = new ColumnConstraints();
+    columnConstraint1.setPercentWidth(33.3333);
+    ColumnConstraints columnConstraint2 = new ColumnConstraints();
+    columnConstraint2.setPercentWidth(33.3333);
+    ColumnConstraints cc3 = new ColumnConstraints();
+    cc3.setPercentWidth(33.3334);
+    kpiGrid.getColumnConstraints().addAll(columnConstraint1, columnConstraint2,
+        cc3);
+
+    lblTotalMovies = new Label("0");
+    VBox kpiTotalMovies = createKpiCard("TOTAL MOVIES", lblTotalMovies,
+        "titles in catalog",
+        "M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z",
+        "kpi-card-blue");
+    kpiGrid.add(kpiTotalMovies, 0, 0);
+
+    lblAvgRating = new Label("—");
+    VBox kpiAvgRating = createKpiCard("AVERAGE IMDb RATING", lblAvgRating,
+        "out of 10.0 scale",
+        "M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z",
+        "kpi-card-orange");
+    kpiGrid.add(kpiAvgRating, 1, 0);
+
+    lblYearRange = new Label("—");
+    VBox kpiYearRange = createKpiCard("RELEASE ERA", lblYearRange,
+        "year range span",
+        "M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z",
+        "kpi-card-blue");
+    kpiGrid.add(kpiYearRange, 2, 0);
+
+    lblTotalWatchlists = new Label("0");
+    VBox kpiWatchlists = createKpiCard("WATCHLISTS", lblTotalWatchlists,
+        "active collections",
+        "M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 9H10V9h8v2zm-4 4h-4v-2h4v2zm4-8h-8V5h8v2z",
+        "kpi-card-orange");
+    kpiGrid.add(kpiWatchlists, 0, 1);
+
+    lblTopGenre = new Label("—");
+    VBox kpiTopGenre = createKpiCard("TOP GENRE", lblTopGenre,
+        "most frequent genre",
+        "M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z",
+        "kpi-card-blue");
+    kpiGrid.add(kpiTopGenre, 1, 1);
+
+    lblTotalDirectors = new Label("0");
+    VBox kpiDirectors = createKpiCard("DIRECTORS", lblTotalDirectors,
+        "unique filmmakers",
+        "M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z",
+        "kpi-card-orange");
+    kpiGrid.add(kpiDirectors, 2, 1);
+
+    // Charts & Top Lists
+    GridPane chartGrid = new GridPane();
+    chartGrid.setHgap(16.0);
+    chartGrid.setVgap(16.0);
+    VBox.setVgrow(chartGrid, Priority.ALWAYS);
+    ColumnConstraints ch1 = new ColumnConstraints();
+    ch1.setPercentWidth(50.0);
+    ColumnConstraints ch2 = new ColumnConstraints();
+    ch2.setPercentWidth(50.0);
+    chartGrid.getColumnConstraints().addAll(ch1, ch2);
+
+    VBox decBox = new VBox(16.0);
+    decBox.getStyleClass().add("analytics-section-card");
+    decBox.setMaxWidth(Double.MAX_VALUE);
+    Label decLabel = new Label("Movies per Decade");
+    decLabel.getStyleClass().add("analytics-section-header");
+    javafx.scene.chart.CategoryAxis decX =
+        new javafx.scene.chart.CategoryAxis();
+    decX.setLabel("Decade");
+    javafx.scene.chart.NumberAxis decY = new javafx.scene.chart.NumberAxis();
+    decY.setLabel("Count");
+    decadeChart = new BarChart<>(decX, decY);
+    decadeChart.setLegendVisible(false);
+    decadeChart.setAnimated(false);
+    decadeChart.setPrefHeight(260.0);
+    decBox.getChildren().addAll(decLabel, decadeChart);
+    chartGrid.add(decBox, 0, 0);
+
+    VBox ratBox = new VBox(16.0);
+    ratBox.getStyleClass().add("analytics-section-card");
+    ratBox.setMaxWidth(Double.MAX_VALUE);
+    Label ratLabel = new Label("IMDb Rating Breakdown (0-10)");
+    ratLabel.getStyleClass().add("analytics-section-header");
+    javafx.scene.chart.CategoryAxis ratX =
+        new javafx.scene.chart.CategoryAxis();
+    ratX.setLabel("IMDb Rating");
+    javafx.scene.chart.NumberAxis ratY = new javafx.scene.chart.NumberAxis();
+    ratY.setLabel("Count");
+    ratingChart = new BarChart<>(ratX, ratY);
+    ratingChart.setLegendVisible(false);
+    ratingChart.setAnimated(false);
+    ratingChart.setPrefHeight(260.0);
+    ratBox.getChildren().addAll(ratLabel, ratingChart);
+    chartGrid.add(ratBox, 1, 0);
+
+    VBox genBox = new VBox(16.0);
+    genBox.getStyleClass().add("analytics-section-card");
+    genBox.setMaxWidth(Double.MAX_VALUE);
+    Label genLabel = new Label("Movie Genres & Appearance");
+    genLabel.getStyleClass().add("analytics-section-header");
+    javafx.scene.chart.CategoryAxis genX =
+        new javafx.scene.chart.CategoryAxis();
+    genX.setLabel("Genre");
+    javafx.scene.chart.NumberAxis genY = new javafx.scene.chart.NumberAxis();
+    genY.setLabel("Count");
+    genreChart = new BarChart<>(genX, genY);
+    genreChart.setLegendVisible(false);
+    genreChart.setAnimated(false);
+    genreChart.setPrefHeight(260.0);
+    genBox.getChildren().addAll(genLabel, genreChart);
+    chartGrid.add(genBox, 0, 1);
+
+    VBox pplBox = new VBox(16.0);
+    pplBox.getStyleClass().add("analytics-section-card");
+    pplBox.setMaxWidth(Double.MAX_VALUE);
+    HBox pplHeaderBox = new HBox(10.0);
+    pplHeaderBox.setAlignment(Pos.CENTER_LEFT);
+    Label pplLabel = new Label("Top People");
+    pplLabel.getStyleClass().add("analytics-section-header");
+    Region pplSpacer = new Region();
+    HBox.setHgrow(pplSpacer, Priority.ALWAYS);
+    comboRoleFilter = new ComboBox<>();
+    comboRoleFilter.setOnAction(e -> handleRoleFilterChange());
+    pplHeaderBox.getChildren().addAll(pplLabel, pplSpacer, comboRoleFilter);
+    topPeopleBox = new VBox(10.0);
+    topPeopleBox.setStyle("-fx-padding: 6px 0 0 0;");
+    pplBox.getChildren().addAll(pplHeaderBox, topPeopleBox);
+    chartGrid.add(pplBox, 1, 1);
+
+    mainContent.getChildren().addAll(headerCard, kpiGrid, chartGrid);
+    rootPane.setContent(mainContent);
+
+    return rootPane;
+  }
+
+  private VBox createKpiCard(String title, Label valLabel, String subtitle,
+      String svgContent, String extraClass) {
+    VBox v = new VBox();
+    v.setMaxWidth(Double.MAX_VALUE);
+    v.getStyleClass().addAll("analytics-kpi-card", extraClass);
+
+    HBox h = new HBox(8.0);
+    h.setAlignment(Pos.CENTER_LEFT);
+    SVGPath svg = new SVGPath();
+    svg.getStyleClass().add("analytics-kpi-svg");
+    svg.setScaleX(0.85);
+    svg.setScaleY(0.85);
+    svg.setContent(svgContent);
+    Label tLabel = new Label(title);
+    tLabel.getStyleClass().add("analytics-kpi-title");
+    h.getChildren().addAll(svg, tLabel);
+
+    valLabel.getStyleClass().add("analytics-kpi-value");
+    Label subLabel = new Label(subtitle);
+    subLabel.getStyleClass().add("analytics-kpi-subtitle");
+
+    v.getChildren().addAll(h, valLabel, subLabel);
+    return v;
+  }
+
   /**
-   * Initializes the analytics view by disabling unwanted chart animations
-   * and populating the role filter dropdown with default values.
+   * Initializes the analytics view by disabling unwanted chart animations and
+   * populating the role filter dropdown with default values.
    */
-  @FXML
   public void initialize() {
     if (decadeChart != null) {
       decadeChart.setAnimated(false);
@@ -171,32 +420,32 @@ public class AnalyticsController implements Refreshable {
     Map<String, List<String>> tmpComposerMovies = new HashMap<>();
     Map<String, List<String>> tmpActorMovies = new HashMap<>();
 
-    for (Movie tmpMovie : tmpMovies) {
+    for (Movie movieItem : tmpMovies) {
       String title =
-          (tmpMovie.getTitle() != null && !tmpMovie.getTitle().isBlank())
-              ? tmpMovie.getTitle()
+          (movieItem.getTitle() != null && !movieItem.getTitle().isBlank())
+              ? movieItem.getTitle()
               : "Untitled";
 
-      if (tmpMovie.getRawRating() != null) {
-        tmpTotalRating += tmpMovie.getRawRating();
+      if (movieItem.getRawRating() != null) {
+        tmpTotalRating += movieItem.getRawRating();
         tmpRatedCount++;
-      } else if (tmpMovie.getRating() != null) {
-        tmpTotalRating += tmpMovie.getRating();
+      } else if (movieItem.getRating() != null) {
+        tmpTotalRating += movieItem.getRating();
         tmpRatedCount++;
       }
 
-      if (tmpMovie.getRating() != null) {
-        String tmpRatingKey = tmpMovie.getRating() + "/10";
+      if (movieItem.getRating() != null) {
+        String tmpRatingKey = movieItem.getRating() + "/10";
         tmpRatings.put(tmpRatingKey,
             tmpRatings.getOrDefault(tmpRatingKey, 0) + 1);
         ratingMovies.computeIfAbsent(tmpRatingKey, k -> new ArrayList<>())
             .add(title);
       }
 
-      if (tmpMovie.getYear() != null) {
-        tmpMinYear = Math.min(tmpMinYear, tmpMovie.getYear());
-        tmpMaxYear = Math.max(tmpMaxYear, tmpMovie.getYear());
-        int tmpDecadeStart = (tmpMovie.getYear() / 10) * 10;
+      if (movieItem.getYear() != null) {
+        tmpMinYear = Math.min(tmpMinYear, movieItem.getYear());
+        tmpMaxYear = Math.max(tmpMaxYear, movieItem.getYear());
+        int tmpDecadeStart = (movieItem.getYear() / 10) * 10;
         String tmpDecadeKey = tmpDecadeStart + "s";
         tmpDecades.put(tmpDecadeKey,
             tmpDecades.getOrDefault(tmpDecadeKey, 0) + 1);
@@ -204,8 +453,8 @@ public class AnalyticsController implements Refreshable {
             .add(title);
       }
 
-      if (tmpMovie.getGenre() != null && !tmpMovie.getGenre().isBlank()) {
-        for (String tmpGenre : tmpMovie.getGenre().split(",")) {
+      if (movieItem.getGenre() != null && !movieItem.getGenre().isBlank()) {
+        for (String tmpGenre : movieItem.getGenre().split(",")) {
           String tmpClean = tmpGenre.trim();
           if (!tmpClean.isEmpty() && !tmpClean.equalsIgnoreCase("Unknown")) {
             tmpGenres.put(tmpClean, tmpGenres.getOrDefault(tmpClean, 0) + 1);
@@ -215,17 +464,17 @@ public class AnalyticsController implements Refreshable {
         }
       }
 
-      parseAndCountWithTitle(tmpMovie.getDirector(), tmpDirectors,
+      parseAndCountWithTitle(movieItem.getDirector(), tmpDirectors,
           tmpDirectorMovies, title);
-      parseAndCountWithTitle(tmpMovie.getWriter(), tmpWriters, tmpWriterMovies,
+      parseAndCountWithTitle(movieItem.getWriter(), tmpWriters, tmpWriterMovies,
           title);
-      parseAndCountWithTitle(tmpMovie.getProducer(), tmpProducers,
+      parseAndCountWithTitle(movieItem.getProducer(), tmpProducers,
           tmpProducerMovies, title);
-      parseAndCountWithTitle(tmpMovie.getCinematographer(), tmpCinematographers,
-          tmpCinematographerMovies, title);
-      parseAndCountWithTitle(tmpMovie.getComposer(), tmpComposers,
+      parseAndCountWithTitle(movieItem.getCinematographer(),
+          tmpCinematographers, tmpCinematographerMovies, title);
+      parseAndCountWithTitle(movieItem.getComposer(), tmpComposers,
           tmpComposerMovies, title);
-      parseAndCountWithTitle(tmpMovie.getActors(), tmpActors, tmpActorMovies,
+      parseAndCountWithTitle(movieItem.getActors(), tmpActors, tmpActorMovies,
           title);
     }
 
@@ -276,12 +525,15 @@ public class AnalyticsController implements Refreshable {
   }
 
   /**
-   * Parses comma-separated names from a movie field and updates frequency/movie tracking maps.
+   * Parses comma-separated names from a movie field and updates frequency/movie
+   * tracking maps.
    *
-   * @param rawField       The raw string from the database (e.g. "Director1, Director2").
-   * @param targetMap      The map to increment frequencies in.
-   * @param targetMovieMap The map tracking which movies a person is associated with.
-   * @param movieTitle     The title of the movie being processed.
+   * @param rawField The raw string from the database (e.g. "Director1,
+   *        Director2").
+   * @param targetMap The map to increment frequencies in.
+   * @param targetMovieMap The map tracking which movies a person is associated
+   *        with.
+   * @param movieTitle The title of the movie being processed.
    */
   private void parseAndCountWithTitle(String rawField,
       Map<String, Integer> targetMap, Map<String, List<String>> targetMovieMap,
@@ -300,8 +552,8 @@ public class AnalyticsController implements Refreshable {
   }
 
   /**
-   * Constructs a formatted, newline-separated bullet list of movie titles
-   * to be displayed inside tooltips.
+   * Constructs a formatted, newline-separated bullet list of movie titles to be
+   * displayed inside tooltips.
    *
    * @param rawMovies List of raw movie titles.
    * @return A formatted string of titles.
@@ -325,13 +577,13 @@ public class AnalyticsController implements Refreshable {
    * Event handler triggered when the user changes the selected role filter
    * (e.g., from Directors to Actors). Re-populates the Top People ranking.
    */
-  @FXML
   private void handleRoleFilterChange() {
     updateTopPeople();
   }
 
   /**
-   * Updates the Top People ranking list based on the currently selected role filter.
+   * Updates the Top People ranking list based on the currently selected role
+   * filter.
    */
   private void updateTopPeople() {
     if (comboRoleFilter == null || topPeopleBox == null) {
@@ -347,9 +599,10 @@ public class AnalyticsController implements Refreshable {
   }
 
   /**
-   * Attaches an interactive tooltip and hover styling to a specific chart data node.
+   * Attaches an interactive tooltip and hover styling to a specific chart data
+   * node.
    *
-   * @param data        The XYChart data point.
+   * @param data The XYChart data point.
    * @param tooltipText The text to display in the tooltip.
    */
   private void installChartTooltip(XYChart.Data<String, Number> data,
@@ -357,15 +610,13 @@ public class AnalyticsController implements Refreshable {
     Runnable attacher = () -> {
       Node node = data.getNode();
       if (node != null) {
-        javafx.scene.control.Tooltip tmpTooltip =
-            new javafx.scene.control.Tooltip(tooltipText);
+        Tooltip tmpTooltip = new Tooltip(tooltipText);
         tmpTooltip.setShowDelay(Duration.millis(150));
         tmpTooltip.setShowDuration(Duration.seconds(15));
         tmpTooltip.getStyleClass().add("chart-popup-tooltip");
-        javafx.scene.control.Tooltip.install(node, tmpTooltip);
+        Tooltip.install(node, tmpTooltip);
 
-        node.setCursor(
-            io.github.kullik01.kinonode.util.CursorUtils.getCameraCursor());
+        node.setCursor(CursorUtils.getCameraCursor());
         // Use a style class toggle instead of setOpacity() to avoid
         // conflicting with CSS :hover rules which causes flickering.
         // hoverProperty() fires even when the mouse is stationary.
@@ -470,12 +721,12 @@ public class AnalyticsController implements Refreshable {
   }
 
   /**
-   * Populates a VBox container with visually rich ranking rows showing
-   * the top individuals for a selected role.
+   * Populates a VBox container with visually rich ranking rows showing the top
+   * individuals for a selected role.
    *
-   * @param container   The VBox layout to populate.
+   * @param container The VBox layout to populate.
    * @param frequencies A map of person names to their occurrence counts.
-   * @param limit       The maximum number of top results to display.
+   * @param limit The maximum number of top results to display.
    */
   private void populateRankingList(VBox container,
       Map<String, Integer> frequencies, int limit) {
@@ -505,11 +756,11 @@ public class AnalyticsController implements Refreshable {
 
     int rank = 1;
     for (Map.Entry<String, Integer> entry : tmpSorted) {
-      VBox tmpCard = new VBox(6);
-      tmpCard.getStyleClass().add("ranking-row");
+      VBox card = new VBox(6);
+      card.getStyleClass().add("ranking-row");
 
       HBox tmpHeader = new HBox(10);
-      tmpHeader.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+      tmpHeader.setAlignment(Pos.CENTER_LEFT);
 
       Label tmpBadge = new Label("#" + rank);
       tmpBadge.getStyleClass().add("rank-badge");
@@ -526,7 +777,7 @@ public class AnalyticsController implements Refreshable {
           .setStyle("-fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
 
       Region tmpSpacer = new Region();
-      HBox.setHgrow(tmpSpacer, javafx.scene.layout.Priority.ALWAYS);
+      HBox.setHgrow(tmpSpacer, Priority.ALWAYS);
 
       int count = entry.getValue();
       Label tmpCount = new Label(count + (count == 1 ? " title" : " titles"));
@@ -553,28 +804,27 @@ public class AnalyticsController implements Refreshable {
           .bind(tmpTrack.widthProperty().multiply(tmpRatio));
 
       tmpTrack.getChildren().add(tmpFill);
-      StackPane.setAlignment(tmpFill, javafx.geometry.Pos.CENTER_LEFT);
+      StackPane.setAlignment(tmpFill, Pos.CENTER_LEFT);
 
-      tmpCard.getChildren().addAll(tmpHeader, tmpTrack);
+      card.getChildren().addAll(tmpHeader, tmpTrack);
 
       List<String> titles =
           personMovies.getOrDefault(entry.getKey(), Collections.emptyList());
-      javafx.scene.control.Tooltip tmpTooltip =
-          new javafx.scene.control.Tooltip(buildMovieListText(titles));
+      Tooltip tmpTooltip = new Tooltip(buildMovieListText(titles));
       tmpTooltip.setShowDelay(Duration.millis(150));
       tmpTooltip.setShowDuration(Duration.seconds(15));
       tmpTooltip.getStyleClass().add("chart-popup-tooltip");
-      javafx.scene.control.Tooltip.install(tmpCard, tmpTooltip);
+      Tooltip.install(card, tmpTooltip);
 
-      container.getChildren().add(tmpCard);
+      container.getChildren().add(card);
       rank++;
     }
   }
 
   /**
-   * Prompts the user for a save location and exports the entire movie catalog as a JSON file.
+   * Prompts the user for a save location and exports the entire movie catalog
+   * as a JSON file.
    */
-  @FXML
   private void handleExportJson() {
     FileChooser tmpChooser = new FileChooser();
     tmpChooser.setTitle("Export Catalog as JSON");
@@ -591,18 +841,18 @@ public class AnalyticsController implements Refreshable {
             .exportToJson(tmpFile.toPath(), tmpMovies);
         showSuccessAlert("Export Complete",
             "Catalog exported successfully to JSON.");
-      } catch (IOException tmpException) {
-        LOGGER.log(Level.SEVERE, "Failed to export JSON", tmpException);
+      } catch (IOException exception) {
+        LOGGER.log(Level.SEVERE, "Failed to export JSON", exception);
         showErrorAlert("Export Error",
-            "Could not write JSON file: " + tmpException.getMessage());
+            "Could not write JSON file: " + exception.getMessage());
       }
     }
   }
 
   /**
-   * Prompts the user for a save location and exports the entire movie catalog as a CSV file.
+   * Prompts the user for a save location and exports the entire movie catalog
+   * as a CSV file.
    */
-  @FXML
   private void handleExportCsv() {
     FileChooser tmpChooser = new FileChooser();
     tmpChooser.setTitle("Export Catalog as CSV");
@@ -619,18 +869,18 @@ public class AnalyticsController implements Refreshable {
             .exportToCsv(tmpFile.toPath(), tmpMovies);
         showSuccessAlert("Export Complete",
             "Catalog exported successfully to CSV.");
-      } catch (IOException tmpException) {
-        LOGGER.log(Level.SEVERE, "Failed to export CSV", tmpException);
+      } catch (IOException exception) {
+        LOGGER.log(Level.SEVERE, "Failed to export CSV", exception);
         showErrorAlert("Export Error",
-            "Could not write CSV file: " + tmpException.getMessage());
+            "Could not write CSV file: " + exception.getMessage());
       }
     }
   }
 
   /**
-   * Prompts the user for a save location and exports the entire movie catalog as a styled HTML report.
+   * Prompts the user for a save location and exports the entire movie catalog
+   * as a styled HTML report.
    */
-  @FXML
   private void handleExportHtml() {
     FileChooser tmpChooser = new FileChooser();
     tmpChooser.setTitle("Export Visual Report (HTML)");
@@ -647,18 +897,18 @@ public class AnalyticsController implements Refreshable {
             .exportToHtml(tmpFile.toPath(), tmpMovies);
         showSuccessAlert("Export Complete",
             "HTML Catalog report created successfully.");
-      } catch (IOException tmpException) {
-        LOGGER.log(Level.SEVERE, "Failed to export HTML", tmpException);
+      } catch (IOException exception) {
+        LOGGER.log(Level.SEVERE, "Failed to export HTML", exception);
         showErrorAlert("Export Error",
-            "Could not write HTML file: " + tmpException.getMessage());
+            "Could not write HTML file: " + exception.getMessage());
       }
     }
   }
 
   /**
-   * Prompts the user for a save location and creates a snapshot backup of the underlying SQLite database.
+   * Prompts the user for a save location and creates a snapshot backup of the
+   * underlying SQLite database.
    */
-  @FXML
   private void handleBackupDatabase() {
     FileChooser tmpChooser = new FileChooser();
     tmpChooser.setTitle("Backup SQLite Database");
@@ -676,21 +926,21 @@ public class AnalyticsController implements Refreshable {
         showSuccessAlert("Backup Created",
             "Database snapshot saved successfully to:\n"
                 + tmpFile.getAbsolutePath());
-      } catch (IOException tmpException) {
-        LOGGER.log(Level.SEVERE, "Failed to create backup", tmpException);
+      } catch (IOException exception) {
+        LOGGER.log(Level.SEVERE, "Failed to create backup", exception);
         showErrorAlert("Backup Error",
-            "Could not backup database: " + tmpException.getMessage());
+            "Could not backup database: " + exception.getMessage());
       }
     }
   }
 
   private void showSuccessAlert(String title, String message) {
-    io.github.kullik01.kinonode.util.CustomAlert.showInformation(
-        lblTotalMovies.getScene().getWindow(), title, title, message);
+    CustomAlert.showInformation(lblTotalMovies.getScene().getWindow(), title,
+        title, message);
   }
 
   private void showErrorAlert(String title, String message) {
-    io.github.kullik01.kinonode.util.CustomAlert.showError(
-        lblTotalMovies.getScene().getWindow(), title, title, message);
+    CustomAlert.showError(lblTotalMovies.getScene().getWindow(), title, title,
+        message);
   }
 }

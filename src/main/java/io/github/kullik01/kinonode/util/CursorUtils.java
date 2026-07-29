@@ -37,6 +37,8 @@
  */
 package io.github.kullik01.kinonode.util;
 
+import javafx.scene.paint.Color;
+
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
@@ -261,7 +263,7 @@ public class CursorUtils {
 
       if (pane.getScene() != null) {
         pane.getScene().setCursor(getAppLogoCursor());
-        pane.getScene().setFill(javafx.scene.paint.Color.TRANSPARENT);
+        pane.getScene().setFill(Color.TRANSPARENT);
         if (pane.getScene().getRoot() != pane) {
           pane.getScene().getRoot()
               .setStyle("-fx-background-color: transparent;");
@@ -270,7 +272,7 @@ public class CursorUtils {
         pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
           if (newScene != null) {
             newScene.setCursor(getAppLogoCursor());
-            newScene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            newScene.setFill(Color.TRANSPARENT);
             if (newScene.getRoot() != pane) {
               newScene.getRoot().setStyle("-fx-background-color: transparent;");
             }

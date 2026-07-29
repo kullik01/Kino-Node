@@ -37,6 +37,10 @@
  */
 package io.github.kullik01.kinonode.util;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.shape.SVGPath;
+
 import javafx.scene.Node;
 
 
@@ -109,14 +113,12 @@ public class CustomAlert {
     Label tmpTitleLabel = new Label(title);
     tmpTitleLabel.getStyleClass().add("title-bar-label");
 
-    javafx.scene.image.ImageView tmpLogoView = new javafx.scene.image.ImageView(
-        new javafx.scene.image.Image(CustomAlert.class.getResourceAsStream(
-            "/io/github/kullik01/kinonode/images/logo.png")));
+    ImageView tmpLogoView = new ImageView(new Image(CustomAlert.class
+        .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
     tmpLogoView.setFitHeight(24);
     tmpLogoView.setSmooth(true);
     tmpLogoView.setFitWidth(24);
-    javafx.scene.layout.HBox.setMargin(tmpLogoView,
-        new javafx.geometry.Insets(0, 0, 0, -5));
+    HBox.setMargin(tmpLogoView, new Insets(0, 0, 0, -5));
 
     tmpTitleBar.getChildren().add(tmpLogoView);
     tmpTitleBar.setSpacing(5);
@@ -160,8 +162,7 @@ public class CustomAlert {
     tmpButtonBox.setAlignment(Pos.CENTER_RIGHT);
 
     Region tmpVSpacer = new Region();
-    javafx.scene.layout.VBox.setVgrow(tmpVSpacer,
-        javafx.scene.layout.Priority.ALWAYS);
+    VBox.setVgrow(tmpVSpacer, Priority.ALWAYS);
 
     tmpContentBox.getChildren().addAll(tmpHeaderLabel, contentNode, tmpVSpacer,
         tmpButtonBox);
@@ -232,14 +233,12 @@ public class CustomAlert {
     Label tmpTitleLabel = new Label(title);
     tmpTitleLabel.getStyleClass().add("title-bar-label");
 
-    javafx.scene.image.ImageView tmpLogoView = new javafx.scene.image.ImageView(
-        new javafx.scene.image.Image(CustomAlert.class.getResourceAsStream(
-            "/io/github/kullik01/kinonode/images/logo.png")));
+    ImageView tmpLogoView = new ImageView(new Image(CustomAlert.class
+        .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
     tmpLogoView.setFitHeight(24);
     tmpLogoView.setSmooth(true);
     tmpLogoView.setFitWidth(24);
-    javafx.scene.layout.HBox.setMargin(tmpLogoView,
-        new javafx.geometry.Insets(0, 0, 0, -5));
+    HBox.setMargin(tmpLogoView, new Insets(0, 0, 0, -5));
 
     tmpTitleBar.getChildren().add(tmpLogoView);
     tmpTitleBar.setSpacing(5);
@@ -289,8 +288,7 @@ public class CustomAlert {
     tmpButtonBox.setAlignment(Pos.CENTER_RIGHT);
 
     Region tmpVSpacer = new Region();
-    javafx.scene.layout.VBox.setVgrow(tmpVSpacer,
-        javafx.scene.layout.Priority.ALWAYS);
+    VBox.setVgrow(tmpVSpacer, Priority.ALWAYS);
 
     tmpContentBox.getChildren().addAll(tmpHeaderLabel, contentNode, tmpVSpacer,
         tmpButtonBox);
@@ -360,14 +358,13 @@ public class CustomAlert {
     Label tmpTitleLabel = new Label(title);
     tmpTitleLabel.getStyleClass().add("title-bar-label");
 
-    javafx.scene.image.ImageView tmpLogoView = new javafx.scene.image.ImageView(
-        new javafx.scene.image.Image(CustomAlert.class.getResourceAsStream(
+    ImageView tmpLogoView =
+        new ImageView(new Image(CustomAlert.class.getResourceAsStream(
             "/io/github/kullik01/kinonode/images/error_icon.png")));
     tmpLogoView.setFitHeight(24);
     tmpLogoView.setSmooth(true);
     tmpLogoView.setFitWidth(24);
-    javafx.scene.layout.HBox.setMargin(tmpLogoView,
-        new javafx.geometry.Insets(0, 0, 0, -5));
+    HBox.setMargin(tmpLogoView, new Insets(0, 0, 0, -5));
 
     tmpTitleBar.getChildren().add(tmpLogoView);
     tmpTitleBar.setSpacing(5);
@@ -410,8 +407,7 @@ public class CustomAlert {
     tmpButtonBox.setAlignment(Pos.CENTER_RIGHT);
 
     Region tmpVSpacer = new Region();
-    javafx.scene.layout.VBox.setVgrow(tmpVSpacer,
-        javafx.scene.layout.Priority.ALWAYS);
+    VBox.setVgrow(tmpVSpacer, Priority.ALWAYS);
 
     tmpContentBox.getChildren().addAll(tmpHeaderLabel, contentNode, tmpVSpacer,
         tmpButtonBox);
@@ -450,7 +446,7 @@ public class CustomAlert {
 
   private static Node createIconNode(String iconPath) {
     if (iconPath.contains("info_icon")) {
-      javafx.scene.shape.SVGPath svg = new javafx.scene.shape.SVGPath();
+      SVGPath svg = new SVGPath();
       svg.setContent(
           "M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z");
       svg.setStyle("-fx-fill: #2178dd;");
@@ -460,7 +456,7 @@ public class CustomAlert {
       pane.setPrefSize(96, 96);
       return pane;
     } else if (iconPath.contains("removal_icon")) {
-      javafx.scene.shape.SVGPath svg = new javafx.scene.shape.SVGPath();
+      SVGPath svg = new SVGPath();
       svg.setContent(
           "M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z");
       svg.setStyle("-fx-fill: #DC3545;");
@@ -470,9 +466,8 @@ public class CustomAlert {
       pane.setPrefSize(96, 96);
       return pane;
     } else {
-      javafx.scene.image.ImageView imgView =
-          new javafx.scene.image.ImageView(new javafx.scene.image.Image(
-              CustomAlert.class.getResourceAsStream(iconPath)));
+      ImageView imgView = new ImageView(
+          new Image(CustomAlert.class.getResourceAsStream(iconPath)));
       imgView.setFitHeight(96);
       imgView.setFitWidth(96);
       imgView.setSmooth(true);

@@ -37,13 +37,16 @@
  */
 package io.github.kullik01.kinonode.controller;
 
+import javafx.scene.Parent;
+import javafx.scene.layout.VBox;
+
 import io.github.kullik01.kinonode.model.Movie;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.fxml.FXML;
+
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -59,17 +62,39 @@ public class MovieCardController {
       Logger.getLogger(MovieCardController.class.getName());
   private static Image PLACEHOLDER_IMAGE;
 
-  @FXML
   private ImageView imgPoster;
-  @FXML
   private Label lblTitle;
-  @FXML
   private Label lblYear;
-  @FXML
   private Label lblDirector;
 
   private Movie movie;
   private Consumer<Movie> clickHandler;
+
+  public Parent buildView() {
+    VBox rootPane = new VBox();
+    rootPane.getStyleClass().add("movie-card");
+    rootPane.setOnMouseClicked(this::onCardClicked);
+
+    VBox posterContainer = new VBox();
+    posterContainer.getStyleClass().add("movie-poster-container");
+
+    imgPoster = new ImageView();
+    imgPoster.getStyleClass().add("movie-poster");
+    posterContainer.getChildren().add(imgPoster);
+
+    lblTitle = new Label();
+    lblTitle.getStyleClass().add("movie-title-label");
+
+    lblYear = new Label();
+    lblYear.getStyleClass().add("movie-year-label");
+
+    lblDirector = new Label();
+    lblDirector.getStyleClass().add("movie-year-label");
+
+    rootPane.getChildren().addAll(posterContainer, lblTitle, lblYear,
+        lblDirector);
+    return rootPane;
+  }
 
   /**
    * Configures the card's data and click action. Updates text labels and
@@ -103,8 +128,8 @@ public class MovieCardController {
   }
 
   /**
-   * Asynchronously loads the movie poster from the file system.
-   * Falls back to a cached placeholder image if the specified file is missing or invalid.
+   * Asynchronously loads the movie poster from the file system. Falls back to a
+   * cached placeholder image if the specified file is missing or invalid.
    */
   private void loadPoster() {
     String tmpPath = movie.getCoverImagePath();
@@ -118,9 +143,9 @@ public class MovieCardController {
           // to avoid freezing the JavaFX application UI thread.
           tmpImage = new Image(tmpFile.toURI().toURL().toExternalForm(), 220,
               320, false, true, true);
-        } catch (MalformedURLException tmpException) {
+        } catch (MalformedURLException exception) {
           LOGGER.log(Level.WARNING, "Failed to load poster image: " + tmpPath,
-              tmpException);
+              exception);
         }
       }
     }
@@ -136,9 +161,9 @@ public class MovieCardController {
             PLACEHOLDER_IMAGE = new Image(tmpResource.toExternalForm(), 220,
                 320, false, true, true);
           }
-        } catch (Exception tmpException) {
+        } catch (Exception exception) {
           LOGGER.log(Level.WARNING, "Failed to load placeholder cover resource",
-              tmpException);
+              exception);
         }
       }
       tmpImage = PLACEHOLDER_IMAGE;
@@ -155,7 +180,6 @@ public class MovieCardController {
    *
    * @param event The mouse click event.
    */
-  @FXML
   private void onCardClicked(MouseEvent event) {
     if (clickHandler != null) {
       clickHandler.accept(movie);

@@ -44,7 +44,7 @@ import java.io.IOException;
 import java.net.URL;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
+
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -52,8 +52,8 @@ import javafx.stage.Stage;
 /**
  * Main application class for KinoNode. Bootstraps services and sets up window
  * presentation. This class handles database service initialization,
- * configuration-based theme loading, FXML layout loading, window setup, and
- * cleanup on exit.
+ * configuration-based theme loading, programmatic layout loading, window setup,
+ * and cleanup on exit.
  */
 public class KinoNodeApp extends Application {
 
@@ -75,7 +75,7 @@ public class KinoNodeApp extends Application {
    *
    * @param primaryStage the primary Stage for this application, onto which the
    *        application scene can be set
-   * @throws Exception if FXML loading fails or context initialization
+   * @throws Exception if programmatic loading fails or context initialization
    *         encounters an error
    */
   @Override
@@ -98,13 +98,6 @@ public class KinoNodeApp extends Application {
           .setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
     }
 
-    // Locate the main view FXML resource
-    URL tmpFxmlLocation = getClass()
-        .getResource("/io/github/kullik01/kinonode/fxml/MainView.fxml");
-    if (tmpFxmlLocation == null) {
-      throw new IOException("FXML file not found: MainView.fxml");
-    }
-
     // Set high-DPI resolution properties for crisp rendering on HiDPI / 4K /
     // Retina screens
     System.setProperty("prism.allowhidpi", "true");
@@ -113,9 +106,11 @@ public class KinoNodeApp extends Application {
     System.setProperty("glass.win.uiScale.enabled", "true");
     System.setProperty("sun.java2d.dpiaware", "true");
 
-    // Load and build the JavaFX node tree from FXML layout
-    FXMLLoader tmpLoader = new FXMLLoader(tmpFxmlLocation);
-    Parent tmpRoot = tmpLoader.load();
+    // Build the JavaFX node tree programmatically
+    io.github.kullik01.kinonode.controller.MainController tmpController =
+        new io.github.kullik01.kinonode.controller.MainController();
+    Parent tmpRoot = tmpController.buildView();
+    tmpController.initialize();
 
     // Set the application logo and title
     primaryStage.getIcons().add(new javafx.scene.image.Image(getClass()

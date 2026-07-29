@@ -29,7 +29,7 @@ module io.github.kullik01.kinonode {
   requires javafx.controls;
   requires javafx.graphics;
   requires javafx.media;
-  requires javafx.fxml;
+
   requires javafx.web;
   requires java.sql;
   requires java.logging;
@@ -48,10 +48,7 @@ module io.github.kullik01.kinonode {
 
   // Open packages for reflection
   opens io.github.kullik01.kinonode to
-      javafx.graphics,
-      javafx.fxml;
-  opens io.github.kullik01.kinonode.controller to
-      javafx.fxml;
+      javafx.graphics;
   opens io.github.kullik01.kinonode.model to
       javafx.base,
       com.google.gson;

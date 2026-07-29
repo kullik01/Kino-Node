@@ -37,6 +37,14 @@
  */
 package io.github.kullik01.kinonode.controller;
 
+import io.github.kullik01.kinonode.util.CursorUtils;
+import io.github.kullik01.kinonode.util.CustomAlert;
+import javafx.event.ActionEvent;
+import javafx.scene.Parent;
+import javafx.scene.control.Control;
+import javafx.scene.control.Label;
+import javafx.util.Duration;
+
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
@@ -54,9 +62,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.fxml.FXML;
+
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -75,34 +96,136 @@ public class WatchlistsController implements Refreshable {
       Logger.getLogger(WatchlistsController.class.getName());
   private static Image PLACEHOLDER_IMAGE;
 
-  @FXML
   private ListView<Watchlist> lstWatchlists;
-  @FXML
   private VBox paneDetails;
-  @FXML
   private Label lblWatchlistName;
-  @FXML
   private Label lblMovieCount;
-  @FXML
   private ListView<Movie> lstMovies;
-  @FXML
   private Button btnCreateWatchlist;
-  @FXML
   private Button btnRenameWatchlist;
-  @FXML
   private Button btnDeleteWatchlist;
-  @FXML
   private Button btnRemoveMovie;
 
   private WatchlistRepository watchlistRepository;
   private Watchlist selectedWatchlist;
+
+  public Parent buildView() {
+    SplitPane rootPane = new SplitPane();
+    rootPane.setDividerPositions(0.25);
+    rootPane.setStyle("-fx-background-color: -color-bg-default;");
+    rootPane.getStylesheets().add(
+        getClass().getResource("/io/github/kullik01/kinonode/css/theme.css")
+            .toExternalForm());
+
+    // Left Sidebar
+    VBox leftVBox = new VBox();
+    leftVBox.setSpacing(15.0);
+    leftVBox
+        .setStyle("-fx-background-color: -color-bg-subtle; -fx-padding: 20px;");
+
+    Label titleLbl = new Label("My Watchlists");
+    titleLbl.setStyle(
+        "-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2178dd;");
+
+    lstWatchlists = new ListView<>();
+    lstWatchlists.setId("lstWatchlists");
+    lstWatchlists.getStyleClass().add("borderless-list");
+    VBox.setVgrow(lstWatchlists, Priority.ALWAYS);
+
+    HBox btnBox = new HBox();
+    btnBox.setAlignment(Pos.CENTER);
+    btnBox.setSpacing(5.0);
+
+    btnCreateWatchlist = new Button("➕");
+    btnCreateWatchlist.setId("btnCreateWatchlist");
+    btnCreateWatchlist.getStyleClass().add("button-success");
+    btnCreateWatchlist.setMinWidth(Control.USE_PREF_SIZE);
+    btnCreateWatchlist.setOnAction(this::showCreateMenu);
+    Tooltip createTooltip = new Tooltip("Create New...");
+    createTooltip.setShowDelay(Duration.millis(250));
+    btnCreateWatchlist.setTooltip(createTooltip);
+
+    btnRenameWatchlist = new Button("📝");
+    btnRenameWatchlist.setId("btnRenameWatchlist");
+    btnRenameWatchlist.getStyleClass().add("button-secondary");
+    btnRenameWatchlist.setMinWidth(Control.USE_PREF_SIZE);
+    btnRenameWatchlist.setOnAction(e -> renameWatchlist());
+    Tooltip renameTooltip = new Tooltip("Rename");
+    renameTooltip.setShowDelay(Duration.millis(250));
+    btnRenameWatchlist.setTooltip(renameTooltip);
+
+    btnDeleteWatchlist = new Button("➖");
+    btnDeleteWatchlist.setId("btnDeleteWatchlist");
+    btnDeleteWatchlist.getStyleClass().add("button-danger");
+    btnDeleteWatchlist.setMinWidth(Control.USE_PREF_SIZE);
+    btnDeleteWatchlist.setOnAction(e -> deleteWatchlist());
+    Tooltip deleteTooltip = new Tooltip("Remove");
+    deleteTooltip.setShowDelay(Duration.millis(250));
+    btnDeleteWatchlist.setTooltip(deleteTooltip);
+
+    btnBox.getChildren().addAll(btnCreateWatchlist, btnRenameWatchlist,
+        btnDeleteWatchlist);
+    leftVBox.getChildren().addAll(titleLbl, lstWatchlists, btnBox);
+
+    // Right Side
+    paneDetails = new VBox();
+    paneDetails.setId("paneDetails");
+    paneDetails.setSpacing(20.0);
+    paneDetails.setStyle(
+        "-fx-background-color: -color-bg-default; -fx-padding: 20px;");
+
+    HBox detailsHeader = new HBox();
+    detailsHeader.setAlignment(Pos.CENTER_LEFT);
+    detailsHeader.setSpacing(15.0);
+
+    VBox nameBox = new VBox();
+    HBox.setHgrow(nameBox, Priority.ALWAYS);
+
+    lblWatchlistName = new Label("Select a Movie");
+    lblWatchlistName.setId("lblWatchlistName");
+    lblWatchlistName.setStyle(
+        "-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2178dd;");
+
+    lblMovieCount = new Label("0 movies");
+    lblMovieCount.setId("lblMovieCount");
+    lblMovieCount
+        .setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-muted;");
+
+    nameBox.getChildren().addAll(lblWatchlistName, lblMovieCount);
+
+    HBox rightBtnBox = new HBox();
+    rightBtnBox.setAlignment(Pos.CENTER_RIGHT);
+    rightBtnBox.setSpacing(10.0);
+
+    btnRemoveMovie = new Button("➖");
+    btnRemoveMovie.setId("btnRemoveMovie");
+    btnRemoveMovie.getStyleClass().add("button-danger");
+    btnRemoveMovie.setMinWidth(Control.USE_PREF_SIZE);
+    btnRemoveMovie.setOnAction(e -> removeMovie());
+    Tooltip removeTooltip = new Tooltip("Remove");
+    removeTooltip.setShowDelay(Duration.millis(250));
+    btnRemoveMovie.setTooltip(removeTooltip);
+
+    rightBtnBox.getChildren().add(btnRemoveMovie);
+    detailsHeader.getChildren().addAll(nameBox, rightBtnBox);
+
+    lstMovies = new ListView<>();
+    lstMovies.setId("lstMovies");
+    lstMovies.getStyleClass().add("borderless-list");
+    VBox.setVgrow(lstMovies, Priority.ALWAYS);
+
+    paneDetails.getChildren().addAll(detailsHeader, lstMovies);
+
+    rootPane.getItems().addAll(leftVBox, paneDetails);
+
+    return rootPane;
+  }
 
   /**
    * Initializes the watchlists layout. Installs custom cell factories for
    * watchlist titles and movie row cells, establishes selection event handlers,
    * and binds double-click controls to trigger media playback.
    */
-  @FXML
   public void initialize() {
     watchlistRepository = AppContext.getInstance().getWatchlistRepository();
 
@@ -197,8 +320,7 @@ public class WatchlistsController implements Refreshable {
             tmpIcon.setScaleX(0.65);
             tmpIcon.setScaleY(0.65);
             tmpReel.setGraphic(tmpIcon);
-            tmpReel.setMinSize(javafx.scene.control.Label.USE_PREF_SIZE,
-                javafx.scene.control.Label.USE_PREF_SIZE);
+            tmpReel.setMinSize(Label.USE_PREF_SIZE, Label.USE_PREF_SIZE);
             if (item.getRating() != null && tmpIndex <= item.getRating()) {
               tmpIcon.setStyle("-fx-fill: #ED8B00; -fx-opacity: 1.0;");
             } else {
@@ -295,8 +417,9 @@ public class WatchlistsController implements Refreshable {
   }
 
   /**
-   * Loads the movies associated with the currently selected watchlist and updates
-   * the UI. If no watchlist is selected, it clears the movie list and disables the details pane.
+   * Loads the movies associated with the currently selected watchlist and
+   * updates the UI. If no watchlist is selected, it clears the movie list and
+   * disables the details pane.
    */
   private void loadWatchlistMovies() {
     if (selectedWatchlist == null) {
@@ -323,8 +446,8 @@ public class WatchlistsController implements Refreshable {
   }
 
   /**
-   * Updates the enabled/disabled state of the movie management buttons
-   * (e.g., Remove Movie) based on the current selection and whether the active
+   * Updates the enabled/disabled state of the movie management buttons (e.g.,
+   * Remove Movie) based on the current selection and whether the active
    * watchlist is a Smart Watchlist (which cannot be manually edited).
    */
   private void updateButtonStates() {
@@ -349,40 +472,42 @@ public class WatchlistsController implements Refreshable {
 
   /**
    * Displays a customized dialog for creating or renaming a standard watchlist.
-   * Features real-time input validation to enforce character limits and ASCII-only
-   * names, and prevents duplicate names.
+   * Features real-time input validation to enforce character limits and
+   * ASCII-only names, and prevents duplicate names.
    *
-   * @param title       The dialog window title.
-   * @param header      The dialog header text.
+   * @param title The dialog window title.
+   * @param header The dialog header text.
    * @param defaultText The initial text to populate in the input field.
-   * @param currentId   The database ID of the current watchlist being renamed (-1 if creating new).
-   * @return An Optional containing the validated watchlist name input, or empty if cancelled.
+   * @param currentId The database ID of the current watchlist being renamed (-1
+   *        if creating new).
+   * @return An Optional containing the validated watchlist name input, or empty
+   *         if cancelled.
    */
   private Optional<String> showWatchlistDialog(String title, String header,
       String defaultText, int currentId) {
-    Dialog<String> tmpDialog = new Dialog<>();
-    tmpDialog.setTitle(title);
-    tmpDialog.setHeaderText(header);
+    Dialog<String> dialog = new Dialog<>();
+    dialog.setTitle(title);
+    dialog.setHeaderText(header);
 
-    tmpDialog.getDialogPane().setPrefSize(480, Region.USE_COMPUTED_SIZE);
-    tmpDialog.getDialogPane().setMinSize(480, Region.USE_COMPUTED_SIZE);
+    dialog.getDialogPane().setPrefSize(480, Region.USE_COMPUTED_SIZE);
+    dialog.getDialogPane().setMinSize(480, Region.USE_COMPUTED_SIZE);
 
-    Stage tmpStage = (Stage) tmpDialog.getDialogPane().getScene().getWindow();
-    tmpStage.getIcons().add(new javafx.scene.image.Image(getClass()
+    Stage tmpStage = (Stage) dialog.getDialogPane().getScene().getWindow();
+    tmpStage.getIcons().add(new Image(getClass()
         .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
 
     ButtonType tmpOkButtonType =
         new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-    tmpDialog.getDialogPane().getButtonTypes().addAll(tmpOkButtonType,
+    dialog.getDialogPane().getButtonTypes().addAll(tmpOkButtonType,
         ButtonType.CANCEL);
 
-    VBox tmpVbox = new VBox(5);
-    Label tmpErrorLabel = new Label();
-    tmpErrorLabel.setWrapText(true);
-    tmpErrorLabel.setPrefWidth(430);
-    tmpErrorLabel.setMinHeight(Region.USE_PREF_SIZE);
-    tmpErrorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
-    tmpErrorLabel.setVisible(false);
+    VBox vBox = new VBox(5);
+    Label errorLabel = new Label();
+    errorLabel.setWrapText(true);
+    errorLabel.setPrefWidth(430);
+    errorLabel.setMinHeight(Region.USE_PREF_SIZE);
+    errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+    errorLabel.setVisible(false);
 
     TextField tmpTextField = new TextField(defaultText);
     tmpTextField.setPromptText("Watchlist Name");
@@ -402,10 +527,10 @@ public class WatchlistsController implements Refreshable {
     tmpAsciiInfo.setPrefWidth(430);
     tmpAsciiInfo.setMinHeight(Region.USE_PREF_SIZE);
 
-    tmpVbox.getChildren().addAll(tmpErrorLabel, tmpTextField, tmpAsciiInfo);
-    tmpDialog.getDialogPane().setContent(tmpVbox);
+    vBox.getChildren().addAll(errorLabel, tmpTextField, tmpAsciiInfo);
+    dialog.getDialogPane().setContent(vBox);
 
-    Node tmpOkButton = tmpDialog.getDialogPane().lookupButton(tmpOkButtonType);
+    Node tmpOkButton = dialog.getDialogPane().lookupButton(tmpOkButtonType);
     if (tmpOkButton != null) {
       tmpOkButton.getStyleClass().add("button-primary");
       tmpOkButton.setDisable(true); // Always disable initially; user must type
@@ -413,15 +538,15 @@ public class WatchlistsController implements Refreshable {
     }
 
     Node tmpCancelButton =
-        tmpDialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+        dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
     if (tmpCancelButton != null) {
       tmpCancelButton.getStyleClass().add("button-primary");
     }
 
     if (currentId != -1) {
-      tmpErrorLabel.setText(
+      errorLabel.setText(
           "A watchlist with this name already exists. Please choose a different name.");
-      tmpErrorLabel.setVisible(true);
+      errorLabel.setVisible(true);
     }
 
     tmpTextField.textProperty()
@@ -432,9 +557,9 @@ public class WatchlistsController implements Refreshable {
           }
           // Restrict input watchlist names to standard ASCII chars only
           if (!newValue.matches("\\A\\p{ASCII}*\\z")) {
-            tmpErrorLabel.setText(
+            errorLabel.setText(
                 "The text you entered is not ASCII code. Only standard English letters (a-z, A-Z), numbers (0-9), and basic symbols (! \" # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \\ ] ^ _ ` { | } ~ space) can be used.");
-            tmpErrorLabel.setVisible(true);
+            errorLabel.setVisible(true);
             tmpOkButton.setDisable(true);
           } else {
             boolean tmpDuplicate = false;
@@ -450,49 +575,49 @@ public class WatchlistsController implements Refreshable {
             }
 
             if (tmpDuplicate) {
-              tmpErrorLabel.setText(
+              errorLabel.setText(
                   "A watchlist with this name already exists. Please choose a different name.");
-              tmpErrorLabel.setVisible(true);
+              errorLabel.setVisible(true);
               tmpOkButton.setDisable(true);
             } else {
               boolean tmpIsUnchanged = currentId != -1
                   && newValue.trim().equalsIgnoreCase(defaultText.trim());
               if (tmpIsUnchanged) {
-                tmpErrorLabel.setText(
+                errorLabel.setText(
                     "A watchlist with this name already exists. Please choose a different name.");
-                tmpErrorLabel.setVisible(true);
+                errorLabel.setVisible(true);
                 tmpOkButton.setDisable(true);
               } else {
-                tmpErrorLabel.setVisible(false);
+                errorLabel.setVisible(false);
                 tmpOkButton.setDisable(newValue.trim().isEmpty());
               }
             }
           }
-          if (tmpDialog.getDialogPane().getScene() != null
-              && tmpDialog.getDialogPane().getScene().getWindow() != null) {
-            tmpDialog.getDialogPane().getScene().getWindow().sizeToScene();
+          if (dialog.getDialogPane().getScene() != null
+              && dialog.getDialogPane().getScene().getWindow() != null) {
+            dialog.getDialogPane().getScene().getWindow().sizeToScene();
           }
         });
 
-    tmpDialog.setResultConverter(dialogButton -> {
+    dialog.setResultConverter(dialogButton -> {
       if (dialogButton == tmpOkButtonType) {
         return tmpTextField.getText();
       }
       return null;
     });
 
-    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpDialog);
-    return tmpDialog.showAndWait();
+    CursorUtils.applyCursor(dialog);
+    return dialog.showAndWait();
   }
 
   /**
    * Displays a context menu to let the user choose between creating a standard
    * watchlist or a smart watchlist.
    *
-   * @param event The action event that triggered the menu, used to position the popup.
+   * @param event The action event that triggered the menu, used to position the
+   *        popup.
    */
-  @FXML
-  private void showCreateMenu(javafx.event.ActionEvent event) {
+  private void showCreateMenu(ActionEvent event) {
     javafx.scene.control.ContextMenu tmpContextMenu =
         new javafx.scene.control.ContextMenu();
     javafx.scene.control.MenuItem tmpItemStandard =
@@ -507,10 +632,9 @@ public class WatchlistsController implements Refreshable {
   }
 
   /**
-   * Triggers the creation flow for a new standard watchlist.
-   * Shows the input dialog, validates the result, and inserts it into the repository.
+   * Triggers the creation flow for a new standard watchlist. Shows the input
+   * dialog, validates the result, and inserts it into the repository.
    */
-  @FXML
   private void createWatchlist() {
     Optional<String> tmpResult =
         showWatchlistDialog("New Watchlist", "Create a new watchlist", "", -1);
@@ -527,10 +651,9 @@ public class WatchlistsController implements Refreshable {
   }
 
   /**
-   * Triggers the renaming flow for the currently selected watchlist.
-   * Shows the input dialog, validates the new name, and updates the repository.
+   * Triggers the renaming flow for the currently selected watchlist. Shows the
+   * input dialog, validates the new name, and updates the repository.
    */
-  @FXML
   private void renameWatchlist() {
     if (selectedWatchlist == null)
       return;
@@ -556,11 +679,12 @@ public class WatchlistsController implements Refreshable {
   }
 
   /**
-   * Validates that a newly proposed watchlist name does not conflict with an existing one.
-   * Shows an error alert if a duplicate is detected.
+   * Validates that a newly proposed watchlist name does not conflict with an
+   * existing one. Shows an error alert if a duplicate is detected.
    *
    * @param cleanName The proposed watchlist name to check.
-   * @param currentId The ID of the watchlist being checked (to ignore itself), or -1 if new.
+   * @param currentId The ID of the watchlist being checked (to ignore itself),
+   *        or -1 if new.
    * @return True if the name is valid (unique), false if it's a duplicate.
    */
   private boolean validateWatchlistName(String cleanName, int currentId) {
@@ -568,8 +692,7 @@ public class WatchlistsController implements Refreshable {
     for (Watchlist tmpWatchlist : tmpWatchlists) {
       if (tmpWatchlist.getName().equalsIgnoreCase(cleanName)) {
         if (tmpWatchlist.getId() != null && tmpWatchlist.getId() != currentId) {
-          io.github.kullik01.kinonode.util.CustomAlert.showError(null,
-              "Validation Error", "Duplicate Watchlist",
+          CustomAlert.showError(null, "Validation Error", "Duplicate Watchlist",
               "A watchlist with this name already exists. Please choose a different name.",
               "/io/github/kullik01/kinonode/images/error_icon.png");
           return false;
@@ -580,18 +703,18 @@ public class WatchlistsController implements Refreshable {
   }
 
   /**
-   * Deletes the currently selected watchlist after seeking confirmation from the user.
+   * Deletes the currently selected watchlist after seeking confirmation from
+   * the user.
    */
-  @FXML
   private void deleteWatchlist() {
     if (selectedWatchlist == null)
       return;
 
-    boolean tmpConfirm = io.github.kullik01.kinonode.util.CustomAlert
-        .showConfirmation(lstMovies.getScene().getWindow(), "Delete Watchlist",
-            "Delete watchlist: " + selectedWatchlist.getName(),
-            "Are you sure you want to delete this watchlist? Movies will not be deleted from your disk or library.",
-            "/io/github/kullik01/kinonode/images/removal_icon.png");
+    boolean tmpConfirm = CustomAlert.showConfirmation(
+        lstMovies.getScene().getWindow(), "Delete Watchlist",
+        "Delete watchlist: " + selectedWatchlist.getName(),
+        "Are you sure you want to delete this watchlist? Movies will not be deleted from your disk or library.",
+        "/io/github/kullik01/kinonode/images/removal_icon.png");
 
     if (tmpConfirm) {
       watchlistRepository.delete(selectedWatchlist.getId());
@@ -600,19 +723,18 @@ public class WatchlistsController implements Refreshable {
   }
 
   /**
-   * Removes the currently selected movie from the active watchlist after seeking confirmation.
-   * This action is disabled for Smart Watchlists.
+   * Removes the currently selected movie from the active watchlist after
+   * seeking confirmation. This action is disabled for Smart Watchlists.
    */
-  @FXML
   private void removeMovie() {
     Movie tmpSelectedMovie = lstMovies.getSelectionModel().getSelectedItem();
     if (tmpSelectedMovie == null || selectedWatchlist == null
         || selectedWatchlist.isSmart())
       return;
 
-    boolean tmpConfirm = io.github.kullik01.kinonode.util.CustomAlert
-        .showConfirmation(lstMovies.getScene().getWindow(), "Remove Movie",
-            "Remove from Watchlist",
+    boolean tmpConfirm =
+        CustomAlert.showConfirmation(lstMovies.getScene().getWindow(),
+            "Remove Movie", "Remove from Watchlist",
             "Are you sure you want to remove this movie from "
                 + selectedWatchlist.getName() + "?",
             "/io/github/kullik01/kinonode/images/removal_icon.png");
@@ -625,55 +747,53 @@ public class WatchlistsController implements Refreshable {
   }
 
   /**
-   * Opens the specified movie in the system's default media player.
-   * Shows an error alert if playback fails.
+   * Opens the specified movie in the system's default media player. Shows an
+   * error alert if playback fails.
    *
    * @param movie The movie to play.
    */
   private void playMovie(Movie movie) {
     try {
       AppContext.getInstance().getPlaybackService().play(movie.getFilePath());
-    } catch (Exception tmpException) {
+    } catch (Exception exception) {
       LOGGER.log(Level.SEVERE, "Failed to play movie from watchlist",
-          tmpException);
-      io.github.kullik01.kinonode.util.CustomAlert.showError(
-          lstMovies.getScene().getWindow(), "Playback Failed",
-          "Cannot open media player", tmpException.getMessage(),
+          exception);
+      CustomAlert.showError(lstMovies.getScene().getWindow(), "Playback Failed",
+          "Cannot open media player", exception.getMessage(),
           "/io/github/kullik01/kinonode/images/error_icon.png");
     }
   }
 
   /**
-   * Triggers the creation flow for a new Smart Watchlist.
-   * Displays a complex dialog allowing the user to name the watchlist and define a
-   * dynamic filtering rule (e.g., "IMDb Rating GREATER_THAN 8.0").
+   * Triggers the creation flow for a new Smart Watchlist. Displays a complex
+   * dialog allowing the user to name the watchlist and define a dynamic
+   * filtering rule (e.g., "IMDb Rating GREATER_THAN 8.0").
    */
-  @FXML
   private void createSmartWatchlist() {
-    Dialog<Watchlist> tmpDialog = new Dialog<>();
-    tmpDialog.setTitle("New Smart Watchlist");
-    tmpDialog.setHeaderText("Create a dynamic watchlist based on rules");
+    Dialog<Watchlist> dialog = new Dialog<>();
+    dialog.setTitle("New Smart Watchlist");
+    dialog.setHeaderText("Create a dynamic watchlist based on rules");
 
-    tmpDialog.getDialogPane().setPrefSize(700, Region.USE_COMPUTED_SIZE);
-    tmpDialog.getDialogPane().setMinSize(700, Region.USE_COMPUTED_SIZE);
+    dialog.getDialogPane().setPrefSize(700, Region.USE_COMPUTED_SIZE);
+    dialog.getDialogPane().setMinSize(700, Region.USE_COMPUTED_SIZE);
 
-    Stage tmpStage = (Stage) tmpDialog.getDialogPane().getScene().getWindow();
-    tmpStage.getIcons().add(new javafx.scene.image.Image(getClass()
+    Stage tmpStage = (Stage) dialog.getDialogPane().getScene().getWindow();
+    tmpStage.getIcons().add(new Image(getClass()
         .getResourceAsStream("/io/github/kullik01/kinonode/images/logo.png")));
 
     ButtonType tmpOkButtonType =
         new ButtonType("Create", ButtonBar.ButtonData.OK_DONE);
-    tmpDialog.getDialogPane().getButtonTypes().addAll(tmpOkButtonType,
+    dialog.getDialogPane().getButtonTypes().addAll(tmpOkButtonType,
         ButtonType.CANCEL);
 
-    VBox tmpVbox = new VBox(10);
+    VBox vBox = new VBox(10);
 
-    Label tmpErrorLabel = new Label();
-    tmpErrorLabel.setWrapText(true);
-    tmpErrorLabel.setPrefWidth(600);
-    tmpErrorLabel.setMinHeight(Region.USE_PREF_SIZE);
-    tmpErrorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
-    tmpErrorLabel.setVisible(false);
+    Label errorLabel = new Label();
+    errorLabel.setWrapText(true);
+    errorLabel.setPrefWidth(600);
+    errorLabel.setMinHeight(Region.USE_PREF_SIZE);
+    errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 12px;");
+    errorLabel.setVisible(false);
 
     TextField tmpNameField = new TextField();
     tmpNameField.setPromptText("Smart Watchlist Name");
@@ -763,7 +883,7 @@ public class WatchlistsController implements Refreshable {
                 if (tmpVal < 0 || tmpVal > 10) {
                   tmpValueField.setText(oldValue);
                 }
-              } catch (NumberFormatException tmpException) {
+              } catch (NumberFormatException exception) {
                 // Allow intermediate typing like "8." or "8,"
               }
             }
@@ -788,18 +908,18 @@ public class WatchlistsController implements Refreshable {
     tmpAsciiInfo.setPrefWidth(600);
     tmpAsciiInfo.setMinHeight(Region.USE_PREF_SIZE);
 
-    tmpVbox.getChildren().addAll(tmpErrorLabel, new Label("Name:"),
-        tmpNameField, new Label("Rule:"), tmpRuleBox, tmpAsciiInfo);
-    tmpDialog.getDialogPane().setContent(tmpVbox);
+    vBox.getChildren().addAll(errorLabel, new Label("Name:"), tmpNameField,
+        new Label("Rule:"), tmpRuleBox, tmpAsciiInfo);
+    dialog.getDialogPane().setContent(vBox);
 
-    Node tmpOkButton = tmpDialog.getDialogPane().lookupButton(tmpOkButtonType);
+    Node tmpOkButton = dialog.getDialogPane().lookupButton(tmpOkButtonType);
     if (tmpOkButton != null) {
       tmpOkButton.getStyleClass().add("button-primary");
       tmpOkButton.setDisable(true);
     }
 
     Node tmpCancelButton =
-        tmpDialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+        dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
     if (tmpCancelButton != null) {
       tmpCancelButton.getStyleClass().add("button-primary");
     }
@@ -815,9 +935,9 @@ public class WatchlistsController implements Refreshable {
             tmpIsValid = false;
             tmpIsNameValid = false;
           } else if (!tmpName.matches("\\A\\p{ASCII}*\\z")) {
-            tmpErrorLabel.setText(
+            errorLabel.setText(
                 "The text you entered is not ASCII code. Only standard English letters, numbers, and basic symbols can be used.");
-            tmpErrorLabel.setVisible(true);
+            errorLabel.setVisible(true);
             tmpIsValid = false;
             tmpIsNameValid = false;
           } else {
@@ -830,45 +950,43 @@ public class WatchlistsController implements Refreshable {
               }
             }
             if (tmpDuplicate) {
-              tmpErrorLabel.setText(
+              errorLabel.setText(
                   "A watchlist with this name already exists. Please choose a different name.");
-              tmpErrorLabel.setVisible(true);
+              errorLabel.setVisible(true);
               tmpIsValid = false;
               tmpIsNameValid = false;
             } else {
               String tmpField = tmpFieldComboBox.getValue();
               if (!tmpValue.isEmpty()) {
                 if ("Year".equals(tmpField) && !tmpValue.matches("\\d{4}")) {
-                  tmpErrorLabel.setText("Year must be exactly 4 digits.");
-                  tmpErrorLabel.setVisible(true);
+                  errorLabel.setText("Year must be exactly 4 digits.");
+                  errorLabel.setVisible(true);
                   tmpIsValid = false;
                 } else if ("IMDb Rating".equals(tmpField)) {
                   try {
                     double tmpRating =
                         Double.parseDouble(tmpValue.replace(",", "."));
                     if (tmpRating < 0 || tmpRating > 10) {
-                      tmpErrorLabel
+                      errorLabel
                           .setText("IMDb Rating must be between 0 and 10.");
-                      tmpErrorLabel.setVisible(true);
+                      errorLabel.setVisible(true);
                       tmpIsValid = false;
                     }
-                  } catch (NumberFormatException tmpException) {
-                    tmpErrorLabel
-                        .setText("IMDb Rating must be a valid number.");
-                    tmpErrorLabel.setVisible(true);
+                  } catch (NumberFormatException exception) {
+                    errorLabel.setText("IMDb Rating must be a valid number.");
+                    errorLabel.setVisible(true);
                     tmpIsValid = false;
                   }
                 } else if ("Duration".equals(tmpField)) {
                   if (!tmpValue.matches("\\d+")) {
-                    tmpErrorLabel
+                    errorLabel
                         .setText("Duration must be a valid number of minutes.");
-                    tmpErrorLabel.setVisible(true);
+                    errorLabel.setVisible(true);
                     tmpIsValid = false;
                   }
                 } else if (!tmpValue.matches("\\A\\p{ASCII}*\\z")) {
-                  tmpErrorLabel
-                      .setText("The text you entered is not ASCII code.");
-                  tmpErrorLabel.setVisible(true);
+                  errorLabel.setText("The text you entered is not ASCII code.");
+                  errorLabel.setVisible(true);
                   tmpIsValid = false;
                 } else if (("Genre".equals(tmpField)
                     || "Director".equals(tmpField) || "Writer".equals(tmpField)
@@ -876,9 +994,9 @@ public class WatchlistsController implements Refreshable {
                     || "Cinematographer".equals(tmpField)
                     || "Composer".equals(tmpField) || "Actors".equals(tmpField))
                     && tmpValue.matches(".*\\d.*")) {
-                  tmpErrorLabel.setText(
+                  errorLabel.setText(
                       tmpField + " must be text and cannot contain numbers.");
-                  tmpErrorLabel.setVisible(true);
+                  errorLabel.setVisible(true);
                   tmpIsValid = false;
                 }
               }
@@ -888,7 +1006,7 @@ public class WatchlistsController implements Refreshable {
           tmpRuleBox.setDisable(!tmpIsNameValid);
 
           if (tmpIsValid) {
-            tmpErrorLabel.setVisible(false);
+            errorLabel.setVisible(false);
           }
 
           if (tmpOkButton != null) {
@@ -896,9 +1014,9 @@ public class WatchlistsController implements Refreshable {
                 !tmpIsValid || tmpName.isEmpty() || tmpValue.isEmpty());
           }
 
-          if (tmpDialog.getDialogPane().getScene() != null
-              && tmpDialog.getDialogPane().getScene().getWindow() != null) {
-            tmpDialog.getDialogPane().getScene().getWindow().sizeToScene();
+          if (dialog.getDialogPane().getScene() != null
+              && dialog.getDialogPane().getScene().getWindow() != null) {
+            dialog.getDialogPane().getScene().getWindow().sizeToScene();
           }
         };
 
@@ -913,7 +1031,7 @@ public class WatchlistsController implements Refreshable {
     tmpOperatorComboBox.valueProperty().addListener((observable, oldValue,
         newValue) -> tmpValidationListener.changed(null, null, null));
 
-    tmpDialog.setResultConverter(dialogButton -> {
+    dialog.setResultConverter(dialogButton -> {
       if (dialogButton == tmpOkButtonType) {
         Watchlist tmpWatchlist = new Watchlist(tmpNameField.getText().trim());
         tmpWatchlist.setSmart(true);
@@ -925,15 +1043,14 @@ public class WatchlistsController implements Refreshable {
       return null;
     });
 
-    io.github.kullik01.kinonode.util.CursorUtils.applyCursor(tmpDialog);
-    Optional<Watchlist> tmpResult = tmpDialog.showAndWait();
+    CursorUtils.applyCursor(dialog);
+    Optional<Watchlist> tmpResult = dialog.showAndWait();
     tmpResult.ifPresent(watchlist -> {
       if (validateWatchlistName(watchlist.getName(), -1)) {
         watchlistRepository.insert(watchlist);
         refresh();
         javafx.application.Platform.runLater(() -> {
-          io.github.kullik01.kinonode.util.CustomAlert.showInformation(null,
-              "Smart Watchlist Created",
+          CustomAlert.showInformation(null, "Smart Watchlist Created",
               "Sync the library to fill the created smart watchlist.",
               "Smart watchlists are filled dynamically based on the movies in your library. Please run a Library Sync if your watchlist appears empty.");
         });

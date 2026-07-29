@@ -37,6 +37,15 @@
  */
 package io.github.kullik01.kinonode.controller;
 
+import io.github.kullik01.kinonode.util.CustomAlert;
+import javafx.geometry.Insets;
+import javafx.scene.Parent;
+import javafx.scene.control.Control;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.RowConstraints;
+
 import javafx.util.Duration;
 
 
@@ -47,7 +56,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javafx.fxml.FXML;
+
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -64,6 +73,7 @@ import javafx.scene.shape.SVGPath;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import javafx.scene.layout.VBox;
 
 /**
  * Controller for the application Settings view. Handles configuration of
@@ -74,19 +84,12 @@ import javafx.stage.Window;
  */
 public class SettingsController implements Refreshable {
 
-  @FXML
   private ListView<String> lstWorkspaces;
-  @FXML
   private Button btnAddFolder;
-  @FXML
   private Button btnRemoveFolder;
-  @FXML
   private TextField txtPlayerPath;
-  @FXML
   private Label lblStatus;
-  @FXML
   private Label lblPlayerStatus;
-  @FXML
   private Label lblPlayerError;
 
   private SettingsRepository settingsRepository;
@@ -111,11 +114,129 @@ public class SettingsController implements Refreshable {
     statusTimer.play();
   }
 
+  public Parent buildView() {
+    VBox rootPane = new VBox();
+    rootPane.setSpacing(20.0);
+    rootPane.getStyleClass().add("detail-pane");
+    rootPane.getStylesheets().add(
+        getClass().getResource("/io/github/kullik01/kinonode/css/theme.css")
+            .toExternalForm());
+    rootPane.setPadding(new Insets(30.0, 30.0, 30.0, 30.0));
+
+    Label titleLbl = new Label("Application Settings");
+    titleLbl.getStyleClass().add("detail-title");
+
+    // Workspaces Section
+    VBox workspaceSection = new VBox(10.0);
+    Label wsTitle = new Label("Workspace Folders");
+    wsTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+    Label wsSub = new Label("Root folders recursively scanned for video files");
+    wsSub.setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-muted;");
+
+    HBox wsBox = new HBox(10.0);
+    lstWorkspaces = new ListView<>();
+    lstWorkspaces.setId("lstWorkspaces");
+    lstWorkspaces.setPrefHeight(150.0);
+    HBox.setHgrow(lstWorkspaces, Priority.ALWAYS);
+
+    VBox wsBtnBox = new VBox(10.0);
+    btnAddFolder = new Button("➕");
+    btnAddFolder.setId("btnAddFolder");
+    btnAddFolder.getStyleClass().add("button-secondary");
+    btnAddFolder.setMinWidth(Control.USE_PREF_SIZE);
+    btnAddFolder.setOnAction(e -> addWorkspace());
+    Tooltip addTooltip = new Tooltip("Add");
+    addTooltip.setShowDelay(Duration.millis(250));
+    btnAddFolder.setTooltip(addTooltip);
+
+    btnRemoveFolder = new Button("➖");
+    btnRemoveFolder.setId("btnRemoveFolder");
+    btnRemoveFolder.getStyleClass().add("button-secondary");
+    btnRemoveFolder.setMinWidth(Control.USE_PREF_SIZE);
+    btnRemoveFolder.setOnAction(e -> removeWorkspace());
+    Tooltip removeTooltip = new Tooltip("Remove");
+    removeTooltip.setShowDelay(Duration.millis(250));
+    btnRemoveFolder.setTooltip(removeTooltip);
+
+    wsBtnBox.getChildren().addAll(btnAddFolder, btnRemoveFolder);
+    wsBox.getChildren().addAll(lstWorkspaces, wsBtnBox);
+    workspaceSection.getChildren().addAll(wsTitle, wsSub, wsBox);
+
+    // Player Section
+    GridPane playerSection = new GridPane();
+    playerSection.setHgap(15.0);
+    playerSection.setVgap(15.0);
+
+    ColumnConstraints col1 = new ColumnConstraints();
+    col1.setMinWidth(150.0);
+    col1.setPrefWidth(180.0);
+    ColumnConstraints col2 = new ColumnConstraints();
+    col2.setHgrow(Priority.ALWAYS);
+    ColumnConstraints col3 = new ColumnConstraints();
+    col3.setMinWidth(100.0);
+    playerSection.getColumnConstraints().addAll(col1, col2, col3);
+
+    RowConstraints row1 = new RowConstraints();
+    row1.setMinHeight(30.0);
+    playerSection.getRowConstraints().add(row1);
+
+    Label playerTitle = new Label("External Media Player:");
+    playerTitle.setStyle("-fx-font-weight: bold;");
+    GridPane.setConstraints(playerTitle, 0, 0, 1, 1, javafx.geometry.HPos.LEFT,
+        javafx.geometry.VPos.CENTER);
+
+    VBox playerPathBox = new VBox(4.0);
+    GridPane.setConstraints(playerPathBox, 1, 0, 1, 1,
+        javafx.geometry.HPos.LEFT, javafx.geometry.VPos.CENTER);
+
+    HBox playerInputBox = new HBox(10.0);
+    playerInputBox.setAlignment(Pos.CENTER_LEFT);
+    txtPlayerPath = new TextField();
+    txtPlayerPath.setId("txtPlayerPath");
+    txtPlayerPath
+        .setPromptText("Path to player binary (e.g. mpv.exe, vlc.exe)");
+    HBox.setHgrow(txtPlayerPath, Priority.ALWAYS);
+
+    lblPlayerStatus = new Label();
+    lblPlayerStatus.setId("lblPlayerStatus");
+    playerInputBox.getChildren().addAll(txtPlayerPath, lblPlayerStatus);
+
+    lblPlayerError = new Label();
+    lblPlayerError.setId("lblPlayerError");
+    lblPlayerError
+        .setStyle("-fx-text-fill: -color-danger-fg; -fx-font-size: 11px;");
+    lblPlayerError.setVisible(false);
+    lblPlayerError.setManaged(false);
+
+    playerPathBox.getChildren().addAll(playerInputBox, lblPlayerError);
+
+    Button btnBrowse = new Button("📂");
+    btnBrowse.getStyleClass().add("button-secondary");
+    btnBrowse.setMinWidth(Control.USE_PREF_SIZE);
+    btnBrowse.setOnAction(e -> browsePlayer());
+    Tooltip browseTooltip = new Tooltip("Browse");
+    browseTooltip.setShowDelay(Duration.millis(250));
+    btnBrowse.setTooltip(browseTooltip);
+    GridPane.setConstraints(btnBrowse, 2, 0, 1, 1, javafx.geometry.HPos.LEFT,
+        javafx.geometry.VPos.CENTER);
+
+    playerSection.getChildren().addAll(playerTitle, playerPathBox, btnBrowse);
+
+    lblStatus = new Label("");
+    lblStatus.setId("lblStatus");
+    lblStatus
+        .setStyle("-fx-text-fill: -color-success-fg; -fx-font-size: 14px;");
+
+    rootPane.getChildren().addAll(titleLbl, workspaceSection, playerSection,
+        lblStatus);
+
+    return rootPane;
+  }
+
   /**
    * Initializes the settings view, setting up control actions, listeners, and
    * validators. Registers scene-detach hooks for automated saves.
    */
-  @FXML
   public void initialize() {
     settingsRepository = AppContext.getInstance().getSettingsRepository();
 
@@ -149,7 +270,8 @@ public class SettingsController implements Refreshable {
 
   /**
    * Loads the current settings from the repository and populates the UI fields.
-   * Also captures a snapshot of the loaded state to enable dirty checking for unsaved changes.
+   * Also captures a snapshot of the loaded state to enable dirty checking for
+   * unsaved changes.
    */
   private void loadSettings() {
     // Load workspaces
@@ -175,10 +297,10 @@ public class SettingsController implements Refreshable {
   }
 
   /**
-   * Opens a directory chooser dialog to let the user select a new workspace folder.
-   * If a valid, non-duplicate directory is selected, it is added to the list and saved.
+   * Opens a directory chooser dialog to let the user select a new workspace
+   * folder. If a valid, non-duplicate directory is selected, it is added to the
+   * list and saved.
    */
-  @FXML
   private void addWorkspace() {
     DirectoryChooser tmpChooser = new DirectoryChooser();
     tmpChooser.setTitle("Select Workspace Folder");
@@ -197,19 +319,18 @@ public class SettingsController implements Refreshable {
   }
 
   /**
-   * Prompts for confirmation and removes the currently selected workspace from the settings.
-   * Also triggers the deletion of all movie records associated with that workspace
-   * from the local database.
+   * Prompts for confirmation and removes the currently selected workspace from
+   * the settings. Also triggers the deletion of all movie records associated
+   * with that workspace from the local database.
    */
-  @FXML
   private void removeWorkspace() {
     String tmpSelected = lstWorkspaces.getSelectionModel().getSelectedItem();
     if (tmpSelected != null) {
-      boolean confirmed = io.github.kullik01.kinonode.util.CustomAlert
-          .showConfirmation(lstWorkspaces.getScene().getWindow(),
-              "Remove Workspace", "Remove workspace: " + tmpSelected,
-              "Are you sure you want to remove this workspace? Movies from this workspace will be removed from your library, but files will not be deleted from your disk.",
-              "/io/github/kullik01/kinonode/images/removal_icon.png");
+      boolean confirmed = CustomAlert.showConfirmation(
+          lstWorkspaces.getScene().getWindow(), "Remove Workspace",
+          "Remove workspace: " + tmpSelected,
+          "Are you sure you want to remove this workspace? Movies from this workspace will be removed from your library, but files will not be deleted from your disk.",
+          "/io/github/kullik01/kinonode/images/removal_icon.png");
       if (confirmed) {
         lstWorkspaces.getItems().remove(tmpSelected);
         saveWorkspacesOnly();
@@ -228,7 +349,6 @@ public class SettingsController implements Refreshable {
    * Opens a file chooser dialog to select an external media player executable.
    * Restricts file types based on the underlying operating system.
    */
-  @FXML
   private void browsePlayer() {
     FileChooser tmpChooser = new FileChooser();
     tmpChooser.setTitle("Select External Media Player Executable");
@@ -251,8 +371,8 @@ public class SettingsController implements Refreshable {
   }
 
   /**
-   * Persists all current settings from the UI to the repository and updates
-   * the local snapshots for dirty checking.
+   * Persists all current settings from the UI to the repository and updates the
+   * local snapshots for dirty checking.
    */
   private void saveSettings() {
     // Save paths
@@ -269,8 +389,8 @@ public class SettingsController implements Refreshable {
   }
 
   /**
-   * Saves only the workspace folder list to the repository.
-   * Used for immediate persistence when adding or removing folders.
+   * Saves only the workspace folder list to the repository. Used for immediate
+   * persistence when adding or removing folders.
    */
   private void saveWorkspacesOnly() {
     String tmpPathsStr = String.join(";", lstWorkspaces.getItems());
@@ -279,8 +399,8 @@ public class SettingsController implements Refreshable {
   }
 
   /**
-   * Initializes listeners on input fields and lists to trigger real-time validation
-   * and change detection.
+   * Initializes listeners on input fields and lists to trigger real-time
+   * validation and change detection.
    */
   private void setupValidationListeners() {
     txtPlayerPath.textProperty()
@@ -302,8 +422,9 @@ public class SettingsController implements Refreshable {
   }
 
   /**
-   * Validates the provided file path to ensure it points to an existing file if it is not empty.
-   * Updates the visual validation state of the player path input field.
+   * Validates the provided file path to ensure it points to an existing file if
+   * it is not empty. Updates the visual validation state of the player path
+   * input field.
    *
    * @param path The absolute path to the executable file.
    */
@@ -326,12 +447,14 @@ public class SettingsController implements Refreshable {
   }
 
   /**
-   * Updates the UI styling and feedback labels of an input field based on its validity.
+   * Updates the UI styling and feedback labels of an input field based on its
+   * validity.
    *
-   * @param field        The TextField being validated.
-   * @param statusLabel  The Label used to display validation icons (e.g., cross).
-   * @param errorLabel   The Label used to display the textual error message.
-   * @param isValid      True if the input is valid, false otherwise.
+   * @param field The TextField being validated.
+   * @param statusLabel The Label used to display validation icons (e.g.,
+   *        cross).
+   * @param errorLabel The Label used to display the textual error message.
+   * @param isValid True if the input is valid, false otherwise.
    * @param errorMessage The message to show if the input is invalid.
    */
   private void setValidationStatus(TextField field, Label statusLabel,
@@ -397,9 +520,9 @@ public class SettingsController implements Refreshable {
   }
 
   /**
-   * Configures the visual presentation of the workspace list items.
-   * Displays the folder path along with an icon, and adds a warning indicator if
-   * the configured directory no longer exists on the filesystem.
+   * Configures the visual presentation of the workspace list items. Displays
+   * the folder path along with an icon, and adds a warning indicator if the
+   * configured directory no longer exists on the filesystem.
    */
   private void setupWorkspaceCellFactory() {
     lstWorkspaces.setCellFactory(

@@ -37,6 +37,14 @@
  */
 package io.github.kullik01.kinonode.controller;
 
+import io.github.kullik01.kinonode.util.CursorUtils;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Control;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
+
 import java.util.HashMap;
 import java.util.Map;
 import javafx.scene.Node;
@@ -57,10 +65,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javafx.concurrent.Task;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+
 import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -71,27 +84,19 @@ import javafx.scene.layout.VBox;
  * Controller for the library view of the application. Manages displaying,
  * filtering, searching, and sorting the movies in the user's library.
  * Implements {@link Refreshable} to allow refreshing the movie catalog display.
- * Caches FXML cards and controllers to optimize rendering performance when
+ * Caches view cards and controllers to optimize rendering performance when
  * filtering/sorting.
  */
 public class LibraryController implements Refreshable {
   private static final Logger LOGGER =
       Logger.getLogger(LibraryController.class.getName());
 
-  @FXML
   private VBox libraryRoot;
-  @FXML
   private TextField txtSearch;
-  @FXML
   private ComboBox<String> cmbSort;
-  @FXML
   private FlowPane gridPane;
-  @FXML
   private Button btnSyncLibrary;
-
-  @FXML
   private HBox progressArea;
-  @FXML
   private ProgressBar progressBar;
 
   private MovieRepository movieRepository;
@@ -103,11 +108,110 @@ public class LibraryController implements Refreshable {
   private final Map<Integer, MovieCardController> controllerCache =
       new HashMap<>();
 
+  public Parent buildView() {
+    StackPane rootPane = new StackPane();
+    rootPane.getStylesheets().add(
+        getClass().getResource("/io/github/kullik01/kinonode/css/theme.css")
+            .toExternalForm());
+
+    libraryRoot = new VBox();
+    libraryRoot.setId("libraryRoot");
+    libraryRoot.setSpacing(15.0);
+    libraryRoot.setPadding(new Insets(20.0, 20.0, 20.0, 20.0));
+
+    HBox toolbar = new HBox();
+    toolbar.setAlignment(Pos.CENTER_LEFT);
+    toolbar.setSpacing(15.0);
+
+    Label titleLbl = new Label("Movie Library");
+    titleLbl.setStyle(
+        "-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2178dd;");
+    titleLbl.setMinWidth(Control.USE_PREF_SIZE);
+
+    Region spacer = new Region();
+    HBox.setHgrow(spacer, Priority.ALWAYS);
+
+    txtSearch = new TextField();
+    txtSearch.setId("txtSearch");
+    txtSearch.setPromptText("Search movies...");
+    txtSearch.setPrefWidth(250.0);
+
+    cmbSort = new ComboBox<>();
+    cmbSort.setId("cmbSort");
+    cmbSort.setPrefWidth(200.0);
+    cmbSort.getStyleClass().add("button-secondary");
+
+    btnSyncLibrary = new Button();
+    btnSyncLibrary.setId("btnSyncLibrary");
+    btnSyncLibrary.getStyleClass().addAll("button-success", "button-icon");
+    btnSyncLibrary.setMinWidth(36.0);
+    btnSyncLibrary.setMaxWidth(36.0);
+    btnSyncLibrary.setMinHeight(36.0);
+    btnSyncLibrary.setOnAction(e -> syncLibrary());
+
+    SVGPath syncGraphic = new SVGPath();
+    syncGraphic.setContent(
+        "M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z");
+    syncGraphic.setFill(Color.WHITE);
+    btnSyncLibrary.setGraphic(syncGraphic);
+
+    Tooltip syncTooltip = new Tooltip("Sync Library");
+    syncTooltip.setShowDelay(Duration.millis(250));
+    btnSyncLibrary.setTooltip(syncTooltip);
+
+    progressArea = new HBox();
+    progressArea.setId("progressArea");
+    progressArea.setAlignment(Pos.CENTER_LEFT);
+    progressArea.setSpacing(10.0);
+    progressArea.setVisible(false);
+    progressArea.managedProperty().bind(progressArea.visibleProperty());
+
+    progressBar = new ProgressBar();
+    progressBar.setId("progressBar");
+    progressBar.setPrefWidth(250.0);
+
+    Button btnCancelSync = new Button();
+    btnCancelSync.getStyleClass().addAll("button-secondary", "button-icon");
+    btnCancelSync.setMinWidth(36.0);
+    btnCancelSync.setMaxWidth(36.0);
+    btnCancelSync.setMinHeight(36.0);
+    btnCancelSync.setOnAction(e -> cancelSync());
+
+    SVGPath cancelGraphic = new SVGPath();
+    cancelGraphic.setContent(
+        "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z");
+    cancelGraphic.setFill(Color.WHITE);
+    btnCancelSync.setGraphic(cancelGraphic);
+
+    Tooltip cancelTooltip = new Tooltip("Cancel");
+    cancelTooltip.setShowDelay(Duration.millis(250));
+    btnCancelSync.setTooltip(cancelTooltip);
+
+    progressArea.getChildren().addAll(progressBar, btnCancelSync);
+    toolbar.getChildren().addAll(titleLbl, spacer, txtSearch, cmbSort,
+        btnSyncLibrary, progressArea);
+
+    ScrollPane scrollPane = new ScrollPane();
+    scrollPane.setFitToWidth(true);
+    scrollPane.setFitToHeight(true);
+    scrollPane.getStyleClass().add("movie-grid-scroll");
+    VBox.setVgrow(scrollPane, Priority.ALWAYS);
+
+    gridPane = new FlowPane();
+    gridPane.setId("gridPane");
+    gridPane.getStyleClass().add("movie-grid");
+    scrollPane.setContent(gridPane);
+
+    libraryRoot.getChildren().addAll(toolbar, scrollPane);
+    rootPane.getChildren().add(libraryRoot);
+
+    return rootPane;
+  }
+
   /**
    * Initializes the controller. Sets up the sorting combo box, registers search
    * field and sorting listeners, and binds progress buttons.
    */
-  @FXML
   public void initialize() {
     movieRepository = AppContext.getInstance().getMovieRepository();
     libraryScanService = AppContext.getInstance().getLibraryScanService();
@@ -132,10 +236,8 @@ public class LibraryController implements Refreshable {
     });
 
     btnSyncLibrary.disableProperty().bind(progressArea.visibleProperty());
-    btnSyncLibrary.setCursor(
-        io.github.kullik01.kinonode.util.CursorUtils.getCameraCursor());
-    cmbSort.setCursor(
-        io.github.kullik01.kinonode.util.CursorUtils.getCameraCursor());
+    btnSyncLibrary.setCursor(CursorUtils.getCameraCursor());
+    cmbSort.setCursor(CursorUtils.getCameraCursor());
 
     refresh();
   }
@@ -155,97 +257,98 @@ public class LibraryController implements Refreshable {
   }
 
   /**
-   * Filters and sorts the movie library based on the current search text and sort option.
-   * Caches FXML cards and controllers for efficient UI updates and handles displaying
-   * either the filtered movie cards or an empty state view if no movies match.
+   * Filters and sorts the movie library based on the current search text and
+   * sort option. Caches view cards and controllers for efficient UI updates and
+   * handles displaying either the filtered movie cards or an empty state view
+   * if no movies match.
    */
   private void filterAndDisplayMovies() {
-    String tmpQuery = txtSearch.getText().toLowerCase().trim();
-    String tmpSortOption =
+    String query = txtSearch.getText().toLowerCase().trim();
+    String sortOption =
         cmbSort.getValue() != null ? cmbSort.getValue() : "Recently Added";
 
-    List<Movie> tmpFiltered = allMovies.stream().filter(movie -> {
-      if (tmpQuery.isEmpty())
+    List<Movie> filteredMovies = allMovies.stream().filter(movie -> {
+      if (query.isEmpty())
         return true;
 
-      return switch (tmpSortOption) {
+      return switch (sortOption) {
         case "Title" -> movie.getTitle() != null
-            && movie.getTitle().toLowerCase().contains(tmpQuery);
+            && movie.getTitle().toLowerCase().contains(query);
         case "Genre" -> movie.getGenre() != null
-            && movie.getGenre().toLowerCase().contains(tmpQuery);
+            && movie.getGenre().toLowerCase().contains(query);
         case "Director" -> movie.getDirector() != null
-            && movie.getDirector().toLowerCase().contains(tmpQuery);
+            && movie.getDirector().toLowerCase().contains(query);
         case "Writer" -> movie.getWriter() != null
-            && movie.getWriter().toLowerCase().contains(tmpQuery);
+            && movie.getWriter().toLowerCase().contains(query);
         case "Producer" -> movie.getProducer() != null
-            && movie.getProducer().toLowerCase().contains(tmpQuery);
+            && movie.getProducer().toLowerCase().contains(query);
         case "Cinematographer" -> movie.getCinematographer() != null
-            && movie.getCinematographer().toLowerCase().contains(tmpQuery);
+            && movie.getCinematographer().toLowerCase().contains(query);
         case "Composer" -> movie.getComposer() != null
-            && movie.getComposer().toLowerCase().contains(tmpQuery);
+            && movie.getComposer().toLowerCase().contains(query);
         default -> (movie.getTitle() != null
-            && movie.getTitle().toLowerCase().contains(tmpQuery))
+            && movie.getTitle().toLowerCase().contains(query))
             || (movie.getGenre() != null
-                && movie.getGenre().toLowerCase().contains(tmpQuery))
+                && movie.getGenre().toLowerCase().contains(query))
             || (movie.getDescription() != null
-                && movie.getDescription().toLowerCase().contains(tmpQuery))
+                && movie.getDescription().toLowerCase().contains(query))
             || (movie.getDirector() != null
-                && movie.getDirector().toLowerCase().contains(tmpQuery))
+                && movie.getDirector().toLowerCase().contains(query))
             || (movie.getWriter() != null
-                && movie.getWriter().toLowerCase().contains(tmpQuery))
+                && movie.getWriter().toLowerCase().contains(query))
             || (movie.getProducer() != null
-                && movie.getProducer().toLowerCase().contains(tmpQuery))
+                && movie.getProducer().toLowerCase().contains(query))
             || (movie.getCinematographer() != null
-                && movie.getCinematographer().toLowerCase().contains(tmpQuery))
+                && movie.getCinematographer().toLowerCase().contains(query))
             || (movie.getComposer() != null
-                && movie.getComposer().toLowerCase().contains(tmpQuery))
+                && movie.getComposer().toLowerCase().contains(query))
             || (movie.getActors() != null
-                && movie.getActors().toLowerCase().contains(tmpQuery));
+                && movie.getActors().toLowerCase().contains(query));
       };
     }).collect(Collectors.toList());
 
     // Sort movies according to selected sorting criteria with deterministic
     // tie-breakers
-    if (tmpSortOption != null) {
+    if (sortOption != null) {
       Comparator<String> strComp =
           Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER);
       Comparator<Integer> idComp =
           Comparator.nullsLast(Comparator.naturalOrder());
 
-      switch (tmpSortOption) {
+      switch (sortOption) {
         case "Title (A-Z)" ->
-          tmpFiltered.sort(Comparator.comparing(Movie::getTitle, strComp)
+          filteredMovies.sort(Comparator.comparing(Movie::getTitle, strComp)
               .thenComparing(Movie::getId, idComp));
 
         case "Title (Z-A)" ->
-          tmpFiltered.sort(Comparator.comparing(Movie::getTitle, strComp)
+          filteredMovies.sort(Comparator.comparing(Movie::getTitle, strComp)
               .reversed().thenComparing(Movie::getId, idComp));
 
-        case "Release Year" -> tmpFiltered.sort(Comparator
+        case "Release Year" -> filteredMovies.sort(Comparator
             .comparing(Movie::getYear,
                 Comparator.nullsLast(Comparator.reverseOrder()))
             .thenComparing(Movie::getTitle, strComp)
             .thenComparing(Movie::getId, idComp));
 
-        case "Rating (Highest)" -> tmpFiltered.sort(Comparator
+        case "Rating (Highest)" -> filteredMovies.sort(Comparator
             .comparing(Movie::getRating,
                 Comparator.nullsLast(Comparator.reverseOrder()))
             .thenComparing(Movie::getTitle, strComp)
             .thenComparing(Movie::getId, idComp));
 
-        case "Longest Movie" -> tmpFiltered.sort(Comparator
+        case "Longest Movie" -> filteredMovies.sort(Comparator
             .comparing(Movie::getDuration,
                 Comparator.nullsLast(Comparator.reverseOrder()))
             .thenComparing(Movie::getTitle, strComp)
             .thenComparing(Movie::getId, idComp));
 
-        case "Shortest Movie" -> tmpFiltered.sort(Comparator
+        case "Shortest Movie" -> filteredMovies.sort(Comparator
             .comparing(Movie::getDuration,
                 Comparator.nullsLast(Comparator.naturalOrder()))
             .thenComparing(Movie::getTitle, strComp)
             .thenComparing(Movie::getId, idComp));
 
-        default -> tmpFiltered.sort(Comparator
+        default -> filteredMovies.sort(Comparator
             .comparing(Movie::getDateAdded,
                 Comparator.nullsLast(Comparator.reverseOrder()))
             .thenComparing(Movie::getTitle, strComp).thenComparing(Movie::getId,
@@ -253,67 +356,65 @@ public class LibraryController implements Refreshable {
       }
     }
 
-    List<Node> tmpNewCards = new ArrayList<>();
-    for (Movie tmpMovie : tmpFiltered) {
-      // Retrieve from cache first to avoid slow FXML loading cycles
-      Parent tmpCard = cardCache.get(tmpMovie.getId());
-      MovieCardController tmpController = controllerCache.get(tmpMovie.getId());
-      if (tmpCard == null) {
+    List<Node> newCards = new ArrayList<>();
+    for (Movie movieItem : filteredMovies) {
+      // Retrieve from cache first to avoid slow loading cycles
+      Parent card = cardCache.get(movieItem.getId());
+      MovieCardController controller = controllerCache.get(movieItem.getId());
+      if (card == null) {
         try {
-          URL tmpUrl = getClass()
-              .getResource("/io/github/kullik01/kinonode/fxml/MovieCard.fxml");
-          FXMLLoader tmpLoader = new FXMLLoader(tmpUrl);
-          tmpCard = tmpLoader.load();
-          tmpController = tmpLoader.getController();
+          controller = new MovieCardController();
+          card = controller.buildView();
 
-          cardCache.put(tmpMovie.getId(), tmpCard);
-          controllerCache.put(tmpMovie.getId(), tmpController);
-        } catch (IOException tmpException) {
-          LOGGER.log(Level.SEVERE, "Failed to load MovieCard FXML",
-              tmpException);
+          cardCache.put(movieItem.getId(), card);
+          controllerCache.put(movieItem.getId(), controller);
+        } catch (Exception exception) {
+          LOGGER.log(Level.SEVERE, "Failed to create MovieCard", exception);
           continue;
         }
       }
 
-      if (tmpController != null) {
-        tmpController.setMovie(tmpMovie, this::openMovieDetail);
+      if (controller != null) {
+        controller.setMovie(movieItem, this::openMovieDetail);
       }
-      tmpNewCards.add(tmpCard);
+      newCards.add(card);
     }
 
-    if (tmpFiltered.isEmpty()) {
-      gridPane.setAlignment(javafx.geometry.Pos.CENTER);
+    if (filteredMovies.isEmpty()) {
+      gridPane.setAlignment(Pos.CENTER);
       gridPane.getChildren().setAll(createEmptyStateNode(allMovies.isEmpty()));
     } else {
-      gridPane.setAlignment(javafx.geometry.Pos.TOP_LEFT);
-      gridPane.getChildren().setAll(tmpNewCards);
+      gridPane.setAlignment(Pos.TOP_LEFT);
+      gridPane.getChildren().setAll(newCards);
     }
   }
 
   /**
-   * Creates an empty state node to display when the library is empty or no movies
-   * match the current search filters. Provides actionable buttons to sync the library
-   * or configure workspaces if none are set.
+   * Creates an empty state node to display when the library is empty or no
+   * movies match the current search filters. Provides actionable buttons to
+   * sync the library or configure workspaces if none are set.
    *
-   * @param isLibraryEmpty true if the entire library is empty (no movies), false if movies exist but don't match the search.
+   * @param isLibraryEmpty true if the entire library is empty (no movies),
+   *        false if movies exist but don't match the search.
    * @return A styled VBox node containing the empty state message and actions.
    */
   private Node createEmptyStateNode(boolean isLibraryEmpty) {
-    javafx.scene.layout.VBox tmpRootVBox = new javafx.scene.layout.VBox();
-    tmpRootVBox.setAlignment(javafx.geometry.Pos.CENTER);
-    tmpRootVBox.setPadding(new javafx.geometry.Insets(30, 20, 30, 20));
-    tmpRootVBox.prefHeightProperty()
+    VBox rootVerticalBox = new VBox();
+    rootVerticalBox.setAlignment(Pos.CENTER);
+    rootVerticalBox.setPadding(new Insets(30, 20, 30, 20));
+    rootVerticalBox.prefHeightProperty()
         .bind(gridPane.heightProperty().subtract(30));
-    tmpRootVBox.prefWidthProperty().bind(gridPane.widthProperty().subtract(30));
-    tmpRootVBox.setMaxWidth(Double.MAX_VALUE);
-    tmpRootVBox.setMaxHeight(Double.MAX_VALUE);
-    tmpRootVBox.setFillWidth(true);
+    rootVerticalBox.prefWidthProperty()
+        .bind(gridPane.widthProperty().subtract(30));
+    rootVerticalBox.setMaxWidth(Double.MAX_VALUE);
+    rootVerticalBox.setMaxHeight(Double.MAX_VALUE);
+    rootVerticalBox.setFillWidth(true);
 
-    javafx.scene.layout.VBox tmpCard = new javafx.scene.layout.VBox(20);
-    tmpCard.setAlignment(javafx.geometry.Pos.CENTER);
-    tmpCard.setMaxWidth(520);
-    tmpCard.setPadding(new javafx.geometry.Insets(36, 40, 36, 40));
-    tmpCard.setStyle("-fx-background-color: -color-bg-overlay; "
+    VBox card = new VBox(20);
+    card.setAlignment(Pos.CENTER);
+    card.setMaxWidth(520);
+    card.setPadding(new Insets(36, 40, 36, 40));
+    card.setStyle("-fx-background-color: -color-bg-overlay; "
         + "-fx-background-radius: 16px; "
         + "-fx-border-color: -color-border-default; "
         + "-fx-border-radius: 16px; "
@@ -341,10 +442,9 @@ public class LibraryController implements Refreshable {
         tmpSyncIcon.setScaleY(2.4);
         tmpSyncIcon.setStyle(
             "-fx-fill: #ED8B00; -fx-effect: dropshadow(three-pass-box, rgba(237, 139, 0, 0.35), 10, 0, 0, 2);");
-        javafx.scene.layout.VBox tmpSyncIconWrapper =
-            new javafx.scene.layout.VBox(tmpSyncIcon);
-        tmpSyncIconWrapper.setAlignment(javafx.geometry.Pos.CENTER);
-        tmpSyncIconWrapper.setPadding(new javafx.geometry.Insets(10, 0, 10, 0));
+        VBox tmpSyncIconWrapper = new VBox(tmpSyncIcon);
+        tmpSyncIconWrapper.setAlignment(Pos.CENTER);
+        tmpSyncIconWrapper.setPadding(new Insets(10, 0, 10, 0));
 
         Label tmpTitle = new Label("Sync Your Library");
         tmpTitle.setStyle(
@@ -358,15 +458,14 @@ public class LibraryController implements Refreshable {
         tmpText
             .setStyle("-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
 
-        javafx.scene.layout.HBox tmpBtnBox = new javafx.scene.layout.HBox(14);
-        tmpBtnBox.setAlignment(javafx.geometry.Pos.CENTER);
+        HBox tmpBtnBox = new HBox(14);
+        tmpBtnBox.setAlignment(Pos.CENTER);
 
         Button tmpBtnSync = new Button("Sync Library");
         tmpBtnSync.getStyleClass().addAll("button-success");
         tmpBtnSync.setStyle(
             "-fx-padding: 8px 18px; -fx-font-size: 14px; -fx-font-weight: bold;");
-        tmpBtnSync.setCursor(
-            io.github.kullik01.kinonode.util.CursorUtils.getAppLogoCursor());
+        tmpBtnSync.setCursor(CursorUtils.getAppLogoCursor());
 
         SVGPath tmpSyncBtnIcon = new SVGPath();
         tmpSyncBtnIcon.setContent(
@@ -385,7 +484,7 @@ public class LibraryController implements Refreshable {
         tmpBtnSync.setOnAction(e -> syncLibrary());
 
         tmpBtnBox.getChildren().add(tmpBtnSync);
-        tmpCard.getChildren().addAll(tmpBadge, tmpSyncIconWrapper, tmpTitle,
+        card.getChildren().addAll(tmpBadge, tmpSyncIconWrapper, tmpTitle,
             tmpText, tmpBtnBox);
       } else {
         // No workspaces configured yet
@@ -402,11 +501,9 @@ public class LibraryController implements Refreshable {
         tmpCameraIcon.setScaleY(2.4);
         tmpCameraIcon.setStyle(
             "-fx-fill: #ED8B00; -fx-effect: dropshadow(three-pass-box, rgba(237, 139, 0, 0.35), 10, 0, 0, 2);");
-        javafx.scene.layout.VBox tmpCameraIconWrapper =
-            new javafx.scene.layout.VBox(tmpCameraIcon);
-        tmpCameraIconWrapper.setAlignment(javafx.geometry.Pos.CENTER);
-        tmpCameraIconWrapper
-            .setPadding(new javafx.geometry.Insets(10, 0, 10, 0));
+        VBox tmpCameraIconWrapper = new VBox(tmpCameraIcon);
+        tmpCameraIconWrapper.setAlignment(Pos.CENTER);
+        tmpCameraIconWrapper.setPadding(new Insets(10, 0, 10, 0));
 
         Label tmpTitle = new Label("Start Your Movie Library");
         tmpTitle.setStyle(
@@ -420,15 +517,14 @@ public class LibraryController implements Refreshable {
         tmpText
             .setStyle("-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
 
-        javafx.scene.layout.HBox tmpBtnBox = new javafx.scene.layout.HBox(14);
-        tmpBtnBox.setAlignment(javafx.geometry.Pos.CENTER);
+        HBox tmpBtnBox = new HBox(14);
+        tmpBtnBox.setAlignment(Pos.CENTER);
 
         Button tmpBtnSettings = new Button("Configure Workspaces");
         tmpBtnSettings.getStyleClass().addAll("button-success");
         tmpBtnSettings.setStyle(
             "-fx-padding: 8px 18px; -fx-font-size: 14px; -fx-font-weight: bold;");
-        tmpBtnSettings.setCursor(
-            io.github.kullik01.kinonode.util.CursorUtils.getAppLogoCursor());
+        tmpBtnSettings.setCursor(CursorUtils.getAppLogoCursor());
 
         SVGPath tmpGear = new SVGPath();
         tmpGear.setContent(
@@ -452,7 +548,7 @@ public class LibraryController implements Refreshable {
         });
 
         tmpBtnBox.getChildren().add(tmpBtnSettings);
-        tmpCard.getChildren().addAll(tmpBadge, tmpCameraIconWrapper, tmpTitle,
+        card.getChildren().addAll(tmpBadge, tmpCameraIconWrapper, tmpTitle,
             tmpText, tmpBtnBox);
       }
     } else {
@@ -469,51 +565,49 @@ public class LibraryController implements Refreshable {
       Label tmpSub = new Label(
           "Try clearing your search query or choosing a different filter.");
       tmpSub.setStyle("-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
-      tmpCard.getChildren().addAll(tmpSearchIcon, tmpTitle, tmpSub);
+      card.getChildren().addAll(tmpSearchIcon, tmpTitle, tmpSub);
     }
 
-    tmpRootVBox.getChildren().add(tmpCard);
-    return tmpRootVBox;
+    rootVerticalBox.getChildren().add(card);
+    return rootVerticalBox;
   }
 
   /**
-   * Opens the detailed view for a specific movie, dynamically replacing the library
-   * grid with the movie's detail view in the parent StackPane.
+   * Opens the detailed view for a specific movie, dynamically replacing the
+   * library grid with the movie's detail view in the parent StackPane.
    *
    * @param movie The movie object to display details for.
    */
   private void openMovieDetail(Movie movie) {
     try {
-      URL tmpUrl = getClass().getResource(
-          "/io/github/kullik01/kinonode/fxml/MovieDetailView.fxml");
-      FXMLLoader tmpLoader = new FXMLLoader(tmpUrl);
-      Parent tmpDetailView = tmpLoader.load();
+      MovieDetailController controller = new MovieDetailController();
+      Parent detailView = controller.buildView();
+      controller.initialize();
 
-      MovieDetailController tmpController = tmpLoader.getController();
-      currentMovieDetailController = tmpController;
-      tmpController.setMovie(movie);
+      currentMovieDetailController = controller;
+      controller.setMovie(movie);
 
       // Replaces library root with the detail view dynamically in StackPane
-      StackPane tmpRootPane = (StackPane) libraryRoot.getParent();
-      if (tmpRootPane != null) {
-        tmpController.setOnBack(() -> {
+      StackPane rootPane = (StackPane) libraryRoot.getParent();
+      if (rootPane != null) {
+        controller.setOnBack(() -> {
           currentMovieDetailController = null;
-          tmpRootPane.getChildren().setAll(libraryRoot);
+          rootPane.getChildren().setAll(libraryRoot);
           refresh();
         });
-        tmpRootPane.getChildren().setAll(tmpDetailView);
+        rootPane.getChildren().setAll(detailView);
       }
-    } catch (IOException tmpException) {
-      LOGGER.log(Level.SEVERE, "Failed to load MovieDetailView FXML",
-          tmpException);
+    } catch (Exception exception) {
+      LOGGER.log(Level.SEVERE, "Failed to create MovieDetailView view",
+          exception);
     }
   }
 
   /**
-   * Initiates a background task to scan configured workspaces and sync the movie library.
-   * Binds UI progress elements to the task and handles success, failure, and cancellation events.
+   * Initiates a background task to scan configured workspaces and sync the
+   * movie library. Binds UI progress elements to the task and handles success,
+   * failure, and cancellation events.
    */
-  @FXML
   private void syncLibrary() {
     if (activeScanTask != null && activeScanTask.isRunning()) {
       return;
@@ -543,10 +637,10 @@ public class LibraryController implements Refreshable {
       progressBar.progressProperty().unbind();
       progressBar.setProgress(0);
       progressArea.setVisible(false);
-      Throwable tmpException = activeScanTask.getException();
+      Throwable exception = activeScanTask.getException();
       CustomAlert.showInformation(gridPane.getScene().getWindow(),
           "Sync Failed", "An error occurred during search",
-          tmpException != null ? tmpException.getMessage()
+          exception != null ? exception.getMessage()
               : "Unknown database or file error");
     });
 
@@ -564,9 +658,9 @@ public class LibraryController implements Refreshable {
   }
 
   /**
-   * Cancels the currently active library sync background task, if one is running.
+   * Cancels the currently active library sync background task, if one is
+   * running.
    */
-  @FXML
   private void cancelSync() {
     if (activeScanTask != null) {
       activeScanTask.cancel();

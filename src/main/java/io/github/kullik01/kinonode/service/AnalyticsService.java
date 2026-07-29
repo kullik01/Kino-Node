@@ -286,7 +286,8 @@ public class AnalyticsService {
   }
 
   /**
-   * Escapes HTML special characters in a string for safe rendering in an HTML report.
+   * Escapes HTML special characters in a string for safe rendering in an HTML
+   * report.
    *
    * @param str the raw string to escape
    * @return the escaped HTML string, or "—" if the input is empty/null

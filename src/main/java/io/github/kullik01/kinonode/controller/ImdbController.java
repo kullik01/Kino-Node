@@ -37,6 +37,15 @@
  */
 package io.github.kullik01.kinonode.controller;
 
+import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.control.Control;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -44,7 +53,7 @@ import java.nio.file.Files;
 
 import javafx.animation.PauseTransition;
 import javafx.concurrent.Worker;
-import javafx.fxml.FXML;
+
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
@@ -59,21 +68,13 @@ import javafx.util.Duration;
  */
 public class ImdbController implements Refreshable {
 
-  @FXML
   private Button btnBack;
-  @FXML
   private Button btnForward;
-  @FXML
   private Button btnReload;
-  @FXML
   private Button btnHome;
-  @FXML
   private TextField txtUrl;
-  @FXML
   private ProgressBar progressLoad;
-  @FXML
   private WebView webView;
-  @FXML
   private VBox paneError;
 
   private WebEngine webEngine;
@@ -81,12 +82,121 @@ public class ImdbController implements Refreshable {
   private PauseTransition showDelay;
   private static final String IMDB_HOME = "https://www.imdb.com/";
 
+  public Parent buildView() {
+    VBox rootPane = new VBox();
+    rootPane.setStyle("-fx-background-color: -color-bg-default;");
+    rootPane.getStylesheets().add(
+        getClass().getResource("/io/github/kullik01/kinonode/css/theme.css")
+            .toExternalForm());
+
+    // Top Browser Navigation Bar
+    HBox navBar = new HBox(10.0);
+    navBar.setAlignment(Pos.CENTER_LEFT);
+    navBar.setStyle(
+        "-fx-padding: 10px; -fx-background-color: -color-bg-subtle; -fx-border-color: -color-border-muted; -fx-border-width: 0 0 1 0;");
+
+    btnBack = new Button("◀");
+    btnBack.setId("btnBack");
+    btnBack.getStyleClass().add("button-secondary");
+    btnBack.setMinWidth(Control.USE_PREF_SIZE);
+    btnBack.setOnAction(e -> handleBack());
+    Tooltip backTooltip = new Tooltip("Back");
+    backTooltip.setShowDelay(Duration.millis(250));
+    btnBack.setTooltip(backTooltip);
+
+    btnForward = new Button("▶");
+    btnForward.setId("btnForward");
+    btnForward.getStyleClass().add("button-secondary");
+    btnForward.setMinWidth(Control.USE_PREF_SIZE);
+    btnForward.setOnAction(e -> handleForward());
+    Tooltip forwardTooltip = new Tooltip("Forward");
+    forwardTooltip.setShowDelay(Duration.millis(250));
+    btnForward.setTooltip(forwardTooltip);
+
+    btnReload = new Button("↻");
+    btnReload.setId("btnReload");
+    btnReload.getStyleClass().add("button-secondary");
+    btnReload.setMinWidth(Control.USE_PREF_SIZE);
+    btnReload.setOnAction(e -> handleReload());
+    Tooltip reloadTooltip = new Tooltip("Reload");
+    reloadTooltip.setShowDelay(Duration.millis(250));
+    btnReload.setTooltip(reloadTooltip);
+
+    btnHome = new Button("🏠");
+    btnHome.setId("btnHome");
+    btnHome.getStyleClass().add("button-secondary");
+    btnHome.setMinWidth(Control.USE_PREF_SIZE);
+    btnHome.setOnAction(e -> handleHome());
+    Tooltip homeTooltip = new Tooltip("IMDb Home");
+    homeTooltip.setShowDelay(Duration.millis(250));
+    btnHome.setTooltip(homeTooltip);
+
+    txtUrl = new TextField();
+    txtUrl.setId("txtUrl");
+    txtUrl.setEditable(false);
+    txtUrl.setMouseTransparent(true);
+    txtUrl.setFocusTraversable(false);
+    txtUrl.setStyle("-fx-background-color: -color-bg-default;");
+    HBox.setHgrow(txtUrl, Priority.ALWAYS);
+
+    navBar.getChildren().addAll(btnBack, btnForward, btnReload, btnHome,
+        txtUrl);
+
+    progressLoad = new ProgressBar();
+    progressLoad.setId("progressLoad");
+    progressLoad.setMinHeight(2.0);
+    progressLoad.setPrefHeight(2.0);
+    progressLoad.setMaxHeight(2.0);
+    progressLoad.setMaxWidth(Double.MAX_VALUE);
+    progressLoad.setVisible(false);
+    progressLoad.managedProperty().bind(progressLoad.visibleProperty());
+    progressLoad.setStyle("-fx-padding: 0; -fx-background-insets: 0;");
+
+    // Main Content Panel
+    StackPane mainContent = new StackPane();
+    VBox.setVgrow(mainContent, Priority.ALWAYS);
+
+    webView = new WebView();
+    webView.setId("webView");
+
+    paneError = new VBox(15.0);
+    paneError.setId("paneError");
+    paneError.setAlignment(Pos.CENTER);
+    paneError.setVisible(false);
+    paneError.setStyle(
+        "-fx-background-color: -color-bg-default; -fx-padding: 40px;");
+
+    Label errorIcon = new Label("🌐");
+    errorIcon.setStyle("-fx-font-size: 48px;");
+
+    Label errorTitle = new Label("No Internet Connection");
+    errorTitle.setStyle(
+        "-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: -color-fg-danger;");
+
+    Label errorDesc =
+        new Label("IMDb requires an active internet connection to load.");
+    errorDesc.setStyle("-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
+    errorDesc.setWrapText(true);
+    errorDesc.setAlignment(Pos.CENTER);
+
+    Button btnRetry = new Button("Retry Loading");
+    btnRetry.getStyleClass().add("button-primary");
+    btnRetry.setOnAction(e -> handleRetry());
+
+    paneError.getChildren().addAll(errorIcon, errorTitle, errorDesc, btnRetry);
+
+    mainContent.getChildren().addAll(webView, paneError);
+
+    rootPane.getChildren().addAll(navBar, progressLoad, mainContent);
+
+    return rootPane;
+  }
+
   /**
    * Initializes the IMDb web browser view. Configures a modern User Agent,
    * links the UI navigation buttons with web engine history properties, and
    * binds loading progress listeners.
    */
-  @FXML
   public void initialize() {
     webEngine = webView.getEngine();
 
@@ -325,9 +435,10 @@ public class ImdbController implements Refreshable {
   }
 
   /**
-   * Injects JavaScript logic to aggressively hide ad slots, cookie banners (OneTrust),
-   * and sign-in prompts. Uses a combination of CSS overrides, MutationObservers,
-   * and timed retry scans to ensure a clean browsing experience.
+   * Injects JavaScript logic to aggressively hide ad slots, cookie banners
+   * (OneTrust), and sign-in prompts. Uses a combination of CSS overrides,
+   * MutationObservers, and timed retry scans to ensure a clean browsing
+   * experience.
    */
   private void injectAdSuppression() {
     webEngine.executeScript("(function(){" + "if(window.__kinoInit)return;"
@@ -456,8 +567,8 @@ public class ImdbController implements Refreshable {
   }
 
   /**
-   * Updates the disabled state of the Back and Forward navigation buttons
-   * based on the browser engine's current history stack position.
+   * Updates the disabled state of the Back and Forward navigation buttons based
+   * on the browser engine's current history stack position.
    */
   private void updateHistoryButtons() {
     int currentIndex = webEngine.getHistory().getCurrentIndex();
@@ -469,7 +580,6 @@ public class ImdbController implements Refreshable {
   /**
    * Navigates back one step in the browser history, if possible.
    */
-  @FXML
   private void handleBack() {
     pendingTargetUrl = null;
     int currentIndex = webEngine.getHistory().getCurrentIndex();
@@ -481,7 +591,6 @@ public class ImdbController implements Refreshable {
   /**
    * Navigates forward one step in the browser history, if possible.
    */
-  @FXML
   private void handleForward() {
     pendingTargetUrl = null;
     int currentIndex = webEngine.getHistory().getCurrentIndex();
@@ -494,7 +603,6 @@ public class ImdbController implements Refreshable {
   /**
    * Reloads the currently loaded web page.
    */
-  @FXML
   private void handleReload() {
     pendingTargetUrl = null;
     webEngine.reload();
@@ -503,7 +611,6 @@ public class ImdbController implements Refreshable {
   /**
    * Returns the browser view to the default IMDb homepage.
    */
-  @FXML
   private void handleHome() {
     loadPage(IMDB_HOME);
   }
@@ -511,7 +618,6 @@ public class ImdbController implements Refreshable {
   /**
    * Attempts to reload the current page after a loading failure.
    */
-  @FXML
   private void handleRetry() {
     loadPage(
         webEngine.getLocation() == null || webEngine.getLocation().isEmpty()
