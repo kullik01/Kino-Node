@@ -80,50 +80,51 @@
         <VBox styleClass="about-card" HBox.hgrow="ALWAYS">
             <Label text="Application Details" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;" />
             
-            <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
+            <Region minHeight="-Infinity" style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
             
-            <GridPane hgap="10.0" vgap="10.0">
+            <GridPane hgap="15.0" vgap="12.0">
                 <columnConstraints>
-                    <ColumnConstraints minWidth="100.0" prefWidth="140.0" />
+                    <ColumnConstraints minWidth="110.0" prefWidth="140.0" />
                     <ColumnConstraints hgrow="ALWAYS" />
                 </columnConstraints>
                 
-                <Label text="Version:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                <Label fx:id="lblVersion" text="1.0.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <Label text="Version:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <Label fx:id="lblVersion" text="1.0.0" style="-fx-font-weight: bold; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-                <Label text="Developer:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                <Label text="Hannah Kullik" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Label text="Developer:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <Label text="Hannah Kullik" style="-fx-font-weight: bold; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                <Label text="Logo Designers:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                <Label text="Martin Urban &amp; Hannah Kullik" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <Label text="Logo Designers:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <Label text="Martin Urban &amp; Hannah Kullik" style="-fx-font-weight: bold; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-                <Label text="License:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                <Label text="BSD 3-Clause License" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <Label text="License:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <Label text="BSD 3-Clause License" style="-fx-font-weight: bold; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                 
-                <Label text="Copyright:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-                <Label text="© 2026 Hannah Kullik" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <Label text="Copyright:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                <Label text="© 2026 Hannah Kullik" style="-fx-font-weight: bold; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="4" />
             </GridPane>
             
-            <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
-            
-            <Label text="System Environment" style="-fx-font-size: 13px; -fx-font-weight: bold;" />
-            <GridPane hgap="10.0" vgap="6.0">
+            <Label text="System Environment" style="-fx-font-size: 13px; -fx-font-weight: bold;">
+                <VBox.margin><Insets top="15.0"/></VBox.margin>
+            </Label>
+            <Region minHeight="-Infinity" style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
+            <GridPane hgap="15.0" vgap="12.0">
                 <columnConstraints>
-                    <ColumnConstraints minWidth="100.0" prefWidth="140.0" />
+                    <ColumnConstraints minWidth="110.0" prefWidth="140.0" />
                     <ColumnConstraints hgrow="ALWAYS" />
                 </columnConstraints>
                 
-                <Label text="Java Runtime:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                <Label fx:id="lblJavaRuntime" text="Unknown" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <Label text="Java Runtime:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <Label fx:id="lblJavaRuntime" text="Unknown" style="-fx-font-weight: bold; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-                <Label text="Operating System:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                <Label fx:id="lblOsDetails" text="Unknown" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-
+                <Label text="Operating System:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <Label fx:id="lblOsDetails" text="Unknown" style="-fx-font-weight: bold; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             </GridPane>
             
-            <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
-            
-            <Label text="Built With" style="-fx-font-size: 13px; -fx-font-weight: bold;" />
+            <Label text="Built With" style="-fx-font-size: 13px; -fx-font-weight: bold;">
+                <VBox.margin><Insets top="15.0"/></VBox.margin>
+            </Label>
+            <Region minHeight="-Infinity" style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
             <VBox spacing="4.0">
                 <Label text="• Java 25 — Core runtime" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" />
                 <Label text="• JavaFX 25 — UI framework" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;" />
@@ -137,28 +138,28 @@
         <VBox styleClass="about-card" HBox.hgrow="ALWAYS">
             <Label text="System Configuration &amp; Storage" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;" />
             
-            <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
+            <Region minHeight="-Infinity" style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
             
-            <GridPane hgap="10.0" vgap="10.0">
+            <GridPane hgap="15.0" vgap="12.0">
                 <columnConstraints>
                     <ColumnConstraints minWidth="130.0" prefWidth="140.0" />
                     <ColumnConstraints hgrow="ALWAYS" />
                 </columnConstraints>
                 
-                <Label text="Library Movies:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                <Label fx:id="lblMovieCount" text="0 movies" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <Label text="Workspace Size:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <Label fx:id="lblWorkspaceSize" text="Unknown" style="-fx-font-weight: bold; -fx-font-size: 14px;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-                <Label text="Database Size:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                <Label fx:id="lblDbSize" text="Unknown" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Label text="Database Size:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <Label fx:id="lblDbSize" text="Unknown" style="-fx-font-weight: bold; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                <Label text="Regular Watchlists:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                <Label fx:id="lblRegularWatchlistCount" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <Label text="Library Movies:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <Label fx:id="lblMovieCount" text="0 movies" style="-fx-font-weight: bold; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-                <Label text="Smart Watchlists:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                <Label fx:id="lblSmartWatchlistCount" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <Label text="Regular Watchlists:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <Label fx:id="lblRegularWatchlistCount" text="0" style="-fx-font-weight: bold; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
-                <Label text="Workspace Size:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-                <Label fx:id="lblWorkspaceSize" text="Unknown" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <Label text="Smart Watchlists:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                <Label fx:id="lblSmartWatchlistCount" text="0" style="-fx-font-weight: bold; -fx-font-size: 13px;" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
             </GridPane>
             
@@ -169,10 +170,10 @@
     <VBox styleClass="about-card">
         <Label text="Paths &amp; Configuration" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;" />
 
-        <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
+        <Region minHeight="-Infinity" style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
 
         <VBox spacing="8.0">
-            <Label text="Media Player Path:" style="-fx-font-weight: bold;" />
+            <Label text="Media Player Path:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;" />
             <HBox spacing="10" alignment="CENTER_LEFT">
                 <TextField fx:id="lblPlayerPath" text="None" editable="false" focusTraversable="false"
                           style="-fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-text-fill: -color-fg-default; -fx-control-inner-background: -color-bg-default; -fx-background-radius: 6px; -fx-border-color: -color-border-default; -fx-border-radius: 6px;"
@@ -183,20 +184,20 @@
             </HBox>
         </VBox>
 
-        <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
+        <Region minHeight="-Infinity" style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
 
         <VBox spacing="8.0">
-            <Label text="Supported Video Extensions:" style="-fx-font-weight: bold;" />
+            <Label text="Supported Video Extensions:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;" />
             <TextField fx:id="lblExtensions" text="3gp, avi, flv, m4v, mkv, mov, mp4, mpeg, mpg, mts, ogg, ogv, ts, webm, wmv" editable="false" focusTraversable="false"
                       style="-fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-text-fill: -color-fg-default; -fx-control-inner-background: -color-bg-default; -fx-background-radius: 6px; -fx-border-color: -color-border-default; -fx-border-radius: 6px;"
                       maxWidth="Infinity" />
         </VBox>
 
-        <Region style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
+        <Region minHeight="-Infinity" style="-fx-background-color: -color-border-default; -fx-pref-height: 1;" />
 
         <VBox spacing="8.0">
             <HBox spacing="8.0" alignment="CENTER_LEFT">
-                <Label text="Database Storage Location:" style="-fx-font-weight: bold;" />
+                <Label text="Database Storage Location:" style="-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;" />
                 <Label fx:id="lblStorageMode" text="" style="-fx-font-size: 11px; -fx-text-fill: -color-fg-muted;" />
             </HBox>
             <HBox spacing="10" alignment="CENTER_LEFT">
