@@ -56,6 +56,7 @@ public final class Launcher {
     System.setProperty("prism.lcdtext", "true");
     System.setProperty("prism.text", "t2k");
     System.setProperty("glass.win.uiScale.enabled", "true");
+    System.setProperty("sun.java2d.dpiaware", "true");
 
     KinoNodeApp.main(args);
   }

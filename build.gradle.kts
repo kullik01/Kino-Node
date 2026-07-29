@@ -56,6 +56,7 @@ val isLinux = osName.contains("linux") || osName.contains("unix")
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(25))
+        vendor.set(JvmVendorSpec.ADOPTIUM)
     }
     modularity.inferModulePath.set(true)
 }
@@ -76,7 +77,8 @@ application {
         "-Dapp.name=KinoNode",
         "-Dprism.allowhidpi=true",
         "-Dprism.lcdtext=true",
-        "-Dglass.win.uiScale.enabled=true"
+        "-Dglass.win.uiScale.enabled=true",
+        "-Dsun.java2d.dpiaware=true"
     )
 }
 
@@ -149,7 +151,11 @@ jlink {
         val commonOptions = iconArgs + listOf(
             "--description", "Personal Movie Library Manager",
             "--vendor", "Hannah Kullik",
-            "--resource-dir", file("src/main/resources/jpackage").absolutePath
+            "--resource-dir", file("src/main/resources/jpackage").absolutePath,
+            "--java-options", "-Dprism.allowhidpi=true",
+            "--java-options", "-Dprism.lcdtext=true",
+            "--java-options", "-Dglass.win.uiScale.enabled=true",
+            "--java-options", "-Dsun.java2d.dpiaware=true"
         )
         
         imageOptions = commonOptions
