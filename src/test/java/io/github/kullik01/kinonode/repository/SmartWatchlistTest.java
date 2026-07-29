@@ -58,4 +58,28 @@ public class SmartWatchlistTest {
     assertEquals(1, found.getMovies().size());
     assertEquals("Inception", found.getMovies().get(0).getTitle());
   }
+
+  @Test
+  public void testSmartWatchlistContains() {
+    Movie m1 = new Movie("C:/movies/inception.mp4", "Inception");
+    m1.setDirector("Christopher Nolan");
+    movieRepository.insert(m1);
+
+    Movie m2 = new Movie("C:/movies/matrix.mp4", "The Matrix");
+    m2.setDirector("Lana Wachowski, Lilly Wachowski");
+    movieRepository.insert(m2);
+
+    Watchlist w = new Watchlist("Nolan Movies");
+    w.setSmart(true);
+    SmartRule r = new SmartRule("Director", "CONTAINS", "Nolan");
+    w.setSmartRulesJson(new Gson().toJson(List.of(r)));
+
+    Watchlist inserted = watchlistRepository.insert(w);
+
+    Watchlist found = watchlistRepository.findById(inserted.getId());
+    assertNotNull(found);
+    assertTrue(found.isSmart());
+    assertEquals(1, found.getMovies().size());
+    assertEquals("Inception", found.getMovies().get(0).getTitle());
+  }
 }

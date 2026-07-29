@@ -711,7 +711,7 @@ public class WatchlistsController implements Refreshable {
         tmpAllowedOperators =
             List.of("EQUALS", "NOT_EQUALS", "GREATER_THAN", "LESS_THAN");
       } else {
-        tmpAllowedOperators = List.of("EQUALS", "NOT_EQUALS");
+        tmpAllowedOperators = List.of("EQUALS", "NOT_EQUALS", "CONTAINS");
       }
 
       if (!tmpOperatorComboBox.getItems().equals(tmpAllowedOperators)) {

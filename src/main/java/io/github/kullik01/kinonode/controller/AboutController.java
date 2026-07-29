@@ -85,6 +85,8 @@ public class AboutController implements Refreshable {
   @FXML
   private Label lblSmartWatchlistCount;
   @FXML
+  private Label lblWorkspaceSize;
+  @FXML
   private TextField lblPlayerPath;
 
   /**
@@ -188,6 +190,55 @@ public class AboutController implements Refreshable {
       lblMovieCount.setText("Unknown");
       lblRegularWatchlistCount.setText("Unknown");
       lblSmartWatchlistCount.setText("Unknown");
+    }
+
+    // 4.5 Workspace Size
+    if (lblWorkspaceSize != null) {
+      lblWorkspaceSize.setText("Calculating...");
+      new Thread(() -> {
+        try {
+          String tmpWorkspaces = AppContext.getInstance().getSettingsRepository().get("workspace_folders", "");
+          long totalWorkspaceSizeBytes = 0;
+          if (!tmpWorkspaces.isBlank()) {
+            String[] tmpFolderList = tmpWorkspaces.split(";");
+            for (String folderPath : tmpFolderList) {
+              Path path = Path.of(folderPath.trim());
+              if (Files.exists(path) && Files.isDirectory(path)) {
+                try (java.util.stream.Stream<Path> pathStream = Files.walk(path)) {
+                  totalWorkspaceSizeBytes += pathStream
+                      .filter(Files::isRegularFile)
+                      .mapToLong(p -> {
+                        try {
+                          return Files.size(p);
+                        } catch (Exception e) {
+                          return 0L;
+                        }
+                      })
+                      .sum();
+                }
+              }
+            }
+          }
+          final long finalSize = totalWorkspaceSizeBytes;
+          javafx.application.Platform.runLater(() -> {
+            if (finalSize > 0) {
+              double tmpSizeGb = finalSize / (1024.0 * 1024.0 * 1024.0);
+              if (tmpSizeGb >= 1.0) {
+                lblWorkspaceSize.setText(String.format("%.2f GB", tmpSizeGb));
+              } else {
+                double tmpSizeMb = finalSize / (1024.0 * 1024.0);
+                lblWorkspaceSize.setText(String.format("%.2f MB", tmpSizeMb));
+              }
+            } else {
+              lblWorkspaceSize.setText("0.00 MB");
+            }
+          });
+        } catch (Exception tmpException) {
+          javafx.application.Platform.runLater(() -> {
+            lblWorkspaceSize.setText("Unknown");
+          });
+        }
+      }).start();
     }
 
     // 5. Media Player Executable

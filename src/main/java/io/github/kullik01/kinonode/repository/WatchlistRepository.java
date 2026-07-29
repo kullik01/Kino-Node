@@ -450,6 +450,10 @@ public class WatchlistRepository {
         };
 
         switch (tmpRule.getOperator()) {
+          case "CONTAINS" -> {
+            tmpQueryBuilder.append(" AND ").append(tmpDbField).append(" LIKE ?");
+            tmpParameters.add("%" + tmpValue + "%");
+          }
           case "EQUALS" -> {
             tmpQueryBuilder.append(" AND ").append(tmpDbField).append(" = ?");
             if (tmpDbField.equals("rating")

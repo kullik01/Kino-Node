@@ -157,6 +157,9 @@
                 <Label text="Smart Watchlists:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="3" />
                 <Label fx:id="lblSmartWatchlistCount" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
+                <Label text="Workspace Size:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                <Label fx:id="lblWorkspaceSize" text="Unknown" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
             </GridPane>
             
         </VBox>
