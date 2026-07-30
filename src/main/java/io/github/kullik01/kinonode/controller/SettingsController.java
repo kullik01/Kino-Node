@@ -37,7 +37,9 @@
  */
 package io.github.kullik01.kinonode.controller;
 
+import io.github.kullik01.kinonode.util.CursorUtils;
 import io.github.kullik01.kinonode.util.CustomAlert;
+import atlantafx.base.controls.ToggleSwitch;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.control.Control;
@@ -54,15 +56,10 @@ import io.github.kullik01.kinonode.service.AppContext;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -95,6 +92,11 @@ public class SettingsController implements Refreshable {
   private SettingsRepository settingsRepository;
   private String loadedWorkspaces = "";
   private String loadedPlayerPath = "";
+  private String loadedCursorMode = "";
+
+  private ToggleSwitch btnCursorToggle;
+  private ToggleSwitch btnCompactToggle;
+  private ToggleSwitch btnMaxToggle;
 
   private javafx.animation.PauseTransition statusTimer;
 
@@ -227,7 +229,52 @@ public class SettingsController implements Refreshable {
     lblStatus
         .setStyle("-fx-text-fill: -color-success-fg; -fx-font-size: 14px;");
 
-    rootPane.getChildren().addAll(titleLbl, workspaceSection, playerSection,
+    // Appearance Section
+    Region tmpSpacer = new Region();
+    VBox.setVgrow(tmpSpacer, Priority.ALWAYS);
+
+    VBox tmpAppearanceSection = new VBox(10.0);
+    Label tmpAppTitle = new Label("Appearance");
+    tmpAppTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+    Label tmpAppSub = new Label("Visual preferences and UI tweaks");
+    tmpAppSub.setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-muted;");
+
+    HBox tmpCursorBox = new HBox(10.0);
+    tmpCursorBox.setAlignment(Pos.CENTER_LEFT);
+    Label tmpCursorLbl = new Label("Custom Mouse Pointer");
+    tmpCursorLbl.setPrefWidth(250.0);
+    btnCursorToggle = new ToggleSwitch();
+    btnCursorToggle.setId("btnCursorToggle");
+    Tooltip tmpCursorTooltip = new Tooltip("Enable custom application mouse pointer");
+    tmpCursorTooltip.setShowDelay(Duration.millis(250));
+    btnCursorToggle.setTooltip(tmpCursorTooltip);
+    tmpCursorBox.getChildren().addAll(tmpCursorLbl, btnCursorToggle);
+
+    HBox tmpCompactBox = new HBox(10.0);
+    tmpCompactBox.setAlignment(Pos.CENTER_LEFT);
+    Label tmpCompactLbl = new Label("Compact Mode (Denser Layout)");
+    tmpCompactLbl.setPrefWidth(250.0);
+    btnCompactToggle = new ToggleSwitch();
+    btnCompactToggle.setId("btnCompactToggle");
+    Tooltip tmpCompactTooltip = new Tooltip("Enable a denser UI layout for more content");
+    tmpCompactTooltip.setShowDelay(Duration.millis(250));
+    btnCompactToggle.setTooltip(tmpCompactTooltip);
+    tmpCompactBox.getChildren().addAll(tmpCompactLbl, btnCompactToggle);
+
+    HBox tmpMaxBox = new HBox(10.0);
+    tmpMaxBox.setAlignment(Pos.CENTER_LEFT);
+    Label tmpMaxLbl = new Label("Always Start Full-Screen");
+    tmpMaxLbl.setPrefWidth(250.0);
+    btnMaxToggle = new ToggleSwitch();
+    btnMaxToggle.setId("btnMaxToggle");
+    Tooltip tmpMaxTooltip = new Tooltip("Launch the application in full-screen mode");
+    tmpMaxTooltip.setShowDelay(Duration.millis(250));
+    btnMaxToggle.setTooltip(tmpMaxTooltip);
+    tmpMaxBox.getChildren().addAll(tmpMaxLbl, btnMaxToggle);
+
+    tmpAppearanceSection.getChildren().addAll(tmpAppTitle, tmpAppSub, tmpCursorBox, tmpCompactBox, tmpMaxBox);
+
+    rootPane.getChildren().addAll(titleLbl, workspaceSection, playerSection, tmpSpacer, tmpAppearanceSection,
         lblStatus);
 
     return rootPane;
@@ -288,9 +335,22 @@ public class SettingsController implements Refreshable {
     String tmpPlayer = settingsRepository.get("player_executable_path", "");
     txtPlayerPath.setText(tmpPlayer);
 
+    // Load cursor mode
+    String tmpCursor = settingsRepository.get("custom_cursor", "true");
+    btnCursorToggle.setSelected("true".equals(tmpCursor));
+
+    // Load compact mode
+    String tmpCompactMode = settingsRepository.get("compact_mode", "false");
+    btnCompactToggle.setSelected("true".equals(tmpCompactMode));
+
+    // Load start maximized
+    String tmpMaxMode = settingsRepository.get("always_start_maximized", "false");
+    btnMaxToggle.setSelected("true".equals(tmpMaxMode));
+
     // Store loaded state snapshots for dirty checking
     loadedWorkspaces = tmpWorkspaces;
     loadedPlayerPath = tmpPlayer;
+    loadedCursorMode = tmpCursor;
 
     // Initial validation trigger
     validateAll();
@@ -382,8 +442,14 @@ public class SettingsController implements Refreshable {
     String tmpPlayer = txtPlayerPath.getText().trim().replace("\\", "/");
     settingsRepository.set("player_executable_path", tmpPlayer);
 
+    // Save cursor mode
+    String tmpCursor = btnCursorToggle.isSelected() ? "true" : "false";
+    settingsRepository.set("custom_cursor", tmpCursor);
+    io.github.kullik01.kinonode.util.CursorUtils.updateGlobalCursor();
+
     // Update dirty checking snapshots
     loadedPlayerPath = tmpPlayer;
+    loadedCursorMode = tmpCursor;
 
     showStatus("Settings saved successfully.");
   }
@@ -411,6 +477,24 @@ public class SettingsController implements Refreshable {
     lstWorkspaces.getItems().addListener((
         javafx.collections.ListChangeListener.Change<? extends String> tmpChange) -> {
       // Unsaved changes detected
+    });
+
+    btnCursorToggle.selectedProperty().addListener((tmpObservable, tmpOldValue, tmpNewValue) -> {
+      String tmpCursor = tmpNewValue ? "true" : "false";
+      settingsRepository.set("custom_cursor", tmpCursor);
+      loadedCursorMode = tmpCursor;
+      CursorUtils.updateGlobalCursor();
+    });
+
+    btnCompactToggle.selectedProperty().addListener((tmpObservable, tmpOldValue, tmpNewValue) -> {
+      String tmpCompact = tmpNewValue ? "true" : "false";
+      settingsRepository.set("compact_mode", tmpCompact);
+      io.github.kullik01.kinonode.KinoNodeApp.updateGlobalDensity();
+    });
+
+    btnMaxToggle.selectedProperty().addListener((tmpObservable, tmpOldValue, tmpNewValue) -> {
+      String tmpMax = tmpNewValue ? "true" : "false";
+      settingsRepository.set("always_start_maximized", tmpMax);
     });
   }
 
@@ -514,9 +598,11 @@ public class SettingsController implements Refreshable {
     String tmpCurrentPlayer = txtPlayerPath.getText() != null
         ? txtPlayerPath.getText().trim().replace("\\", "/")
         : "";
+    String tmpCurrentCursor = btnCursorToggle.isSelected() ? "true" : "false";
 
     return !tmpCurrentWorkspaces.equals(loadedWorkspaces)
-        || !tmpCurrentPlayer.equals(loadedPlayerPath);
+        || !tmpCurrentPlayer.equals(loadedPlayerPath)
+        || !tmpCurrentCursor.equals(loadedCursorMode);
   }
 
   /**

@@ -46,8 +46,12 @@ import javafx.scene.control.Dialog;
 
 
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import io.github.kullik01.kinonode.service.AppContext;
 import javafx.scene.Cursor;
 import javafx.scene.ImageCursor;
 import javafx.scene.image.Image;
@@ -64,6 +68,9 @@ public class CursorUtils {
   private static Cursor appLogoCursor;
   private static Cursor centeredAppLogoCursor;
 
+  private static final Set<Node> registeredNodes = Collections.newSetFromMap(new WeakHashMap<>());
+  private static final Set<Node> centeredNodes = Collections.newSetFromMap(new WeakHashMap<>());
+
   /**
    * Gets the transparent application logo mouse cursor.
    *
@@ -71,6 +78,10 @@ public class CursorUtils {
    *         as fallback
    */
   public static Cursor getAppLogoCursor() {
+    String cursorMode = AppContext.getInstance().getSettingsRepository().get("custom_cursor", "true");
+    if ("false".equals(cursorMode)) {
+      return Cursor.DEFAULT;
+    }
     if (appLogoCursor == null) {
       try {
         InputStream tmpStream = CursorUtils.class.getResourceAsStream(
@@ -98,6 +109,10 @@ public class CursorUtils {
    *         {@link Cursor#DEFAULT} as fallback
    */
   public static Cursor getCenteredAppLogoCursor() {
+    String cursorMode = AppContext.getInstance().getSettingsRepository().get("custom_cursor", "true");
+    if ("false".equals(cursorMode)) {
+      return Cursor.DEFAULT;
+    }
     if (centeredAppLogoCursor == null) {
       try {
         InputStream tmpStream = CursorUtils.class.getResourceAsStream(
@@ -126,6 +141,53 @@ public class CursorUtils {
    */
   public static Cursor getCameraCursor() {
     return getAppLogoCursor();
+  }
+
+  /**
+   * Updates the cursor on all currently open windows based on the current setting.
+   */
+  public static void updateGlobalCursor() {
+    Cursor tmpCursor = getAppLogoCursor();
+    for (Window tmpWindow : Window.getWindows()) {
+      if (tmpWindow.getScene() != null) {
+        tmpWindow.getScene().setCursor(tmpCursor);
+      }
+    }
+    for (Node tmpNode : registeredNodes) {
+      if (tmpNode != null) {
+        tmpNode.setCursor(tmpCursor == Cursor.DEFAULT ? null : tmpCursor);
+      }
+    }
+    Cursor tmpCenteredCursor = getCenteredAppLogoCursor();
+    for (Node tmpNode : centeredNodes) {
+      if (tmpNode != null) {
+        tmpNode.setCursor(tmpCenteredCursor == Cursor.DEFAULT ? null : tmpCenteredCursor);
+      }
+    }
+  }
+
+  /**
+   * Applies the standard application logo cursor to a node and registers it for dynamic updates.
+   *
+   * @param node the JavaFX {@link Node} to configure
+   */
+  public static void applyCursor(Node tmpNode) {
+    if (tmpNode == null) return;
+    registeredNodes.add(tmpNode);
+    Cursor tmpCursor = getAppLogoCursor();
+    tmpNode.setCursor(tmpCursor == Cursor.DEFAULT ? null : tmpCursor);
+  }
+
+  /**
+   * Applies the centered application logo cursor to a node and registers it for dynamic updates.
+   *
+   * @param node the JavaFX {@link Node} to configure
+   */
+  public static void applyCenteredCursor(Node tmpNode) {
+    if (tmpNode == null) return;
+    centeredNodes.add(tmpNode);
+    Cursor tmpCursor = getCenteredAppLogoCursor();
+    tmpNode.setCursor(tmpCursor == Cursor.DEFAULT ? null : tmpCursor);
   }
 
   /**

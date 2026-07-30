@@ -236,8 +236,8 @@ public class LibraryController implements Refreshable {
     });
 
     btnSyncLibrary.disableProperty().bind(progressArea.visibleProperty());
-    btnSyncLibrary.setCursor(CursorUtils.getCameraCursor());
-    cmbSort.setCursor(CursorUtils.getCameraCursor());
+    CursorUtils.applyCursor(btnSyncLibrary);
+    CursorUtils.applyCursor(cmbSort);
 
     refresh();
   }
@@ -465,7 +465,7 @@ public class LibraryController implements Refreshable {
         tmpBtnSync.getStyleClass().addAll("button-success");
         tmpBtnSync.setStyle(
             "-fx-padding: 8px 18px; -fx-font-size: 14px; -fx-font-weight: bold;");
-        tmpBtnSync.setCursor(CursorUtils.getAppLogoCursor());
+        CursorUtils.applyCursor(tmpBtnSync);
 
         SVGPath tmpSyncBtnIcon = new SVGPath();
         tmpSyncBtnIcon.setContent(
@@ -524,7 +524,7 @@ public class LibraryController implements Refreshable {
         tmpBtnSettings.getStyleClass().addAll("button-success");
         tmpBtnSettings.setStyle(
             "-fx-padding: 8px 18px; -fx-font-size: 14px; -fx-font-weight: bold;");
-        tmpBtnSettings.setCursor(CursorUtils.getAppLogoCursor());
+        CursorUtils.applyCursor(tmpBtnSettings);
 
         SVGPath tmpGear = new SVGPath();
         tmpGear.setContent(

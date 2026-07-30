@@ -608,25 +608,25 @@ public class AnalyticsController implements Refreshable {
   private void installChartTooltip(XYChart.Data<String, Number> data,
       String tooltipText) {
     Runnable attacher = () -> {
-      Node node = data.getNode();
-      if (node != null) {
+      Node tmpNode = data.getNode();
+      if (tmpNode != null) {
         Tooltip tmpTooltip = new Tooltip(tooltipText);
         tmpTooltip.setShowDelay(Duration.millis(150));
         tmpTooltip.setShowDuration(Duration.seconds(15));
         tmpTooltip.getStyleClass().add("chart-popup-tooltip");
-        Tooltip.install(node, tmpTooltip);
+        Tooltip.install(tmpNode, tmpTooltip);
 
-        node.setCursor(CursorUtils.getCameraCursor());
+        CursorUtils.applyCursor(tmpNode);
         // Use a style class toggle instead of setOpacity() to avoid
         // conflicting with CSS :hover rules which causes flickering.
         // hoverProperty() fires even when the mouse is stationary.
-        node.hoverProperty().addListener((obs, wasHovered, isHovered) -> {
+        tmpNode.hoverProperty().addListener((obs, wasHovered, isHovered) -> {
           if (isHovered) {
-            if (!node.getStyleClass().contains("chart-bar-hovered")) {
-              node.getStyleClass().add("chart-bar-hovered");
+            if (!tmpNode.getStyleClass().contains("chart-bar-hovered")) {
+              tmpNode.getStyleClass().add("chart-bar-hovered");
             }
           } else {
-            node.getStyleClass().remove("chart-bar-hovered");
+            tmpNode.getStyleClass().remove("chart-bar-hovered");
           }
         });
       }

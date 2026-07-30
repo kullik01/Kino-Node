@@ -39,6 +39,7 @@ package io.github.kullik01.kinonode.controller;
 
 import io.github.kullik01.kinonode.util.CursorUtils;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Control;
 import javafx.scene.control.Tooltip;
@@ -235,14 +236,13 @@ public class MainController {
         });
 
     // Apply application logo cursor to sidebar buttons
-    javafx.scene.Cursor tmpLogoCursor = CursorUtils.getAppLogoCursor();
-    btnLibrary.setCursor(tmpLogoCursor);
-    btnWatchlists.setCursor(tmpLogoCursor);
-    btnAnalytics.setCursor(tmpLogoCursor);
-    buttonImdb.setCursor(tmpLogoCursor);
-    btnSettings.setCursor(tmpLogoCursor);
-    btnAbout.setCursor(tmpLogoCursor);
-    btnThemeToggle.setCursor(CursorUtils.getCenteredAppLogoCursor());
+    CursorUtils.applyCursor(btnLibrary);
+    CursorUtils.applyCursor(btnWatchlists);
+    CursorUtils.applyCursor(btnAnalytics);
+    CursorUtils.applyCursor(buttonImdb);
+    CursorUtils.applyCursor(btnSettings);
+    CursorUtils.applyCursor(btnAbout);
+    CursorUtils.applyCenteredCursor(btnThemeToggle);
 
     // Show Library by default
     showLibrary();
@@ -255,7 +255,8 @@ public class MainController {
     Platform.runLater(() -> {
       Scene tmpScene = rootPane.getScene();
       if (tmpScene != null) {
-        tmpScene.setCursor(tmpLogoCursor);
+        Cursor tmpCursor = CursorUtils.getAppLogoCursor();
+        tmpScene.setCursor(tmpCursor);
       }
 
       Stage tmpStage = (Stage) rootPane.getScene().getWindow();
