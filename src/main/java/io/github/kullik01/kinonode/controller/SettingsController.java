@@ -95,7 +95,6 @@ public class SettingsController implements Refreshable {
   private String loadedCursorMode = "";
 
   private ToggleSwitch btnCursorToggle;
-  private ToggleSwitch btnCompactToggle;
   private ToggleSwitch btnMaxToggle;
 
   private javafx.animation.PauseTransition statusTimer;
@@ -230,9 +229,6 @@ public class SettingsController implements Refreshable {
         .setStyle("-fx-text-fill: -color-success-fg; -fx-font-size: 14px;");
 
     // Appearance Section
-    Region tmpSpacer = new Region();
-    VBox.setVgrow(tmpSpacer, Priority.ALWAYS);
-
     VBox tmpAppearanceSection = new VBox(10.0);
     Label tmpAppTitle = new Label("Appearance");
     tmpAppTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
@@ -250,17 +246,6 @@ public class SettingsController implements Refreshable {
     btnCursorToggle.setTooltip(tmpCursorTooltip);
     tmpCursorBox.getChildren().addAll(tmpCursorLbl, btnCursorToggle);
 
-    HBox tmpCompactBox = new HBox(10.0);
-    tmpCompactBox.setAlignment(Pos.CENTER_LEFT);
-    Label tmpCompactLbl = new Label("Compact Mode (Denser Layout)");
-    tmpCompactLbl.setPrefWidth(250.0);
-    btnCompactToggle = new ToggleSwitch();
-    btnCompactToggle.setId("btnCompactToggle");
-    Tooltip tmpCompactTooltip = new Tooltip("Enable a denser UI layout for more content");
-    tmpCompactTooltip.setShowDelay(Duration.millis(250));
-    btnCompactToggle.setTooltip(tmpCompactTooltip);
-    tmpCompactBox.getChildren().addAll(tmpCompactLbl, btnCompactToggle);
-
     HBox tmpMaxBox = new HBox(10.0);
     tmpMaxBox.setAlignment(Pos.CENTER_LEFT);
     Label tmpMaxLbl = new Label("Always Start Full-Screen");
@@ -272,9 +257,9 @@ public class SettingsController implements Refreshable {
     btnMaxToggle.setTooltip(tmpMaxTooltip);
     tmpMaxBox.getChildren().addAll(tmpMaxLbl, btnMaxToggle);
 
-    tmpAppearanceSection.getChildren().addAll(tmpAppTitle, tmpAppSub, tmpCursorBox, tmpCompactBox, tmpMaxBox);
+    tmpAppearanceSection.getChildren().addAll(tmpAppTitle, tmpAppSub, tmpCursorBox, tmpMaxBox);
 
-    rootPane.getChildren().addAll(titleLbl, workspaceSection, playerSection, tmpSpacer, tmpAppearanceSection,
+    rootPane.getChildren().addAll(titleLbl, workspaceSection, playerSection, tmpAppearanceSection,
         lblStatus);
 
     return rootPane;
@@ -338,10 +323,6 @@ public class SettingsController implements Refreshable {
     // Load cursor mode
     String tmpCursor = settingsRepository.get("custom_cursor", "true");
     btnCursorToggle.setSelected("true".equals(tmpCursor));
-
-    // Load compact mode
-    String tmpCompactMode = settingsRepository.get("compact_mode", "false");
-    btnCompactToggle.setSelected("true".equals(tmpCompactMode));
 
     // Load start maximized
     String tmpMaxMode = settingsRepository.get("always_start_maximized", "false");
@@ -484,12 +465,6 @@ public class SettingsController implements Refreshable {
       settingsRepository.set("custom_cursor", tmpCursor);
       loadedCursorMode = tmpCursor;
       CursorUtils.updateGlobalCursor();
-    });
-
-    btnCompactToggle.selectedProperty().addListener((tmpObservable, tmpOldValue, tmpNewValue) -> {
-      String tmpCompact = tmpNewValue ? "true" : "false";
-      settingsRepository.set("compact_mode", tmpCompact);
-      io.github.kullik01.kinonode.KinoNodeApp.updateGlobalDensity();
     });
 
     btnMaxToggle.selectedProperty().addListener((tmpObservable, tmpOldValue, tmpNewValue) -> {

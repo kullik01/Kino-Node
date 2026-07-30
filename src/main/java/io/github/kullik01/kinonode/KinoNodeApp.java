@@ -150,9 +150,6 @@ public class KinoNodeApp extends Application {
 
     primaryStage.show();
 
-    // Apply layout density
-    updateGlobalDensity();
-
     Platform.runLater(() -> {
       primaryStage.setIconified(false);
       primaryStage.setAlwaysOnTop(true);
@@ -174,23 +171,6 @@ public class KinoNodeApp extends Application {
     // Shut down database service cleanly on app exit
     AppContext.getInstance().close();
     super.stop();
-  }
-
-  public static void updateGlobalDensity() {
-    var tmpSettingsRepository = AppContext.getInstance().getSettingsRepository();
-    String tmpCompactMode = tmpSettingsRepository.get("compact_mode", "false");
-    for (javafx.stage.Window tmpWindow : javafx.stage.Window.getWindows()) {
-      Scene tmpScene = tmpWindow.getScene();
-      if (tmpScene != null && tmpScene.getRoot() != null) {
-        if ("true".equals(tmpCompactMode)) {
-          if (!tmpScene.getRoot().getStyleClass().contains("compact-mode")) {
-            tmpScene.getRoot().getStyleClass().add("compact-mode");
-          }
-        } else {
-          tmpScene.getRoot().getStyleClass().remove("compact-mode");
-        }
-      }
-    }
   }
 
   /**
