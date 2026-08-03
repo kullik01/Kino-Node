@@ -1,0 +1,119 @@
+plugins {
+    application
+    id("org.openjfx.javafxplugin")
+    id("org.beryx.jlink")
+}
+
+application {
+    mainModule.set("kinonode.ui")
+    mainClass.set("io.github.kullik01.kinonode.Launcher")
+    applicationDefaultJvmArgs = listOf(
+        "-Dapp.name=KinoNode",
+        "-Dprism.allowhidpi=true",
+        "-Dprism.lcdtext=true",
+        "-Dglass.win.uiScale.enabled=true",
+        "-Dsun.java2d.dpiaware=true"
+    )
+}
+
+javafx {
+    version = rootProject.extra["javafxVersion"] as String? ?: "25.0.2"
+    modules = listOf("javafx.controls", "javafx.graphics", "javafx.media", "javafx.base", "javafx.fxml", "javafx.web")
+}
+
+dependencies {
+    implementation(project(":kinonode-domain"))
+    implementation(project(":kinonode-data"))
+    
+    implementation("io.github.mkpaz:atlantafx-base:${rootProject.extra["atlantafxVersion"] ?: "2.0.1"}")
+    implementation("com.google.inject:guice:${rootProject.extra["guiceVersion"] ?: "6.0.0"}")
+    implementation("com.google.code.gson:gson:${rootProject.extra["gsonVersion"] ?: "2.10.1"}")
+}
+
+// jlink tasks ...
+val isWindows = System.getProperty("os.name").lowercase().contains("win")
+val isMac = System.getProperty("os.name").lowercase().contains("mac")
+val isLinux = System.getProperty("os.name").lowercase().contains("linux") || System.getProperty("os.name").lowercase().contains("unix")
+
+jlink {
+    imageDir.set(layout.buildDirectory.dir("KinoNode-${version}"))
+    val zipOsSuffix = when {
+        isWindows -> "Windows"
+        isMac -> "macOS"
+        else -> "Linux"
+    }
+    imageZip.set(layout.buildDirectory.file("distributions/KinoNode-${version}-${zipOsSuffix}.zip"))
+    options.set(listOf(
+        "--strip-debug",
+        "--compress", "zip-6",
+        "--no-header-files",
+        "--no-man-pages",
+        "--bind-services"
+    ))
+    launcher {
+        name = "KinoNode"
+        noConsole = true
+    }
+    
+    jpackage {
+        jpackageHome = System.getenv("JAVA_HOME") ?: ""
+        val typeProp = project.findProperty("installerType") as? String
+        installerType = typeProp ?: when {
+            isWindows -> "exe"
+            isMac -> "dmg"
+            else -> "deb"
+        }
+        
+        installerName = "KinoNode"
+        appVersion = "1.0.0"
+        vendor = "Hannah Kullik"
+        
+        val iconPath = when {
+            isWindows -> "src/main/resources/io/github/kullik01/kinonode/images/logos/logo.ico"
+            isMac -> "src/main/resources/io/github/kullik01/kinonode/images/logos/logo.icns"
+            else -> "src/main/resources/io/github/kullik01/kinonode/images/logos/logo.png"
+        }
+        val iconArgs = if (file(iconPath).exists()) listOf("--icon", file(iconPath).absolutePath) else emptyList()
+        val commonOptions = iconArgs + listOf(
+            "--description", "Personal Movie Library Manager",
+            "--vendor", "Hannah Kullik",
+            "--resource-dir", file("src/main/resources/jpackage").absolutePath,
+            "--java-options", "-Dprism.allowhidpi=true",
+            "--java-options", "-Dprism.lcdtext=true",
+            "--java-options", "-Dglass.win.uiScale.enabled=true",
+            "--java-options", "-Dsun.java2d.dpiaware=true"
+        )
+        
+        imageOptions = commonOptions
+        
+        val osSpecificOptions = when {
+            isWindows -> listOf(
+                "--win-dir-chooser",
+                "--win-menu",
+                "--win-shortcut",
+                "--win-upgrade-uuid", "c1a0b0d3-8f83-4a3d-82d8-5f2122650f92",
+                "--install-dir", "KinoNode"
+            )
+            isMac -> listOf(
+                "--mac-package-identifier", "io.github.kullik01.kinonode",
+                "--mac-package-name", "KinoNode",
+                "--install-dir", "/Applications/KinoNode"
+            )
+            else -> {
+                val linuxCommon = listOf(
+                    "--linux-menu-group", "Utility",
+                    "--linux-shortcut",
+                    "--linux-package-name", "kinonode",
+                    "--install-dir", "/opt/KinoNode"
+                )
+                when (installerType) {
+                    "deb" -> linuxCommon + listOf("--linux-deb-maintainer", "hannah@example.com")
+                    "rpm" -> linuxCommon + listOf("--linux-rpm-license-type", "BSD-3-Clause")
+                    else -> linuxCommon
+                }
+            }
+        }
+        
+        installerOptions = commonOptions + osSpecificOptions
+    }
+}

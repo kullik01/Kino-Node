@@ -27,3 +27,7 @@ replay_pid*
 /.idea
 /build
 !gradle/wrapper/gradle-wrapper.jar
+
+# AI agent local state (not committed)
+.agents/.cache/
+.agents/.local/
