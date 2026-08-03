@@ -33,3 +33,7 @@ plugins {
 }
 
 rootProject.name = "kino-node"
+
+include("kinonode-domain")
+include("kinonode-data")
+include("kinonode-ui")
