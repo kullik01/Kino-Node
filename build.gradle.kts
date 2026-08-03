@@ -1,6 +1,5 @@
 plugins {
     java
-    application
     id("org.openjfx.javafxplugin") version "0.1.0" apply false
     id("org.beryx.jlink") version "3.2.0" apply false
     id("com.diffplug.spotless") version "6.25.0"

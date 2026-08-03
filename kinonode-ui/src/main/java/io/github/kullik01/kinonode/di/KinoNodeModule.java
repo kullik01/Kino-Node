@@ -30,6 +30,12 @@ public class KinoNodeModule extends AbstractModule {
 
   @Provides
   @Singleton
+  AppContext provideAppContext() {
+    return AppContext.getInstance();
+  }
+
+  @Provides
+  @Singleton
   ResourceBundle provideResourceBundle() {
     return ResourceBundle.getBundle("io.github.kullik01.kinonode.i18n.messages");
   }

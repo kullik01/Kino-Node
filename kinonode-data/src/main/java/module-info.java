@@ -1,6 +1,7 @@
 module kinonode.data {
     requires transitive kinonode.domain;
     requires java.sql;
+    requires org.xerial.sqlitejdbc;
     requires java.logging;
     requires java.desktop;
     requires java.net.http;
