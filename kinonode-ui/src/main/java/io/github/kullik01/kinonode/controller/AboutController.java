@@ -72,8 +72,7 @@ public class AboutController implements Refreshable {
   @Inject
   public AboutController(SettingsRepository settingsRepository,
       DatabaseService databaseService, MovieRepository movieRepository,
-      WatchlistRepository watchlistRepository,
-      PlaybackService playbackService,
+      WatchlistRepository watchlistRepository, PlaybackService playbackService,
       ResourceBundle resources) {
     this.settingsRepository = settingsRepository;
     this.databaseService = databaseService;

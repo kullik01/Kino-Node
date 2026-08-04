@@ -1,3 +1,40 @@
+/**
+ * BSD 3-Clause License
+ *
+ * <p>
+ * Copyright (c) 2026, Hannah Kullik
+ *
+ * <p>
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * <p>
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *
+ * <p>
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * <p>
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ * may be used to endorse or promote products derived from this software without
+ * specific prior written permission.
+ *
+ * <p>
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 package io.github.kullik01.kinonode.view.pages;
 
 import javafx.geometry.Insets;
@@ -120,12 +157,16 @@ public class AboutView {
     grid1.getColumnConstraints().addAll(gc1, gc2);
 
     lblVersion.setId("lblVersion");
-    addGridRow(grid1, 0, resources.getString("about.label.version"), lblVersion);
-    addGridRow(grid1, 1, resources.getString("about.label.developer"), new Label(resources.getString("about.val.developer")));
+    addGridRow(grid1, 0, resources.getString("about.label.version"),
+        lblVersion);
+    addGridRow(grid1, 1, resources.getString("about.label.developer"),
+        new Label(resources.getString("about.val.developer")));
     addGridRow(grid1, 2, resources.getString("about.label.designers"),
         new Label(resources.getString("about.val.designers")));
-    addGridRow(grid1, 3, resources.getString("about.label.license"), new Label(resources.getString("about.val.license")));
-    addGridRow(grid1, 4, resources.getString("about.label.copyright"), new Label(resources.getString("about.val.copyright")));
+    addGridRow(grid1, 3, resources.getString("about.label.license"),
+        new Label(resources.getString("about.val.license")));
+    addGridRow(grid1, 4, resources.getString("about.label.copyright"),
+        new Label(resources.getString("about.val.copyright")));
 
     Label envTitle = new Label(resources.getString("about.card.env"));
     envTitle.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
@@ -141,7 +182,8 @@ public class AboutView {
     grid2.getColumnConstraints().addAll(gc1, gc2);
 
     lblJavaRuntime.setId("lblJavaRuntime");
-    addGridRow(grid2, 0, resources.getString("about.label.java"), lblJavaRuntime);
+    addGridRow(grid2, 0, resources.getString("about.label.java"),
+        lblJavaRuntime);
     lblOsDetails.setId("lblOsDetails");
     addGridRow(grid2, 1, resources.getString("about.label.os"), lblOsDetails);
 
@@ -154,7 +196,8 @@ public class AboutView {
         "-fx-background-color: -color-border-default; -fx-pref-height: 1;");
 
     VBox builtBox = new VBox(4.0);
-    builtBox.getChildren().addAll(createMutedLabel(resources.getString("about.built.java")),
+    builtBox.getChildren().addAll(
+        createMutedLabel(resources.getString("about.built.java")),
         createMutedLabel(resources.getString("about.built.javafx")),
         createMutedLabel(resources.getString("about.built.sqlite")),
         createMutedLabel(resources.getString("about.built.atlantafx")),
@@ -185,15 +228,19 @@ public class AboutView {
     grid3.getColumnConstraints().addAll(gc3, gc2);
 
     lblWorkspaceSize.setId("lblWorkspaceSize");
-    addGridRow(grid3, 0, resources.getString("about.label.workspace"), lblWorkspaceSize);
+    addGridRow(grid3, 0, resources.getString("about.label.workspace"),
+        lblWorkspaceSize);
     lblDbSize.setId("lblDbSize");
     addGridRow(grid3, 1, resources.getString("about.label.db_size"), lblDbSize);
     lblMovieCount.setId("lblMovieCount");
-    addGridRow(grid3, 2, resources.getString("about.label.movies"), lblMovieCount);
+    addGridRow(grid3, 2, resources.getString("about.label.movies"),
+        lblMovieCount);
     lblRegularWatchlistCount.setId("lblRegularWatchlistCount");
-    addGridRow(grid3, 3, resources.getString("about.label.regular_watchlists"), lblRegularWatchlistCount);
+    addGridRow(grid3, 3, resources.getString("about.label.regular_watchlists"),
+        lblRegularWatchlistCount);
     lblSmartWatchlistCount.setId("lblSmartWatchlistCount");
-    addGridRow(grid3, 4, resources.getString("about.label.smart_watchlists"), lblSmartWatchlistCount);
+    addGridRow(grid3, 4, resources.getString("about.label.smart_watchlists"),
+        lblSmartWatchlistCount);
 
     rightCard.getChildren().addAll(rightCardTitle, sep4, grid3);
 
@@ -212,7 +259,8 @@ public class AboutView {
         "-fx-background-color: -color-border-default; -fx-pref-height: 1;");
 
     VBox playerBox = new VBox(8.0);
-    Label playerLabel = new Label(resources.getString("about.label.player_path"));
+    Label playerLabel =
+        new Label(resources.getString("about.label.player_path"));
     playerLabel
         .setStyle("-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;");
     HBox playerInputBox = new HBox(10.0);
@@ -229,7 +277,8 @@ public class AboutView {
     btnPlayerLoc.getStyleClass().add("button-secondary");
     btnPlayerLoc.setMinWidth(Region.USE_PREF_SIZE);
     btnPlayerLoc.setStyle("-fx-text-fill: white;");
-    Tooltip playerLocTip = new Tooltip(resources.getString("about.tooltip.open_location"));
+    Tooltip playerLocTip =
+        new Tooltip(resources.getString("about.tooltip.open_location"));
     playerLocTip.setShowDelay(Duration.millis(250));
     btnPlayerLoc.setTooltip(playerLocTip);
     playerInputBox.getChildren().addAll(lblPlayerPath, btnPlayerLoc);
@@ -279,7 +328,8 @@ public class AboutView {
     btnDbLoc.getStyleClass().add("button-secondary");
     btnDbLoc.setMinWidth(Region.USE_PREF_SIZE);
     btnDbLoc.setStyle("-fx-text-fill: white;");
-    Tooltip dbLocTip = new Tooltip(resources.getString("about.tooltip.open_location"));
+    Tooltip dbLocTip =
+        new Tooltip(resources.getString("about.tooltip.open_location"));
     dbLocTip.setShowDelay(Duration.millis(250));
     btnDbLoc.setTooltip(dbLocTip);
     dbInputBox.getChildren().addAll(lblDbPath, btnDbLoc);

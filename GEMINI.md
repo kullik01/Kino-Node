@@ -97,6 +97,8 @@ the exact format (including `<p>` paragraph tags) from any existing source file.
 - Required on all `public` classes, constructors, and methods
 - Use `@param`, `@return`, `@throws` tags
 - First sentence: imperative verb ("Gets the…", "Sets the…", "Constructs a new…")
+- See `skills/commenting.md` for full templates, field annotation rules,
+  inline comment guidelines, and a documentation completeness checklist
 
 ### Formatting
 - Google Java Format — 2-space indent
@@ -138,6 +140,7 @@ Detailed step-by-step guides for common tasks are in `.agents/skills/`:
 | Building MVC views & controllers | `.agents/skills/add-view-controller.md` |
 | SQLite schema evolution | `.agents/skills/database-migration.md` |
 | Externalizing UI strings | `.agents/skills/i18n-externalization.md` |
+| Commenting & documentation | `.agents/skills/commenting.md` |
 
 Additional reference material in `.agents/standards/` and `.agents/context/`.
 

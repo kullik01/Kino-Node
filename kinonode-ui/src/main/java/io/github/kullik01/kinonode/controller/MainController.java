@@ -118,8 +118,7 @@ public class MainController {
       Provider<ImdbController> imdbProvider,
       Provider<AboutController> aboutProvider,
       Provider<AnalyticsController> analyticsProvider, AppContext appContext,
-      SettingsRepository settingsRepository,
-      ResourceBundle resources) {
+      SettingsRepository settingsRepository, ResourceBundle resources) {
     this.libraryProvider = libraryProvider;
     this.watchlistsProvider = watchlistsProvider;
     this.settingsProvider = settingsProvider;
@@ -150,21 +149,26 @@ public class MainController {
     VBox sidebar = new VBox();
     sidebar.getStyleClass().add("sidebar");
 
-    btnLibrary = createSidebarButton(resources.getString("main.library"), "btnLibrary", "🎬",
-        this::showLibrary, true);
-    btnWatchlists = createSidebarButton(resources.getString("main.watchlists"), "btnWatchlists",
+    btnLibrary = createSidebarButton(resources.getString("main.library"),
+        "btnLibrary", "🎬", this::showLibrary, true);
+    btnWatchlists = createSidebarButton(resources.getString("main.watchlists"),
+        "btnWatchlists",
         "M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 9H10V9h8v2zm-4 4h-4v-2h4v2zm4-8h-8V5h8v2z",
         this::showWatchlists, false);
-    btnAnalytics = createSidebarButton(resources.getString("main.analytics"), "btnAnalytics",
+    btnAnalytics = createSidebarButton(resources.getString("main.analytics"),
+        "btnAnalytics",
         "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z",
         this::showAnalytics, false);
-    buttonImdb = createSidebarButton(resources.getString("main.imdb"), "buttonImdb",
+    buttonImdb = createSidebarButton(resources.getString("main.imdb"),
+        "buttonImdb",
         "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z",
         this::showImdb, false);
-    btnSettings = createSidebarButton(resources.getString("main.settings"), "btnSettings",
+    btnSettings = createSidebarButton(resources.getString("main.settings"),
+        "btnSettings",
         "M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66Z",
         this::showSettings, false);
-    btnAbout = createSidebarButton(resources.getString("main.about"), "btnAbout",
+    btnAbout = createSidebarButton(resources.getString("main.about"),
+        "btnAbout",
         "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z",
         this::showAbout, false);
 
@@ -249,14 +253,16 @@ public class MainController {
       btnThemeToggle.setSelected(true);
       btnThemeToggle.setText("🌙");
       if (btnThemeToggle.getTooltip() != null) {
-        btnThemeToggle.getTooltip().setText(resources.getString("main.theme.dark"));
+        btnThemeToggle.getTooltip()
+            .setText(resources.getString("main.theme.dark"));
         btnThemeToggle.getTooltip().setShowDelay(Duration.millis(250));
       }
     } else {
       btnThemeToggle.setSelected(false);
       btnThemeToggle.setText("☀");
       if (btnThemeToggle.getTooltip() != null) {
-        btnThemeToggle.getTooltip().setText(resources.getString("main.theme.light"));
+        btnThemeToggle.getTooltip()
+            .setText(resources.getString("main.theme.light"));
         btnThemeToggle.getTooltip().setShowDelay(Duration.millis(250));
       }
     }
@@ -385,14 +391,16 @@ public class MainController {
     if (dark) {
       btnThemeToggle.setText("🌙");
       if (btnThemeToggle.getTooltip() != null)
-        btnThemeToggle.getTooltip().setText(resources.getString("main.theme.dark"));
+        btnThemeToggle.getTooltip()
+            .setText(resources.getString("main.theme.dark"));
       Application
           .setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
       tmpSettingsRepository.set("theme_mode", "dark");
     } else {
       btnThemeToggle.setText("☀");
       if (btnThemeToggle.getTooltip() != null)
-        btnThemeToggle.getTooltip().setText(resources.getString("main.theme.light"));
+        btnThemeToggle.getTooltip()
+            .setText(resources.getString("main.theme.light"));
       Application
           .setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
       tmpSettingsRepository.set("theme_mode", "light");

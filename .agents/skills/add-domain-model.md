@@ -38,7 +38,7 @@ package io.github.kullik01.kinonode.model;
 - Use `private` access for all fields
 - Use wrapper types (`Integer`, `Double`) for nullable fields
 - Use `Instant` for timestamps
-- Include inline comment for non-obvious fields
+- Use end-of-line `//` annotation for units, ranges, or nullability
 
 ```java
 private Integer id;

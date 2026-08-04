@@ -178,7 +178,8 @@ public class LibraryController implements Refreshable {
     syncGraphic.setFill(Color.WHITE);
     btnSyncLibrary.setGraphic(syncGraphic);
 
-    Tooltip syncTooltip = new Tooltip(resources.getString("library.empty.sync_btn"));
+    Tooltip syncTooltip =
+        new Tooltip(resources.getString("library.empty.sync_btn"));
     syncTooltip.setShowDelay(Duration.millis(250));
     btnSyncLibrary.setTooltip(syncTooltip);
 
@@ -293,8 +294,8 @@ public class LibraryController implements Refreshable {
    */
   private void filterAndDisplayMovies() {
     String query = txtSearch.getText().toLowerCase().trim();
-    String sortOption =
-        cmbSort.getValue() != null ? cmbSort.getValue() : resources.getString("library.sort.recently_added");
+    String sortOption = cmbSort.getValue() != null ? cmbSort.getValue()
+        : resources.getString("library.sort.recently_added");
 
     List<Movie> filteredMovies = allMovies.stream().filter(movie -> {
       if (query.isEmpty())
@@ -457,7 +458,8 @@ public class LibraryController implements Refreshable {
 
       if (tmpHasWorkspaces) {
         // Workspaces configured but library not yet synced
-        Label tmpBadge = new Label(resources.getString("library.empty.sync_required"));
+        Label tmpBadge =
+            new Label(resources.getString("library.empty.sync_required"));
         tmpBadge.setStyle("-fx-background-color: rgba(237, 139, 0, 0.15); "
             + "-fx-text-fill: #ED8B00; " + "-fx-font-weight: bold; "
             + "-fx-font-size: 11px; " + "-fx-padding: 4px 14px; "
@@ -474,11 +476,13 @@ public class LibraryController implements Refreshable {
         tmpSyncIconWrapper.setAlignment(Pos.CENTER);
         tmpSyncIconWrapper.setPadding(new Insets(10, 0, 10, 0));
 
-        Label tmpTitle = new Label(resources.getString("library.empty.sync_title"));
+        Label tmpTitle =
+            new Label(resources.getString("library.empty.sync_title"));
         tmpTitle.setStyle(
             "-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
 
-        Label tmpText = new Label(resources.getString("library.empty.sync_text"));
+        Label tmpText =
+            new Label(resources.getString("library.empty.sync_text"));
         tmpText.setWrapText(true);
         tmpText.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         tmpText.setMaxWidth(420);
@@ -488,7 +492,8 @@ public class LibraryController implements Refreshable {
         HBox tmpBtnBox = new HBox(14);
         tmpBtnBox.setAlignment(Pos.CENTER);
 
-        Button tmpBtnSync = new Button(resources.getString("library.empty.sync_btn"));
+        Button tmpBtnSync =
+            new Button(resources.getString("library.empty.sync_btn"));
         tmpBtnSync.getStyleClass().addAll("button-success");
         tmpBtnSync.setStyle(
             "-fx-padding: 8px 18px; -fx-font-size: 14px; -fx-font-weight: bold;");
@@ -502,7 +507,8 @@ public class LibraryController implements Refreshable {
         tmpSyncBtnIcon.setStyle("-fx-fill: white;");
         tmpBtnSync.setGraphic(tmpSyncBtnIcon);
 
-        Tooltip tmpSyncTooltip = new Tooltip(resources.getString("library.empty.sync_tooltip"));
+        Tooltip tmpSyncTooltip =
+            new Tooltip(resources.getString("library.empty.sync_tooltip"));
         tmpSyncTooltip.setShowDelay(Duration.millis(250));
         tmpSyncTooltip.getStyleClass().add("chart-popup-tooltip");
         Tooltip.install(tmpBtnSync, tmpSyncTooltip);
@@ -514,7 +520,8 @@ public class LibraryController implements Refreshable {
             tmpText, tmpBtnBox);
       } else {
         // No workspaces configured yet
-        Label tmpBadge = new Label(resources.getString("library.empty.config_required"));
+        Label tmpBadge =
+            new Label(resources.getString("library.empty.config_required"));
         tmpBadge.setStyle("-fx-background-color: rgba(33, 120, 221, 0.15); "
             + "-fx-text-fill: #2178dd; " + "-fx-font-weight: bold; "
             + "-fx-font-size: 11px; " + "-fx-padding: 4px 14px; "
@@ -531,11 +538,13 @@ public class LibraryController implements Refreshable {
         tmpCameraIconWrapper.setAlignment(Pos.CENTER);
         tmpCameraIconWrapper.setPadding(new Insets(10, 0, 10, 0));
 
-        Label tmpTitle = new Label(resources.getString("library.empty.config_title"));
+        Label tmpTitle =
+            new Label(resources.getString("library.empty.config_title"));
         tmpTitle.setStyle(
             "-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
 
-        Label tmpText = new Label(resources.getString("library.empty.config_text"));
+        Label tmpText =
+            new Label(resources.getString("library.empty.config_text"));
         tmpText.setWrapText(true);
         tmpText.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         tmpText.setMaxWidth(420);
@@ -545,7 +554,8 @@ public class LibraryController implements Refreshable {
         HBox tmpBtnBox = new HBox(14);
         tmpBtnBox.setAlignment(Pos.CENTER);
 
-        Button tmpBtnSettings = new Button(resources.getString("library.empty.config_btn"));
+        Button tmpBtnSettings =
+            new Button(resources.getString("library.empty.config_btn"));
         tmpBtnSettings.getStyleClass().addAll("button-success");
         tmpBtnSettings.setStyle(
             "-fx-padding: 8px 18px; -fx-font-size: 14px; -fx-font-weight: bold;");
@@ -559,7 +569,8 @@ public class LibraryController implements Refreshable {
         tmpGear.setStyle("-fx-fill: white;");
         tmpBtnSettings.setGraphic(tmpGear);
 
-        Tooltip tmpTooltip = new Tooltip(resources.getString("library.empty.config_tooltip"));
+        Tooltip tmpTooltip =
+            new Tooltip(resources.getString("library.empty.config_tooltip"));
         tmpTooltip.setShowDelay(Duration.millis(250));
         tmpTooltip.getStyleClass().add("chart-popup-tooltip");
         Tooltip.install(tmpBtnSettings, tmpTooltip);
@@ -583,10 +594,12 @@ public class LibraryController implements Refreshable {
       tmpSearchIcon.setScaleY(2.0);
       tmpSearchIcon.setStyle("-fx-fill: -color-fg-muted;");
 
-      Label tmpTitle = new Label(resources.getString("library.empty.no_match_title"));
+      Label tmpTitle =
+          new Label(resources.getString("library.empty.no_match_title"));
       tmpTitle.setStyle(
           "-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
-      Label tmpSub = new Label(resources.getString("library.empty.no_match_text"));
+      Label tmpSub =
+          new Label(resources.getString("library.empty.no_match_text"));
       tmpSub.setStyle("-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
       card.getChildren().addAll(tmpSearchIcon, tmpTitle, tmpSub);
     }
