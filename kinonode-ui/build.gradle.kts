@@ -117,3 +117,39 @@ jlink {
         installerOptions = commonOptions + osSpecificOptions
     }
 }
+
+// Copy the install/uninstall scripts and icon to the image directory
+tasks.named("jlink") {
+    doLast {
+        val imageDirPath = layout.buildDirectory.dir("KinoNode-${version}").get().asFile
+        val osName = System.getProperty("os.name").lowercase()
+        
+        if (!osName.contains("win") && !osName.contains("mac")) {
+            // Linux scripts
+            copy {
+                from("src/main/scripts/linux/install.sh")
+                from("src/main/scripts/linux/install_shortcut.sh")
+                from("src/main/scripts/linux/uninstall.sh")
+                into(imageDirPath)
+            }
+            ant.withGroovyBuilder {
+                "chmod"("file" to File(imageDirPath, "install.sh"), "perm" to "755")
+                "chmod"("file" to File(imageDirPath, "install_shortcut.sh"), "perm" to "755")
+                "chmod"("file" to File(imageDirPath, "uninstall.sh"), "perm" to "755")
+            }
+            // Application Icon
+            copy {
+                from("src/main/resources/io/github/kullik01/kinonode/images/logos/logo_highres.png")
+                into(imageDirPath)
+                rename { "logo.png" }
+            }
+        } else if (osName.contains("win")) {
+            // Windows scripts
+            copy {
+                from("src/main/scripts/windows/install_shortcut.bat")
+                from("src/main/scripts/windows/uninstall.bat")
+                into(imageDirPath)
+            }
+        }
+    }
+}
