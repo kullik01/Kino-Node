@@ -64,6 +64,7 @@ public class Movie {
   private String actors;
   private Integer duration; // Duration in minutes
   private Instant dateAdded;
+  private String matchStatus;
 
   /** Constructs a new Movie with the current timestamp as the date added. */
   public Movie() {
@@ -443,6 +444,24 @@ public class Movie {
   }
 
   /**
+   * Gets the match status indicating how this movie was identified during sync.
+   *
+   * @return the match status (MATCHED, UNRESOLVED, UNMATCHED, or MANUAL)
+   */
+  public String getMatchStatus() {
+    return matchStatus;
+  }
+
+  /**
+   * Sets the match status indicating how this movie was identified during sync.
+   *
+   * @param matchStatus the match status to set
+   */
+  public void setMatchStatus(String matchStatus) {
+    this.matchStatus = matchStatus;
+  }
+
+  /**
    * Returns a string representation of the Movie object, including its ID,
    * title, and file path.
    *
@@ -451,6 +470,6 @@ public class Movie {
   @Override
   public String toString() {
     return "Movie{" + "id=" + id + ", title='" + title + '\'' + ", filePath='"
-        + filePath + '\'' + '}';
+        + filePath + '\'' + ", matchStatus='" + matchStatus + '\'' + '}';
   }
 }

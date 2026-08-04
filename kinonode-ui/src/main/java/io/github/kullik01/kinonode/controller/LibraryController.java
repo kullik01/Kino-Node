@@ -69,6 +69,11 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.ResourceBundle;
 import javafx.concurrent.Task;
+import io.github.kullik01.kinonode.service.ImdbService;
+import io.github.kullik01.kinonode.view.pages.DisambiguationView;
+import javafx.stage.Stage;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
@@ -95,6 +100,10 @@ public class LibraryController implements Refreshable {
   private static final Logger LOGGER =
       Logger.getLogger(LibraryController.class.getName());
 
+  private static final double MIN_CARD_WIDTH = 200.0;
+  private static final double CARD_GAP = 15.0;
+  private static final double GRID_PADDING = 10.0;
+
   private VBox libraryRoot;
   private TextField txtSearch;
   private ComboBox<String> cmbSort;
@@ -109,19 +118,21 @@ public class LibraryController implements Refreshable {
   private final AppContext appContext;
   private final Provider<MovieDetailController> movieDetailControllerProvider;
   private final ResourceBundle resources;
+  private final ImdbService imdbService;
 
   @Inject
   public LibraryController(MovieRepository movieRepository,
       LibraryScanService libraryScanService,
       SettingsRepository settingsRepository, AppContext appContext,
       Provider<MovieDetailController> movieDetailControllerProvider,
-      ResourceBundle resources) {
+      ResourceBundle resources, ImdbService imdbService) {
     this.movieRepository = movieRepository;
     this.libraryScanService = libraryScanService;
     this.settingsRepository = settingsRepository;
     this.appContext = appContext;
     this.movieDetailControllerProvider = movieDetailControllerProvider;
     this.resources = resources;
+    this.imdbService = imdbService;
   }
 
   private List<Movie> allMovies = new ArrayList<>();
@@ -183,6 +194,24 @@ public class LibraryController implements Refreshable {
     syncTooltip.setShowDelay(Duration.millis(250));
     btnSyncLibrary.setTooltip(syncTooltip);
 
+    Button btnAddMovie = new Button();
+    btnAddMovie.setId("btnAddMovie");
+    btnAddMovie.getStyleClass().addAll("button-secondary", "button-icon");
+    btnAddMovie.setMinWidth(36.0);
+    btnAddMovie.setMaxWidth(36.0);
+    btnAddMovie.setMinHeight(36.0);
+    btnAddMovie.setOnAction(e -> showAddMovieDialog());
+
+    SVGPath addGraphic = new SVGPath();
+    addGraphic.setContent("M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z");
+    addGraphic.setFill(Color.WHITE);
+    btnAddMovie.setGraphic(addGraphic);
+
+    Tooltip addTooltip =
+        new Tooltip(resources.getString("library.add.movie.title"));
+    addTooltip.setShowDelay(Duration.millis(250));
+    btnAddMovie.setTooltip(addTooltip);
+
     progressArea = new HBox();
     progressArea.setId("progressArea");
     progressArea.setAlignment(Pos.CENTER_LEFT);
@@ -213,7 +242,7 @@ public class LibraryController implements Refreshable {
 
     progressArea.getChildren().addAll(progressBar, btnCancelSync);
     toolbar.getChildren().addAll(titleLbl, spacer, txtSearch, cmbSort,
-        btnSyncLibrary, progressArea);
+        btnAddMovie, btnSyncLibrary, progressArea);
 
     ScrollPane scrollPane = new ScrollPane();
     scrollPane.setFitToWidth(true);
@@ -226,10 +255,41 @@ public class LibraryController implements Refreshable {
     gridPane.getStyleClass().add("movie-grid");
     scrollPane.setContent(gridPane);
 
+    scrollPane.widthProperty().addListener((tmpObs, tmpOld, tmpNew) -> {
+      recalculateCardSizes(tmpNew.doubleValue());
+    });
+
     libraryRoot.getChildren().addAll(toolbar, scrollPane);
     rootPane.getChildren().add(libraryRoot);
 
     return rootPane;
+  }
+
+  /**
+   * Recalculates card sizes to fill the available grid width responsively.
+   *
+   * @param availableWidth the available width from the scroll pane
+   */
+  private void recalculateCardSizes(double availableWidth) {
+    if (availableWidth <= 0)
+      return;
+    double tmpUsableWidth = availableWidth - (GRID_PADDING * 2);
+    int tmpColumns =
+        Math.max(1, (int) (tmpUsableWidth / (MIN_CARD_WIDTH + CARD_GAP)));
+    double tmpCardWidth =
+        (tmpUsableWidth - (tmpColumns - 1) * CARD_GAP) / tmpColumns;
+
+    for (Node tmpChild : gridPane.getChildren()) {
+      if (tmpChild instanceof VBox) {
+        ((Region) tmpChild).setPrefWidth(tmpCardWidth);
+        ((Region) tmpChild).setMaxWidth(tmpCardWidth);
+      }
+    }
+
+    // Update card controllers
+    for (MovieCardController tmpController : controllerCache.values()) {
+      tmpController.updateCardWidth(tmpCardWidth);
+    }
   }
 
   /**
@@ -416,6 +476,11 @@ public class LibraryController implements Refreshable {
     } else {
       gridPane.setAlignment(Pos.TOP_LEFT);
       gridPane.getChildren().setAll(newCards);
+    }
+
+    // Ensure cards are sized correctly for current width
+    if (gridPane.getParent() instanceof ScrollPane scroll) {
+      recalculateCardSizes(scroll.getWidth());
     }
   }
 
@@ -693,6 +758,16 @@ public class LibraryController implements Refreshable {
       progressBar.progressProperty().unbind();
       progressBar.setProgress(0);
       progressArea.setVisible(false);
+
+      if (tmpResult.unresolvedMovies() != null
+          && !tmpResult.unresolvedMovies().isEmpty()) {
+        Stage tmpOwnerStage = (Stage) gridPane.getScene().getWindow();
+        DisambiguationView tmpDisambiguationView =
+            new DisambiguationView(tmpOwnerStage, resources,
+                tmpResult.unresolvedMovies(), imdbService, movieRepository);
+        tmpDisambiguationView.showAndWait();
+      }
+
       refresh();
       appContext.notifyLibraryChanged();
 
@@ -734,5 +809,61 @@ public class LibraryController implements Refreshable {
     if (activeScanTask != null) {
       activeScanTask.cancel();
     }
+  }
+
+  private void showAddMovieDialog() {
+    Stage tmpDialogStage = new Stage();
+    tmpDialogStage.setTitle(resources.getString("library.add.movie.title"));
+
+    // We will just show a basic implementation of the dialog for now.
+    // Further complex implementations could be added in a separate view file.
+    VBox tmpLayout = new VBox(15);
+    tmpLayout.setPadding(new Insets(20));
+    tmpLayout.setStyle("-fx-background-color: -color-bg-default;");
+
+    Label tmpPrompt =
+        new Label(resources.getString("library.add.movie.imdb.prompt"));
+    TextField tmpInput = new TextField();
+    Button btnLookup =
+        new Button(resources.getString("library.add.movie.imdb.lookup"));
+    btnLookup.getStyleClass().add("button-primary");
+
+    btnLookup.setOnAction(e -> {
+      String tmpId = tmpInput.getText().trim();
+      if (!tmpId.matches("^tt\\d{7,}$")) {
+        tmpInput.setStyle("-fx-border-color: red;");
+        return;
+      }
+
+      Task<Void> tmpAdd = new Task<>() {
+        @Override
+        protected Void call() {
+          Movie tmpMovie = new Movie();
+          tmpMovie.setMatchStatus("MANUAL");
+          imdbService.enrichMovieDataById(tmpId, tmpMovie);
+          if (tmpMovie.getTitle() != null) {
+            movieRepository.insert(tmpMovie);
+          }
+          return null;
+        }
+      };
+      tmpAdd.setOnSucceeded(evt -> {
+        tmpDialogStage.close();
+        refresh();
+        appContext.notifyLibraryChanged();
+      });
+      Thread t = new Thread(tmpAdd);
+      t.setDaemon(true);
+      t.start();
+    });
+
+    tmpLayout.getChildren().addAll(tmpPrompt, tmpInput, btnLookup);
+
+    javafx.scene.Scene tmpScene = new javafx.scene.Scene(tmpLayout, 400, 200);
+    tmpScene.getStylesheets().addAll(gridPane.getScene().getStylesheets());
+    tmpDialogStage.setScene(tmpScene);
+    tmpDialogStage.initOwner(gridPane.getScene().getWindow());
+    tmpDialogStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+    tmpDialogStage.showAndWait();
   }
 }

@@ -185,12 +185,17 @@ public class DatabaseService {
           "INSERT INTO settings (key, value) VALUES ('video_extensions', '3gp,avi,flv,m4v,mkv,mov,mp4,mpeg,mpg,mts,ogg,ogv,ts,webm,wmv') ON CONFLICT(key) DO UPDATE SET value = excluded.value;");
 
       // Schema migration for new columns
-      String[] tmpNewColumns = {"director", "writer", "producer",
-          "cinematographer", "composer", "actors", "duration", "raw_rating"};
+      String[] tmpNewColumns =
+          {"director", "writer", "producer", "cinematographer", "composer",
+              "actors", "duration", "raw_rating", "match_status"};
       for (String tmpColumn : tmpNewColumns) {
         try {
-          String columnType = tmpColumn.equals("duration") ? "INTEGER"
-              : (tmpColumn.equals("raw_rating") ? "REAL" : "TEXT");
+          String columnType =
+              tmpColumn.equals("duration") ? "INTEGER"
+                  : (tmpColumn.equals("raw_rating") ? "REAL"
+                      : (tmpColumn.equals("match_status")
+                          ? "TEXT DEFAULT 'MATCHED'"
+                          : "TEXT"));
           tmpStatement.execute("ALTER TABLE movies ADD COLUMN " + tmpColumn
               + " " + columnType + ";");
           LOGGER.info("Added new column to movies: " + tmpColumn);

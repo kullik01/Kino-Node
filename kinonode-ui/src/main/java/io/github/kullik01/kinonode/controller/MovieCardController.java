@@ -80,6 +80,8 @@ public class MovieCardController {
 
     imgPoster = new ImageView();
     imgPoster.getStyleClass().add("movie-poster");
+    imgPoster.setPreserveRatio(true);
+    imgPoster.setSmooth(true);
     posterContainer.getChildren().add(imgPoster);
 
     lblTitle = new Label();
@@ -94,6 +96,18 @@ public class MovieCardController {
     rootPane.getChildren().addAll(posterContainer, lblTitle, lblYear,
         lblDirector);
     return rootPane;
+  }
+
+  /**
+   * Updates the card width to dynamically fit the responsive grid layout.
+   *
+   * @param cardWidth the new card width in pixels
+   */
+  public void updateCardWidth(double cardWidth) {
+    double tmpPosterWidth = cardWidth - 20; // card padding
+    imgPoster.setFitWidth(tmpPosterWidth);
+    imgPoster.setFitHeight(tmpPosterWidth * 1.45); // ~2:3 aspect ratio
+    lblTitle.setMaxWidth(tmpPosterWidth);
   }
 
   /**

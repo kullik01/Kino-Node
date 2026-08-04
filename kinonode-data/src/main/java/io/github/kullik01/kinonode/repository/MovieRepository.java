@@ -211,8 +211,8 @@ public class MovieRepository {
   public Movie insert(Movie movie) {
     String tmpSql =
         """
-            INSERT INTO movies (file_path, title, year, genre, description, rating, cover_image_path, trailer_url, director, writer, producer, cinematographer, composer, actors, duration, date_added, raw_rating)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            INSERT INTO movies (file_path, title, year, genre, description, rating, cover_image_path, trailer_url, director, writer, producer, cinematographer, composer, actors, duration, date_added, raw_rating, match_status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """;
     // Prepare statement requesting generated keys to retrieve the
     // auto-incremented ID
@@ -259,6 +259,8 @@ public class MovieRepository {
       else
         tmpPreparedStatement.setNull(17, Types.DOUBLE);
 
+      tmpPreparedStatement.setString(18, movie.getMatchStatus());
+
       int tmpAffectedRows = tmpPreparedStatement.executeUpdate();
       // If the row was successfully inserted, fetch the auto-generated ID
       if (tmpAffectedRows > 0) {
@@ -284,7 +286,7 @@ public class MovieRepository {
   public void update(Movie movie) {
     String tmpSql =
         """
-            UPDATE movies SET file_path = ?, title = ?, year = ?, genre = ?, description = ?, rating = ?, cover_image_path = ?, trailer_url = ?, director = ?, writer = ?, producer = ?, cinematographer = ?, composer = ?, actors = ?, duration = ?, date_added = ?, raw_rating = ?
+            UPDATE movies SET file_path = ?, title = ?, year = ?, genre = ?, description = ?, rating = ?, cover_image_path = ?, trailer_url = ?, director = ?, writer = ?, producer = ?, cinematographer = ?, composer = ?, actors = ?, duration = ?, date_added = ?, raw_rating = ?, match_status = ?
             WHERE id = ?;
             """;
     try (PreparedStatement tmpPreparedStatement =
@@ -329,7 +331,8 @@ public class MovieRepository {
       else
         tmpPreparedStatement.setNull(17, Types.DOUBLE);
 
-      tmpPreparedStatement.setInt(18, movie.getId());
+      tmpPreparedStatement.setString(18, movie.getMatchStatus());
+      tmpPreparedStatement.setInt(19, movie.getId());
 
       tmpPreparedStatement.executeUpdate();
     } catch (SQLException tmpException) {
@@ -430,6 +433,38 @@ public class MovieRepository {
     // database
     tmpMovie
         .setDateAdded(Instant.ofEpochSecond(resultSet.getLong("date_added")));
+
+    try {
+      tmpMovie.setMatchStatus(resultSet.getString("match_status"));
+    } catch (SQLException tmpException) {
+      tmpMovie.setMatchStatus("MATCHED");
+    }
+
     return tmpMovie;
+  }
+
+  /**
+   * Retrieves all movies matching the specified match status.
+   *
+   * @param matchStatus the match status to filter by
+   * @return a list of movies with the given match status
+   */
+  public List<Movie> findByMatchStatus(String matchStatus) {
+    List<Movie> tmpMovies = new ArrayList<>();
+    String tmpSql = "SELECT * FROM movies WHERE match_status = ?";
+    try (PreparedStatement tmpPreparedStatement =
+        databaseService.getConnection().prepareStatement(tmpSql)) {
+      tmpPreparedStatement.setString(1, matchStatus);
+      try (ResultSet tmpResultSet = tmpPreparedStatement.executeQuery()) {
+        while (tmpResultSet.next()) {
+          tmpMovies.add(mapRowToMovie(tmpResultSet));
+        }
+      }
+    } catch (SQLException tmpException) {
+      LOGGER.log(Level.SEVERE,
+          "Failed to find movies by match status: " + matchStatus,
+          tmpException);
+    }
+    return tmpMovies;
   }
 }

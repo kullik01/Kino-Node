@@ -821,4 +821,192 @@ public class ImdbService {
     }
     return null;
   }
+
+  /**
+   * Searches the IMDb Suggestion API to retrieve multiple disambiguation
+   * candidates for a given query. Returns up to 10 movie suggestions with basic
+   * metadata (title, year, poster, actors).
+   *
+   * @param query the search query string
+   * @return a list of up to 10 candidate {@link Movie} objects, or an empty
+   *         list on error
+   */
+  public List<Movie> searchSuggestions(String query) {
+    List<Movie> tmpResultsList = new ArrayList<>();
+    if (query == null || query.isBlank()) {
+      return tmpResultsList;
+    }
+
+    try {
+      String tmpCleanedQuery = query.replaceAll("[^a-zA-Z0-9 äöüÄÖÜß-]", " ")
+          .trim().replaceAll("\\s+", " ");
+      if (tmpCleanedQuery.isEmpty())
+        return tmpResultsList;
+
+      String tmpEncodedQuery = URLEncoder
+          .encode(tmpCleanedQuery.toLowerCase(), StandardCharsets.UTF_8)
+          .replace("+", "%20");
+      String tmpFirstLetter = tmpCleanedQuery.substring(0, 1).toLowerCase();
+
+      String tmpUrlStr = "https://v3.sg.media-imdb.com/suggestion/"
+          + tmpFirstLetter + "/" + tmpEncodedQuery + ".json";
+
+      HttpRequest tmpRequest = HttpRequest.newBuilder()
+          .uri(URI.create(tmpUrlStr))
+          .header("User-Agent",
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+          .header("Accept", "application/json")
+          .header("Accept-Language", "en-US,en;q=0.5").GET().build();
+
+      HttpResponse<String> tmpResponse =
+          client.send(tmpRequest, HttpResponse.BodyHandlers.ofString());
+
+      if (tmpResponse.statusCode() == 200) {
+        JsonObject tmpJsonObject =
+            JsonParser.parseString(tmpResponse.body()).getAsJsonObject();
+        if (tmpJsonObject.has("d") && tmpJsonObject.get("d").isJsonArray()) {
+          JsonArray tmpResults = tmpJsonObject.getAsJsonArray("d");
+          for (JsonElement tmpElement : tmpResults) {
+            JsonObject tmpResult = tmpElement.getAsJsonObject();
+
+            if (tmpResult.has("id")) {
+              String tmpIdentifier = tmpResult.get("id").getAsString();
+              if (!tmpIdentifier.startsWith("tt")) {
+                continue;
+              }
+
+              Movie tmpMovie = new Movie();
+              if (tmpResult.has("l")) {
+                tmpMovie.setTitle(tmpResult.get("l").getAsString());
+              }
+              if (tmpResult.has("y")) {
+                tmpMovie.setYear(tmpResult.get("y").getAsInt());
+              }
+              if (tmpResult.has("i")) {
+                JsonObject tmpImageObj = tmpResult.getAsJsonObject("i");
+                if (tmpImageObj.has("imageUrl")) {
+                  String tmpLocalImagePath = downloadPoster(
+                      tmpImageObj.get("imageUrl").getAsString(), tmpIdentifier);
+                  if (tmpLocalImagePath != null) {
+                    tmpMovie.setCoverImagePath(tmpLocalImagePath);
+                  }
+                }
+              }
+              if (tmpResult.has("s")) {
+                String tmpStarring = tmpResult.get("s").getAsString();
+                if (tmpStarring != null && !tmpStarring.isBlank()) {
+                  String[] tmpActorArray = tmpStarring.split(",");
+                  Set<String> tmpUniqueStarring = new LinkedHashSet<>();
+                  for (String tmpActor : tmpActorArray) {
+                    if (tmpActor != null && !tmpActor.isBlank()) {
+                      tmpUniqueStarring.add(tmpActor.trim());
+                    }
+                  }
+                  if (!tmpUniqueStarring.isEmpty()) {
+                    tmpMovie.setActors(
+                        String.join(", ", tmpUniqueStarring) + ", ...");
+                  }
+                }
+              }
+              tmpResultsList.add(tmpMovie);
+              if (tmpResultsList.size() >= 10) {
+                break;
+              }
+            }
+          }
+        }
+      }
+    } catch (Exception tmpException) {
+      LOGGER.log(Level.WARNING,
+          "Error searching IMDb suggestions for: " + query, tmpException);
+    }
+    return tmpResultsList;
+  }
+
+  /**
+   * Enriches a movie object with full metadata using a known IMDb identifier.
+   * Downloads the poster image and fetches details from IMDb title page and
+   * Wikidata SPARQL API.
+   *
+   * @param imdbId the IMDb identifier (e.g., "tt0133093")
+   * @param movie the {@link Movie} object to enrich with fetched metadata
+   */
+  public void enrichMovieDataById(String imdbId, Movie movie) {
+    if (imdbId == null || imdbId.isBlank()) {
+      return;
+    }
+
+    try {
+      String tmpFirstLetter = imdbId.substring(0, 1).toLowerCase();
+      String tmpEncodedQuery =
+          URLEncoder.encode(imdbId, StandardCharsets.UTF_8);
+      String tmpUrlStr = "https://v3.sg.media-imdb.com/suggestion/"
+          + tmpFirstLetter + "/" + tmpEncodedQuery + ".json";
+
+      HttpRequest tmpRequest = HttpRequest.newBuilder()
+          .uri(URI.create(tmpUrlStr))
+          .header("User-Agent",
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+          .header("Accept", "application/json")
+          .header("Accept-Language", "en-US,en;q=0.5").GET().build();
+
+      HttpResponse<String> tmpResponse =
+          client.send(tmpRequest, HttpResponse.BodyHandlers.ofString());
+
+      if (tmpResponse.statusCode() == 200) {
+        JsonObject tmpJsonObject =
+            JsonParser.parseString(tmpResponse.body()).getAsJsonObject();
+        if (tmpJsonObject.has("d") && tmpJsonObject.get("d").isJsonArray()) {
+          JsonArray tmpResults = tmpJsonObject.getAsJsonArray("d");
+          for (JsonElement tmpElement : tmpResults) {
+            JsonObject tmpResult = tmpElement.getAsJsonObject();
+            if (tmpResult.has("id")
+                && tmpResult.get("id").getAsString().equals(imdbId)) {
+
+              if (tmpResult.has("l")) {
+                movie.setTitle(tmpResult.get("l").getAsString());
+              }
+              if (tmpResult.has("y")) {
+                movie.setYear(tmpResult.get("y").getAsInt());
+              }
+              if (tmpResult.has("i")) {
+                JsonObject tmpImageObj = tmpResult.getAsJsonObject("i");
+                if (tmpImageObj.has("imageUrl")) {
+                  String tmpLocalImagePath = downloadPoster(
+                      tmpImageObj.get("imageUrl").getAsString(), imdbId);
+                  if (tmpLocalImagePath != null) {
+                    movie.setCoverImagePath(tmpLocalImagePath);
+                  }
+                }
+              }
+              if (tmpResult.has("s")) {
+                String tmpStarring = tmpResult.get("s").getAsString();
+                if (tmpStarring != null && !tmpStarring.isBlank()) {
+                  String[] tmpActorArray = tmpStarring.split(",");
+                  Set<String> tmpUniqueStarring = new LinkedHashSet<>();
+                  for (String tmpActor : tmpActorArray) {
+                    if (tmpActor != null && !tmpActor.isBlank()) {
+                      tmpUniqueStarring.add(tmpActor.trim());
+                    }
+                  }
+                  if (!tmpUniqueStarring.isEmpty()) {
+                    movie.setActors(
+                        String.join(", ", tmpUniqueStarring) + ", ...");
+                  }
+                }
+              }
+              break;
+            }
+          }
+        }
+      }
+
+      fetchImdbTitleDetails(imdbId, movie);
+      fetchWikidataDetails(imdbId, movie);
+      LOGGER.info("Successfully enriched movie by ID: " + imdbId);
+    } catch (Exception tmpException) {
+      LOGGER.log(Level.WARNING, "Error enriching movie by IMDb ID: " + imdbId,
+          tmpException);
+    }
+  }
 }

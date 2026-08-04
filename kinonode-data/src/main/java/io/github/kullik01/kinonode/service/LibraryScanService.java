@@ -111,7 +111,8 @@ public class LibraryScanService {
 
     if (tmpFoldersSetting.isBlank()) {
       return new ScanResult(0, 0, List.of(
-          "No workspace folders configured. Please configure folders in Settings."));
+          "No workspace folders configured. Please configure folders in Settings."),
+          new ArrayList<>());
     }
 
     String[] tmpFolders = tmpFoldersSetting.split(";");
@@ -152,6 +153,7 @@ public class LibraryScanService {
     int tmpTotalFiles = tmpFilesToScan.size();
     int tmpNewMoviesAdded = 0;
     List<String> tmpLogs = new ArrayList<>();
+    List<Movie> tmpUnresolvedMovies = new ArrayList<>();
     LOGGER.log(Level.INFO, "Found {0} potential video files to scan.",
         tmpTotalFiles);
 
@@ -181,6 +183,20 @@ public class LibraryScanService {
         boolean fetchedDirect = imdbService.fetchImdbDurationDirectly(tmpMovie);
         if (!fetchedDirect || tmpMovie.getRating() == null) {
           imdbService.enrichMovieData(tmpMovie);
+        }
+
+        if (tmpMovie.getCoverImagePath() == null
+            && tmpMovie.getRating() == null) {
+          List<Movie> tmpSuggestions =
+              imdbService.searchSuggestions(tmpMovie.getTitle());
+          if (!tmpSuggestions.isEmpty()) {
+            tmpMovie.setMatchStatus("UNRESOLVED");
+            tmpUnresolvedMovies.add(tmpMovie);
+          } else {
+            tmpMovie.setMatchStatus("UNMATCHED");
+          }
+        } else {
+          tmpMovie.setMatchStatus("MATCHED");
         }
 
         // Fetch and set a trailer URL from YouTube
@@ -215,13 +231,26 @@ public class LibraryScanService {
         if (tmpNeedsEnrichment) {
           callback.updateMessage("Checking IMDB for existing movie: "
               + tmpExistingMovie.getTitle());
-          String tmpOriginalTitle = tmpExistingMovie.getTitle();
 
           // Do not overwrite existing title here since the user might have
           // manually corrected it.
 
           imdbService.fetchImdbDurationDirectly(tmpExistingMovie);
           imdbService.enrichMovieData(tmpExistingMovie);
+
+          if (tmpExistingMovie.getCoverImagePath() == null
+              && tmpExistingMovie.getRating() == null) {
+            List<Movie> tmpSuggestions =
+                imdbService.searchSuggestions(tmpExistingMovie.getTitle());
+            if (!tmpSuggestions.isEmpty()) {
+              tmpExistingMovie.setMatchStatus("UNRESOLVED");
+              tmpUnresolvedMovies.add(tmpExistingMovie);
+            } else {
+              tmpExistingMovie.setMatchStatus("UNMATCHED");
+            }
+          } else {
+            tmpExistingMovie.setMatchStatus("MATCHED");
+          }
 
           if (tmpExistingMovie.getTrailerUrl() == null
               || tmpExistingMovie.getTrailerUrl().isBlank()) {
@@ -248,7 +277,8 @@ public class LibraryScanService {
     callback.updateProgress(tmpTotalFiles, tmpTotalFiles);
     callback.updateMessage(
         "Scan complete. Added " + tmpNewMoviesAdded + " new movies.");
-    return new ScanResult(tmpTotalFiles, tmpNewMoviesAdded, tmpLogs);
+    return new ScanResult(tmpTotalFiles, tmpNewMoviesAdded, tmpLogs,
+        tmpUnresolvedMovies);
   }
 
   /**
@@ -319,8 +349,11 @@ public class LibraryScanService {
    *        the database
    * @param logs a list of logging/operation messages describing the files
    *        processed
+   * @param unresolvedMovies a list of movies that could not be automatically
+   *        matched to a single IMDb entry
    */
-  public record ScanResult(int totalScanned, int newAdded, List<String> logs) {}
+  public record ScanResult(int totalScanned, int newAdded, List<String> logs,
+      List<Movie> unresolvedMovies) {}
 
   /**
    * Checks whether the actor list strings contain exactly three names followed
