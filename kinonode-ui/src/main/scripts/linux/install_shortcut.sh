@@ -10,11 +10,29 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$(realpath "$0")")" && pwd)"
-INSTALL_DIR="${HOME}/.kinonode-app/KinoNode"
-EXEC_PATH="${INSTALL_DIR}/bin/KinoNode"
 ICON_TARGET_DIR="${HOME}/.local/share/icons/hicolor/256x256/apps"
 ICON_PATH="${ICON_TARGET_DIR}/kinonode.png"
 MENU_DESKTOP_FILE="${HOME}/.local/share/applications/KinoNode.desktop"
+
+# Resolve Executable Path
+if [ -f "${SCRIPT_DIR}/bin/KinoNode" ]; then
+    EXEC_PATH="${SCRIPT_DIR}/bin/KinoNode"
+elif [ -f "${HOME}/.kinonode-app/KinoNode/bin/KinoNode" ]; then
+    EXEC_PATH="${HOME}/.kinonode-app/KinoNode/bin/KinoNode"
+elif [ -f "/opt/KinoNode/bin/KinoNode" ]; then
+    EXEC_PATH="/opt/KinoNode/bin/KinoNode"
+else
+    EXEC_PATH="${SCRIPT_DIR}/KinoNode"
+fi
+
+# Resolve Icon Source Image
+if [ -f "${SCRIPT_DIR}/logo.png" ]; then
+    ICON_SRC="${SCRIPT_DIR}/logo.png"
+elif [ -f "${HOME}/.kinonode-app/KinoNode/logo.png" ]; then
+    ICON_SRC="${HOME}/.kinonode-app/KinoNode/logo.png"
+else
+    ICON_SRC=""
+fi
 
 # Resolve user's localized Desktop directory
 DESKTOP_DIR="$(xdg-user-dir DESKTOP 2>/dev/null || echo "${HOME}/Desktop")"
@@ -27,11 +45,11 @@ mkdir -p "${HOME}/.local/share/applications"
 mkdir -p "${ICON_TARGET_DIR}"
 
 # Install application icon into FreeDesktop hicolor theme path
-if [ -f "${SCRIPT_DIR}/logo.png" ]; then
-    cp "${SCRIPT_DIR}/logo.png" "${ICON_PATH}"
+if [ -n "${ICON_SRC}" ] && [ -f "${ICON_SRC}" ]; then
+    cp "${ICON_SRC}" "${ICON_PATH}"
 fi
 
-# FreeDesktop .desktop specification with StartupWMClass to prevent fallback Java icon
+# FreeDesktop .desktop specification with absolute Icon path and StartupWMClass
 DESKTOP_CONTENT="[Desktop Entry]
 Version=1.0
 Type=Application
@@ -39,7 +57,7 @@ Name=KinoNode
 GenericName=Movie Library Manager
 Comment=Personal Movie Library Manager & Media Center
 Exec=${EXEC_PATH}
-Icon=kinonode
+Icon=${ICON_PATH}
 Terminal=false
 Categories=Utility;AudioVideo;Video;Player;Java;
 StartupWMClass=io-github-kullik01-kinonode-Launcher

@@ -34,6 +34,8 @@ KinoNode is a modern, lightweight, personal movie library manager built on a sol
 - [📦 Native Distribution & Packaging](#-native-distribution--packaging)
   - [Modular Runtime Image](#modular-runtime-image)
   - [Native OS Installers](#native-os-installers)
+  - [🐧 Linux Desktop Integration & Shortcuts](#-linux-desktop-integration--shortcuts)
+  - [🧹 Guaranteed 100% Deep Uninstallation](#-guaranteed-100-deep-uninstallation)
   - [Automated CI/CD Pipelines](#automated-cicd-pipelines)
 - [🤝 Contributing & Feedback](#-contributing--feedback)
 - [📄 License](#-license)
@@ -163,6 +165,19 @@ Generate a native executable installer (Windows `.exe`, macOS `.dmg`, or Linux `
 ```
 > [!NOTE]
 > Cross-compilation is not supported by `jpackage`. You must run the build command on the target operating system.
+
+### 🐧 Linux Desktop Integration & Shortcuts
+KinoNode automatically extracts FreeDesktop icon assets (`~/.local/share/icons/hicolor/256x256/apps/kinonode.png`) and generates application menu entries (`~/.local/share/applications/KinoNode.desktop`) and user Desktop shortcuts (`~/Desktop/KinoNode.desktop`) upon launch or via the included installation script:
+```bash
+./install_shortcut.sh
+```
+* **Window Manager Binding:** Utilizes `StartupWMClass=io-github-kullik01-kinonode-Launcher` to bind window manager instances directly to custom branding in Linux taskbars and window switchers instead of generic Java runtime icons.
+
+### 🧹 Guaranteed 100% Deep Uninstallation
+KinoNode includes platform-native uninstallation scripts to guarantee zero residual files post-removal:
+* **Linux:** Run `./uninstall.sh` (or `./uninstall.sh --force`) to purge binaries (`~/.kinonode-app` / `/opt/KinoNode`), shortcuts, icon assets, SQLite databases (`kinonode.db`), configuration, logs, and caches.
+* **Windows:** Run `uninstall.bat` (or `powershell -ExecutionPolicy Bypass -File uninstall.ps1`) to remove binaries, Start Menu and Desktop `.lnk` shortcuts, `%APPDATA%\KinoNode`, local caches, and Windows Registry keys.
+* **macOS:** Run `./uninstall.command` to remove `.app` bundles, Application Support data, preferences (`.plist`), caches, and flush `cfprefsd`.
 
 ### Automated CI/CD Pipelines
 KinoNode features a GitHub Actions workflow (`.github/workflows/build.yml`) triggered on pushes and pull requests to the main branch. The workflow runs automated tests and builds distribution assets across a multi-OS matrix:

@@ -114,10 +114,24 @@ public class KinoNodeApp extends Application {
       Parent tmpRoot = tmpController.buildView();
       tmpController.initialize();
 
-      // Set the application logo and title
-      primaryStage.getIcons()
-          .add(new javafx.scene.image.Image(getClass().getResourceAsStream(
-              "/io/github/kullik01/kinonode/images/logos/logo.png")));
+      // Set the application logo and title with multi-resolution icon support
+      String[] tmpLogoPaths = new String[] {
+          "/io/github/kullik01/kinonode/images/logos/logo_highres.png",
+          "/io/github/kullik01/kinonode/images/logos/logo.png",
+          "/io/github/kullik01/kinonode/images/logos/app_logo_cursor_128.png",
+          "/io/github/kullik01/kinonode/images/logos/app_logo_cursor_48.png",
+          "/io/github/kullik01/kinonode/images/logos/app_logo_cursor_32.png"};
+      for (String tmpLogoPath : tmpLogoPaths) {
+        try (InputStream tmpIconStream =
+            getClass().getResourceAsStream(tmpLogoPath)) {
+          if (tmpIconStream != null) {
+            primaryStage.getIcons()
+                .add(new javafx.scene.image.Image(tmpIconStream));
+          }
+        } catch (Exception tmpException) {
+          // Ignore unreadable individual resolution streams
+        }
+      }
       primaryStage.setTitle("KinoNode - Personal Movie Library");
 
       // Calculate adaptive, high-resolution initial window dimensions based on
@@ -156,6 +170,11 @@ public class KinoNodeApp extends Application {
       });
 
       primaryStage.show();
+
+      // Trigger automatic cross-platform desktop shortcut & icon integration
+      // (Linux, Windows, macOS)
+      io.github.kullik01.kinonode.uiutil.DesktopIntegration
+          .ensureDesktopIntegrationAsync();
 
       Platform.runLater(() -> {
         primaryStage.setIconified(false);

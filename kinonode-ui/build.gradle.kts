@@ -147,20 +147,24 @@ tasks.named("jlink") {
                 rename { "logo.png" }
             }
         } else if (osName.contains("win")) {
-            // Windows scripts
+            // Windows scripts & icon
             copy {
                 from("src/main/scripts/windows/install_shortcut.bat")
                 from("src/main/scripts/windows/uninstall.bat")
                 from("src/main/scripts/windows/uninstall.ps1")
+                from("src/main/resources/io/github/kullik01/kinonode/images/logos/logo.ico")
                 into(imageDirPath)
             }
         } else if (osName.contains("mac")) {
-            // macOS scripts
+            // macOS scripts & icon
             copy {
+                from("src/main/scripts/macos/install_shortcut.command")
                 from("src/main/scripts/macos/uninstall.command")
+                from("src/main/resources/io/github/kullik01/kinonode/images/logos/logo.icns")
                 into(imageDirPath)
             }
             ant.withGroovyBuilder {
+                "chmod"("file" to File(imageDirPath, "install_shortcut.command"), "perm" to "755")
                 "chmod"("file" to File(imageDirPath, "uninstall.command"), "perm" to "755")
             }
         }
