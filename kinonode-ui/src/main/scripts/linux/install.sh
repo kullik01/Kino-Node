@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # 
 # BSD 3-Clause License
 # Copyright (c) 2026, Hannah Kullik
@@ -6,26 +6,33 @@
 # install.sh
 # 
 # KinoNode Application Installer for Linux
-# This script copies the application binaries to the user's home directory.
+# Copies application binaries into user environment and sets execution rights.
 
-set -e
-# Determine the installation directory (hidden app folder in home)
-INSTALL_DIR="$HOME/.kinonode-app"
-# Determine the directory where this script resides (inside the bundle)
-SCRIPT_DIR="$(dirname "$(realpath "$0")")"
-# The name of the release folder
-RELEASE_DIR_NAME="$(basename "$SCRIPT_DIR")"
+set -euo pipefail
 
-echo "Installing KinoNode to $INSTALL_DIR ..."
+SCRIPT_DIR="$(cd "$(dirname "$(realpath "$0")")" && pwd)"
 
-# Remove any previous installation to ensure a clean upgrade
-rm -rf "$INSTALL_DIR" 
-mkdir -p "$INSTALL_DIR"
+# Target installation path in user home
+INSTALL_BASE="${HOME}/.kinonode-app"
+TARGET_DIR="${INSTALL_BASE}/KinoNode"
 
-# Copy the entire release bundle into the installation directory
-cp -r "$SCRIPT_DIR" "$INSTALL_DIR/$RELEASE_DIR_NAME"
+echo "Installing KinoNode to ${TARGET_DIR}..."
 
-# Ensure the main KinoNode executable has execute permissions
-chmod +x "$INSTALL_DIR/$RELEASE_DIR_NAME/bin/KinoNode"
+# Remove previous installation to guarantee clean update
+rm -rf "${TARGET_DIR}"
+mkdir -p "${INSTALL_BASE}"
 
-echo "Installation complete. Run install_shortcut.sh to add icons."
+# Copy release bundle into target installation directory
+cp -r "${SCRIPT_DIR}" "${TARGET_DIR}"
+
+# Ensure execution permissions on main launcher binary
+if [ -f "${TARGET_DIR}/bin/KinoNode" ]; then
+    chmod +x "${TARGET_DIR}/bin/KinoNode"
+fi
+
+# Automatically execute desktop shortcut installer if present
+if [ -f "${SCRIPT_DIR}/install_shortcut.sh" ]; then
+    bash "${SCRIPT_DIR}/install_shortcut.sh"
+fi
+
+echo "KinoNode installation complete! You can now launch KinoNode directly from your Applications menu or Desktop shortcut."

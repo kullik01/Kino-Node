@@ -151,7 +151,17 @@ tasks.named("jlink") {
             copy {
                 from("src/main/scripts/windows/install_shortcut.bat")
                 from("src/main/scripts/windows/uninstall.bat")
+                from("src/main/scripts/windows/uninstall.ps1")
                 into(imageDirPath)
+            }
+        } else if (osName.contains("mac")) {
+            // macOS scripts
+            copy {
+                from("src/main/scripts/macos/uninstall.command")
+                into(imageDirPath)
+            }
+            ant.withGroovyBuilder {
+                "chmod"("file" to File(imageDirPath, "uninstall.command"), "perm" to "755")
             }
         }
     }

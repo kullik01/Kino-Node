@@ -1,55 +1,83 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # 
 # BSD 3-Clause License
 # Copyright (c) 2026, Hannah Kullik
 #
 # install_shortcut.sh
 #
-# KinoNode Shortcut Installer for Linux
-# This script generates a .desktop file to provide application menu
-# and desktop shortcuts for KinoNode.
-# Define the installation directory paths
-INSTALL_DIR="$HOME/.kinonode-app"
-SCRIPT_DIR="$(dirname "$(realpath "$0")")"
-RELEASE_DIR_NAME="$(basename "$SCRIPT_DIR")"
-INSTALLED_DIR="$INSTALL_DIR/$RELEASE_DIR_NAME"
+# KinoNode Desktop Shortcut & Integration Script for Linux
 
-# Define paths to the application resources
-ICON_PATH="$INSTALLED_DIR/logo.png"
-EXEC_PATH="$INSTALLED_DIR/bin/KinoNode"
+set -euo pipefail
 
-# Define destination paths for the shortcuts
-MENU_DESKTOP_FILE="$HOME/.local/share/applications/KinoNode.desktop"
-# Safely detect the user's localized Desktop directory
-DESKTOP_DIR="$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop")"
-DESKTOP_DESKTOP_FILE="$DESKTOP_DIR/KinoNode.desktop"
+SCRIPT_DIR="$(cd "$(dirname "$(realpath "$0")")" && pwd)"
+INSTALL_DIR="${HOME}/.kinonode-app/KinoNode"
+EXEC_PATH="${INSTALL_DIR}/bin/KinoNode"
+ICON_TARGET_DIR="${HOME}/.local/share/icons/hicolor/256x256/apps"
+ICON_PATH="${ICON_TARGET_DIR}/kinonode.png"
+MENU_DESKTOP_FILE="${HOME}/.local/share/applications/KinoNode.desktop"
 
-# Desktop file template definition
-DESKTOP_CONTENT="[Desktop Entry]
-Name=KinoNode
-Comment=Personal Movie Library Manager
-Exec=$EXEC_PATH
-Icon=$ICON_PATH
-Terminal=false
-Type=Application
-Categories=Utility;AudioVideo;"
+# Resolve user's localized Desktop directory
+DESKTOP_DIR="$(xdg-user-dir DESKTOP 2>/dev/null || echo "${HOME}/Desktop")"
+DESKTOP_DESKTOP_FILE="${DESKTOP_DIR}/KinoNode.desktop"
 
-# 1. Application Menu Shortcut Creation
-mkdir -p "$HOME/.local/share/applications"
-echo "$DESKTOP_CONTENT" > "$MENU_DESKTOP_FILE"
-chmod +x "$MENU_DESKTOP_FILE"
+echo "Configuring KinoNode Linux desktop integration..."
 
-# Refresh the desktop database to make the new menu entry visible immediately
-update-desktop-database "$HOME/.local/share/applications" 2>/dev/null
-echo "Added KinoNode to application menu."
+# Ensure target directories exist
+mkdir -p "${HOME}/.local/share/applications"
+mkdir -p "${ICON_TARGET_DIR}"
 
-# 2. Desktop Icon Creation
-if [ -d "$DESKTOP_DIR" ]; then
-    echo "$DESKTOP_CONTENT" > "$DESKTOP_DESKTOP_FILE"
-    chmod +x "$DESKTOP_DESKTOP_FILE"
-    
-    # Mark the shortcut as trusted so modern desktop environments display it correctly
-    gio set "$DESKTOP_DESKTOP_FILE" "metadata::trusted" true 2>/dev/null
-    
-    echo "Added KinoNode desktop shortcut."
+# Install application icon into FreeDesktop hicolor theme path
+if [ -f "${SCRIPT_DIR}/logo.png" ]; then
+    cp "${SCRIPT_DIR}/logo.png" "${ICON_PATH}"
 fi
+
+# FreeDesktop .desktop specification with StartupWMClass to prevent fallback Java icon
+DESKTOP_CONTENT="[Desktop Entry]
+Version=1.0
+Type=Application
+Name=KinoNode
+GenericName=Movie Library Manager
+Comment=Personal Movie Library Manager & Media Center
+Exec=${EXEC_PATH}
+Icon=kinonode
+Terminal=false
+Categories=Utility;AudioVideo;Video;Player;Java;
+StartupWMClass=io-github-kullik01-kinonode-Launcher
+MimeType=video/mp4;video/x-matroska;video/webm;
+Keywords=Movie;Film;Media;Library;Watchlist;"
+
+# 1. Install Application Menu Shortcut
+echo "${DESKTOP_CONTENT}" > "${MENU_DESKTOP_FILE}"
+chmod +x "${MENU_DESKTOP_FILE}"
+
+# 2. Install User Desktop Shortcut (if Desktop folder exists)
+if [ -d "${DESKTOP_DIR}" ]; then
+    echo "${DESKTOP_CONTENT}" > "${DESKTOP_DESKTOP_FILE}"
+    chmod +x "${DESKTOP_DESKTOP_FILE}"
+    
+    # Modern Desktop Environment Trust & Metadata Assignment
+    if command -v gio >/dev/null 2>&1; then
+        gio set "${DESKTOP_DESKTOP_FILE}" "metadata::trusted" true 2>/dev/null || true
+    fi
+
+    if command -v kwriteconfig5 >/dev/null 2>&1; then
+        kwriteconfig5 --file "${DESKTOP_DESKTOP_FILE}" --group "Desktop Entry" --key "X-KDE-SubstituteUID" "false" 2>/dev/null || true
+    elif command -v kwriteconfig6 >/dev/null 2>&1; then
+        kwriteconfig6 --file "${DESKTOP_DESKTOP_FILE}" --group "Desktop Entry" --key "X-KDE-SubstituteUID" "false" 2>/dev/null || true
+    fi
+    
+    echo "Added desktop shortcut: ${DESKTOP_DESKTOP_FILE}"
+fi
+
+# 3. Flush Desktop & Icon Databases
+if command -v update-desktop-database >/dev/null 2>&1; then
+    update-desktop-database "${HOME}/.local/share/applications" 2>/dev/null || true
+fi
+
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+    gtk-update-icon-cache -f -t "${HOME}/.local/share/icons/hicolor" 2>/dev/null || true
+fi
+
+touch --no-create "${HOME}/.local/share/icons/hicolor" 2>/dev/null || true
+
+echo "KinoNode desktop integration complete."
