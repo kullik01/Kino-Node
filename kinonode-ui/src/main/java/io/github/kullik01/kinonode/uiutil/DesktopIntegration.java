@@ -120,8 +120,15 @@ public final class DesktopIntegration {
       }
     }
 
+    // Also check if logo.png exists next to the release directory (FocusBean
+    // style)
+    Path tmpReleaseLogo =
+        tmpExecPath.getParent().getParent().resolve("logo.png");
+    Path tmpTargetIconPath =
+        Files.exists(tmpReleaseLogo) ? tmpReleaseLogo : tmpIconPath;
+
     String tmpExecString = tmpExecPath.toAbsolutePath().toString();
-    String tmpIconString = tmpIconPath.toAbsolutePath().toString();
+    String tmpIconString = tmpTargetIconPath.toAbsolutePath().toString();
 
     String tmpDesktopContent = """
         [Desktop Entry]
@@ -133,10 +140,8 @@ public final class DesktopIntegration {
         Exec=%s
         Icon=%s
         Terminal=false
-        Categories=Utility;AudioVideo;Video;Player;Java;
+        Categories=Utility;AudioVideo;
         StartupWMClass=io-github-kullik01-kinonode-Launcher
-        MimeType=video/mp4;video/x-matroska;video/webm;
-        Keywords=Movie;Film;Media;Library;Watchlist;
         """.formatted(tmpExecString, tmpIconString);
 
     // Application Menu Entry

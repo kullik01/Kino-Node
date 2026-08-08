@@ -1,38 +1,66 @@
-#!/usr/bin/env bash
-# 
+#!/bin/bash
+
 # BSD 3-Clause License
 # Copyright (c) 2026, Hannah Kullik
 #
-# install.sh
-# 
-# KinoNode Application Installer for Linux
-# Copies application binaries into user environment and sets execution rights.
+# KinoNode Installer for Linux
+# Removes any previous version and installs the current release to ~/.kinonode-app.
 
-set -euo pipefail
+set -e
 
-SCRIPT_DIR="$(cd "$(dirname "$(realpath "$0")")" && pwd)"
+INSTALL_DIR="$HOME/.kinonode-app"
 
-# Target installation path in user home
-INSTALL_BASE="${HOME}/.kinonode-app"
-TARGET_DIR="${INSTALL_BASE}/KinoNode"
+# Determine the directory where this script is located (inside the release archive)
+SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 
-echo "Installing KinoNode to ${TARGET_DIR}..."
+# The release folder name follows the pattern KinoNode-x.y.z
+RELEASE_DIR_NAME="$(basename "$SCRIPT_DIR")"
 
-# Remove previous installation to guarantee clean update
-rm -rf "${TARGET_DIR}"
-mkdir -p "${INSTALL_BASE}"
-
-# Copy release bundle into target installation directory
-cp -r "${SCRIPT_DIR}" "${TARGET_DIR}"
-
-# Ensure execution permissions on main launcher binary
-if [ -f "${TARGET_DIR}/bin/KinoNode" ]; then
-    chmod +x "${TARGET_DIR}/bin/KinoNode"
+# --- Validate release structure -------------------------------------------------
+if [ ! -f "$SCRIPT_DIR/bin/KinoNode" ]; then
+    echo "Error: bin/KinoNode not found in $SCRIPT_DIR"
+    echo "Please run this script from within the extracted KinoNode release directory."
+    exit 1
 fi
 
-# Automatically execute desktop shortcut installer if present
-if [ -f "${SCRIPT_DIR}/install_shortcut.sh" ]; then
-    bash "${SCRIPT_DIR}/install_shortcut.sh"
+# --- Remove previous installation -----------------------------------------------
+if [ -d "$INSTALL_DIR" ]; then
+    echo "Existing installation found at $INSTALL_DIR."
+
+    # List old version directories (anything matching KinoNode-*)
+    OLD_VERSIONS=$(find "$INSTALL_DIR" -maxdepth 1 -type d -name "KinoNode-*" 2>/dev/null)
+
+    if [ -n "$OLD_VERSIONS" ]; then
+        echo "Removing old version(s):"
+        for OLD_DIR in $OLD_VERSIONS; do
+            echo "  - $(basename "$OLD_DIR")"
+            rm -rf "$OLD_DIR"
+        done
+    fi
+else
+    echo "No previous installation found. Creating $INSTALL_DIR."
+    mkdir -p "$INSTALL_DIR"
 fi
 
-echo "KinoNode installation complete! You can now launch KinoNode directly from your Applications menu or Desktop shortcut."
+# --- Install new version --------------------------------------------------------
+echo ""
+echo "Installing $RELEASE_DIR_NAME to $INSTALL_DIR ..."
+cp -r "$SCRIPT_DIR" "$INSTALL_DIR/$RELEASE_DIR_NAME"
+
+# Ensure the launcher is executable
+chmod +x "$INSTALL_DIR/$RELEASE_DIR_NAME/bin/KinoNode"
+
+# Automatically run shortcut installer if present
+if [ -f "$INSTALL_DIR/$RELEASE_DIR_NAME/install_shortcut.sh" ]; then
+    bash "$INSTALL_DIR/$RELEASE_DIR_NAME/install_shortcut.sh"
+fi
+
+echo ""
+echo "Installation complete!"
+echo ""
+echo "  Run KinoNode:"
+echo "    sh $INSTALL_DIR/$RELEASE_DIR_NAME/bin/KinoNode"
+echo ""
+echo "  Add a desktop shortcut (optional):"
+echo "    sh $INSTALL_DIR/$RELEASE_DIR_NAME/install_shortcut.sh"
+echo ""
