@@ -1,0 +1,17 @@
+#!/bin/sh
+# RPM post-uninstall script for KinoNode
+
+rm -f /usr/share/applications/kinonode.desktop
+rm -f /usr/share/icons/hicolor/256x256/apps/kinonode.png
+rm -f /usr/share/pixmaps/kinonode.png
+
+for USER_HOME in /home/*; do
+    if [ -d "$USER_HOME/Desktop" ]; then
+        rm -f "$USER_HOME/Desktop/KinoNode.desktop"
+    fi
+done
+
+update-desktop-database -q /usr/share/applications 2>/dev/null || true
+gtk-update-icon-cache -q -f -t /usr/share/icons/hicolor 2>/dev/null || true
+
+exit 0

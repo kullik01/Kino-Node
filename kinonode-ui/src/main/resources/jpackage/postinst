@@ -1,0 +1,48 @@
+#!/bin/sh
+# DEB post-install script for KinoNode
+set -e
+
+case "$1" in
+    configure)
+        mkdir -p /usr/share/icons/hicolor/256x256/apps
+        mkdir -p /usr/share/pixmaps
+
+        if [ -f /opt/KinoNode/lib/app/logo.png ]; then
+            cp /opt/KinoNode/lib/app/logo.png /usr/share/icons/hicolor/256x256/apps/kinonode.png
+            cp /opt/KinoNode/lib/app/logo.png /usr/share/pixmaps/kinonode.png
+        elif [ -f /opt/KinoNode/logo.png ]; then
+            cp /opt/KinoNode/logo.png /usr/share/icons/hicolor/256x256/apps/kinonode.png
+            cp /opt/KinoNode/logo.png /usr/share/pixmaps/kinonode.png
+        fi
+
+        mkdir -p /usr/share/applications
+        cat << 'EOF' > /usr/share/applications/kinonode.desktop
+[Desktop Entry]
+Name=KinoNode
+Comment=Personal Movie Library Manager
+Exec=/opt/KinoNode/bin/KinoNode
+Icon=/usr/share/icons/hicolor/256x256/apps/kinonode.png
+Terminal=false
+Type=Application
+Categories=Utility;Application;
+EOF
+        chmod 644 /usr/share/applications/kinonode.desktop
+
+        for USER_HOME in /home/*; do
+            if [ -d "$USER_HOME" ]; then
+                DESKTOP_DIR="$USER_HOME/Desktop"
+                if [ -d "$DESKTOP_DIR" ]; then
+                    cp /usr/share/applications/kinonode.desktop "$DESKTOP_DIR/KinoNode.desktop"
+                    chmod 755 "$DESKTOP_DIR/KinoNode.desktop"
+                    chown "$(basename "$USER_HOME")" "$DESKTOP_DIR/KinoNode.desktop" 2>/dev/null || true
+                    su - "$(basename "$USER_HOME")" -c "gio set '$DESKTOP_DIR/KinoNode.desktop' 'metadata::trusted' true" 2>/dev/null || true
+                fi
+            fi
+        done
+
+        update-desktop-database -q /usr/share/applications 2>/dev/null || true
+        gtk-update-icon-cache -q -f -t /usr/share/icons/hicolor 2>/dev/null || true
+    ;;
+esac
+
+exit 0

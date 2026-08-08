@@ -257,6 +257,29 @@ public final class DesktopIntegration {
     } catch (Exception tmpException) {
     }
 
+    Path tmpUserHome = Paths.get(System.getProperty("user.home"));
+    Path tmpUserDir = Paths.get(System.getProperty("user.dir"));
+
+    // Check jlink build directory in kinonode-ui/build/KinoNode-*/bin/KinoNode
+    Path tmpJlinkExec = tmpUserDir
+        .resolve("kinonode-ui/build/KinoNode-1.0.0/bin/" + tmpExecName);
+    if (Files.exists(tmpJlinkExec)) {
+      return tmpJlinkExec;
+    }
+
+    Path tmpRootJlinkExec =
+        tmpUserDir.resolve("build/KinoNode-1.0.0/bin/" + tmpExecName);
+    if (Files.exists(tmpRootJlinkExec)) {
+      return tmpRootJlinkExec;
+    }
+
+    // Check installed app directory in ~/.kinonode-app/
+    Path tmpInstalledExec =
+        tmpUserHome.resolve(".kinonode-app/KinoNode/bin/" + tmpExecName);
+    if (Files.exists(tmpInstalledExec)) {
+      return tmpInstalledExec;
+    }
+
     Path tmpCurrentDirExec =
         Paths.get(System.getProperty("user.dir"), "bin", tmpExecName);
     if (Files.exists(tmpCurrentDirExec)) {
