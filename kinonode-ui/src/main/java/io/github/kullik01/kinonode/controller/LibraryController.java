@@ -73,6 +73,7 @@ import javafx.concurrent.Task;
 import io.github.kullik01.kinonode.service.ImdbService;
 import io.github.kullik01.kinonode.view.pages.DisambiguationView;
 import io.github.kullik01.kinonode.view.pages.SyncOverviewView;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -89,6 +90,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -751,15 +753,23 @@ public class LibraryController implements Refreshable {
       }
     };
 
-    // Bind UI progress elements to the background task
+    // Bind UI progress elements to the background task and lock GUI interactions during sync
     progressBar.progressProperty().bind(activeScanTask.progressProperty());
     progressArea.setVisible(true);
+    gridPane.setDisable(true);
+    if (gridPane.getScene() != null) {
+      gridPane.getScene().setCursor(Cursor.WAIT);
+    }
 
     activeScanTask.setOnSucceeded(event -> {
       LibraryScanService.ScanResult tmpResult = activeScanTask.getValue();
       progressBar.progressProperty().unbind();
       progressBar.setProgress(0);
       progressArea.setVisible(false);
+      gridPane.setDisable(false);
+      if (gridPane.getScene() != null) {
+        gridPane.getScene().setCursor(Cursor.DEFAULT);
+      }
 
       Stage tmpOwnerStage = (Stage) gridPane.getScene().getWindow();
       if (tmpResult.unresolvedMovies() != null
@@ -783,6 +793,10 @@ public class LibraryController implements Refreshable {
       progressBar.progressProperty().unbind();
       progressBar.setProgress(0);
       progressArea.setVisible(false);
+      gridPane.setDisable(false);
+      if (gridPane.getScene() != null) {
+        gridPane.getScene().setCursor(Cursor.DEFAULT);
+      }
       Throwable exception = activeScanTask.getException();
       CustomAlert.showInformation(gridPane.getScene().getWindow(),
           "Sync Failed", "An error occurred during search",
@@ -794,6 +808,10 @@ public class LibraryController implements Refreshable {
       progressBar.progressProperty().unbind();
       progressBar.setProgress(0);
       progressArea.setVisible(false);
+      gridPane.setDisable(false);
+      if (gridPane.getScene() != null) {
+        gridPane.getScene().setCursor(Cursor.DEFAULT);
+      }
     });
 
     // Run sync task in a daemon thread so it doesn't block JavaFX application
@@ -819,12 +837,13 @@ public class LibraryController implements Refreshable {
     tmpDialogStage.setMinWidth(780);
     tmpDialogStage.setMinHeight(620);
 
-    VBox tmpLayout = new VBox(15);
-    tmpLayout.setPadding(new Insets(20));
-    tmpLayout.setStyle("-fx-background-color: -color-bg-default;");
+    BorderPane tmpRoot = new BorderPane();
+    tmpRoot.setPadding(new Insets(20));
+    tmpRoot.setStyle("-fx-background-color: -color-bg-default;");
 
     Label tmpHeaderLabel = new Label("Enhanced Movie Import & Match Management");
     tmpHeaderLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
+    tmpRoot.setTop(tmpHeaderLabel);
 
     // Interactive Title Search & Match Options List
     VBox tmpSection1 = new VBox(10);
@@ -843,10 +862,11 @@ public class LibraryController implements Refreshable {
     VBox tmpCandidateContainer = new VBox(10);
     ScrollPane tmpScroll = new ScrollPane(tmpCandidateContainer);
     tmpScroll.setFitToWidth(true);
-    tmpScroll.setPrefHeight(320);
     tmpScroll.setStyle("-fx-background-color: transparent;");
+    VBox.setVgrow(tmpScroll, Priority.ALWAYS);
 
     tmpSection1.getChildren().addAll(tmpSec1Title, tmpSearchBox, tmpScroll);
+    VBox.setVgrow(tmpSection1, Priority.ALWAYS);
 
     // Manual Search via IMDb ID
     VBox tmpSection2 = new VBox(10);
@@ -864,13 +884,20 @@ public class LibraryController implements Refreshable {
 
     tmpSection2.getChildren().addAll(tmpSec2Title, tmpImdbBox);
 
-    Button btnClose = new Button("Close");
-    btnClose.getStyleClass().add("button-secondary");
-    btnClose.setOnAction(e -> tmpDialogStage.close());
-    HBox tmpBottomBox = new HBox(btnClose);
-    tmpBottomBox.setAlignment(Pos.CENTER_RIGHT);
+    VBox tmpCenter = new VBox(15, tmpSection1, tmpSection2);
+    VBox.setVgrow(tmpCenter, Priority.ALWAYS);
+    BorderPane.setMargin(tmpCenter, new Insets(12, 0, 12, 0));
+    tmpRoot.setCenter(tmpCenter);
 
-    tmpLayout.getChildren().addAll(tmpHeaderLabel, tmpSection1, tmpSection2, tmpBottomBox);
+    // OK Button MUST always occur in the right bottom corner
+    Button btnClose = new Button("OK");
+    btnClose.getStyleClass().add("button-secondary");
+    btnClose.setStyle("-fx-font-weight: bold; -fx-padding: 8px 20px;");
+    btnClose.setOnAction(e -> tmpDialogStage.close());
+
+    HBox tmpBottomBox = new HBox(btnClose);
+    tmpBottomBox.setAlignment(Pos.BOTTOM_RIGHT);
+    tmpRoot.setBottom(tmpBottomBox);
 
     Runnable tmpPerformSearch = () -> {
       String tmpQuery = tmpSearchInput.getText().trim();
@@ -934,7 +961,11 @@ public class LibraryController implements Refreshable {
               String tmpTargetId = tmpCand.getImdbId();
               if (tmpTargetId == null || tmpTargetId.isBlank()) return;
 
-              btnSelectMatch.setDisable(true);
+              tmpRoot.setDisable(true);
+              if (tmpDialogStage.getScene() != null) {
+                tmpDialogStage.getScene().setCursor(Cursor.WAIT);
+              }
+
               Task<Void> tmpImportTask = new Task<>() {
                 @Override
                 protected Void call() {
@@ -951,6 +982,12 @@ public class LibraryController implements Refreshable {
                 tmpDialogStage.close();
                 refresh();
                 appContext.notifyLibraryChanged();
+              });
+              tmpImportTask.setOnFailed(e2 -> {
+                tmpRoot.setDisable(false);
+                if (tmpDialogStage.getScene() != null) {
+                  tmpDialogStage.getScene().setCursor(Cursor.DEFAULT);
+                }
               });
               Thread t = new Thread(tmpImportTask);
               t.setDaemon(true);
@@ -978,7 +1015,11 @@ public class LibraryController implements Refreshable {
         return;
       }
       tmpImdbInput.setStyle("");
-      btnImdbImport.setDisable(true);
+
+      tmpRoot.setDisable(true);
+      if (tmpDialogStage.getScene() != null) {
+        tmpDialogStage.getScene().setCursor(Cursor.WAIT);
+      }
 
       Task<Void> tmpAdd = new Task<>() {
         @Override
@@ -997,12 +1038,18 @@ public class LibraryController implements Refreshable {
         refresh();
         appContext.notifyLibraryChanged();
       });
+      tmpAdd.setOnFailed(evt -> {
+        tmpRoot.setDisable(false);
+        if (tmpDialogStage.getScene() != null) {
+          tmpDialogStage.getScene().setCursor(Cursor.DEFAULT);
+        }
+      });
       Thread t = new Thread(tmpAdd);
       t.setDaemon(true);
       t.start();
     });
 
-    Scene tmpScene = new Scene(tmpLayout, 780, 620);
+    Scene tmpScene = new Scene(tmpRoot, 780, 620);
     tmpScene.getStylesheets().addAll(gridPane.getScene().getStylesheets());
     tmpDialogStage.setScene(tmpScene);
     tmpDialogStage.initOwner(gridPane.getScene().getWindow());

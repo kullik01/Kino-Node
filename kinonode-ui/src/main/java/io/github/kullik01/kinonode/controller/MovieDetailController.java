@@ -47,6 +47,7 @@ import javafx.scene.control.TextFormatter;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -70,6 +71,7 @@ import java.util.regex.Pattern;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.geometry.Point2D;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
@@ -2042,12 +2044,13 @@ public class MovieDetailController implements Refreshable {
     tmpStage.setMinWidth(780);
     tmpStage.setMinHeight(620);
 
-    VBox tmpLayout = new VBox(15);
-    tmpLayout.setPadding(new Insets(20));
-    tmpLayout.setStyle("-fx-background-color: -color-bg-default;");
+    BorderPane tmpRoot = new BorderPane();
+    tmpRoot.setPadding(new Insets(20));
+    tmpRoot.setStyle("-fx-background-color: -color-bg-default;");
 
     Label tmpHeaderLabel = new Label("Enhanced Movie Import & Match Management");
     tmpHeaderLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
+    tmpRoot.setTop(tmpHeaderLabel);
 
     // Interactive Title Search & Match Options List
     VBox tmpSection1 = new VBox(10);
@@ -2066,10 +2069,11 @@ public class MovieDetailController implements Refreshable {
     VBox tmpCandidateContainer = new VBox(10);
     ScrollPane tmpScroll = new ScrollPane(tmpCandidateContainer);
     tmpScroll.setFitToWidth(true);
-    tmpScroll.setPrefHeight(320);
     tmpScroll.setStyle("-fx-background-color: transparent;");
+    VBox.setVgrow(tmpScroll, Priority.ALWAYS);
 
     tmpSection1.getChildren().addAll(tmpSec1Title, tmpSearchBox, tmpScroll);
+    VBox.setVgrow(tmpSection1, Priority.ALWAYS);
 
     // Manual Search via IMDb ID
     VBox tmpSection2 = new VBox(10);
@@ -2087,13 +2091,20 @@ public class MovieDetailController implements Refreshable {
 
     tmpSection2.getChildren().addAll(tmpSec2Title, tmpImdbBox);
 
-    Button btnClose = new Button("Close");
-    btnClose.getStyleClass().add("button-secondary");
-    btnClose.setOnAction(e -> tmpStage.close());
-    HBox tmpBottomBox = new HBox(btnClose);
-    tmpBottomBox.setAlignment(Pos.CENTER_RIGHT);
+    VBox tmpCenter = new VBox(15, tmpSection1, tmpSection2);
+    VBox.setVgrow(tmpCenter, Priority.ALWAYS);
+    BorderPane.setMargin(tmpCenter, new Insets(12, 0, 12, 0));
+    tmpRoot.setCenter(tmpCenter);
 
-    tmpLayout.getChildren().addAll(tmpHeaderLabel, tmpSection1, tmpSection2, tmpBottomBox);
+    // OK Button MUST always occur in the right bottom corner
+    Button btnClose = new Button("OK");
+    btnClose.getStyleClass().add("button-secondary");
+    btnClose.setStyle("-fx-font-weight: bold; -fx-padding: 8px 20px;");
+    btnClose.setOnAction(e -> tmpStage.close());
+
+    HBox tmpBottomBox = new HBox(btnClose);
+    tmpBottomBox.setAlignment(Pos.BOTTOM_RIGHT);
+    tmpRoot.setBottom(tmpBottomBox);
 
     Runnable tmpPerformSearch = () -> {
       String tmpQuery = tmpSearchInput.getText().trim();
@@ -2157,7 +2168,11 @@ public class MovieDetailController implements Refreshable {
               String tmpTargetId = tmpCand.getImdbId();
               if (tmpTargetId == null || tmpTargetId.isBlank()) return;
 
-              btnSelectMatch.setDisable(true);
+              tmpRoot.setDisable(true);
+              if (tmpStage.getScene() != null) {
+                tmpStage.getScene().setCursor(Cursor.WAIT);
+              }
+
               Task<Void> tmpReindexTask = new Task<>() {
                 @Override
                 protected Void call() {
@@ -2171,6 +2186,12 @@ public class MovieDetailController implements Refreshable {
                 tmpStage.close();
                 setMovie(movie);
                 showStatus("Movie re-indexed successfully!");
+              });
+              tmpReindexTask.setOnFailed(e2 -> {
+                tmpRoot.setDisable(false);
+                if (tmpStage.getScene() != null) {
+                  tmpStage.getScene().setCursor(Cursor.DEFAULT);
+                }
               });
               Thread t = new Thread(tmpReindexTask);
               t.setDaemon(true);
@@ -2198,7 +2219,11 @@ public class MovieDetailController implements Refreshable {
         return;
       }
       tmpImdbInput.setStyle("");
-      btnImdbImport.setDisable(true);
+
+      tmpRoot.setDisable(true);
+      if (tmpStage.getScene() != null) {
+        tmpStage.getScene().setCursor(Cursor.WAIT);
+      }
 
       Task<Void> tmpImdbTask = new Task<>() {
         @Override
@@ -2215,13 +2240,19 @@ public class MovieDetailController implements Refreshable {
         setMovie(movie);
         showStatus("Movie re-indexed via IMDb ID: " + tmpImdbId);
       });
+      tmpImdbTask.setOnFailed(evt -> {
+        tmpRoot.setDisable(false);
+        if (tmpStage.getScene() != null) {
+          tmpStage.getScene().setCursor(Cursor.DEFAULT);
+        }
+      });
 
       Thread t = new Thread(tmpImdbTask);
       t.setDaemon(true);
       t.start();
     });
 
-    Scene tmpScene = new Scene(tmpLayout, 780, 620);
+    Scene tmpScene = new Scene(tmpRoot, 780, 620);
     if (imgPoster != null && imgPoster.getScene() != null) {
       tmpScene.getStylesheets().addAll(imgPoster.getScene().getStylesheets());
     }

@@ -50,6 +50,7 @@ import java.util.logging.Logger;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -57,6 +58,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -68,6 +70,8 @@ import javafx.stage.Stage;
  * Modal dialog presenting a complete overview of movies processed after syncing the library.
  * Displays each scanned file alongside options to alter matching via Interactive Match Selection
  * or Manual Search via IMDb ID directly next to the filename.
+ * Guarantees responsive resizing layout with Ok button always in the bottom-right corner
+ * and disables UI interactions during re-indexing tasks to prevent accidental double actions.
  */
 public class SyncOverviewView {
   private static final Logger LOGGER =
@@ -112,7 +116,7 @@ public class SyncOverviewView {
     dialogStage.setMinWidth(850);
     dialogStage.setMinHeight(650);
 
-    VBox tmpRoot = new VBox(15);
+    BorderPane tmpRoot = new BorderPane();
     tmpRoot.setPadding(new Insets(20));
     tmpRoot.setStyle("-fx-background-color: -color-bg-default;");
 
@@ -137,6 +141,9 @@ public class SyncOverviewView {
     Label tmpListTitle = new Label("Processed Movies Overview");
     tmpListTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: -color-fg-default;");
 
+    VBox tmpTopBox = new VBox(10, tmpHeaderBox, tmpListTitle);
+    tmpRoot.setTop(tmpTopBox);
+
     // Scrollable movie rows container
     movieListContainer = new VBox(12);
     movieListContainer.setPadding(new Insets(5));
@@ -144,19 +151,20 @@ public class SyncOverviewView {
     tmpScroll.setFitToWidth(true);
     tmpScroll.setStyle("-fx-background-color: transparent;");
     VBox.setVgrow(tmpScroll, Priority.ALWAYS);
+    BorderPane.setMargin(tmpScroll, new Insets(12, 0, 12, 0));
 
     populateMovieRows();
+    tmpRoot.setCenter(tmpScroll);
 
-    // Bottom Done Button
-    Button btnDone = new Button("Done");
+    // Bottom Ok Button - ALWAYS pinned at bottom right corner
+    Button btnDone = new Button("OK");
     btnDone.getStyleClass().add("button-primary");
-    btnDone.setStyle("-fx-padding: 8px 24px; -fx-font-size: 14px; -fx-font-weight: bold;");
+    btnDone.setStyle("-fx-padding: 8px 28px; -fx-font-size: 14px; -fx-font-weight: bold;");
     btnDone.setOnAction(e -> dialogStage.close());
 
     HBox tmpBottomBox = new HBox(btnDone);
-    tmpBottomBox.setAlignment(Pos.CENTER_RIGHT);
-
-    tmpRoot.getChildren().addAll(tmpHeaderBox, tmpListTitle, tmpScroll, tmpBottomBox);
+    tmpBottomBox.setAlignment(Pos.BOTTOM_RIGHT);
+    tmpRoot.setBottom(tmpBottomBox);
 
     Scene tmpScene = new Scene(tmpRoot, 900, 700);
     if (ownerStage.getScene() != null) {
@@ -258,9 +266,9 @@ public class SyncOverviewView {
     tmpMatchStage.setMinWidth(750);
     tmpMatchStage.setMinHeight(600);
 
-    VBox tmpLayout = new VBox(15);
-    tmpLayout.setPadding(new Insets(20));
-    tmpLayout.setStyle("-fx-background-color: -color-bg-default;");
+    BorderPane tmpRoot = new BorderPane();
+    tmpRoot.setPadding(new Insets(20));
+    tmpRoot.setStyle("-fx-background-color: -color-bg-default;");
 
     Label tmpHeaderLabel = new Label("Interactive Match Selection");
     tmpHeaderLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
@@ -276,19 +284,29 @@ public class SyncOverviewView {
     HBox tmpSearchBox = new HBox(10, tmpSearchInput, btnSearchCandidates);
     HBox.setHgrow(tmpSearchInput, Priority.ALWAYS);
 
+    VBox tmpTopBox = new VBox(8, tmpHeaderLabel, tmpFileLabel, tmpSearchBox);
+    tmpRoot.setTop(tmpTopBox);
+
     VBox tmpCandidateContainer = new VBox(10);
     ScrollPane tmpScroll = new ScrollPane(tmpCandidateContainer);
     tmpScroll.setFitToWidth(true);
-    tmpScroll.setPrefHeight(360);
     tmpScroll.setStyle("-fx-background-color: transparent;");
+    VBox.setVgrow(tmpScroll, Priority.ALWAYS);
+    BorderPane.setMargin(tmpScroll, new Insets(12, 0, 12, 0));
+    tmpRoot.setCenter(tmpScroll);
 
-    Button btnClose = new Button("Close");
-    btnClose.getStyleClass().add("button-secondary");
-    btnClose.setOnAction(e -> tmpMatchStage.close());
-    HBox tmpBottom = new HBox(btnClose);
-    tmpBottom.setAlignment(Pos.CENTER_RIGHT);
+    // OK Button ALWAYS pinned at bottom right corner
+    Button btnCancel = new Button("OK");
+    btnCancel.getStyleClass().add("button-secondary");
+    btnCancel.setOnAction(e -> tmpMatchStage.close());
+    HBox tmpBottom = new HBox(btnCancel);
+    tmpBottom.setAlignment(Pos.BOTTOM_RIGHT);
+    tmpRoot.setBottom(tmpBottom);
 
-    tmpLayout.getChildren().addAll(tmpHeaderLabel, tmpFileLabel, tmpSearchBox, tmpScroll, tmpBottom);
+    Scene tmpScene = new Scene(tmpRoot, 800, 650);
+    if (dialogStage.getScene() != null) {
+      tmpScene.getStylesheets().addAll(dialogStage.getScene().getStylesheets());
+    }
 
     Runnable tmpPerformSearch = () -> {
       String tmpQuery = tmpSearchInput.getText().trim();
@@ -353,7 +371,10 @@ public class SyncOverviewView {
               String tmpTargetId = tmpCand.getImdbId();
               if (tmpTargetId == null || tmpTargetId.isBlank()) return;
 
-              btnSelectMatch.setDisable(true);
+              // Prevent user from clicking anywhere during re-indexing
+              tmpRoot.setDisable(true);
+              tmpScene.setCursor(Cursor.WAIT);
+
               Task<Void> tmpReindexTask = new Task<>() {
                 @Override
                 protected Void call() {
@@ -366,6 +387,10 @@ public class SyncOverviewView {
               tmpReindexTask.setOnSucceeded(e2 -> {
                 tmpMatchStage.close();
                 refreshRowInOverview(movie, rowNode);
+              });
+              tmpReindexTask.setOnFailed(e2 -> {
+                tmpRoot.setDisable(false);
+                tmpScene.setCursor(Cursor.DEFAULT);
               });
               Thread t = new Thread(tmpReindexTask);
               t.setDaemon(true);
@@ -386,10 +411,6 @@ public class SyncOverviewView {
     btnSearchCandidates.setOnAction(e -> tmpPerformSearch.run());
     tmpSearchInput.setOnAction(e -> tmpPerformSearch.run());
 
-    Scene tmpScene = new Scene(tmpLayout, 800, 650);
-    if (dialogStage.getScene() != null) {
-      tmpScene.getStylesheets().addAll(dialogStage.getScene().getStylesheets());
-    }
     tmpMatchStage.setScene(tmpScene);
     tmpPerformSearch.run();
     tmpMatchStage.showAndWait();
@@ -400,12 +421,12 @@ public class SyncOverviewView {
     tmpImdbStage.initModality(Modality.APPLICATION_MODAL);
     tmpImdbStage.initOwner(dialogStage);
     tmpImdbStage.setTitle("Manual Search via IMDb ID — " + movie.getTitle());
-    tmpImdbStage.setMinWidth(500);
-    tmpImdbStage.setMinHeight(220);
+    tmpImdbStage.setMinWidth(520);
+    tmpImdbStage.setMinHeight(240);
 
-    VBox tmpLayout = new VBox(15);
-    tmpLayout.setPadding(new Insets(20));
-    tmpLayout.setStyle("-fx-background-color: -color-bg-default;");
+    BorderPane tmpRoot = new BorderPane();
+    tmpRoot.setPadding(new Insets(20));
+    tmpRoot.setStyle("-fx-background-color: -color-bg-default;");
 
     Label tmpHeaderLabel = new Label("Manual Search via IMDb ID");
     tmpHeaderLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
@@ -414,11 +435,34 @@ public class SyncOverviewView {
     Label tmpFileLabel = new Label("File: " + tmpFile.getName());
     tmpFileLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: -color-fg-muted;");
 
+    VBox tmpTopBox = new VBox(8, tmpHeaderLabel, tmpFileLabel);
+    tmpRoot.setTop(tmpTopBox);
+
     TextField tmpInput = new TextField();
     tmpInput.setPromptText("Enter IMDb ID (e.g. tt0111161)");
 
     Button btnImport = new Button("Instant Import / Re-index");
     btnImport.getStyleClass().add("button-success");
+
+    HBox tmpBox = new HBox(10, tmpInput, btnImport);
+    HBox.setHgrow(tmpInput, Priority.ALWAYS);
+    BorderPane.setMargin(tmpBox, new Insets(15, 0, 15, 0));
+    tmpRoot.setCenter(tmpBox);
+
+    // OK Button ALWAYS pinned at bottom right corner
+    Button btnCancel = new Button("OK");
+    btnCancel.getStyleClass().add("button-secondary");
+    btnCancel.setOnAction(e -> tmpImdbStage.close());
+
+    HBox tmpBottom = new HBox(btnCancel);
+    tmpBottom.setAlignment(Pos.BOTTOM_RIGHT);
+    tmpRoot.setBottom(tmpBottom);
+
+    Scene tmpScene = new Scene(tmpRoot, 520, 240);
+    if (dialogStage.getScene() != null) {
+      tmpScene.getStylesheets().addAll(dialogStage.getScene().getStylesheets());
+    }
+
     btnImport.setOnAction(e -> {
       String tmpId = tmpInput.getText().trim();
       if (!tmpId.matches("^tt\\d{7,}$")) {
@@ -426,7 +470,10 @@ public class SyncOverviewView {
         return;
       }
       tmpInput.setStyle("");
-      btnImport.setDisable(true);
+
+      // Prevent any interactions during import
+      tmpRoot.setDisable(true);
+      tmpScene.setCursor(Cursor.WAIT);
 
       Task<Void> tmpTask = new Task<>() {
         @Override
@@ -441,27 +488,15 @@ public class SyncOverviewView {
         tmpImdbStage.close();
         refreshRowInOverview(movie, rowNode);
       });
+      tmpTask.setOnFailed(evt -> {
+        tmpRoot.setDisable(false);
+        tmpScene.setCursor(Cursor.DEFAULT);
+      });
       Thread t = new Thread(tmpTask);
       t.setDaemon(true);
       t.start();
     });
 
-    Button btnCancel = new Button("Cancel");
-    btnCancel.getStyleClass().add("button-secondary");
-    btnCancel.setOnAction(e -> tmpImdbStage.close());
-
-    HBox tmpBox = new HBox(10, tmpInput, btnImport);
-    HBox.setHgrow(tmpInput, Priority.ALWAYS);
-
-    HBox tmpBottom = new HBox(btnCancel);
-    tmpBottom.setAlignment(Pos.CENTER_RIGHT);
-
-    tmpLayout.getChildren().addAll(tmpHeaderLabel, tmpFileLabel, tmpBox, tmpBottom);
-
-    Scene tmpScene = new Scene(tmpLayout, 520, 220);
-    if (dialogStage.getScene() != null) {
-      tmpScene.getStylesheets().addAll(dialogStage.getScene().getStylesheets());
-    }
     tmpImdbStage.setScene(tmpScene);
     tmpImdbStage.showAndWait();
   }

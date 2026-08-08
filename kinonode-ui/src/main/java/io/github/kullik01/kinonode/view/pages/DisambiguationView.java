@@ -51,6 +51,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -58,6 +59,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -87,7 +89,7 @@ public class DisambiguationView {
   private Label lblExtractedTitle;
   private VBox candidateList;
   private TextField txtImdbId;
-  private VBox rootLayout;
+  private BorderPane rootLayout;
 
   /**
    * Constructs a new DisambiguationView dialog.
@@ -124,7 +126,7 @@ public class DisambiguationView {
     dialogStage.setMinWidth(650);
     dialogStage.setMinHeight(550);
 
-    rootLayout = new VBox(15);
+    rootLayout = new BorderPane();
     rootLayout.setPadding(new Insets(20));
     rootLayout.setStyle("-fx-background-color: -color-bg-default;");
 
@@ -141,6 +143,7 @@ public class DisambiguationView {
         new VBox(5, lblProgress, lblFileName, lblExtractedTitle);
     tmpHeaderBox.setStyle(
         "-fx-background-color: -color-bg-overlay; -fx-padding: 15; -fx-background-radius: 8;");
+    rootLayout.setTop(tmpHeaderBox);
 
     // Middle section: Scrollable candidate list
     Label tmpSelectLabel =
@@ -163,7 +166,12 @@ public class DisambiguationView {
     HBox tmpManualBox = new HBox(10, tmpManualLabel, txtImdbId, btnLookup);
     tmpManualBox.setAlignment(Pos.CENTER_LEFT);
 
-    // Bottom action buttons
+    VBox tmpCenter = new VBox(10, tmpSelectLabel, tmpScroll, tmpManualBox);
+    VBox.setVgrow(tmpCenter, Priority.ALWAYS);
+    BorderPane.setMargin(tmpCenter, new Insets(12, 0, 12, 0));
+    rootLayout.setCenter(tmpCenter);
+
+    // Bottom action buttons pinned at bottom-right corner
     Button btnSkip =
         new Button(resources.getString("library.disambiguation.skip"));
     btnSkip.setOnAction(e -> handleSkip());
@@ -173,9 +181,8 @@ public class DisambiguationView {
     Region tmpSpacer = new Region();
     HBox.setHgrow(tmpSpacer, Priority.ALWAYS);
     HBox tmpActionBox = new HBox(10, btnSkipAll, tmpSpacer, btnSkip);
-
-    rootLayout.getChildren().addAll(tmpHeaderBox, tmpSelectLabel, tmpScroll,
-        tmpManualBox, tmpActionBox);
+    tmpActionBox.setAlignment(Pos.BOTTOM_RIGHT);
+    rootLayout.setBottom(tmpActionBox);
 
     Scene tmpScene = new Scene(rootLayout, 800, 650);
     // Add theme stylesheets
@@ -192,6 +199,13 @@ public class DisambiguationView {
     if (currentIndex >= unresolvedMovies.size()) {
       dialogStage.close();
       return;
+    }
+
+    if (rootLayout != null) {
+      rootLayout.setDisable(false);
+    }
+    if (dialogStage != null && dialogStage.getScene() != null) {
+      dialogStage.getScene().setCursor(Cursor.DEFAULT);
     }
 
     Movie tmpCurrentMovie = unresolvedMovies.get(currentIndex);
@@ -300,22 +314,26 @@ public class DisambiguationView {
 
   private void handleSelectCandidate(Movie candidate) {
     Movie tmpCurrentMovie = unresolvedMovies.get(currentIndex);
+    String tmpFinalId = candidate.getImdbId();
 
-    String tmpId = candidate.getImdbId();
-    if (tmpId == null || tmpId.isBlank()) {
-      tmpId = extractImdbId(candidate.getCoverImagePath());
+    if (tmpFinalId == null || tmpFinalId.isBlank()) {
+      tmpFinalId = extractImdbId(candidate.getCoverImagePath());
     }
 
-    if (tmpId == null || tmpId.isBlank()) {
-      tmpId = "tt0000000";
+    if (tmpFinalId == null) {
+      tmpFinalId = "tt0000000";
     }
 
-    final String tmpFinalId = tmpId;
+    rootLayout.setDisable(true);
+    if (dialogStage.getScene() != null) {
+      dialogStage.getScene().setCursor(Cursor.WAIT);
+    }
 
+    String tmpFinalImdbId = tmpFinalId;
     Task<Void> tmpEnrichTask = new Task<>() {
       @Override
       protected Void call() {
-        imdbService.enrichMovieDataById(tmpFinalId, tmpCurrentMovie);
+        imdbService.enrichMovieDataById(tmpFinalImdbId, tmpCurrentMovie);
         tmpCurrentMovie.setMatchStatus("MANUAL");
         movieRepository.update(tmpCurrentMovie);
         return null;
@@ -325,6 +343,12 @@ public class DisambiguationView {
     tmpEnrichTask.setOnSucceeded(e -> {
       currentIndex++;
       loadCurrentMovie();
+    });
+    tmpEnrichTask.setOnFailed(e -> {
+      rootLayout.setDisable(false);
+      if (dialogStage.getScene() != null) {
+        dialogStage.getScene().setCursor(Cursor.DEFAULT);
+      }
     });
 
     Thread tmpThread = new Thread(tmpEnrichTask);
@@ -353,6 +377,11 @@ public class DisambiguationView {
 
     Movie tmpCurrentMovie = unresolvedMovies.get(currentIndex);
 
+    rootLayout.setDisable(true);
+    if (dialogStage.getScene() != null) {
+      dialogStage.getScene().setCursor(Cursor.WAIT);
+    }
+
     Task<Void> tmpEnrichTask = new Task<>() {
       @Override
       protected Void call() {
@@ -366,6 +395,12 @@ public class DisambiguationView {
     tmpEnrichTask.setOnSucceeded(e -> {
       currentIndex++;
       loadCurrentMovie();
+    });
+    tmpEnrichTask.setOnFailed(e -> {
+      rootLayout.setDisable(false);
+      if (dialogStage.getScene() != null) {
+        dialogStage.getScene().setCursor(Cursor.DEFAULT);
+      }
     });
 
     Thread tmpThread = new Thread(tmpEnrichTask);
