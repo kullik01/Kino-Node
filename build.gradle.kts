@@ -54,3 +54,40 @@ configure<com.diffplug.gradle.spotless.SpotlessExtension> {
         eclipse().configFile(rootProject.file("eclipse-java-google-style.xml"))
     }
 }
+
+tasks.register("jpackage") {
+    dependsOn(":kinonode-ui:jpackage")
+}
+
+tasks.register("jlinkZip") {
+    dependsOn(":kinonode-ui:jlinkZip")
+}
+
+tasks.register<Zip>("windowsAppImageZip") {
+    dependsOn(":kinonode-ui:jlink")
+    archiveFileName.set("KinoNode-windows-x64-${version}.zip")
+    destinationDirectory.set(file("build/distributions"))
+    from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))
+}
+
+tasks.register<Zip>("linuxAppImageZip") {
+    dependsOn(":kinonode-ui:jlink")
+    archiveFileName.set("KinoNode-linux-x64-${version}.zip")
+    destinationDirectory.set(file("build/distributions"))
+    from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))
+}
+
+tasks.register<Tar>("linuxAppImageTar") {
+    dependsOn(":kinonode-ui:jlink")
+    archiveFileName.set("KinoNode-linux-x64-${version}.tar.gz")
+    destinationDirectory.set(file("build/distributions"))
+    compression = Compression.GZIP
+    from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))
+}
+
+tasks.register<Zip>("macAppImageZip") {
+    dependsOn(":kinonode-ui:jlink")
+    archiveFileName.set("KinoNode-macos-x64-${version}.zip")
+    destinationDirectory.set(file("build/distributions"))
+    from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))
+}

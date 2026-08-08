@@ -75,17 +75,19 @@ jlink {
             else -> "src/main/resources/io/github/kullik01/kinonode/images/logos/logo.png"
         }
         val iconArgs = if (file(iconPath).exists()) listOf("--icon", file(iconPath).absolutePath) else emptyList()
-        val commonOptions = iconArgs + listOf(
+        val baseOptions = iconArgs + listOf(
             "--description", "Personal Movie Library Manager",
             "--vendor", "Hannah Kullik",
-            "--resource-dir", file("src/main/resources/jpackage").absolutePath,
+            "--resource-dir", file("src/main/resources/jpackage").absolutePath
+        )
+        val javaOptionsList = listOf(
             "--java-options", "-Dprism.allowhidpi=true",
             "--java-options", "-Dprism.lcdtext=true",
             "--java-options", "-Dglass.win.uiScale.enabled=true",
             "--java-options", "-Dsun.java2d.dpiaware=true"
         )
         
-        imageOptions = commonOptions
+        imageOptions = baseOptions + javaOptionsList
         
         val osSpecificOptions = when {
             isWindows -> listOf(
@@ -115,7 +117,7 @@ jlink {
             }
         }
         
-        installerOptions = commonOptions + osSpecificOptions
+        installerOptions = baseOptions + osSpecificOptions
     }
 }
 

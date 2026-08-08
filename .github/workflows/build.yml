@@ -3,10 +3,10 @@ name: Cross-Platform Build & Package
 on:
   push:
     branches: [ main, master ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
-
 
 jobs:
   build-and-package:
@@ -20,22 +20,24 @@ jobs:
           - os: windows-latest
             display_name: windows-latest
             artifact-path: |
-              build/installers/*.exe
-              build/installers/*.msi
-              build/distributions/*.zip
+              kinonode-ui/build/jpackage/*
+              kinonode-ui/build/distributions/*
+              build/distributions/*
+              build/installers/*
           - os: ubuntu-latest
             display_name: linux-latest
             artifact-path: |
-              build/installers/*.deb
-              build/installers/*.rpm
-              build/distributions/*.zip
-              build/distributions/*.tar.gz
+              kinonode-ui/build/jpackage/*
+              kinonode-ui/build/distributions/*
+              build/distributions/*
+              build/installers/*
           - os: macos-latest
             display_name: macos-latest
             artifact-path: |
-              build/installers/*.dmg
-              build/installers/*.pkg
-              build/distributions/*.zip
+              kinonode-ui/build/jpackage/*
+              kinonode-ui/build/distributions/*
+              build/distributions/*
+              build/installers/*
 
     steps:
       - name: Checkout repository
@@ -107,3 +109,25 @@ jobs:
           name: KinoNode-${{ matrix.display_name }}-artifacts
           path: ${{ matrix.artifact-path }}
           if-no-files-found: warn
+
+  release:
+    name: Publish Release Artifacts
+    needs: build-and-package
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-artifacts/**/*
+          generate_release_notes: true
