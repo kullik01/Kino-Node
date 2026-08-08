@@ -57,7 +57,7 @@ jlink {
     }
     
     jpackage {
-        jpackageHome = System.getenv("JAVA_HOME") ?: ""
+        jpackageHome = System.getenv("JAVA_HOME") ?: System.getProperty("java.home")
         val typeProp = project.findProperty("installerType") as? String
         installerType = typeProp ?: when {
             isWindows -> "exe"
