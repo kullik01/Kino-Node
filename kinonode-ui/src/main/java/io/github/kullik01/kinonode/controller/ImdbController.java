@@ -68,11 +68,11 @@ import javafx.util.Duration;
  */
 public class ImdbController implements Refreshable {
 
-  private Button btnBack;
-  private Button btnForward;
-  private Button btnReload;
-  private Button btnHome;
-  private TextField txtUrl;
+  private Button buttonBack;
+  private Button buttonForward;
+  private Button buttonReload;
+  private Button buttonHome;
+  private TextField textFieldUrl;
   private ProgressBar progressLoad;
   private WebView webView;
   private VBox paneError;
@@ -95,52 +95,52 @@ public class ImdbController implements Refreshable {
     navBar.setStyle(
         "-fx-padding: 10px; -fx-background-color: -color-bg-subtle; -fx-border-color: -color-border-muted; -fx-border-width: 0 0 1 0;");
 
-    btnBack = new Button("◀");
-    btnBack.setId("btnBack");
-    btnBack.getStyleClass().add("button-secondary");
-    btnBack.setMinWidth(Control.USE_PREF_SIZE);
-    btnBack.setOnAction(e -> handleBack());
+    buttonBack = new Button("◀");
+    buttonBack.setId("buttonBack");
+    buttonBack.getStyleClass().add("button-secondary");
+    buttonBack.setMinWidth(Control.USE_PREF_SIZE);
+    buttonBack.setOnAction(e -> handleBack());
     Tooltip backTooltip = new Tooltip("Back");
     backTooltip.setShowDelay(Duration.millis(250));
-    btnBack.setTooltip(backTooltip);
+    buttonBack.setTooltip(backTooltip);
 
-    btnForward = new Button("▶");
-    btnForward.setId("btnForward");
-    btnForward.getStyleClass().add("button-secondary");
-    btnForward.setMinWidth(Control.USE_PREF_SIZE);
-    btnForward.setOnAction(e -> handleForward());
+    buttonForward = new Button("▶");
+    buttonForward.setId("buttonForward");
+    buttonForward.getStyleClass().add("button-secondary");
+    buttonForward.setMinWidth(Control.USE_PREF_SIZE);
+    buttonForward.setOnAction(e -> handleForward());
     Tooltip forwardTooltip = new Tooltip("Forward");
     forwardTooltip.setShowDelay(Duration.millis(250));
-    btnForward.setTooltip(forwardTooltip);
+    buttonForward.setTooltip(forwardTooltip);
 
-    btnReload = new Button("↻");
-    btnReload.setId("btnReload");
-    btnReload.getStyleClass().add("button-secondary");
-    btnReload.setMinWidth(Control.USE_PREF_SIZE);
-    btnReload.setOnAction(e -> handleReload());
+    buttonReload = new Button("↻");
+    buttonReload.setId("buttonReload");
+    buttonReload.getStyleClass().add("button-secondary");
+    buttonReload.setMinWidth(Control.USE_PREF_SIZE);
+    buttonReload.setOnAction(e -> handleReload());
     Tooltip reloadTooltip = new Tooltip("Reload");
     reloadTooltip.setShowDelay(Duration.millis(250));
-    btnReload.setTooltip(reloadTooltip);
+    buttonReload.setTooltip(reloadTooltip);
 
-    btnHome = new Button("🏠");
-    btnHome.setId("btnHome");
-    btnHome.getStyleClass().add("button-secondary");
-    btnHome.setMinWidth(Control.USE_PREF_SIZE);
-    btnHome.setOnAction(e -> handleHome());
+    buttonHome = new Button("🏠");
+    buttonHome.setId("buttonHome");
+    buttonHome.getStyleClass().add("button-secondary");
+    buttonHome.setMinWidth(Control.USE_PREF_SIZE);
+    buttonHome.setOnAction(e -> handleHome());
     Tooltip homeTooltip = new Tooltip("IMDb Home");
     homeTooltip.setShowDelay(Duration.millis(250));
-    btnHome.setTooltip(homeTooltip);
+    buttonHome.setTooltip(homeTooltip);
 
-    txtUrl = new TextField();
-    txtUrl.setId("txtUrl");
-    txtUrl.setEditable(false);
-    txtUrl.setMouseTransparent(true);
-    txtUrl.setFocusTraversable(false);
-    txtUrl.setStyle("-fx-background-color: -color-bg-default;");
-    HBox.setHgrow(txtUrl, Priority.ALWAYS);
+    textFieldUrl = new TextField();
+    textFieldUrl.setId("textFieldUrl");
+    textFieldUrl.setEditable(false);
+    textFieldUrl.setMouseTransparent(true);
+    textFieldUrl.setFocusTraversable(false);
+    textFieldUrl.setStyle("-fx-background-color: -color-bg-default;");
+    HBox.setHgrow(textFieldUrl, Priority.ALWAYS);
 
-    navBar.getChildren().addAll(btnBack, btnForward, btnReload, btnHome,
-        txtUrl);
+    navBar.getChildren().addAll(buttonBack, buttonForward, buttonReload,
+        buttonHome, textFieldUrl);
 
     progressLoad = new ProgressBar();
     progressLoad.setId("progressLoad");
@@ -330,7 +330,7 @@ public class ImdbController implements Refreshable {
 
     // Bind URL text field to current location
     webEngine.locationProperty().addListener((obs, oldVal, newVal) -> {
-      txtUrl.setText(newVal);
+      textFieldUrl.setText(newVal);
     });
 
     // Bind progress bar and state listeners
@@ -573,8 +573,8 @@ public class ImdbController implements Refreshable {
   private void updateHistoryButtons() {
     int currentIndex = webEngine.getHistory().getCurrentIndex();
     int historySize = webEngine.getHistory().getEntries().size();
-    btnBack.setDisable(currentIndex <= 0);
-    btnForward.setDisable(currentIndex >= historySize - 1);
+    buttonBack.setDisable(currentIndex <= 0);
+    buttonForward.setDisable(currentIndex >= historySize - 1);
   }
 
   /**

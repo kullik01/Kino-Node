@@ -69,7 +69,7 @@ public class MovieCardController {
   private static final double POSTER_HEIGHT = POSTER_WIDTH * 1.45;
 
   private ImageView imgPoster;
-  private Label lblTitle;
+  private Label labelTitle;
   private Label lblYear;
   private Label lblDirector;
 
@@ -95,9 +95,9 @@ public class MovieCardController {
     imgPoster.setSmooth(true);
     posterContainer.getChildren().add(imgPoster);
 
-    lblTitle = new Label();
-    lblTitle.getStyleClass().add("movie-title-label");
-    lblTitle.setMaxWidth(POSTER_WIDTH);
+    labelTitle = new Label();
+    labelTitle.getStyleClass().add("movie-title-label");
+    labelTitle.setMaxWidth(POSTER_WIDTH);
 
     lblYear = new Label();
     lblYear.getStyleClass().add("movie-year-label");
@@ -105,7 +105,7 @@ public class MovieCardController {
     lblDirector = new Label();
     lblDirector.getStyleClass().add("movie-year-label");
 
-    rootPane.getChildren().addAll(posterContainer, lblTitle, lblYear,
+    rootPane.getChildren().addAll(posterContainer, labelTitle, lblYear,
         lblDirector);
     return rootPane;
   }
@@ -119,7 +119,7 @@ public class MovieCardController {
     double tmpPosterWidth = cardWidth - (CARD_PADDING * 2);
     imgPoster.setFitWidth(tmpPosterWidth);
     imgPoster.setFitHeight(tmpPosterWidth * 1.45); // ~2:3 aspect ratio
-    lblTitle.setMaxWidth(tmpPosterWidth);
+    labelTitle.setMaxWidth(tmpPosterWidth);
   }
 
   /**
@@ -134,7 +134,7 @@ public class MovieCardController {
     this.movie = movie;
     this.clickHandler = clickHandler;
 
-    lblTitle.setText(movie.getTitle());
+    labelTitle.setText(movie.getTitle());
     lblYear.setText(
         movie.getYear() != null ? String.valueOf(movie.getYear()) : "—");
 

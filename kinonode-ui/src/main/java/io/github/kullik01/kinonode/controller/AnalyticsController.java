@@ -93,11 +93,11 @@ public class AnalyticsController implements Refreshable {
   private static final Logger LOGGER =
       Logger.getLogger(AnalyticsController.class.getName());
 
-  private Label lblTotalMovies;
-  private Label lblAvgRating;
+  private Label labelTotalMovies;
+  private Label labelAverageRating;
   private Label lblYearRange;
-  private Label lblTotalWatchlists;
-  private Label lblTopGenre;
+  private Label labelTotalWatchlists;
+  private Label labelTopGenre;
   private Label lblTotalDirectors;
 
   private BarChart<String, Number> decadeChart;
@@ -218,15 +218,15 @@ public class AnalyticsController implements Refreshable {
     kpiGrid.getColumnConstraints().addAll(columnConstraint1, columnConstraint2,
         cc3);
 
-    lblTotalMovies = new Label("0");
-    VBox kpiTotalMovies = createKpiCard("TOTAL MOVIES", lblTotalMovies,
+    labelTotalMovies = new Label("0");
+    VBox kpiTotalMovies = createKpiCard("TOTAL MOVIES", labelTotalMovies,
         "titles in catalog",
         "M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z",
         "kpi-card-blue");
     kpiGrid.add(kpiTotalMovies, 0, 0);
 
-    lblAvgRating = new Label("—");
-    VBox kpiAvgRating = createKpiCard("AVERAGE IMDb RATING", lblAvgRating,
+    labelAverageRating = new Label("—");
+    VBox kpiAvgRating = createKpiCard("AVERAGE IMDb RATING", labelAverageRating,
         "out of 10.0 scale",
         "M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z",
         "kpi-card-orange");
@@ -239,15 +239,15 @@ public class AnalyticsController implements Refreshable {
         "kpi-card-blue");
     kpiGrid.add(kpiYearRange, 2, 0);
 
-    lblTotalWatchlists = new Label("0");
-    VBox kpiWatchlists = createKpiCard("WATCHLISTS", lblTotalWatchlists,
+    labelTotalWatchlists = new Label("0");
+    VBox kpiWatchlists = createKpiCard("WATCHLISTS", labelTotalWatchlists,
         "active collections",
         "M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 9H10V9h8v2zm-4 4h-4v-2h4v2zm4-8h-8V5h8v2z",
         "kpi-card-orange");
     kpiGrid.add(kpiWatchlists, 0, 1);
 
-    lblTopGenre = new Label("—");
-    VBox kpiTopGenre = createKpiCard("TOP GENRE", lblTopGenre,
+    labelTopGenre = new Label("—");
+    VBox kpiTopGenre = createKpiCard("TOP GENRE", labelTopGenre,
         "most frequent genre",
         "M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z",
         "kpi-card-blue");
@@ -398,8 +398,8 @@ public class AnalyticsController implements Refreshable {
     List<Watchlist> tmpWatchlists = watchlistRepository.findAll();
 
     // KPI Summary
-    lblTotalMovies.setText(String.valueOf(tmpMovies.size()));
-    lblTotalWatchlists.setText(String.valueOf(tmpWatchlists.size()));
+    labelTotalMovies.setText(String.valueOf(tmpMovies.size()));
+    labelTotalWatchlists.setText(String.valueOf(tmpWatchlists.size()));
 
     double tmpTotalRating = 0;
     int tmpRatedCount = 0;
@@ -507,10 +507,10 @@ public class AnalyticsController implements Refreshable {
     rolePersonMovies.put("Actor(s)", tmpActorMovies);
 
     if (tmpRatedCount > 0) {
-      lblAvgRating
+      labelAverageRating
           .setText(String.format("%.1f / 10", tmpTotalRating / tmpRatedCount));
     } else {
-      lblAvgRating.setText("—");
+      labelAverageRating.setText("—");
     }
 
     if (tmpMinYear != Integer.MAX_VALUE && tmpMaxYear != Integer.MIN_VALUE) {
@@ -519,10 +519,10 @@ public class AnalyticsController implements Refreshable {
       lblYearRange.setText("—");
     }
 
-    if (lblTopGenre != null) {
+    if (labelTopGenre != null) {
       String tmpTopGenre = tmpGenres.entrySet().stream()
           .max(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse("—");
-      lblTopGenre.setText(tmpTopGenre);
+      labelTopGenre.setText(tmpTopGenre);
     }
 
     if (lblTotalDirectors != null) {
@@ -846,7 +846,7 @@ public class AnalyticsController implements Refreshable {
     tmpChooser.getExtensionFilters()
         .add(new FileChooser.ExtensionFilter("JSON Files (*.json)", "*.json"));
     File tmpFile =
-        tmpChooser.showSaveDialog(lblTotalMovies.getScene().getWindow());
+        tmpChooser.showSaveDialog(labelTotalMovies.getScene().getWindow());
     if (tmpFile != null) {
       try {
         List<Movie> tmpMovies = movieRepository.findAll();
@@ -872,7 +872,7 @@ public class AnalyticsController implements Refreshable {
     tmpChooser.getExtensionFilters()
         .add(new FileChooser.ExtensionFilter("CSV Files (*.csv)", "*.csv"));
     File tmpFile =
-        tmpChooser.showSaveDialog(lblTotalMovies.getScene().getWindow());
+        tmpChooser.showSaveDialog(labelTotalMovies.getScene().getWindow());
     if (tmpFile != null) {
       try {
         List<Movie> tmpMovies = movieRepository.findAll();
@@ -898,7 +898,7 @@ public class AnalyticsController implements Refreshable {
     tmpChooser.getExtensionFilters()
         .add(new FileChooser.ExtensionFilter("HTML Files (*.html)", "*.html"));
     File tmpFile =
-        tmpChooser.showSaveDialog(lblTotalMovies.getScene().getWindow());
+        tmpChooser.showSaveDialog(labelTotalMovies.getScene().getWindow());
     if (tmpFile != null) {
       try {
         List<Movie> tmpMovies = movieRepository.findAll();
@@ -926,7 +926,7 @@ public class AnalyticsController implements Refreshable {
     tmpChooser.getExtensionFilters()
         .add(new FileChooser.ExtensionFilter("SQLite Database (*.db)", "*.db"));
     File tmpFile =
-        tmpChooser.showSaveDialog(lblTotalMovies.getScene().getWindow());
+        tmpChooser.showSaveDialog(labelTotalMovies.getScene().getWindow());
     if (tmpFile != null) {
       try {
         analyticsService.backupDatabase(tmpFile.toPath());
@@ -942,12 +942,12 @@ public class AnalyticsController implements Refreshable {
   }
 
   private void showSuccessAlert(String title, String message) {
-    CustomAlert.showInformation(lblTotalMovies.getScene().getWindow(), title,
+    CustomAlert.showInformation(labelTotalMovies.getScene().getWindow(), title,
         title, message);
   }
 
   private void showErrorAlert(String title, String message) {
-    CustomAlert.showError(lblTotalMovies.getScene().getWindow(), title, title,
+    CustomAlert.showError(labelTotalMovies.getScene().getWindow(), title, title,
         message);
   }
 }

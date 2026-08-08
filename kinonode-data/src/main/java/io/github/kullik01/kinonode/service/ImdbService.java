@@ -239,50 +239,50 @@ public class ImdbService {
 
         // 1. ISO 8601 duration in JSON-LD e.g. "duration":"PT2H28M" or
         // "duration":"PT148M"
-        Pattern tmpDurPattern1 = Pattern
+        Pattern tmpDurationPattern1 = Pattern
             .compile("\"duration\"\\s*:\\s*\"PT(?:(\\d+)H)?(?:(\\d+)M)?\"");
-        Matcher tmpDurMatcher1 = tmpDurPattern1.matcher(tmpBody);
-        if (tmpDurMatcher1.find()) {
-          int tmpHours = tmpDurMatcher1.group(1) != null
-              ? Integer.parseInt(tmpDurMatcher1.group(1))
+        Matcher tmpDurationMatcher1 = tmpDurationPattern1.matcher(tmpBody);
+        if (tmpDurationMatcher1.find()) {
+          int tmpHours = tmpDurationMatcher1.group(1) != null
+              ? Integer.parseInt(tmpDurationMatcher1.group(1))
               : 0;
-          int tmpMins = tmpDurMatcher1.group(2) != null
-              ? Integer.parseInt(tmpDurMatcher1.group(2))
+          int tmpMinutes = tmpDurationMatcher1.group(2) != null
+              ? Integer.parseInt(tmpDurationMatcher1.group(2))
               : 0;
-          int tmpTotalMins = (tmpHours * 60) + tmpMins;
-          if (tmpTotalMins > 0) {
-            movie.setDuration(tmpTotalMins);
+          int tmpTotalMinutes = (tmpHours * 60) + tmpMinutes;
+          if (tmpTotalMinutes > 0) {
+            movie.setDuration(tmpTotalMinutes);
             LOGGER.info("Extracted IMDb ISO duration for " + movie.getTitle()
-                + ": " + tmpTotalMins + " mins");
+                + ": " + tmpTotalMinutes + " mins");
           }
         }
 
         // 2. Next.js JSON / GraphQL runtime e.g. "runtime":{"seconds":8880}
-        Pattern tmpDurPattern2 = Pattern
+        Pattern tmpDurationPattern2 = Pattern
             .compile("\"runtime\"\\s*:\\s*\\{\\s*\"seconds\"\\s*:\\s*(\\d+)");
-        Matcher tmpDurMatcher2 = tmpDurPattern2.matcher(tmpBody);
-        if (tmpDurMatcher2.find()) {
-          int tmpSeconds = Integer.parseInt(tmpDurMatcher2.group(1));
-          int tmpTotalMins = tmpSeconds / 60;
-          if (tmpTotalMins > 0) {
-            movie.setDuration(tmpTotalMins);
+        Matcher tmpDurationMatcher2 = tmpDurationPattern2.matcher(tmpBody);
+        if (tmpDurationMatcher2.find()) {
+          int tmpSeconds = Integer.parseInt(tmpDurationMatcher2.group(1));
+          int tmpTotalMinutes = tmpSeconds / 60;
+          if (tmpTotalMinutes > 0) {
+            movie.setDuration(tmpTotalMinutes);
             LOGGER.info("Extracted IMDb runtime seconds for " + movie.getTitle()
-                + ": " + tmpTotalMins + " mins");
+                + ": " + tmpTotalMinutes + " mins");
           }
         }
 
         // 3. HTML text pattern e.g. "2h 28m" or "1h 45m"
-        Pattern tmpDurPattern3 = Pattern
+        Pattern tmpDurationPattern3 = Pattern
             .compile("(\\d+)\\s*h(?:ours?)?\\s*(\\d+)\\s*m(?:in(?:ute)?s?)?");
-        Matcher tmpDurMatcher3 = tmpDurPattern3.matcher(tmpBody);
-        if (tmpDurMatcher3.find()) {
-          int tmpHours = Integer.parseInt(tmpDurMatcher3.group(1));
-          int tmpMins = Integer.parseInt(tmpDurMatcher3.group(2));
-          int tmpTotalMins = (tmpHours * 60) + tmpMins;
-          if (tmpTotalMins > 0) {
-            movie.setDuration(tmpTotalMins);
+        Matcher tmpDurationMatcher3 = tmpDurationPattern3.matcher(tmpBody);
+        if (tmpDurationMatcher3.find()) {
+          int tmpHours = Integer.parseInt(tmpDurationMatcher3.group(1));
+          int tmpMinutes = Integer.parseInt(tmpDurationMatcher3.group(2));
+          int tmpTotalMinutes = (tmpHours * 60) + tmpMinutes;
+          if (tmpTotalMinutes > 0) {
+            movie.setDuration(tmpTotalMinutes);
             LOGGER.info("Extracted IMDb text duration for " + movie.getTitle()
-                + ": " + tmpTotalMins + " mins");
+                + ": " + tmpTotalMinutes + " mins");
           }
         }
       }

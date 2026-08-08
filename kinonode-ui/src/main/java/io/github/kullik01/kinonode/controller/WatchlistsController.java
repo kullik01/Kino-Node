@@ -98,15 +98,15 @@ public class WatchlistsController implements Refreshable {
       Logger.getLogger(WatchlistsController.class.getName());
   private static Image PLACEHOLDER_IMAGE;
 
-  private ListView<Watchlist> lstWatchlists;
+  private ListView<Watchlist> listWatchlists;
   private VBox paneDetails;
-  private Label lblWatchlistName;
-  private Label lblMovieCount;
-  private ListView<Movie> lstMovies;
+  private Label labelWatchlistName;
+  private Label labelMovieCount;
+  private ListView<Movie> listMovies;
   private Button btnCreateWatchlist;
-  private Button btnRenameWatchlist;
-  private Button btnDeleteWatchlist;
-  private Button btnRemoveMovie;
+  private Button buttonRenameWatchlist;
+  private Button buttonDeleteWatchlist;
+  private Button buttonRemoveMovie;
 
   private final WatchlistRepository watchlistRepository;
   private final PlaybackService playbackService;
@@ -137,10 +137,10 @@ public class WatchlistsController implements Refreshable {
     titleLbl.setStyle(
         "-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2178dd;");
 
-    lstWatchlists = new ListView<>();
-    lstWatchlists.setId("lstWatchlists");
-    lstWatchlists.getStyleClass().add("borderless-list");
-    VBox.setVgrow(lstWatchlists, Priority.ALWAYS);
+    listWatchlists = new ListView<>();
+    listWatchlists.setId("listWatchlists");
+    listWatchlists.getStyleClass().add("borderless-list");
+    VBox.setVgrow(listWatchlists, Priority.ALWAYS);
 
     HBox btnBox = new HBox();
     btnBox.setAlignment(Pos.CENTER);
@@ -155,27 +155,27 @@ public class WatchlistsController implements Refreshable {
     createTooltip.setShowDelay(Duration.millis(250));
     btnCreateWatchlist.setTooltip(createTooltip);
 
-    btnRenameWatchlist = new Button("📝");
-    btnRenameWatchlist.setId("btnRenameWatchlist");
-    btnRenameWatchlist.getStyleClass().add("button-secondary");
-    btnRenameWatchlist.setMinWidth(Control.USE_PREF_SIZE);
-    btnRenameWatchlist.setOnAction(e -> renameWatchlist());
+    buttonRenameWatchlist = new Button("📝");
+    buttonRenameWatchlist.setId("buttonRenameWatchlist");
+    buttonRenameWatchlist.getStyleClass().add("button-secondary");
+    buttonRenameWatchlist.setMinWidth(Control.USE_PREF_SIZE);
+    buttonRenameWatchlist.setOnAction(e -> renameWatchlist());
     Tooltip renameTooltip = new Tooltip("Rename");
     renameTooltip.setShowDelay(Duration.millis(250));
-    btnRenameWatchlist.setTooltip(renameTooltip);
+    buttonRenameWatchlist.setTooltip(renameTooltip);
 
-    btnDeleteWatchlist = new Button("➖");
-    btnDeleteWatchlist.setId("btnDeleteWatchlist");
-    btnDeleteWatchlist.getStyleClass().add("button-danger");
-    btnDeleteWatchlist.setMinWidth(Control.USE_PREF_SIZE);
-    btnDeleteWatchlist.setOnAction(e -> deleteWatchlist());
+    buttonDeleteWatchlist = new Button("➖");
+    buttonDeleteWatchlist.setId("buttonDeleteWatchlist");
+    buttonDeleteWatchlist.getStyleClass().add("button-danger");
+    buttonDeleteWatchlist.setMinWidth(Control.USE_PREF_SIZE);
+    buttonDeleteWatchlist.setOnAction(e -> deleteWatchlist());
     Tooltip deleteTooltip = new Tooltip("Remove");
     deleteTooltip.setShowDelay(Duration.millis(250));
-    btnDeleteWatchlist.setTooltip(deleteTooltip);
+    buttonDeleteWatchlist.setTooltip(deleteTooltip);
 
-    btnBox.getChildren().addAll(btnCreateWatchlist, btnRenameWatchlist,
-        btnDeleteWatchlist);
-    leftVBox.getChildren().addAll(titleLbl, lstWatchlists, btnBox);
+    btnBox.getChildren().addAll(btnCreateWatchlist, buttonRenameWatchlist,
+        buttonDeleteWatchlist);
+    leftVBox.getChildren().addAll(titleLbl, listWatchlists, btnBox);
 
     // Right Side
     paneDetails = new VBox();
@@ -191,40 +191,40 @@ public class WatchlistsController implements Refreshable {
     VBox nameBox = new VBox();
     HBox.setHgrow(nameBox, Priority.ALWAYS);
 
-    lblWatchlistName = new Label("Select a Movie");
-    lblWatchlistName.setId("lblWatchlistName");
-    lblWatchlistName.setStyle(
+    labelWatchlistName = new Label("Select a Movie");
+    labelWatchlistName.setId("labelWatchlistName");
+    labelWatchlistName.setStyle(
         "-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2178dd;");
 
-    lblMovieCount = new Label("0 movies");
-    lblMovieCount.setId("lblMovieCount");
-    lblMovieCount
+    labelMovieCount = new Label("0 movies");
+    labelMovieCount.setId("labelMovieCount");
+    labelMovieCount
         .setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-muted;");
 
-    nameBox.getChildren().addAll(lblWatchlistName, lblMovieCount);
+    nameBox.getChildren().addAll(labelWatchlistName, labelMovieCount);
 
     HBox rightBtnBox = new HBox();
     rightBtnBox.setAlignment(Pos.CENTER_RIGHT);
     rightBtnBox.setSpacing(10.0);
 
-    btnRemoveMovie = new Button("➖");
-    btnRemoveMovie.setId("btnRemoveMovie");
-    btnRemoveMovie.getStyleClass().add("button-danger");
-    btnRemoveMovie.setMinWidth(Control.USE_PREF_SIZE);
-    btnRemoveMovie.setOnAction(e -> removeMovie());
+    buttonRemoveMovie = new Button("➖");
+    buttonRemoveMovie.setId("buttonRemoveMovie");
+    buttonRemoveMovie.getStyleClass().add("button-danger");
+    buttonRemoveMovie.setMinWidth(Control.USE_PREF_SIZE);
+    buttonRemoveMovie.setOnAction(e -> removeMovie());
     Tooltip removeTooltip = new Tooltip("Remove");
     removeTooltip.setShowDelay(Duration.millis(250));
-    btnRemoveMovie.setTooltip(removeTooltip);
+    buttonRemoveMovie.setTooltip(removeTooltip);
 
-    rightBtnBox.getChildren().add(btnRemoveMovie);
+    rightBtnBox.getChildren().add(buttonRemoveMovie);
     detailsHeader.getChildren().addAll(nameBox, rightBtnBox);
 
-    lstMovies = new ListView<>();
-    lstMovies.setId("lstMovies");
-    lstMovies.getStyleClass().add("borderless-list");
-    VBox.setVgrow(lstMovies, Priority.ALWAYS);
+    listMovies = new ListView<>();
+    listMovies.setId("listMovies");
+    listMovies.getStyleClass().add("borderless-list");
+    VBox.setVgrow(listMovies, Priority.ALWAYS);
 
-    paneDetails.getChildren().addAll(detailsHeader, lstMovies);
+    paneDetails.getChildren().addAll(detailsHeader, listMovies);
 
     rootPane.getItems().addAll(leftVBox, paneDetails);
 
@@ -245,7 +245,7 @@ public class WatchlistsController implements Refreshable {
     });
 
     // Custom Cell Factory for Watchlists
-    lstWatchlists.setCellFactory(tmpListView -> new ListCell<>() {
+    listWatchlists.setCellFactory(tmpListView -> new ListCell<>() {
       @Override
       protected void updateItem(Watchlist item, boolean empty) {
         super.updateItem(item, empty);
@@ -258,7 +258,7 @@ public class WatchlistsController implements Refreshable {
     });
 
     // Watchlist Selection Listener
-    lstWatchlists.getSelectionModel().selectedItemProperty()
+    listWatchlists.getSelectionModel().selectedItemProperty()
         .addListener((observable, oldValue, newValue) -> {
           selectedWatchlist = newValue;
           loadWatchlistMovies();
@@ -270,7 +270,7 @@ public class WatchlistsController implements Refreshable {
     // Custom Cell Factory for Movies inside Watchlist (displays cover thumbnail
     // and star rating
     // row)
-    lstMovies.setCellFactory(tmpListView -> new ListCell<>() {
+    listMovies.setCellFactory(tmpListView -> new ListCell<>() {
       private final HBox content = new HBox(15);
       private final ImageView thumbnail = new ImageView();
       private final Label titleLabel = new Label();
@@ -380,10 +380,10 @@ public class WatchlistsController implements Refreshable {
     });
 
     // Double-click action to play selected movie in external player
-    lstMovies.setOnMouseClicked(event -> {
+    listMovies.setOnMouseClicked(event -> {
       if (event.getClickCount() == 2) {
         Movie tmpSelectedMovie =
-            lstMovies.getSelectionModel().getSelectedItem();
+            listMovies.getSelectionModel().getSelectedItem();
         if (tmpSelectedMovie != null) {
           playMovie(tmpSelectedMovie);
         }
@@ -391,7 +391,7 @@ public class WatchlistsController implements Refreshable {
     });
 
     // Update button states on selection changes
-    lstMovies.getSelectionModel().selectedItemProperty()
+    listMovies.getSelectionModel().selectedItemProperty()
         .addListener((observable, oldValue, newValue) -> {
           updateButtonStates();
         });
@@ -406,18 +406,18 @@ public class WatchlistsController implements Refreshable {
    */
   @Override
   public void refresh() {
-    int tmpSelectedIdx = lstWatchlists.getSelectionModel().getSelectedIndex();
+    int tmpSelectedIdx = listWatchlists.getSelectionModel().getSelectedIndex();
     List<Watchlist> tmpWatchlists = watchlistRepository.findAll();
-    lstWatchlists.getItems().setAll(tmpWatchlists);
+    listWatchlists.getItems().setAll(tmpWatchlists);
 
     // Keep active selection focus when resetting/updating lists
     if (tmpSelectedIdx >= 0 && tmpSelectedIdx < tmpWatchlists.size()) {
-      lstWatchlists.getSelectionModel().select(tmpSelectedIdx);
-      selectedWatchlist = lstWatchlists.getSelectionModel().getSelectedItem();
+      listWatchlists.getSelectionModel().select(tmpSelectedIdx);
+      selectedWatchlist = listWatchlists.getSelectionModel().getSelectedItem();
       loadWatchlistMovies();
     } else if (!tmpWatchlists.isEmpty()) {
-      lstWatchlists.getSelectionModel().selectFirst();
-      selectedWatchlist = lstWatchlists.getSelectionModel().getSelectedItem();
+      listWatchlists.getSelectionModel().selectFirst();
+      selectedWatchlist = listWatchlists.getSelectionModel().getSelectedItem();
       loadWatchlistMovies();
     } else {
       selectedWatchlist = null;
@@ -432,9 +432,9 @@ public class WatchlistsController implements Refreshable {
    */
   private void loadWatchlistMovies() {
     if (selectedWatchlist == null) {
-      lblWatchlistName.setText("Select a Movie");
-      lblMovieCount.setText("0 movies");
-      lstMovies.getItems().clear();
+      labelWatchlistName.setText("Select a Movie");
+      labelMovieCount.setText("0 movies");
+      listMovies.getItems().clear();
       paneDetails.setDisable(true);
     } else {
       // Re-fetch latest from db to avoid stale data
@@ -444,11 +444,11 @@ public class WatchlistsController implements Refreshable {
         selectedWatchlist = tmpRefreshed;
       }
 
-      lblWatchlistName.setText(selectedWatchlist.getName());
+      labelWatchlistName.setText(selectedWatchlist.getName());
       List<Movie> tmpMovies = selectedWatchlist.getMovies();
-      lblMovieCount.setText(
+      labelMovieCount.setText(
           tmpMovies.size() + (tmpMovies.size() == 1 ? " movie" : " movies"));
-      lstMovies.getItems().setAll(tmpMovies);
+      listMovies.getItems().setAll(tmpMovies);
       paneDetails.setDisable(false);
     }
     updateButtonStates();
@@ -460,10 +460,10 @@ public class WatchlistsController implements Refreshable {
    * watchlist is a Smart Watchlist (which cannot be manually edited).
    */
   private void updateButtonStates() {
-    boolean selected = lstMovies.getSelectionModel().getSelectedItem() != null;
+    boolean selected = listMovies.getSelectionModel().getSelectedItem() != null;
     boolean tmpIsSmart =
         selectedWatchlist != null && selectedWatchlist.isSmart();
-    btnRemoveMovie.setDisable(!selected || tmpIsSmart);
+    buttonRemoveMovie.setDisable(!selected || tmpIsSmart);
   }
 
   /**
@@ -473,10 +473,10 @@ public class WatchlistsController implements Refreshable {
    * @param hasSelection True if a watchlist is selected, false otherwise.
    */
   private void updateWatchlistButtonStates(boolean hasSelection) {
-    if (btnRenameWatchlist != null)
-      btnRenameWatchlist.setDisable(!hasSelection);
-    if (btnDeleteWatchlist != null)
-      btnDeleteWatchlist.setDisable(!hasSelection);
+    if (buttonRenameWatchlist != null)
+      buttonRenameWatchlist.setDisable(!hasSelection);
+    if (buttonDeleteWatchlist != null)
+      buttonDeleteWatchlist.setDisable(!hasSelection);
   }
 
   /**
@@ -720,7 +720,7 @@ public class WatchlistsController implements Refreshable {
       return;
 
     boolean tmpConfirm = CustomAlert.showConfirmation(
-        lstMovies.getScene().getWindow(), "Delete Watchlist",
+        listMovies.getScene().getWindow(), "Delete Watchlist",
         "Delete watchlist: " + selectedWatchlist.getName(),
         "Are you sure you want to delete this watchlist? Movies will not be deleted from your disk or library.",
         "/io/github/kullik01/kinonode/images/icons/removal_icon.png");
@@ -736,13 +736,13 @@ public class WatchlistsController implements Refreshable {
    * seeking confirmation. This action is disabled for Smart Watchlists.
    */
   private void removeMovie() {
-    Movie tmpSelectedMovie = lstMovies.getSelectionModel().getSelectedItem();
+    Movie tmpSelectedMovie = listMovies.getSelectionModel().getSelectedItem();
     if (tmpSelectedMovie == null || selectedWatchlist == null
         || selectedWatchlist.isSmart())
       return;
 
     boolean tmpConfirm =
-        CustomAlert.showConfirmation(lstMovies.getScene().getWindow(),
+        CustomAlert.showConfirmation(listMovies.getScene().getWindow(),
             "Remove Movie", "Remove from Watchlist",
             "Are you sure you want to remove this movie from "
                 + selectedWatchlist.getName() + "?",
@@ -767,8 +767,8 @@ public class WatchlistsController implements Refreshable {
     } catch (Exception exception) {
       LOGGER.log(Level.SEVERE, "Failed to play movie from watchlist",
           exception);
-      CustomAlert.showError(lstMovies.getScene().getWindow(), "Playback Failed",
-          "Cannot open media player", exception.getMessage(),
+      CustomAlert.showError(listMovies.getScene().getWindow(),
+          "Playback Failed", "Cannot open media player", exception.getMessage(),
           "/io/github/kullik01/kinonode/images/icons/error_icon.png");
     }
   }

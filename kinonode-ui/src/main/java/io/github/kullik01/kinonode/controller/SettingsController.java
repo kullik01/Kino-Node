@@ -85,7 +85,7 @@ public class SettingsController implements Refreshable {
   private ListView<String> lstWorkspaces;
   private Button btnAddFolder;
   private Button btnRemoveFolder;
-  private TextField txtPlayerPath;
+  private TextField textFieldPlayerPath;
   private Label lblStatus;
   private Label lblPlayerStatus;
   private Label lblPlayerError;
@@ -201,15 +201,15 @@ public class SettingsController implements Refreshable {
 
     HBox playerInputBox = new HBox(10.0);
     playerInputBox.setAlignment(Pos.CENTER_LEFT);
-    txtPlayerPath = new TextField();
-    txtPlayerPath.setId("txtPlayerPath");
-    txtPlayerPath
+    textFieldPlayerPath = new TextField();
+    textFieldPlayerPath.setId("textFieldPlayerPath");
+    textFieldPlayerPath
         .setPromptText("Path to player binary (e.g. mpv.exe, vlc.exe)");
-    HBox.setHgrow(txtPlayerPath, Priority.ALWAYS);
+    HBox.setHgrow(textFieldPlayerPath, Priority.ALWAYS);
 
     lblPlayerStatus = new Label();
     lblPlayerStatus.setId("lblPlayerStatus");
-    playerInputBox.getChildren().addAll(txtPlayerPath, lblPlayerStatus);
+    playerInputBox.getChildren().addAll(textFieldPlayerPath, lblPlayerStatus);
 
     lblPlayerError = new Label();
     lblPlayerError.setId("lblPlayerError");
@@ -329,7 +329,7 @@ public class SettingsController implements Refreshable {
 
     // Load player path
     String tmpPlayer = settingsRepository.get("player_executable_path", "");
-    txtPlayerPath.setText(tmpPlayer);
+    textFieldPlayerPath.setText(tmpPlayer);
 
     // Load cursor mode
     String tmpCursor = settingsRepository.get("custom_cursor", "true");
@@ -414,10 +414,10 @@ public class SettingsController implements Refreshable {
           .add(new FileChooser.ExtensionFilter("All Files", "*"));
     }
 
-    Window tmpWindow = txtPlayerPath.getScene().getWindow();
+    Window tmpWindow = textFieldPlayerPath.getScene().getWindow();
     File tmpFile = tmpChooser.showOpenDialog(tmpWindow);
     if (tmpFile != null) {
-      txtPlayerPath.setText(tmpFile.getAbsolutePath().replace("\\", "/"));
+      textFieldPlayerPath.setText(tmpFile.getAbsolutePath().replace("\\", "/"));
     }
   }
 
@@ -430,7 +430,7 @@ public class SettingsController implements Refreshable {
     saveWorkspacesOnly();
 
     // Save player
-    String tmpPlayer = txtPlayerPath.getText().trim().replace("\\", "/");
+    String tmpPlayer = textFieldPlayerPath.getText().trim().replace("\\", "/");
     settingsRepository.set("player_executable_path", tmpPlayer);
 
     // Save cursor mode
@@ -460,7 +460,7 @@ public class SettingsController implements Refreshable {
    * validation and change detection.
    */
   private void setupValidationListeners() {
-    txtPlayerPath.textProperty()
+    textFieldPlayerPath.textProperty()
         .addListener((observable, oldValue, newValue) -> {
           validatePlayerPath(newValue);
         });
@@ -489,7 +489,7 @@ public class SettingsController implements Refreshable {
    * Triggers a full validation pass across all configurable settings.
    */
   private void validateAll() {
-    validatePlayerPath(txtPlayerPath.getText());
+    validatePlayerPath(textFieldPlayerPath.getText());
   }
 
   /**
@@ -503,16 +503,16 @@ public class SettingsController implements Refreshable {
     if (path == null || path.isBlank()) {
       // Empty path is considered valid (meaning no custom external player
       // configured)
-      setValidationStatus(txtPlayerPath, lblPlayerStatus, lblPlayerError, true,
-          null);
+      setValidationStatus(textFieldPlayerPath, lblPlayerStatus, lblPlayerError,
+          true, null);
     } else {
       File tmpFile = new File(path);
       if (tmpFile.exists() && tmpFile.isFile()) {
-        setValidationStatus(txtPlayerPath, lblPlayerStatus, lblPlayerError,
-            true, null);
+        setValidationStatus(textFieldPlayerPath, lblPlayerStatus,
+            lblPlayerError, true, null);
       } else {
-        setValidationStatus(txtPlayerPath, lblPlayerStatus, lblPlayerError,
-            false, "Executable file does not exist.");
+        setValidationStatus(textFieldPlayerPath, lblPlayerStatus,
+            lblPlayerError, false, "Executable file does not exist.");
       }
     }
   }
@@ -566,7 +566,7 @@ public class SettingsController implements Refreshable {
    */
   public boolean hasValidationErrors() {
     boolean tmpIsPlayerValid = true;
-    String tmpPlayerPath = txtPlayerPath.getText();
+    String tmpPlayerPath = textFieldPlayerPath.getText();
     if (tmpPlayerPath != null && !tmpPlayerPath.isBlank()) {
       File tmpFile = new File(tmpPlayerPath);
       tmpIsPlayerValid = tmpFile.exists() && tmpFile.isFile();
@@ -582,8 +582,8 @@ public class SettingsController implements Refreshable {
    */
   public boolean hasUnsavedChanges() {
     String tmpCurrentWorkspaces = String.join(";", lstWorkspaces.getItems());
-    String tmpCurrentPlayer = txtPlayerPath.getText() != null
-        ? txtPlayerPath.getText().trim().replace("\\", "/")
+    String tmpCurrentPlayer = textFieldPlayerPath.getText() != null
+        ? textFieldPlayerPath.getText().trim().replace("\\", "/")
         : "";
     String tmpCurrentCursor = btnCursorToggle.isSelected() ? "true" : "false";
 

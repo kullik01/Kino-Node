@@ -60,29 +60,29 @@ public class AboutView {
 
   private final ScrollPane rootPane;
 
-  public final Label lblVersion = new Label("1.0.0");
-  public final TextField lblExtensions = new TextField();
-  public final TextField lblDbPath = new TextField();
-  public final Label lblStorageMode = new Label("");
-  public final Label lblJavaRuntime = new Label("Unknown");
-  public final Label lblOsDetails = new Label("Unknown");
-  public final Label lblMovieCount = new Label("0 movies");
-  public final Label lblDbSize = new Label("Unknown");
-  public final Label lblRegularWatchlistCount = new Label("0");
-  public final Label lblSmartWatchlistCount = new Label("0");
-  public final Label lblWorkspaceSize = new Label("Unknown");
-  public final TextField lblPlayerPath = new TextField("None");
+  public final Label labelVersion = new Label("1.0.0");
+  public final TextField labelExtensions = new TextField();
+  public final TextField labelDatabasePath = new TextField();
+  public final Label labelStorageMode = new Label("");
+  public final Label labelJavaRuntime = new Label("Unknown");
+  public final Label labelOsDetails = new Label("Unknown");
+  public final Label labelMovieCount = new Label("0 movies");
+  public final Label labelDatabaseSize = new Label("Unknown");
+  public final Label labelRegularWatchlistCount = new Label("0");
+  public final Label labelSmartWatchlistCount = new Label("0");
+  public final Label labelWorkspaceSize = new Label("Unknown");
+  public final TextField labelPlayerPath = new TextField("None");
 
-  public final Button btnGitHub;
-  public final Button btnBug;
-  public final Button btnUpdate;
-  public final Button btnPlayerLoc = new Button("📂");
-  public final Button btnDbLoc = new Button("📂");
+  public final Button buttonGitHub;
+  public final Button buttonBug;
+  public final Button buttonUpdate;
+  public final Button buttonPlayerLocation = new Button("📂");
+  public final Button buttonDatabaseLocation = new Button("📂");
 
   public AboutView(ResourceBundle resources) {
-    btnGitHub = new Button(resources.getString("about.btn.github"));
-    btnBug = new Button(resources.getString("about.btn.bug"));
-    btnUpdate = new Button(resources.getString("about.btn.update"));
+    buttonGitHub = new Button(resources.getString("about.btn.github"));
+    buttonBug = new Button(resources.getString("about.btn.bug"));
+    buttonUpdate = new Button(resources.getString("about.btn.update"));
 
     rootPane = new ScrollPane();
     rootPane.setFitToWidth(true);
@@ -117,18 +117,18 @@ public class AboutView {
     tmpAppSubtitle.getStyleClass().add("text-muted");
     tmpAppSubtitle.setStyle("-fx-font-size: 16px;");
 
-    HBox tmpBtnBox = new HBox(15.0);
-    tmpBtnBox.setAlignment(Pos.CENTER);
-    tmpBtnBox.setPadding(new Insets(15.0, 0, 15.0, 0));
+    HBox tmpButtonBox = new HBox(15.0);
+    tmpButtonBox.setAlignment(Pos.CENTER);
+    tmpButtonBox.setPadding(new Insets(15.0, 0, 15.0, 0));
 
-    btnGitHub.getStyleClass().add("accent");
-    btnGitHub.setStyle("-fx-text-fill: white;");
-    btnBug.setStyle("-fx-text-fill: white;");
-    btnUpdate.setStyle("-fx-text-fill: white;");
+    buttonGitHub.getStyleClass().add("accent");
+    buttonGitHub.setStyle("-fx-text-fill: white;");
+    buttonBug.setStyle("-fx-text-fill: white;");
+    buttonUpdate.setStyle("-fx-text-fill: white;");
 
-    tmpBtnBox.getChildren().addAll(btnGitHub, btnBug, btnUpdate);
+    tmpButtonBox.getChildren().addAll(buttonGitHub, buttonBug, buttonUpdate);
     tmpHeaderSection.getChildren().addAll(tmpLogoView, tmpAppTitle,
-        tmpAppSubtitle, tmpBtnBox);
+        tmpAppSubtitle, tmpButtonBox);
 
     // Cards Row
     HBox tmpCardsRow = new HBox(20.0);
@@ -143,24 +143,25 @@ public class AboutView {
         new Label(resources.getString("about.card.details"));
     tmpLeftCardTitle.setStyle(
         "-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
-    Region tmpSep1 = new Region();
-    tmpSep1.setMinHeight(Region.USE_PREF_SIZE);
-    tmpSep1.setStyle(
+    Region tmpSeparator1 = new Region();
+    tmpSeparator1.setMinHeight(Region.USE_PREF_SIZE);
+    tmpSeparator1.setStyle(
         "-fx-background-color: -color-border-default; -fx-pref-height: 1;");
 
     GridPane tmpGrid1 = new GridPane();
     tmpGrid1.setHgap(15.0);
     tmpGrid1.setVgap(12.0);
-    ColumnConstraints tmpGc1 = new ColumnConstraints();
-    tmpGc1.setMinWidth(110.0);
-    tmpGc1.setPrefWidth(140.0);
-    ColumnConstraints tmpGc2 = new ColumnConstraints();
-    tmpGc2.setHgrow(Priority.ALWAYS);
-    tmpGrid1.getColumnConstraints().addAll(tmpGc1, tmpGc2);
+    ColumnConstraints tmpColumnConstraints1 = new ColumnConstraints();
+    tmpColumnConstraints1.setMinWidth(110.0);
+    tmpColumnConstraints1.setPrefWidth(140.0);
+    ColumnConstraints tmpColumnConstraints2 = new ColumnConstraints();
+    tmpColumnConstraints2.setHgrow(Priority.ALWAYS);
+    tmpGrid1.getColumnConstraints().addAll(tmpColumnConstraints1,
+        tmpColumnConstraints2);
 
-    lblVersion.setId("lblVersion");
+    labelVersion.setId("labelVersion");
     addGridRow(tmpGrid1, 0, resources.getString("about.label.version"),
-        lblVersion);
+        labelVersion);
     addGridRow(tmpGrid1, 1, resources.getString("about.label.developer"),
         new Label(resources.getString("about.val.developer")));
     addGridRow(tmpGrid1, 2, resources.getString("about.label.designers"),
@@ -170,32 +171,34 @@ public class AboutView {
     addGridRow(tmpGrid1, 4, resources.getString("about.label.copyright"),
         new Label(resources.getString("about.val.copyright")));
 
-    Label tmpEnvTitle = new Label(resources.getString("about.card.env"));
-    tmpEnvTitle.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
-    VBox.setMargin(tmpEnvTitle, new Insets(15.0, 0, 0, 0));
-    Region tmpSep2 = new Region();
-    tmpSep2.setMinHeight(Region.USE_PREF_SIZE);
-    tmpSep2.setStyle(
+    Label tmpEnvironmentTitle =
+        new Label(resources.getString("about.card.env"));
+    tmpEnvironmentTitle.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
+    VBox.setMargin(tmpEnvironmentTitle, new Insets(15.0, 0, 0, 0));
+    Region tmpSeparator2 = new Region();
+    tmpSeparator2.setMinHeight(Region.USE_PREF_SIZE);
+    tmpSeparator2.setStyle(
         "-fx-background-color: -color-border-default; -fx-pref-height: 1;");
 
     GridPane tmpGrid2 = new GridPane();
     tmpGrid2.setHgap(15.0);
     tmpGrid2.setVgap(12.0);
-    tmpGrid2.getColumnConstraints().addAll(tmpGc1, tmpGc2);
+    tmpGrid2.getColumnConstraints().addAll(tmpColumnConstraints1,
+        tmpColumnConstraints2);
 
-    lblJavaRuntime.setId("lblJavaRuntime");
+    labelJavaRuntime.setId("labelJavaRuntime");
     addGridRow(tmpGrid2, 0, resources.getString("about.label.java"),
-        lblJavaRuntime);
-    lblOsDetails.setId("lblOsDetails");
+        labelJavaRuntime);
+    labelOsDetails.setId("labelOsDetails");
     addGridRow(tmpGrid2, 1, resources.getString("about.label.os"),
-        lblOsDetails);
+        labelOsDetails);
 
     Label tmpBuiltTitle = new Label(resources.getString("about.card.built"));
     tmpBuiltTitle.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
     VBox.setMargin(tmpBuiltTitle, new Insets(15.0, 0, 0, 0));
-    Region tmpSep3 = new Region();
-    tmpSep3.setMinHeight(Region.USE_PREF_SIZE);
-    tmpSep3.setStyle(
+    Region tmpSeparator3 = new Region();
+    tmpSeparator3.setMinHeight(Region.USE_PREF_SIZE);
+    tmpSeparator3.setStyle(
         "-fx-background-color: -color-border-default; -fx-pref-height: 1;");
 
     VBox tmpBuiltBox = new VBox(4.0);
@@ -206,8 +209,9 @@ public class AboutView {
         createMutedLabel(resources.getString("about.built.atlantafx")),
         createMutedLabel(resources.getString("about.built.gson")));
 
-    tmpLeftCard.getChildren().addAll(tmpLeftCardTitle, tmpSep1, tmpGrid1,
-        tmpEnvTitle, tmpSep2, tmpGrid2, tmpBuiltTitle, tmpSep3, tmpBuiltBox);
+    tmpLeftCard.getChildren().addAll(tmpLeftCardTitle, tmpSeparator1, tmpGrid1,
+        tmpEnvironmentTitle, tmpSeparator2, tmpGrid2, tmpBuiltTitle,
+        tmpSeparator3, tmpBuiltBox);
 
     // Right Card
     VBox tmpRightCard = new VBox();
@@ -218,37 +222,39 @@ public class AboutView {
         new Label(resources.getString("about.card.storage"));
     tmpRightCardTitle.setStyle(
         "-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
-    Region tmpSep4 = new Region();
-    tmpSep4.setMinHeight(Region.USE_PREF_SIZE);
-    tmpSep4.setStyle(
+    Region tmpSeparator4 = new Region();
+    tmpSeparator4.setMinHeight(Region.USE_PREF_SIZE);
+    tmpSeparator4.setStyle(
         "-fx-background-color: -color-border-default; -fx-pref-height: 1;");
 
     GridPane tmpGrid3 = new GridPane();
     tmpGrid3.setHgap(15.0);
     tmpGrid3.setVgap(12.0);
-    ColumnConstraints tmpGc3 = new ColumnConstraints();
-    tmpGc3.setMinWidth(130.0);
-    tmpGc3.setPrefWidth(140.0);
-    tmpGrid3.getColumnConstraints().addAll(tmpGc3, tmpGc2);
+    ColumnConstraints tmpColumnConstraints3 = new ColumnConstraints();
+    tmpColumnConstraints3.setMinWidth(130.0);
+    tmpColumnConstraints3.setPrefWidth(140.0);
+    tmpGrid3.getColumnConstraints().addAll(tmpColumnConstraints3,
+        tmpColumnConstraints2);
 
-    lblWorkspaceSize.setId("lblWorkspaceSize");
+    labelWorkspaceSize.setId("labelWorkspaceSize");
     addGridRow(tmpGrid3, 0, resources.getString("about.label.workspace"),
-        lblWorkspaceSize);
-    lblDbSize.setId("lblDbSize");
+        labelWorkspaceSize);
+    labelDatabaseSize.setId("labelDatabaseSize");
     addGridRow(tmpGrid3, 1, resources.getString("about.label.db_size"),
-        lblDbSize);
-    lblMovieCount.setId("lblMovieCount");
+        labelDatabaseSize);
+    labelMovieCount.setId("labelMovieCount");
     addGridRow(tmpGrid3, 2, resources.getString("about.label.movies"),
-        lblMovieCount);
-    lblRegularWatchlistCount.setId("lblRegularWatchlistCount");
+        labelMovieCount);
+    labelRegularWatchlistCount.setId("labelRegularWatchlistCount");
     addGridRow(tmpGrid3, 3,
         resources.getString("about.label.regular_watchlists"),
-        lblRegularWatchlistCount);
-    lblSmartWatchlistCount.setId("lblSmartWatchlistCount");
+        labelRegularWatchlistCount);
+    labelSmartWatchlistCount.setId("labelSmartWatchlistCount");
     addGridRow(tmpGrid3, 4, resources.getString("about.label.smart_watchlists"),
-        lblSmartWatchlistCount);
+        labelSmartWatchlistCount);
 
-    tmpRightCard.getChildren().addAll(tmpRightCardTitle, tmpSep4, tmpGrid3);
+    tmpRightCard.getChildren().addAll(tmpRightCardTitle, tmpSeparator4,
+        tmpGrid3);
 
     tmpCardsRow.getChildren().addAll(tmpLeftCard, tmpRightCard);
 
@@ -259,9 +265,9 @@ public class AboutView {
     Label tmpFullCardTitle = new Label(resources.getString("about.card.paths"));
     tmpFullCardTitle.setStyle(
         "-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
-    Region tmpSep5 = new Region();
-    tmpSep5.setMinHeight(Region.USE_PREF_SIZE);
-    tmpSep5.setStyle(
+    Region tmpSeparator5 = new Region();
+    tmpSeparator5.setMinHeight(Region.USE_PREF_SIZE);
+    tmpSeparator5.setStyle(
         "-fx-background-color: -color-border-default; -fx-pref-height: 1;");
 
     VBox tmpPlayerBox = new VBox(8.0);
@@ -272,80 +278,86 @@ public class AboutView {
     HBox tmpPlayerInputBox = new HBox(10.0);
     tmpPlayerInputBox.setAlignment(Pos.CENTER_LEFT);
 
-    lblPlayerPath.setId("lblPlayerPath");
-    lblPlayerPath.setEditable(false);
-    lblPlayerPath.setFocusTraversable(false);
-    lblPlayerPath.setStyle(
+    labelPlayerPath.setId("labelPlayerPath");
+    labelPlayerPath.setEditable(false);
+    labelPlayerPath.setFocusTraversable(false);
+    labelPlayerPath.setStyle(
         "-fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-text-fill: -color-fg-default; -fx-control-inner-background: -color-bg-default; -fx-background-radius: 6px; -fx-border-color: -color-border-default; -fx-border-radius: 6px;");
-    HBox.setHgrow(lblPlayerPath, Priority.ALWAYS);
-    lblPlayerPath.setMaxWidth(Double.MAX_VALUE);
+    HBox.setHgrow(labelPlayerPath, Priority.ALWAYS);
+    labelPlayerPath.setMaxWidth(Double.MAX_VALUE);
 
-    btnPlayerLoc.getStyleClass().add("button-secondary");
-    btnPlayerLoc.setMinWidth(Region.USE_PREF_SIZE);
-    btnPlayerLoc.setStyle("-fx-text-fill: white;");
-    Tooltip tmpPlayerLocTip =
+    buttonPlayerLocation.getStyleClass().add("button-secondary");
+    buttonPlayerLocation.setMinWidth(Region.USE_PREF_SIZE);
+    buttonPlayerLocation.setStyle("-fx-text-fill: white;");
+    Tooltip tmpPlayerLocationTooltip =
         new Tooltip(resources.getString("about.tooltip.open_location"));
-    tmpPlayerLocTip.setShowDelay(Duration.millis(250));
-    btnPlayerLoc.setTooltip(tmpPlayerLocTip);
-    tmpPlayerInputBox.getChildren().addAll(lblPlayerPath, btnPlayerLoc);
+    tmpPlayerLocationTooltip.setShowDelay(Duration.millis(250));
+    buttonPlayerLocation.setTooltip(tmpPlayerLocationTooltip);
+    tmpPlayerInputBox.getChildren().addAll(labelPlayerPath,
+        buttonPlayerLocation);
     tmpPlayerBox.getChildren().addAll(tmpPlayerLabel, tmpPlayerInputBox);
 
-    Region tmpSep6 = new Region();
-    tmpSep6.setMinHeight(Region.USE_PREF_SIZE);
-    tmpSep6.setStyle(
+    Region tmpSeparator6 = new Region();
+    tmpSeparator6.setMinHeight(Region.USE_PREF_SIZE);
+    tmpSeparator6.setStyle(
         "-fx-background-color: -color-border-default; -fx-pref-height: 1;");
 
-    VBox tmpExtBox = new VBox(8.0);
-    Label tmpExtLabel =
+    VBox tmpExtensionBox = new VBox(8.0);
+    Label tmpExtensionLabel =
         new Label(resources.getString("about.label.extensions"));
-    tmpExtLabel
+    tmpExtensionLabel
         .setStyle("-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;");
-    lblExtensions.setId("lblExtensions");
-    lblExtensions.setEditable(false);
-    lblExtensions.setFocusTraversable(false);
-    lblExtensions.setStyle(
+    labelExtensions.setId("labelExtensions");
+    labelExtensions.setEditable(false);
+    labelExtensions.setFocusTraversable(false);
+    labelExtensions.setStyle(
         "-fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-text-fill: -color-fg-default; -fx-control-inner-background: -color-bg-default; -fx-background-radius: 6px; -fx-border-color: -color-border-default; -fx-border-radius: 6px;");
-    lblExtensions.setMaxWidth(Double.MAX_VALUE);
-    tmpExtBox.getChildren().addAll(tmpExtLabel, lblExtensions);
+    labelExtensions.setMaxWidth(Double.MAX_VALUE);
+    tmpExtensionBox.getChildren().addAll(tmpExtensionLabel, labelExtensions);
 
-    Region tmpSep7 = new Region();
-    tmpSep7.setMinHeight(Region.USE_PREF_SIZE);
-    tmpSep7.setStyle(
+    Region tmpSeparator7 = new Region();
+    tmpSeparator7.setMinHeight(Region.USE_PREF_SIZE);
+    tmpSeparator7.setStyle(
         "-fx-background-color: -color-border-default; -fx-pref-height: 1;");
 
-    VBox tmpDbBox = new VBox(8.0);
-    HBox tmpDbLabelBox = new HBox(8.0);
-    tmpDbLabelBox.setAlignment(Pos.CENTER_LEFT);
-    Label tmpDbLabel =
+    VBox tmpDatabaseBox = new VBox(8.0);
+    HBox tmpDatabaseLabelBox = new HBox(8.0);
+    tmpDatabaseLabelBox.setAlignment(Pos.CENTER_LEFT);
+    Label tmpDatabaseLabel =
         new Label(resources.getString("about.label.db_location"));
-    tmpDbLabel.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;");
-    lblStorageMode.setId("lblStorageMode");
-    lblStorageMode
+    tmpDatabaseLabel
+        .setStyle("-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;");
+    labelStorageMode.setId("labelStorageMode");
+    labelStorageMode
         .setStyle("-fx-font-size: 11px; -fx-text-fill: -color-fg-muted;");
-    tmpDbLabelBox.getChildren().addAll(tmpDbLabel, lblStorageMode);
+    tmpDatabaseLabelBox.getChildren().addAll(tmpDatabaseLabel,
+        labelStorageMode);
 
-    HBox tmpDbInputBox = new HBox(10.0);
-    tmpDbInputBox.setAlignment(Pos.CENTER_LEFT);
-    lblDbPath.setId("lblDbPath");
-    lblDbPath.setEditable(false);
-    lblDbPath.setFocusTraversable(false);
-    lblDbPath.setStyle(
+    HBox tmpDatabaseInputBox = new HBox(10.0);
+    tmpDatabaseInputBox.setAlignment(Pos.CENTER_LEFT);
+    labelDatabasePath.setId("labelDatabasePath");
+    labelDatabasePath.setEditable(false);
+    labelDatabasePath.setFocusTraversable(false);
+    labelDatabasePath.setStyle(
         "-fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-text-fill: -color-fg-default; -fx-control-inner-background: -color-bg-default; -fx-background-radius: 6px; -fx-border-color: -color-border-default; -fx-border-radius: 6px;");
-    HBox.setHgrow(lblDbPath, Priority.ALWAYS);
-    lblDbPath.setMaxWidth(Double.MAX_VALUE);
+    HBox.setHgrow(labelDatabasePath, Priority.ALWAYS);
+    labelDatabasePath.setMaxWidth(Double.MAX_VALUE);
 
-    btnDbLoc.getStyleClass().add("button-secondary");
-    btnDbLoc.setMinWidth(Region.USE_PREF_SIZE);
-    btnDbLoc.setStyle("-fx-text-fill: white;");
-    Tooltip tmpDbLocTip =
+    buttonDatabaseLocation.getStyleClass().add("button-secondary");
+    buttonDatabaseLocation.setMinWidth(Region.USE_PREF_SIZE);
+    buttonDatabaseLocation.setStyle("-fx-text-fill: white;");
+    Tooltip tmpDatabaseLocationTooltip =
         new Tooltip(resources.getString("about.tooltip.open_location"));
-    tmpDbLocTip.setShowDelay(Duration.millis(250));
-    btnDbLoc.setTooltip(tmpDbLocTip);
-    tmpDbInputBox.getChildren().addAll(lblDbPath, btnDbLoc);
-    tmpDbBox.getChildren().addAll(tmpDbLabelBox, tmpDbInputBox);
+    tmpDatabaseLocationTooltip.setShowDelay(Duration.millis(250));
+    buttonDatabaseLocation.setTooltip(tmpDatabaseLocationTooltip);
+    tmpDatabaseInputBox.getChildren().addAll(labelDatabasePath,
+        buttonDatabaseLocation);
+    tmpDatabaseBox.getChildren().addAll(tmpDatabaseLabelBox,
+        tmpDatabaseInputBox);
 
-    tmpFullCard.getChildren().addAll(tmpFullCardTitle, tmpSep5, tmpPlayerBox,
-        tmpSep6, tmpExtBox, tmpSep7, tmpDbBox);
+    tmpFullCard.getChildren().addAll(tmpFullCardTitle, tmpSeparator5,
+        tmpPlayerBox, tmpSeparator6, tmpExtensionBox, tmpSeparator7,
+        tmpDatabaseBox);
 
     tmpMainContent.getChildren().addAll(tmpHeaderSection, tmpCardsRow,
         tmpFullCard);
@@ -356,14 +368,15 @@ public class AboutView {
     return rootPane;
   }
 
-  private void addGridRow(GridPane grid, int row, String name, Label valLabel) {
+  private void addGridRow(GridPane grid, int row, String name,
+      Label valueLabel) {
     Label tmpNameLabel = new Label(name);
     tmpNameLabel
         .setStyle("-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;");
     GridPane.setConstraints(tmpNameLabel, 0, row);
-    valLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
-    GridPane.setConstraints(valLabel, 1, row);
-    grid.getChildren().addAll(tmpNameLabel, valLabel);
+    valueLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
+    GridPane.setConstraints(valueLabel, 1, row);
+    grid.getChildren().addAll(tmpNameLabel, valueLabel);
   }
 
   private Label createMutedLabel(String text) {

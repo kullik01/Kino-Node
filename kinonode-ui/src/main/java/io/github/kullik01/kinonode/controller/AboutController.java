@@ -86,11 +86,11 @@ public class AboutController implements Refreshable {
     view = new AboutView(resources);
 
     // Wire up event handlers
-    view.btnGitHub.setOnAction(e -> openRepository());
-    view.btnBug.setOnAction(e -> openIssueTracker());
-    view.btnUpdate.setOnAction(e -> checkForUpdates());
-    view.btnDbLoc.setOnAction(e -> openDatabaseLocation());
-    view.btnPlayerLoc.setOnAction(e -> openPlayerLocation());
+    view.buttonGitHub.setOnAction(e -> openRepository());
+    view.buttonBug.setOnAction(e -> openIssueTracker());
+    view.buttonUpdate.setOnAction(e -> checkForUpdates());
+    view.buttonDatabaseLocation.setOnAction(e -> openDatabaseLocation());
+    view.buttonPlayerLocation.setOnAction(e -> openPlayerLocation());
 
     return view.getRoot();
   }
@@ -108,58 +108,60 @@ public class AboutController implements Refreshable {
     if (view == null)
       return;
 
-    view.lblVersion.setText("1.0.0");
+    view.labelVersion.setText("1.0.0");
 
     // 1. Extensions
     String tmpExtensions = settingsRepository.get("video_extensions",
         "3gp,avi,flv,m4v,mkv,mov,mp4,mpeg,mpg,mts,ogg,ogv,ts,webm,wmv");
-    view.lblExtensions.setText(tmpExtensions);
+    view.labelExtensions.setText(tmpExtensions);
 
     // 2. Database path & size
     try {
       Path tmpDatabasePath = databaseService.getDbPath();
-      view.lblDbPath.setText(
+      view.labelDatabasePath.setText(
           tmpDatabasePath.toAbsolutePath().toString().replace("\\", "/"));
 
       Path tmpCurrentDir = Path.of(System.getProperty("user.dir"));
       if (tmpDatabasePath.toAbsolutePath().startsWith(tmpCurrentDir)) {
-        view.lblStorageMode.setText("(Single Directory / Portable Mode)");
+        view.labelStorageMode.setText("(Single Directory / Portable Mode)");
       } else {
-        view.lblStorageMode.setText("(OS Application Data Directory)");
+        view.labelStorageMode.setText("(OS Application Data Directory)");
       }
 
       if (Files.exists(tmpDatabasePath)) {
         long tmpSizeBytes = Files.size(tmpDatabasePath);
         double tmpSizeMegabytes = tmpSizeBytes / (1024.0 * 1024.0);
-        view.lblDbSize.setText(String.format("%.2f MB", tmpSizeMegabytes));
+        view.labelDatabaseSize
+            .setText(String.format("%.2f MB", tmpSizeMegabytes));
       } else {
-        view.lblDbSize.setText("Unknown");
+        view.labelDatabaseSize.setText("Unknown");
       }
     } catch (Exception exception) {
-      view.lblDbPath.setText("Unknown database path");
+      view.labelDatabasePath.setText("Unknown database path");
     }
 
     // 3. System properties
     try {
       String tmpJavaVersion = System.getProperty("java.version");
       String tmpJavaVendor = System.getProperty("java.vendor");
-      view.lblJavaRuntime.setText(tmpJavaVersion + " (" + tmpJavaVendor + ")");
+      view.labelJavaRuntime
+          .setText(tmpJavaVersion + " (" + tmpJavaVendor + ")");
 
       String tmpOperatingSystemName = System.getProperty("os.name");
       String tmpOperatingSystemArchitecture = System.getProperty("os.arch");
       String tmpOperatingSystemVersion = System.getProperty("os.version");
-      view.lblOsDetails
+      view.labelOsDetails
           .setText(tmpOperatingSystemName + " " + tmpOperatingSystemVersion
               + " (" + tmpOperatingSystemArchitecture + ")");
     } catch (Exception exception) {
-      view.lblJavaRuntime.setText("Unknown");
-      view.lblOsDetails.setText("Unknown");
+      view.labelJavaRuntime.setText("Unknown");
+      view.labelOsDetails.setText("Unknown");
     }
 
     // 4. Statistics
     try {
       int tmpMovieCount = movieRepository.findAll().size();
-      view.lblMovieCount
+      view.labelMovieCount
           .setText(tmpMovieCount + (tmpMovieCount == 1 ? " movie" : " movies"));
 
       List<Watchlist> allWatchlists = watchlistRepository.findAll();
@@ -167,16 +169,16 @@ public class AboutController implements Refreshable {
           allWatchlists.stream().filter(Watchlist::isSmart).count();
       long tmpRegularCount = allWatchlists.size() - tmpSmartCount;
 
-      view.lblRegularWatchlistCount.setText(String.valueOf(tmpRegularCount));
-      view.lblSmartWatchlistCount.setText(String.valueOf(tmpSmartCount));
+      view.labelRegularWatchlistCount.setText(String.valueOf(tmpRegularCount));
+      view.labelSmartWatchlistCount.setText(String.valueOf(tmpSmartCount));
     } catch (Exception exception) {
-      view.lblMovieCount.setText("Unknown");
-      view.lblRegularWatchlistCount.setText("Unknown");
-      view.lblSmartWatchlistCount.setText("Unknown");
+      view.labelMovieCount.setText("Unknown");
+      view.labelRegularWatchlistCount.setText("Unknown");
+      view.labelSmartWatchlistCount.setText("Unknown");
     }
 
     // 4.5 Workspace Size
-    view.lblWorkspaceSize.setText("Calculating...");
+    view.labelWorkspaceSize.setText("Calculating...");
     new Thread(() -> {
       try {
         String tmpWorkspaces = settingsRepository.get("workspace_folders", "");
@@ -205,20 +207,20 @@ public class AboutController implements Refreshable {
           if (finalSize > 0) {
             double tmpSizeGb = finalSize / (1024.0 * 1024.0 * 1024.0);
             if (tmpSizeGb >= 1.0) {
-              view.lblWorkspaceSize
+              view.labelWorkspaceSize
                   .setText(String.format("%.2f GB", tmpSizeGb));
             } else {
               double tmpSizeMb = finalSize / (1024.0 * 1024.0);
-              view.lblWorkspaceSize
+              view.labelWorkspaceSize
                   .setText(String.format("%.2f MB", tmpSizeMb));
             }
           } else {
-            view.lblWorkspaceSize.setText("0.00 MB");
+            view.labelWorkspaceSize.setText("0.00 MB");
           }
         });
       } catch (Exception exception) {
         javafx.application.Platform.runLater(() -> {
-          view.lblWorkspaceSize.setText("Unknown");
+          view.labelWorkspaceSize.setText("Unknown");
         });
       }
     }).start();
@@ -227,14 +229,14 @@ public class AboutController implements Refreshable {
     try {
       Optional<Path> tmpPlayerPathOptional = playbackService.getPlayerPath();
       if (tmpPlayerPathOptional.isPresent()) {
-        view.lblPlayerPath.setText(tmpPlayerPathOptional.get().toAbsolutePath()
-            .toString().replace("\\", "/"));
+        view.labelPlayerPath.setText(tmpPlayerPathOptional.get()
+            .toAbsolutePath().toString().replace("\\", "/"));
       } else {
-        view.lblPlayerPath
+        view.labelPlayerPath
             .setText("No player configured (using auto-detect/none)");
       }
     } catch (Exception exception) {
-      view.lblPlayerPath.setText("Unknown");
+      view.labelPlayerPath.setText("Unknown");
     }
   }
 

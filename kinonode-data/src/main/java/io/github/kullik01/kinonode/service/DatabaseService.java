@@ -57,9 +57,9 @@ import java.util.logging.Logger;
 public class DatabaseService {
   private static final Logger LOGGER =
       Logger.getLogger(DatabaseService.class.getName());
-  private static final String DB_FILENAME = "kinonode.db";
+  private static final String DATABASE_FILENAME = "kinonode.db";
 
-  private final Path dbPath;
+  private final Path databasePath;
   private Connection connection;
 
   /**
@@ -74,10 +74,10 @@ public class DatabaseService {
   /**
    * Constructs a new DatabaseService with a custom database file path.
    *
-   * @param dbPath the {@link Path} to the SQLite database file
+   * @param databasePath the {@link Path} to the SQLite database file
    */
-  public DatabaseService(Path dbPath) {
-    this.dbPath = dbPath;
+  public DatabaseService(Path databasePath) {
+    this.databasePath = databasePath;
     initialize();
   }
 
@@ -89,7 +89,7 @@ public class DatabaseService {
   private void initialize() {
     try {
       // Ensure parent directory exists
-      Path tmpParentDir = dbPath.getParent();
+      Path tmpParentDir = databasePath.getParent();
       if (tmpParentDir != null && !Files.exists(tmpParentDir)) {
         Files.createDirectories(tmpParentDir);
         LOGGER.info(
@@ -98,10 +98,10 @@ public class DatabaseService {
 
       // Connect to database
       String tmpUrl = "jdbc:sqlite:"
-          + dbPath.toAbsolutePath().toString().replace("\\", "/");
+          + databasePath.toAbsolutePath().toString().replace("\\", "/");
       connection = DriverManager.getConnection(tmpUrl);
-      LOGGER
-          .info("Connected to SQLite database at: " + dbPath.toAbsolutePath());
+      LOGGER.info(
+          "Connected to SQLite database at: " + databasePath.toAbsolutePath());
 
       // Enable Foreign Keys in SQLite
       try (Statement tmpStatement = connection.createStatement()) {
@@ -245,7 +245,7 @@ public class DatabaseService {
       // needed
       if (connection == null || connection.isClosed()) {
         String tmpUrl = "jdbc:sqlite:"
-            + dbPath.toAbsolutePath().toString().replace("\\", "/");
+            + databasePath.toAbsolutePath().toString().replace("\\", "/");
         connection = DriverManager.getConnection(tmpUrl);
         try (Statement tmpStatement = connection.createStatement()) {
           tmpStatement.execute("PRAGMA foreign_keys = ON;");
@@ -264,7 +264,7 @@ public class DatabaseService {
    * @return the {@link Path} to the SQLite database file
    */
   public Path getDbPath() {
-    return dbPath;
+    return databasePath;
   }
 
   /** Closes the active database connection if it is open. */
@@ -291,14 +291,15 @@ public class DatabaseService {
     // 1. Check custom system property override
     String tmpCustomHome = System.getProperty("kinonode.home");
     if (tmpCustomHome != null && !tmpCustomHome.isBlank()) {
-      return Paths.get(tmpCustomHome, DB_FILENAME);
+      return Paths.get(tmpCustomHome, DATABASE_FILENAME);
     }
 
     // 2. Check if local kinonode.db already exists in current directory
     // (portable mode)
-    Path tmpLocalDb = Paths.get(System.getProperty("user.dir"), DB_FILENAME);
-    if (Files.exists(tmpLocalDb)) {
-      return tmpLocalDb;
+    Path tmpLocalDatabase =
+        Paths.get(System.getProperty("user.dir"), DATABASE_FILENAME);
+    if (Files.exists(tmpLocalDatabase)) {
+      return tmpLocalDatabase;
     }
 
     // 3. Check single directory mode: if running inside a directory named
@@ -306,7 +307,7 @@ public class DatabaseService {
     Path tmpCurrentDir = Paths.get(System.getProperty("user.dir"));
     if (tmpCurrentDir.getFileName() != null && tmpCurrentDir.getFileName()
         .toString().equalsIgnoreCase("KinoNode")) {
-      return tmpCurrentDir.resolve(DB_FILENAME);
+      return tmpCurrentDir.resolve(DATABASE_FILENAME);
     }
 
     // 4. Fallback to OS-specific user application data directory
@@ -331,6 +332,6 @@ public class DatabaseService {
       }
       tmpAppDataDir = Paths.get(tmpXdgDataHome, "KinoNode");
     }
-    return tmpAppDataDir.resolve(DB_FILENAME);
+    return tmpAppDataDir.resolve(DATABASE_FILENAME);
   }
 }

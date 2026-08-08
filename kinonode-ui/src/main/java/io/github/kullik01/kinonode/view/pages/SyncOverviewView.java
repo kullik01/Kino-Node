@@ -259,18 +259,20 @@ public class SyncOverviewView {
     VBox tmpActionsBox = new VBox(8);
     tmpActionsBox.setAlignment(Pos.CENTER_RIGHT);
 
-    Button btnInteractiveMatch = new Button("Interactive Match Selection");
-    btnInteractiveMatch.getStyleClass().add("button-primary");
-    btnInteractiveMatch.setStyle("-fx-font-size: 12px; -fx-padding: 6px 12px;");
-    btnInteractiveMatch
+    Button buttonInteractiveMatch = new Button("Interactive Match Selection");
+    buttonInteractiveMatch.getStyleClass().add("button-primary");
+    buttonInteractiveMatch
+        .setStyle("-fx-font-size: 12px; -fx-padding: 6px 12px;");
+    buttonInteractiveMatch
         .setOnAction(e -> openInteractiveMatchDialog(movie, tmpRow));
 
-    Button btnManualImdb = new Button("Manual Search via IMDb ID");
-    btnManualImdb.getStyleClass().add("button-secondary");
-    btnManualImdb.setStyle("-fx-font-size: 12px; -fx-padding: 6px 12px;");
-    btnManualImdb.setOnAction(e -> openManualImdbDialog(movie, tmpRow));
+    Button buttonManualImdb = new Button("Manual Search via IMDb ID");
+    buttonManualImdb.getStyleClass().add("button-secondary");
+    buttonManualImdb.setStyle("-fx-font-size: 12px; -fx-padding: 6px 12px;");
+    buttonManualImdb.setOnAction(e -> openManualImdbDialog(movie, tmpRow));
 
-    tmpActionsBox.getChildren().addAll(btnInteractiveMatch, btnManualImdb);
+    tmpActionsBox.getChildren().addAll(buttonInteractiveMatch,
+        buttonManualImdb);
 
     tmpRow.getChildren().addAll(tmpPosterView, tmpInfoBox, tmpActionsBox);
     return tmpRow;
@@ -299,9 +301,9 @@ public class SyncOverviewView {
 
     TextField tmpSearchInput = new TextField(movie.getTitle());
     tmpSearchInput.setPromptText("Enter movie title to search candidates...");
-    Button btnSearchCandidates = new Button("Search Candidates");
-    btnSearchCandidates.getStyleClass().add("button-primary");
-    HBox tmpSearchBox = new HBox(10, tmpSearchInput, btnSearchCandidates);
+    Button buttonSearchCandidates = new Button("Search Candidates");
+    buttonSearchCandidates.getStyleClass().add("button-primary");
+    HBox tmpSearchBox = new HBox(10, tmpSearchInput, buttonSearchCandidates);
     HBox.setHgrow(tmpSearchInput, Priority.ALWAYS);
 
     VBox tmpTopBox = new VBox(8, tmpHeaderLabel, tmpFileLabel, tmpSearchBox);
@@ -397,11 +399,11 @@ public class SyncOverviewView {
             Region tmpSp = new Region();
             HBox.setHgrow(tmpSp, Priority.ALWAYS);
 
-            Button btnSelectMatch = new Button("Select & Re-index");
-            btnSelectMatch.getStyleClass().add("button-primary");
-            btnSelectMatch.setStyle(
+            Button buttonSelectMatch = new Button("Select & Re-index");
+            buttonSelectMatch.getStyleClass().add("button-primary");
+            buttonSelectMatch.setStyle(
                 "-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 8px 16px;");
-            btnSelectMatch.setOnAction(e -> {
+            buttonSelectMatch.setOnAction(e -> {
               String tmpTargetId = tmpCand.getImdbId();
               if (tmpTargetId == null || tmpTargetId.isBlank())
                 return;
@@ -433,7 +435,7 @@ public class SyncOverviewView {
             });
 
             tmpCandRow.getChildren().addAll(tmpPoster, tmpInfo, tmpSp,
-                btnSelectMatch);
+                buttonSelectMatch);
             tmpCandidateContainer.getChildren().add(tmpCandRow);
           }
         }
@@ -444,7 +446,7 @@ public class SyncOverviewView {
       t.start();
     };
 
-    btnSearchCandidates.setOnAction(e -> tmpPerformSearch.run());
+    buttonSearchCandidates.setOnAction(e -> tmpPerformSearch.run());
     tmpSearchInput.setOnAction(e -> tmpPerformSearch.run());
 
     tmpMatchStage.setScene(tmpScene);
@@ -479,10 +481,10 @@ public class SyncOverviewView {
     TextField tmpInput = new TextField();
     tmpInput.setPromptText("Enter IMDb ID (e.g. tt0111161)");
 
-    Button btnImport = new Button("Instant Import / Re-index");
-    btnImport.getStyleClass().add("button-success");
+    Button buttonImport = new Button("Instant Import / Re-index");
+    buttonImport.getStyleClass().add("button-success");
 
-    HBox tmpBox = new HBox(10, tmpInput, btnImport);
+    HBox tmpBox = new HBox(10, tmpInput, buttonImport);
     HBox.setHgrow(tmpInput, Priority.ALWAYS);
     BorderPane.setMargin(tmpBox, new Insets(15, 0, 15, 0));
     tmpRoot.setCenter(tmpBox);
@@ -501,7 +503,7 @@ public class SyncOverviewView {
       tmpScene.getStylesheets().addAll(dialogStage.getScene().getStylesheets());
     }
 
-    btnImport.setOnAction(e -> {
+    buttonImport.setOnAction(e -> {
       String tmpId = tmpInput.getText().trim();
       if (!tmpId.matches("^tt\\d{7,}$")) {
         tmpInput.setStyle("-fx-border-color: red;");

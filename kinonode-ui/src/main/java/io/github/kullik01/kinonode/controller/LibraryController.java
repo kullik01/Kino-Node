@@ -113,10 +113,10 @@ public class LibraryController implements Refreshable {
   private static final double GRID_PADDING = 10.0;
 
   private VBox libraryRoot;
-  private TextField txtSearch;
-  private ComboBox<String> cmbSort;
+  private TextField textFieldSearch;
+  private ComboBox<String> comboBoxSort;
   private FlowPane gridPane;
-  private Button btnSyncLibrary;
+  private Button buttonSyncLibrary;
   private HBox progressArea;
   private ProgressBar progressBar;
 
@@ -173,52 +173,52 @@ public class LibraryController implements Refreshable {
     Region spacer = new Region();
     HBox.setHgrow(spacer, Priority.ALWAYS);
 
-    txtSearch = new TextField();
-    txtSearch.setId("txtSearch");
-    txtSearch.setPromptText(resources.getString("library.search.prompt"));
-    txtSearch.setPrefWidth(250.0);
+    textFieldSearch = new TextField();
+    textFieldSearch.setId("textFieldSearch");
+    textFieldSearch.setPromptText(resources.getString("library.search.prompt"));
+    textFieldSearch.setPrefWidth(250.0);
 
-    cmbSort = new ComboBox<>();
-    cmbSort.setId("cmbSort");
-    cmbSort.setPrefWidth(200.0);
-    cmbSort.getStyleClass().add("button-secondary");
+    comboBoxSort = new ComboBox<>();
+    comboBoxSort.setId("comboBoxSort");
+    comboBoxSort.setPrefWidth(200.0);
+    comboBoxSort.getStyleClass().add("button-secondary");
 
-    btnSyncLibrary = new Button();
-    btnSyncLibrary.setId("btnSyncLibrary");
-    btnSyncLibrary.getStyleClass().addAll("button-success", "button-icon");
-    btnSyncLibrary.setMinWidth(36.0);
-    btnSyncLibrary.setMaxWidth(36.0);
-    btnSyncLibrary.setMinHeight(36.0);
-    btnSyncLibrary.setOnAction(e -> syncLibrary());
+    buttonSyncLibrary = new Button();
+    buttonSyncLibrary.setId("buttonSyncLibrary");
+    buttonSyncLibrary.getStyleClass().addAll("button-success", "button-icon");
+    buttonSyncLibrary.setMinWidth(36.0);
+    buttonSyncLibrary.setMaxWidth(36.0);
+    buttonSyncLibrary.setMinHeight(36.0);
+    buttonSyncLibrary.setOnAction(e -> syncLibrary());
 
     SVGPath syncGraphic = new SVGPath();
     syncGraphic.setContent(
         "M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z");
     syncGraphic.setFill(Color.WHITE);
-    btnSyncLibrary.setGraphic(syncGraphic);
+    buttonSyncLibrary.setGraphic(syncGraphic);
 
     Tooltip syncTooltip =
         new Tooltip(resources.getString("library.empty.sync_btn"));
     syncTooltip.setShowDelay(Duration.millis(250));
-    btnSyncLibrary.setTooltip(syncTooltip);
+    buttonSyncLibrary.setTooltip(syncTooltip);
 
-    Button btnAddMovie = new Button();
-    btnAddMovie.setId("btnAddMovie");
-    btnAddMovie.getStyleClass().addAll("button-secondary", "button-icon");
-    btnAddMovie.setMinWidth(36.0);
-    btnAddMovie.setMaxWidth(36.0);
-    btnAddMovie.setMinHeight(36.0);
-    btnAddMovie.setOnAction(e -> showAddMovieDialog());
+    Button buttonAddMovie = new Button();
+    buttonAddMovie.setId("buttonAddMovie");
+    buttonAddMovie.getStyleClass().addAll("button-secondary", "button-icon");
+    buttonAddMovie.setMinWidth(36.0);
+    buttonAddMovie.setMaxWidth(36.0);
+    buttonAddMovie.setMinHeight(36.0);
+    buttonAddMovie.setOnAction(e -> showAddMovieDialog());
 
     SVGPath addGraphic = new SVGPath();
     addGraphic.setContent("M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z");
     addGraphic.setFill(Color.WHITE);
-    btnAddMovie.setGraphic(addGraphic);
+    buttonAddMovie.setGraphic(addGraphic);
 
     Tooltip addTooltip =
         new Tooltip(resources.getString("library.add.movie.title"));
     addTooltip.setShowDelay(Duration.millis(250));
-    btnAddMovie.setTooltip(addTooltip);
+    buttonAddMovie.setTooltip(addTooltip);
 
     progressArea = new HBox();
     progressArea.setId("progressArea");
@@ -231,26 +231,26 @@ public class LibraryController implements Refreshable {
     progressBar.setId("progressBar");
     progressBar.setPrefWidth(250.0);
 
-    Button btnCancelSync = new Button();
-    btnCancelSync.getStyleClass().addAll("button-secondary", "button-icon");
-    btnCancelSync.setMinWidth(36.0);
-    btnCancelSync.setMaxWidth(36.0);
-    btnCancelSync.setMinHeight(36.0);
-    btnCancelSync.setOnAction(e -> cancelSync());
+    Button buttonCancelSync = new Button();
+    buttonCancelSync.getStyleClass().addAll("button-secondary", "button-icon");
+    buttonCancelSync.setMinWidth(36.0);
+    buttonCancelSync.setMaxWidth(36.0);
+    buttonCancelSync.setMinHeight(36.0);
+    buttonCancelSync.setOnAction(e -> cancelSync());
 
     SVGPath cancelGraphic = new SVGPath();
     cancelGraphic.setContent(
         "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z");
     cancelGraphic.setFill(Color.WHITE);
-    btnCancelSync.setGraphic(cancelGraphic);
+    buttonCancelSync.setGraphic(cancelGraphic);
 
     Tooltip cancelTooltip = new Tooltip(resources.getString("button.cancel"));
     cancelTooltip.setShowDelay(Duration.millis(250));
-    btnCancelSync.setTooltip(cancelTooltip);
+    buttonCancelSync.setTooltip(cancelTooltip);
 
-    progressArea.getChildren().addAll(progressBar, btnCancelSync);
-    toolbar.getChildren().addAll(titleLbl, spacer, txtSearch, cmbSort,
-        btnAddMovie, btnSyncLibrary, progressArea);
+    progressArea.getChildren().addAll(progressBar, buttonCancelSync);
+    toolbar.getChildren().addAll(titleLbl, spacer, textFieldSearch,
+        comboBoxSort, buttonAddMovie, buttonSyncLibrary, progressArea);
 
     ScrollPane scrollPane = new ScrollPane();
     scrollPane.setFitToWidth(true);
@@ -303,7 +303,7 @@ public class LibraryController implements Refreshable {
   public void initialize() {
 
     // Setup sort and filter options
-    cmbSort.getItems().addAll(
+    comboBoxSort.getItems().addAll(
         resources.getString("library.sort.cinematographer"),
         resources.getString("library.sort.composer"),
         resources.getString("library.sort.director"),
@@ -317,21 +317,22 @@ public class LibraryController implements Refreshable {
         resources.getString("library.sort.title"),
         resources.getString("library.sort.writer"));
 
-    cmbSort.setValue(resources.getString("library.sort.title"));
+    comboBoxSort.setValue(resources.getString("library.sort.title"));
 
     // Real-time filters and sorts
-    txtSearch.textProperty().addListener(
+    textFieldSearch.textProperty().addListener(
         (observable, oldValue, newValue) -> filterAndDisplayMovies());
-    cmbSort.valueProperty().addListener((observable, oldValue, newValue) -> {
-      if (newValue != null) {
-        settingsRepository.set("library_sort_filter", newValue);
-      }
-      filterAndDisplayMovies();
-    });
+    comboBoxSort.valueProperty()
+        .addListener((observable, oldValue, newValue) -> {
+          if (newValue != null) {
+            settingsRepository.set("library_sort_filter", newValue);
+          }
+          filterAndDisplayMovies();
+        });
 
-    btnSyncLibrary.disableProperty().bind(progressArea.visibleProperty());
-    CursorUtils.applyCursor(btnSyncLibrary);
-    CursorUtils.applyCursor(cmbSort);
+    buttonSyncLibrary.disableProperty().bind(progressArea.visibleProperty());
+    CursorUtils.applyCursor(buttonSyncLibrary);
+    CursorUtils.applyCursor(comboBoxSort);
 
     refresh();
   }
@@ -357,9 +358,10 @@ public class LibraryController implements Refreshable {
    * if no movies match.
    */
   private void filterAndDisplayMovies() {
-    String query = txtSearch.getText().toLowerCase().trim();
-    String sortOption = cmbSort.getValue() != null ? cmbSort.getValue()
-        : resources.getString("library.sort.recently_added");
+    String query = textFieldSearch.getText().toLowerCase().trim();
+    String sortOption =
+        comboBoxSort.getValue() != null ? comboBoxSort.getValue()
+            : resources.getString("library.sort.recently_added");
 
     List<Movie> filteredMovies = allMovies.stream().filter(movie -> {
       if (query.isEmpty())
@@ -971,11 +973,11 @@ public class LibraryController implements Refreshable {
             Region tmpSp = new Region();
             HBox.setHgrow(tmpSp, Priority.ALWAYS);
 
-            Button btnSelectMatch = new Button("Select & Import");
-            btnSelectMatch.getStyleClass().add("button-primary");
-            btnSelectMatch.setStyle(
+            Button buttonSelectMatch = new Button("Select & Import");
+            buttonSelectMatch.getStyleClass().add("button-primary");
+            buttonSelectMatch.setStyle(
                 "-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 8px 16px;");
-            btnSelectMatch.setOnAction(e -> {
+            buttonSelectMatch.setOnAction(e -> {
               String tmpTargetId = tmpCand.getImdbId();
               if (tmpTargetId == null || tmpTargetId.isBlank())
                 return;
@@ -1015,7 +1017,7 @@ public class LibraryController implements Refreshable {
             });
 
             tmpRow.getChildren().addAll(tmpPoster, tmpInfo, tmpSp,
-                btnSelectMatch);
+                buttonSelectMatch);
             tmpCandidateContainer.getChildren().add(tmpRow);
           }
         }
