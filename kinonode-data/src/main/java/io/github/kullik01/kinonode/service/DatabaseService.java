@@ -294,20 +294,26 @@ public class DatabaseService {
       return Paths.get(tmpCustomHome, DATABASE_FILENAME);
     }
 
-    // 2. Check if local kinonode.db already exists in current directory
-    // (portable mode)
-    Path tmpLocalDatabase =
-        Paths.get(System.getProperty("user.dir"), DATABASE_FILENAME);
-    if (Files.exists(tmpLocalDatabase)) {
-      return tmpLocalDatabase;
-    }
-
-    // 3. Check single directory mode: if running inside a directory named
-    // KinoNode
     Path tmpCurrentDir = Paths.get(System.getProperty("user.dir"));
-    if (tmpCurrentDir.getFileName() != null && tmpCurrentDir.getFileName()
-        .toString().equalsIgnoreCase("KinoNode")) {
-      return tmpCurrentDir.resolve(DATABASE_FILENAME);
+    boolean tmpIsSystemLocation = isSystemInstallationDirectory(tmpCurrentDir);
+    boolean tmpIsWritableDir = isWritableDirectory(tmpCurrentDir);
+
+    // Only adopt local/portable database path if directory is NOT a system
+    // location AND IS writable
+    if (!tmpIsSystemLocation && tmpIsWritableDir) {
+      // 2. Check if local kinonode.db already exists in current directory
+      // (portable mode)
+      Path tmpLocalDatabase = tmpCurrentDir.resolve(DATABASE_FILENAME);
+      if (Files.exists(tmpLocalDatabase)) {
+        return tmpLocalDatabase;
+      }
+
+      // 3. Check single directory mode: if running inside a local writable
+      // portable folder named KinoNode
+      if (tmpCurrentDir.getFileName() != null && tmpCurrentDir.getFileName()
+          .toString().equalsIgnoreCase("KinoNode")) {
+        return tmpLocalDatabase;
+      }
     }
 
     // 4. Fallback to OS-specific user application data directory
@@ -333,5 +339,31 @@ public class DatabaseService {
       tmpAppDataDir = Paths.get(tmpXdgDataHome, "KinoNode");
     }
     return tmpAppDataDir.resolve(DATABASE_FILENAME);
+  }
+
+  private static boolean isSystemInstallationDirectory(Path path) {
+    if (path == null) {
+      return false;
+    }
+    String tmpPathString =
+        path.toAbsolutePath().toString().toLowerCase().replace('\\', '/');
+    return tmpPathString.startsWith("/opt") || tmpPathString.startsWith("/usr")
+        || tmpPathString.startsWith("/var") || tmpPathString.startsWith("/app")
+        || tmpPathString.startsWith("/snap")
+        || tmpPathString.startsWith("/flatpak")
+        || tmpPathString.startsWith("/applications")
+        || tmpPathString.contains("program files");
+  }
+
+  private static boolean isWritableDirectory(Path path) {
+    if (path == null) {
+      return false;
+    }
+    try {
+      return Files.exists(path) && Files.isDirectory(path)
+          && Files.isWritable(path);
+    } catch (SecurityException tmpException) {
+      return false;
+    }
   }
 }

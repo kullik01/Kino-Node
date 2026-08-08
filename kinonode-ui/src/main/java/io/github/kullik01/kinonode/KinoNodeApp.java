@@ -80,88 +80,113 @@ public class KinoNodeApp extends Application {
    */
   @Override
   public void start(Stage primaryStage) throws Exception {
-    // Initialize Database and Repositories via the application context
-    // singleton
-    AppContext.getInstance();
+    try {
+      // Initialize Database and Repositories via the application context
+      // singleton
+      AppContext.getInstance();
 
-    // Retrieve user's configured theme and apply the corresponding stylesheet
-    var tmpSettingsRepository =
-        AppContext.getInstance().getSettingsRepository();
-    String tmpTheme = tmpSettingsRepository.get("theme_mode", "light");
-    if ("dark".equals(tmpTheme)) {
-      // Use AtlantaFX PrimerDark theme for dark mode
-      Application
-          .setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
-    } else {
-      // Default to AtlantaFX PrimerLight theme for light mode
-      Application
-          .setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+      // Retrieve user's configured theme and apply the corresponding stylesheet
+      var tmpSettingsRepository =
+          AppContext.getInstance().getSettingsRepository();
+      String tmpTheme = tmpSettingsRepository.get("theme_mode", "light");
+      if ("dark".equals(tmpTheme)) {
+        // Use AtlantaFX PrimerDark theme for dark mode
+        Application
+            .setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
+      } else {
+        // Default to AtlantaFX PrimerLight theme for light mode
+        Application
+            .setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+      }
+
+      // Set high-DPI resolution properties for crisp rendering on HiDPI / 4K /
+      // Retina screens
+      System.setProperty("prism.allowhidpi", "true");
+      System.setProperty("prism.lcdtext", "true");
+      System.setProperty("prism.text", "t2k");
+      System.setProperty("glass.win.uiScale.enabled", "true");
+      System.setProperty("sun.java2d.dpiaware", "true");
+
+      // Build the JavaFX node tree programmatically using Guice Injector
+      io.github.kullik01.kinonode.controller.MainController tmpController =
+          AppContext.getInstance().getInjector().getInstance(
+              io.github.kullik01.kinonode.controller.MainController.class);
+      Parent tmpRoot = tmpController.buildView();
+      tmpController.initialize();
+
+      // Set the application logo and title
+      primaryStage.getIcons()
+          .add(new javafx.scene.image.Image(getClass().getResourceAsStream(
+              "/io/github/kullik01/kinonode/images/logos/logo.png")));
+      primaryStage.setTitle("KinoNode - Personal Movie Library");
+
+      // Calculate adaptive, high-resolution initial window dimensions based on
+      // screen bounds
+      javafx.geometry.Rectangle2D tmpVisualBounds =
+          javafx.stage.Screen.getPrimary().getVisualBounds();
+      double tmpTargetWidth =
+          Math.max(960, Math.min(1600, tmpVisualBounds.getWidth() * 0.80));
+      double tmpTargetHeight =
+          Math.max(680, Math.min(1000, tmpVisualBounds.getHeight() * 0.80));
+
+      primaryStage.setMinWidth(Math.min(800, tmpVisualBounds.getWidth() * 0.5));
+      primaryStage
+          .setMinHeight(Math.min(600, tmpVisualBounds.getHeight() * 0.5));
+
+      // Initialize the main scene, associate it with the stage, and display the
+      // window
+      Scene tmpScene = new Scene(tmpRoot, tmpTargetWidth, tmpTargetHeight);
+      primaryStage.setScene(tmpScene);
+
+      // Check maximized state settings
+      String tmpAlwaysMax =
+          tmpSettingsRepository.get("always_start_maximized", "false");
+      if ("true".equals(tmpAlwaysMax)) {
+        primaryStage.setMaximized(true);
+      } else {
+        String tmpIsMax =
+            tmpSettingsRepository.get("window_is_maximized", "false");
+        primaryStage.setMaximized("true".equals(tmpIsMax));
+      }
+
+      // Track maximized state changes
+      primaryStage.maximizedProperty().addListener((tmpObs, tmpOld, tmpNew) -> {
+        tmpSettingsRepository.set("window_is_maximized",
+            tmpNew ? "true" : "false");
+      });
+
+      primaryStage.show();
+
+      Platform.runLater(() -> {
+        primaryStage.setIconified(false);
+        primaryStage.setAlwaysOnTop(true);
+        primaryStage.toFront();
+        primaryStage.requestFocus();
+        primaryStage.setAlwaysOnTop(false);
+      });
+    } catch (Throwable tmpThrowable) {
+      java.util.logging.Logger.getLogger(KinoNodeApp.class.getName()).log(
+          java.util.logging.Level.SEVERE,
+          "Fatal exception encountered during application startup",
+          tmpThrowable);
+      showFatalStartupErrorDialog(primaryStage, tmpThrowable);
     }
+  }
 
-    // Set high-DPI resolution properties for crisp rendering on HiDPI / 4K /
-    // Retina screens
-    System.setProperty("prism.allowhidpi", "true");
-    System.setProperty("prism.lcdtext", "true");
-    System.setProperty("prism.text", "t2k");
-    System.setProperty("glass.win.uiScale.enabled", "true");
-    System.setProperty("sun.java2d.dpiaware", "true");
-
-    // Build the JavaFX node tree programmatically using Guice Injector
-    io.github.kullik01.kinonode.controller.MainController tmpController =
-        AppContext.getInstance().getInjector().getInstance(
-            io.github.kullik01.kinonode.controller.MainController.class);
-    Parent tmpRoot = tmpController.buildView();
-    tmpController.initialize();
-
-    // Set the application logo and title
-    primaryStage.getIcons()
-        .add(new javafx.scene.image.Image(getClass().getResourceAsStream(
-            "/io/github/kullik01/kinonode/images/logos/logo.png")));
-    primaryStage.setTitle("KinoNode - Personal Movie Library");
-
-    // Calculate adaptive, high-resolution initial window dimensions based on
-    // screen bounds
-    javafx.geometry.Rectangle2D tmpVisualBounds =
-        javafx.stage.Screen.getPrimary().getVisualBounds();
-    double tmpTargetWidth =
-        Math.max(960, Math.min(1600, tmpVisualBounds.getWidth() * 0.80));
-    double tmpTargetHeight =
-        Math.max(680, Math.min(1000, tmpVisualBounds.getHeight() * 0.80));
-
-    primaryStage.setMinWidth(Math.min(800, tmpVisualBounds.getWidth() * 0.5));
-    primaryStage.setMinHeight(Math.min(600, tmpVisualBounds.getHeight() * 0.5));
-
-    // Initialize the main scene, associate it with the stage, and display the
-    // window
-    Scene tmpScene = new Scene(tmpRoot, tmpTargetWidth, tmpTargetHeight);
-    primaryStage.setScene(tmpScene);
-
-    // Check maximized state settings
-    String tmpAlwaysMax =
-        tmpSettingsRepository.get("always_start_maximized", "false");
-    if ("true".equals(tmpAlwaysMax)) {
-      primaryStage.setMaximized(true);
-    } else {
-      String tmpIsMax =
-          tmpSettingsRepository.get("window_is_maximized", "false");
-      primaryStage.setMaximized("true".equals(tmpIsMax));
+  private void showFatalStartupErrorDialog(Stage stage, Throwable throwable) {
+    try {
+      javafx.scene.control.Alert tmpAlert = new javafx.scene.control.Alert(
+          javafx.scene.control.Alert.AlertType.ERROR);
+      tmpAlert.setTitle("KinoNode - Startup Error");
+      tmpAlert.setHeaderText("Failed to initialize application context");
+      tmpAlert.setContentText("An unexpected error occurred during startup:\n\n"
+          + throwable.getClass().getName() + ": " + throwable.getMessage()
+          + "\n\nPlease verify file permissions and system configuration.");
+      tmpAlert.showAndWait();
+    } catch (Exception tmpIgnored) {
+      System.err.println("Fatal startup error: " + throwable.getMessage());
+      throwable.printStackTrace();
     }
-
-    // Track maximized state changes
-    primaryStage.maximizedProperty().addListener((tmpObs, tmpOld, tmpNew) -> {
-      tmpSettingsRepository.set("window_is_maximized",
-          tmpNew ? "true" : "false");
-    });
-
-    primaryStage.show();
-
-    Platform.runLater(() -> {
-      primaryStage.setIconified(false);
-      primaryStage.setAlwaysOnTop(true);
-      primaryStage.toFront();
-      primaryStage.requestFocus();
-      primaryStage.setAlwaysOnTop(false);
-    });
   }
 
   /**
@@ -185,6 +210,12 @@ public class KinoNodeApp extends Application {
    * @param arguments the command-line arguments
    */
   public static void main(String[] arguments) {
+    Thread.setDefaultUncaughtExceptionHandler((tmpThread, tmpThrowable) -> {
+      java.util.logging.Logger.getLogger(KinoNodeApp.class.getName()).log(
+          java.util.logging.Level.SEVERE,
+          "Uncaught exception on thread " + tmpThread.getName(), tmpThrowable);
+    });
+
     try (InputStream tmpConfigStream = KinoNodeApp.class.getResourceAsStream(
         "/io/github/kullik01/kinonode/config/logging.properties")) {
       if (tmpConfigStream != null) {
