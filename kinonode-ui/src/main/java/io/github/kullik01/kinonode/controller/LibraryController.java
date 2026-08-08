@@ -59,6 +59,7 @@ import io.github.kullik01.kinonode.service.LibraryScanService;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import io.github.kullik01.kinonode.uiutil.CustomAlert;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -71,6 +72,9 @@ import java.util.ResourceBundle;
 import javafx.concurrent.Task;
 import io.github.kullik01.kinonode.service.ImdbService;
 import io.github.kullik01.kinonode.view.pages.DisambiguationView;
+import io.github.kullik01.kinonode.view.pages.SyncOverviewView;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -83,6 +87,8 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -755,22 +761,22 @@ public class LibraryController implements Refreshable {
       progressBar.setProgress(0);
       progressArea.setVisible(false);
 
+      Stage tmpOwnerStage = (Stage) gridPane.getScene().getWindow();
       if (tmpResult.unresolvedMovies() != null
           && !tmpResult.unresolvedMovies().isEmpty()) {
-        Stage tmpOwnerStage = (Stage) gridPane.getScene().getWindow();
         DisambiguationView tmpDisambiguationView =
             new DisambiguationView(tmpOwnerStage, resources,
                 tmpResult.unresolvedMovies(), imdbService, movieRepository);
         tmpDisambiguationView.showAndWait();
       }
 
+      SyncOverviewView tmpOverviewView =
+          new SyncOverviewView(tmpOwnerStage, resources, tmpResult, imdbService,
+              movieRepository);
+      tmpOverviewView.showAndWait();
+
       refresh();
       appContext.notifyLibraryChanged();
-
-      CustomAlert.showInformation(gridPane.getScene().getWindow(),
-          "Sync Completed", "Sync Completed Successfully",
-          "Total files scanned: " + tmpResult.totalScanned()
-              + "\nNew movies added: " + tmpResult.newAdded());
     });
 
     activeScanTask.setOnFailed(event -> {
@@ -810,31 +816,174 @@ public class LibraryController implements Refreshable {
   private void showAddMovieDialog() {
     Stage tmpDialogStage = new Stage();
     tmpDialogStage.setTitle(resources.getString("library.add.movie.title"));
+    tmpDialogStage.setMinWidth(780);
+    tmpDialogStage.setMinHeight(620);
 
-    // We will just show a basic implementation of the dialog for now.
-    // Further complex implementations could be added in a separate view file.
     VBox tmpLayout = new VBox(15);
     tmpLayout.setPadding(new Insets(20));
     tmpLayout.setStyle("-fx-background-color: -color-bg-default;");
 
-    Label tmpPrompt =
-        new Label(resources.getString("library.add.movie.imdb.prompt"));
-    TextField tmpInput = new TextField();
-    Button btnLookup =
-        new Button(resources.getString("library.add.movie.imdb.lookup"));
-    btnLookup.getStyleClass().add("button-primary");
+    Label tmpHeaderLabel = new Label("Enhanced Movie Import & Match Management");
+    tmpHeaderLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
 
-    btnLookup.setOnAction(e -> {
-      String tmpId = tmpInput.getText().trim();
+    // Interactive Title Search & Match Options List
+    VBox tmpSection1 = new VBox(10);
+    tmpSection1.setStyle("-fx-background-color: -color-bg-overlay; -fx-padding: 15; -fx-background-radius: 8;");
+
+    Label tmpSec1Title = new Label("Interactive Match Selection");
+    tmpSec1Title.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+
+    TextField tmpSearchInput = new TextField();
+    tmpSearchInput.setPromptText("Enter movie title to search candidates...");
+    Button btnSearchCandidates = new Button("Search Candidates");
+    btnSearchCandidates.getStyleClass().add("button-primary");
+    HBox tmpSearchBox = new HBox(10, tmpSearchInput, btnSearchCandidates);
+    HBox.setHgrow(tmpSearchInput, Priority.ALWAYS);
+
+    VBox tmpCandidateContainer = new VBox(10);
+    ScrollPane tmpScroll = new ScrollPane(tmpCandidateContainer);
+    tmpScroll.setFitToWidth(true);
+    tmpScroll.setPrefHeight(320);
+    tmpScroll.setStyle("-fx-background-color: transparent;");
+
+    tmpSection1.getChildren().addAll(tmpSec1Title, tmpSearchBox, tmpScroll);
+
+    // Manual Search via IMDb ID
+    VBox tmpSection2 = new VBox(10);
+    tmpSection2.setStyle("-fx-background-color: -color-bg-overlay; -fx-padding: 15; -fx-background-radius: 8;");
+
+    Label tmpSec2Title = new Label("Manual Search via IMDb ID");
+    tmpSec2Title.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+
+    TextField tmpImdbInput = new TextField();
+    tmpImdbInput.setPromptText("e.g. tt0111161");
+    Button btnImdbImport = new Button("Instant Import");
+    btnImdbImport.getStyleClass().add("button-success");
+    HBox tmpImdbBox = new HBox(10, tmpImdbInput, btnImdbImport);
+    HBox.setHgrow(tmpImdbInput, Priority.ALWAYS);
+
+    tmpSection2.getChildren().addAll(tmpSec2Title, tmpImdbBox);
+
+    Button btnClose = new Button("Close");
+    btnClose.getStyleClass().add("button-secondary");
+    btnClose.setOnAction(e -> tmpDialogStage.close());
+    HBox tmpBottomBox = new HBox(btnClose);
+    tmpBottomBox.setAlignment(Pos.CENTER_RIGHT);
+
+    tmpLayout.getChildren().addAll(tmpHeaderLabel, tmpSection1, tmpSection2, tmpBottomBox);
+
+    Runnable tmpPerformSearch = () -> {
+      String tmpQuery = tmpSearchInput.getText().trim();
+      if (tmpQuery.isEmpty()) return;
+      tmpCandidateContainer.getChildren().setAll(new Label("Searching IMDb for matches..."));
+
+      Task<List<Movie>> tmpTask = new Task<>() {
+        @Override
+        protected List<Movie> call() {
+          return imdbService.searchSuggestions(tmpQuery);
+        }
+      };
+
+      tmpTask.setOnSucceeded(evt -> {
+        List<Movie> tmpResults = tmpTask.getValue();
+        tmpCandidateContainer.getChildren().clear();
+        if (tmpResults.isEmpty()) {
+          tmpCandidateContainer.getChildren().add(new Label("No candidate movie matches found."));
+        } else {
+          for (Movie tmpCand : tmpResults) {
+            HBox tmpRow = new HBox(15);
+            tmpRow.setAlignment(Pos.CENTER_LEFT);
+            tmpRow.setStyle("-fx-background-color: -color-bg-subtle; -fx-padding: 12; -fx-background-radius: 8; -fx-border-color: -color-border-default; -fx-border-radius: 8;");
+
+            ImageView tmpPoster = new ImageView();
+            tmpPoster.setFitWidth(70);
+            tmpPoster.setFitHeight(105);
+            tmpPoster.setPreserveRatio(true);
+
+            if (tmpCand.getCoverImagePath() != null) {
+              File tmpImgFile = new File(tmpCand.getCoverImagePath());
+              if (tmpImgFile.exists()) {
+                try {
+                  tmpPoster.setImage(new Image(tmpImgFile.toURI().toURL().toExternalForm(), 70, 105, true, true, true));
+                } catch (Exception ignored) {}
+              }
+            }
+
+            VBox tmpInfo = new VBox(4);
+            Label tmpT = new Label(tmpCand.getTitle());
+            tmpT.setStyle("-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: -color-fg-default;");
+            String tmpSubText = (tmpCand.getYear() != null ? "Year: " + tmpCand.getYear() : "")
+                + (tmpCand.getImdbId() != null ? "  •  IMDb ID: " + tmpCand.getImdbId() : "");
+            Label tmpSub = new Label(tmpSubText);
+            tmpSub.setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-muted;");
+            tmpInfo.getChildren().addAll(tmpT, tmpSub);
+
+            if (tmpCand.getActors() != null && !tmpCand.getActors().isBlank()) {
+              Label tmpAct = new Label("Cast: " + tmpCand.getActors());
+              tmpAct.setStyle("-fx-font-size: 11px; -fx-text-fill: -color-fg-subtle;");
+              tmpInfo.getChildren().add(tmpAct);
+            }
+
+            Region tmpSp = new Region();
+            HBox.setHgrow(tmpSp, Priority.ALWAYS);
+
+            Button btnSelectMatch = new Button("Select & Import");
+            btnSelectMatch.getStyleClass().add("button-primary");
+            btnSelectMatch.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 8px 16px;");
+            btnSelectMatch.setOnAction(e -> {
+              String tmpTargetId = tmpCand.getImdbId();
+              if (tmpTargetId == null || tmpTargetId.isBlank()) return;
+
+              btnSelectMatch.setDisable(true);
+              Task<Void> tmpImportTask = new Task<>() {
+                @Override
+                protected Void call() {
+                  Movie tmpMovie = new Movie("manual://" + tmpTargetId, tmpCand.getTitle());
+                  tmpMovie.setMatchStatus("MANUAL");
+                  imdbService.enrichMovieDataById(tmpTargetId, tmpMovie);
+                  if (tmpMovie.getTitle() != null) {
+                    movieRepository.insert(tmpMovie);
+                  }
+                  return null;
+                }
+              };
+              tmpImportTask.setOnSucceeded(e2 -> {
+                tmpDialogStage.close();
+                refresh();
+                appContext.notifyLibraryChanged();
+              });
+              Thread t = new Thread(tmpImportTask);
+              t.setDaemon(true);
+              t.start();
+            });
+
+            tmpRow.getChildren().addAll(tmpPoster, tmpInfo, tmpSp, btnSelectMatch);
+            tmpCandidateContainer.getChildren().add(tmpRow);
+          }
+        }
+      });
+
+      Thread t = new Thread(tmpTask);
+      t.setDaemon(true);
+      t.start();
+    };
+
+    btnSearchCandidates.setOnAction(e -> tmpPerformSearch.run());
+    tmpSearchInput.setOnAction(e -> tmpPerformSearch.run());
+
+    btnImdbImport.setOnAction(e -> {
+      String tmpId = tmpImdbInput.getText().trim();
       if (!tmpId.matches("^tt\\d{7,}$")) {
-        tmpInput.setStyle("-fx-border-color: red;");
+        tmpImdbInput.setStyle("-fx-border-color: red;");
         return;
       }
+      tmpImdbInput.setStyle("");
+      btnImdbImport.setDisable(true);
 
       Task<Void> tmpAdd = new Task<>() {
         @Override
         protected Void call() {
-          Movie tmpMovie = new Movie();
+          Movie tmpMovie = new Movie("manual://" + tmpId, "Importing...");
           tmpMovie.setMatchStatus("MANUAL");
           imdbService.enrichMovieDataById(tmpId, tmpMovie);
           if (tmpMovie.getTitle() != null) {
@@ -853,13 +1002,11 @@ public class LibraryController implements Refreshable {
       t.start();
     });
 
-    tmpLayout.getChildren().addAll(tmpPrompt, tmpInput, btnLookup);
-
-    javafx.scene.Scene tmpScene = new javafx.scene.Scene(tmpLayout, 400, 200);
+    Scene tmpScene = new Scene(tmpLayout, 780, 620);
     tmpScene.getStylesheets().addAll(gridPane.getScene().getStylesheets());
     tmpDialogStage.setScene(tmpScene);
     tmpDialogStage.initOwner(gridPane.getScene().getWindow());
-    tmpDialogStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+    tmpDialogStage.initModality(Modality.APPLICATION_MODAL);
     tmpDialogStage.showAndWait();
   }
 }

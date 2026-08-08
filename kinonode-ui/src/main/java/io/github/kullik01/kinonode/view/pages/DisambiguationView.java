@@ -177,7 +177,7 @@ public class DisambiguationView {
     rootLayout.getChildren().addAll(tmpHeaderBox, tmpSelectLabel, tmpScroll,
         tmpManualBox, tmpActionBox);
 
-    Scene tmpScene = new Scene(rootLayout, 700, 600);
+    Scene tmpScene = new Scene(rootLayout, 800, 650);
     // Add theme stylesheets
     tmpScene.getStylesheets().addAll(ownerStage.getScene().getStylesheets());
 
@@ -240,11 +240,11 @@ public class DisambiguationView {
     HBox tmpRow = new HBox(15);
     tmpRow.setAlignment(Pos.CENTER_LEFT);
     tmpRow.setStyle(
-        "-fx-background-color: -color-bg-subtle; -fx-padding: 10; -fx-background-radius: 5;");
+        "-fx-background-color: -color-bg-subtle; -fx-padding: 10; -fx-background-radius: 8; -fx-border-color: -color-border-default; -fx-border-radius: 8;");
 
     ImageView tmpPosterView = new ImageView();
-    tmpPosterView.setFitWidth(60);
-    tmpPosterView.setFitHeight(90);
+    tmpPosterView.setFitWidth(70);
+    tmpPosterView.setFitHeight(105);
     tmpPosterView.setPreserveRatio(true);
 
     if (candidate.getCoverImagePath() != null) {
@@ -252,7 +252,7 @@ public class DisambiguationView {
       if (tmpImgFile.exists()) {
         try {
           Image tmpImage =
-              new Image(tmpImgFile.toURI().toURL().toExternalForm(), 60, 90,
+              new Image(tmpImgFile.toURI().toURL().toExternalForm(), 70, 105,
                   true, true, true);
           tmpPosterView.setImage(tmpImage);
         } catch (MalformedURLException tmpException) {
@@ -261,12 +261,28 @@ public class DisambiguationView {
       }
     }
 
-    VBox tmpInfoBox = new VBox(5);
+    VBox tmpInfoBox = new VBox(4);
     Label tmpTitleLbl = new Label(candidate.getTitle());
-    tmpTitleLbl.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
-    Label tmpYearLbl = new Label(
-        candidate.getYear() != null ? String.valueOf(candidate.getYear()) : "");
-    tmpInfoBox.getChildren().addAll(tmpTitleLbl, tmpYearLbl);
+    tmpTitleLbl.setStyle("-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: -color-fg-default;");
+
+    String tmpYearStr = candidate.getYear() != null ? " (" + candidate.getYear() + ")" : "";
+    String tmpIdStr = candidate.getImdbId() != null ? " • " + candidate.getImdbId() : "";
+    Label tmpSubLbl = new Label("Release Year" + tmpYearStr + tmpIdStr);
+    tmpSubLbl.setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-muted;");
+
+    tmpInfoBox.getChildren().addAll(tmpTitleLbl, tmpSubLbl);
+
+    if (candidate.getDirector() != null && !candidate.getDirector().isBlank()) {
+      Label tmpDirLbl = new Label("Director: " + candidate.getDirector());
+      tmpDirLbl.setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-subtle;");
+      tmpInfoBox.getChildren().add(tmpDirLbl);
+    }
+
+    if (candidate.getActors() != null && !candidate.getActors().isBlank()) {
+      Label tmpCastLbl = new Label("Cast: " + candidate.getActors());
+      tmpCastLbl.setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-subtle;");
+      tmpInfoBox.getChildren().add(tmpCastLbl);
+    }
 
     Region tmpSpacer = new Region();
     HBox.setHgrow(tmpSpacer, Priority.ALWAYS);
@@ -274,6 +290,7 @@ public class DisambiguationView {
     Button btnSelect =
         new Button(resources.getString("library.disambiguation.select.button"));
     btnSelect.getStyleClass().add("button-primary");
+    btnSelect.setStyle("-fx-padding: 6px 14px; -fx-font-weight: bold;");
     btnSelect.setOnAction(e -> handleSelectCandidate(candidate));
 
     tmpRow.getChildren().addAll(tmpPosterView, tmpInfoBox, tmpSpacer,
@@ -284,10 +301,12 @@ public class DisambiguationView {
   private void handleSelectCandidate(Movie candidate) {
     Movie tmpCurrentMovie = unresolvedMovies.get(currentIndex);
 
-    // Extract ID from coverImagePath or use dummy for now if missing
-    String tmpId = extractImdbId(candidate.getCoverImagePath());
-    if (tmpId == null) {
-      // fallback if no cover image
+    String tmpId = candidate.getImdbId();
+    if (tmpId == null || tmpId.isBlank()) {
+      tmpId = extractImdbId(candidate.getCoverImagePath());
+    }
+
+    if (tmpId == null || tmpId.isBlank()) {
       tmpId = "tt0000000";
     }
 
@@ -321,7 +340,7 @@ public class DisambiguationView {
     if (tmpName.contains(".")) {
       tmpName = tmpName.substring(0, tmpName.lastIndexOf('.'));
     }
-    return tmpName;
+    return tmpName.startsWith("tt") ? tmpName : null;
   }
 
   private void handleManualLookup() {

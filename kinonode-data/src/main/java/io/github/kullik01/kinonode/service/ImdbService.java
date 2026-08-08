@@ -190,6 +190,7 @@ public class ImdbService {
             // Fetch additional details from IMDb title page (duration & rating)
             // and Wikidata
             String tmpImdbIdentifierString = tmpResult.get("id").getAsString();
+            movie.setImdbId(tmpImdbIdentifierString);
             fetchImdbTitleDetails(tmpImdbIdentifierString, movie);
             fetchWikidataDetails(tmpImdbIdentifierString, movie);
 
@@ -876,6 +877,7 @@ public class ImdbService {
               }
 
               Movie tmpMovie = new Movie();
+              tmpMovie.setImdbId(tmpIdentifier);
               if (tmpResult.has("l")) {
                 tmpMovie.setTitle(tmpResult.get("l").getAsString());
               }

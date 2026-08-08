@@ -65,6 +65,7 @@ public class Movie {
   private Integer duration; // Duration in minutes
   private Instant dateAdded;
   private String matchStatus;
+  private String imdbId;
 
   /** Constructs a new Movie with the current timestamp as the date added. */
   public Movie() {
@@ -459,6 +460,24 @@ public class Movie {
    */
   public void setMatchStatus(String matchStatus) {
     this.matchStatus = matchStatus;
+  }
+
+  /**
+   * Gets the IMDb identifier of the movie (e.g., "tt0111161").
+   *
+   * @return the IMDb ID, or null if not assigned
+   */
+  public String getImdbId() {
+    return imdbId;
+  }
+
+  /**
+   * Sets the IMDb identifier of the movie.
+   *
+   * @param imdbId the IMDb ID to set (e.g., "tt0111161")
+   */
+  public void setImdbId(String imdbId) {
+    this.imdbId = imdbId;
   }
 
   /**

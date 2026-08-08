@@ -187,7 +187,7 @@ public class DatabaseService {
       // Schema migration for new columns
       String[] tmpNewColumns =
           {"director", "writer", "producer", "cinematographer", "composer",
-              "actors", "duration", "raw_rating", "match_status"};
+              "actors", "duration", "raw_rating", "match_status", "imdb_id"};
       for (String tmpColumn : tmpNewColumns) {
         try {
           String columnType =

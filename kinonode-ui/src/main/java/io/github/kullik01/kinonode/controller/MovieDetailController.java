@@ -68,10 +68,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 
@@ -315,7 +319,23 @@ public class MovieDetailController implements Refreshable {
     ttImdbPage.setShowDelay(Duration.millis(250));
     btnImdbPage.setTooltip(ttImdbPage);
 
-    actionBox.getChildren().addAll(btnPlay, btnTrailer, btnImdbPage);
+    Button btnFixMatch = new Button();
+    btnFixMatch.getStyleClass().addAll("button-secondary", "button-icon");
+    btnFixMatch.setMinSize(36.0, 36.0);
+    btnFixMatch.setMaxSize(36.0, 36.0);
+    btnFixMatch.setOnAction(e -> showFixMatchDialog());
+    SVGPath svgFixMatch = new SVGPath();
+    svgFixMatch.setContent(
+        "M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z");
+    svgFixMatch.setFill(Color.WHITE);
+    svgFixMatch.setScaleX(0.75);
+    svgFixMatch.setScaleY(0.75);
+    btnFixMatch.setGraphic(svgFixMatch);
+    Tooltip ttFixMatch = new Tooltip("Match & Re-index Movie");
+    ttFixMatch.setShowDelay(Duration.millis(250));
+    btnFixMatch.setTooltip(ttFixMatch);
+
+    actionBox.getChildren().addAll(btnPlay, btnTrailer, btnImdbPage, btnFixMatch);
     leftBox.getChildren().addAll(posterContainer, btnChangePoster, actionBox);
 
     // Right Side: Details Grid
@@ -2003,5 +2023,211 @@ public class MovieDetailController implements Refreshable {
       }
     }
     return list;
+  }
+
+  /**
+   * Displays an interactive match management dialog for re-indexing the current movie,
+   * providing interactive candidate selection with metadata preview and manual search via IMDb ID.
+   */
+  private void showFixMatchDialog() {
+    if (movie == null)
+      return;
+
+    Stage tmpStage = new Stage();
+    tmpStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+    if (imgPoster != null && imgPoster.getScene() != null) {
+      tmpStage.initOwner(imgPoster.getScene().getWindow());
+    }
+    tmpStage.setTitle("Match & Re-index Movie — " + movie.getTitle());
+    tmpStage.setMinWidth(780);
+    tmpStage.setMinHeight(620);
+
+    VBox tmpLayout = new VBox(15);
+    tmpLayout.setPadding(new Insets(20));
+    tmpLayout.setStyle("-fx-background-color: -color-bg-default;");
+
+    Label tmpHeaderLabel = new Label("Enhanced Movie Import & Match Management");
+    tmpHeaderLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
+
+    // Interactive Title Search & Match Options List
+    VBox tmpSection1 = new VBox(10);
+    tmpSection1.setStyle("-fx-background-color: -color-bg-overlay; -fx-padding: 15; -fx-background-radius: 8;");
+
+    Label tmpSec1Title = new Label("Interactive Match Selection");
+    tmpSec1Title.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+
+    TextField tmpSearchInput = new TextField(movie.getTitle());
+    tmpSearchInput.setPromptText("Enter movie title to search candidates...");
+    Button btnSearchCandidates = new Button("Search Candidates");
+    btnSearchCandidates.getStyleClass().add("button-primary");
+    HBox tmpSearchBox = new HBox(10, tmpSearchInput, btnSearchCandidates);
+    HBox.setHgrow(tmpSearchInput, Priority.ALWAYS);
+
+    VBox tmpCandidateContainer = new VBox(10);
+    ScrollPane tmpScroll = new ScrollPane(tmpCandidateContainer);
+    tmpScroll.setFitToWidth(true);
+    tmpScroll.setPrefHeight(320);
+    tmpScroll.setStyle("-fx-background-color: transparent;");
+
+    tmpSection1.getChildren().addAll(tmpSec1Title, tmpSearchBox, tmpScroll);
+
+    // Manual Search via IMDb ID
+    VBox tmpSection2 = new VBox(10);
+    tmpSection2.setStyle("-fx-background-color: -color-bg-overlay; -fx-padding: 15; -fx-background-radius: 8;");
+
+    Label tmpSec2Title = new Label("Manual Search via IMDb ID");
+    tmpSec2Title.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+
+    TextField tmpImdbInput = new TextField();
+    tmpImdbInput.setPromptText("e.g. tt0111161");
+    Button btnImdbImport = new Button("Instant Import / Re-index");
+    btnImdbImport.getStyleClass().add("button-success");
+    HBox tmpImdbBox = new HBox(10, tmpImdbInput, btnImdbImport);
+    HBox.setHgrow(tmpImdbInput, Priority.ALWAYS);
+
+    tmpSection2.getChildren().addAll(tmpSec2Title, tmpImdbBox);
+
+    Button btnClose = new Button("Close");
+    btnClose.getStyleClass().add("button-secondary");
+    btnClose.setOnAction(e -> tmpStage.close());
+    HBox tmpBottomBox = new HBox(btnClose);
+    tmpBottomBox.setAlignment(Pos.CENTER_RIGHT);
+
+    tmpLayout.getChildren().addAll(tmpHeaderLabel, tmpSection1, tmpSection2, tmpBottomBox);
+
+    Runnable tmpPerformSearch = () -> {
+      String tmpQuery = tmpSearchInput.getText().trim();
+      if (tmpQuery.isEmpty()) return;
+      tmpCandidateContainer.getChildren().setAll(new Label("Searching IMDb for matches..."));
+
+      Task<List<Movie>> tmpTask = new Task<>() {
+        @Override
+        protected List<Movie> call() {
+          return imdbService.searchSuggestions(tmpQuery);
+        }
+      };
+
+      tmpTask.setOnSucceeded(evt -> {
+        List<Movie> tmpResults = tmpTask.getValue();
+        tmpCandidateContainer.getChildren().clear();
+        if (tmpResults.isEmpty()) {
+          tmpCandidateContainer.getChildren().add(new Label("No candidate movie matches found."));
+        } else {
+          for (Movie tmpCand : tmpResults) {
+            HBox tmpRow = new HBox(15);
+            tmpRow.setAlignment(Pos.CENTER_LEFT);
+            tmpRow.setStyle("-fx-background-color: -color-bg-subtle; -fx-padding: 12; -fx-background-radius: 8; -fx-border-color: -color-border-default; -fx-border-radius: 8;");
+
+            ImageView tmpPoster = new ImageView();
+            tmpPoster.setFitWidth(70);
+            tmpPoster.setFitHeight(105);
+            tmpPoster.setPreserveRatio(true);
+
+            if (tmpCand.getCoverImagePath() != null) {
+              File tmpImgFile = new File(tmpCand.getCoverImagePath());
+              if (tmpImgFile.exists()) {
+                try {
+                  tmpPoster.setImage(new Image(tmpImgFile.toURI().toURL().toExternalForm(), 70, 105, true, true, true));
+                } catch (Exception ignored) {}
+              }
+            }
+
+            VBox tmpInfo = new VBox(4);
+            Label tmpT = new Label(tmpCand.getTitle());
+            tmpT.setStyle("-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: -color-fg-default;");
+            String tmpSubText = (tmpCand.getYear() != null ? "Year: " + tmpCand.getYear() : "")
+                + (tmpCand.getImdbId() != null ? "  •  IMDb ID: " + tmpCand.getImdbId() : "");
+            Label tmpSub = new Label(tmpSubText);
+            tmpSub.setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-muted;");
+            tmpInfo.getChildren().addAll(tmpT, tmpSub);
+
+            if (tmpCand.getActors() != null && !tmpCand.getActors().isBlank()) {
+              Label tmpAct = new Label("Cast: " + tmpCand.getActors());
+              tmpAct.setStyle("-fx-font-size: 11px; -fx-text-fill: -color-fg-subtle;");
+              tmpInfo.getChildren().add(tmpAct);
+            }
+
+            Region tmpSp = new Region();
+            HBox.setHgrow(tmpSp, Priority.ALWAYS);
+
+            Button btnSelectMatch = new Button("Select & Re-index");
+            btnSelectMatch.getStyleClass().add("button-primary");
+            btnSelectMatch.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 8px 16px;");
+            btnSelectMatch.setOnAction(e -> {
+              String tmpTargetId = tmpCand.getImdbId();
+              if (tmpTargetId == null || tmpTargetId.isBlank()) return;
+
+              btnSelectMatch.setDisable(true);
+              Task<Void> tmpReindexTask = new Task<>() {
+                @Override
+                protected Void call() {
+                  imdbService.enrichMovieDataById(tmpTargetId, movie);
+                  movie.setMatchStatus("MANUAL");
+                  movieRepository.update(movie);
+                  return null;
+                }
+              };
+              tmpReindexTask.setOnSucceeded(e2 -> {
+                tmpStage.close();
+                setMovie(movie);
+                showStatus("Movie re-indexed successfully!");
+              });
+              Thread t = new Thread(tmpReindexTask);
+              t.setDaemon(true);
+              t.start();
+            });
+
+            tmpRow.getChildren().addAll(tmpPoster, tmpInfo, tmpSp, btnSelectMatch);
+            tmpCandidateContainer.getChildren().add(tmpRow);
+          }
+        }
+      });
+
+      Thread t = new Thread(tmpTask);
+      t.setDaemon(true);
+      t.start();
+    };
+
+    btnSearchCandidates.setOnAction(e -> tmpPerformSearch.run());
+    tmpSearchInput.setOnAction(e -> tmpPerformSearch.run());
+
+    btnImdbImport.setOnAction(e -> {
+      String tmpImdbId = tmpImdbInput.getText().trim();
+      if (!tmpImdbId.matches("^tt\\d{7,}$")) {
+        tmpImdbInput.setStyle("-fx-border-color: red;");
+        return;
+      }
+      tmpImdbInput.setStyle("");
+      btnImdbImport.setDisable(true);
+
+      Task<Void> tmpImdbTask = new Task<>() {
+        @Override
+        protected Void call() {
+          imdbService.enrichMovieDataById(tmpImdbId, movie);
+          movie.setMatchStatus("MANUAL");
+          movieRepository.update(movie);
+          return null;
+        }
+      };
+
+      tmpImdbTask.setOnSucceeded(evt -> {
+        tmpStage.close();
+        setMovie(movie);
+        showStatus("Movie re-indexed via IMDb ID: " + tmpImdbId);
+      });
+
+      Thread t = new Thread(tmpImdbTask);
+      t.setDaemon(true);
+      t.start();
+    });
+
+    Scene tmpScene = new Scene(tmpLayout, 780, 620);
+    if (imgPoster != null && imgPoster.getScene() != null) {
+      tmpScene.getStylesheets().addAll(imgPoster.getScene().getStylesheets());
+    }
+    tmpStage.setScene(tmpScene);
+
+    tmpPerformSearch.run();
+    tmpStage.showAndWait();
   }
 }

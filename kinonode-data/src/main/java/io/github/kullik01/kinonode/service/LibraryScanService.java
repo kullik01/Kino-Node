@@ -112,7 +112,7 @@ public class LibraryScanService {
     if (tmpFoldersSetting.isBlank()) {
       return new ScanResult(0, 0, List.of(
           "No workspace folders configured. Please configure folders in Settings."),
-          new ArrayList<>());
+          new ArrayList<>(), new ArrayList<>());
     }
 
     String[] tmpFolders = tmpFoldersSetting.split(";");
@@ -154,6 +154,7 @@ public class LibraryScanService {
     int tmpNewMoviesAdded = 0;
     List<String> tmpLogs = new ArrayList<>();
     List<Movie> tmpUnresolvedMovies = new ArrayList<>();
+    List<Movie> tmpScannedMovies = new ArrayList<>();
     LOGGER.log(Level.INFO, "Found {0} potential video files to scan.",
         tmpTotalFiles);
 
@@ -207,6 +208,7 @@ public class LibraryScanService {
         movieRepository.insert(tmpMovie);
         tmpNewMoviesAdded++;
         tmpLogs.add("Added: " + tmpMovie.getTitle());
+        tmpScannedMovies.add(tmpMovie);
         LOGGER.log(Level.INFO, "Imported movie: {0}", tmpMovie.getTitle());
       } else {
         // Case 2: The movie is already registered, but we check if it is
@@ -271,6 +273,7 @@ public class LibraryScanService {
           LOGGER.log(Level.INFO, "Updated rating for existing movie: {0}",
               tmpExistingMovie.getTitle());
         }
+        tmpScannedMovies.add(tmpExistingMovie);
       }
     }
 
@@ -278,7 +281,7 @@ public class LibraryScanService {
     callback.updateMessage(
         "Scan complete. Added " + tmpNewMoviesAdded + " new movies.");
     return new ScanResult(tmpTotalFiles, tmpNewMoviesAdded, tmpLogs,
-        tmpUnresolvedMovies);
+        tmpUnresolvedMovies, tmpScannedMovies);
   }
 
   /**
@@ -351,9 +354,10 @@ public class LibraryScanService {
    *        processed
    * @param unresolvedMovies a list of movies that could not be automatically
    *        matched to a single IMDb entry
+   * @param scannedMovies a list of all movies processed during the scan
    */
   public record ScanResult(int totalScanned, int newAdded, List<String> logs,
-      List<Movie> unresolvedMovies) {}
+      List<Movie> unresolvedMovies, List<Movie> scannedMovies) {}
 
   /**
    * Checks whether the actor list strings contain exactly three names followed
