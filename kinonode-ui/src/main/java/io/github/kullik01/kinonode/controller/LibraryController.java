@@ -266,27 +266,23 @@ public class LibraryController implements Refreshable {
   }
 
   /**
-   * Recalculates card sizes to fill the available grid width responsively.
+   * Enforces consistent card sizes across all window GUI sizes, maintaining
+   * the optimal default view dimensions regardless of full view / window resize.
    *
    * @param availableWidth the available width from the scroll pane
    */
   private void recalculateCardSizes(double availableWidth) {
-    if (availableWidth <= 0)
-      return;
-    double tmpUsableWidth = availableWidth - (GRID_PADDING * 2);
-    int tmpColumns =
-        Math.max(1, (int) (tmpUsableWidth / (MIN_CARD_WIDTH + CARD_GAP)));
-    double tmpCardWidth =
-        (tmpUsableWidth - (tmpColumns - 1) * CARD_GAP) / tmpColumns;
+    double tmpCardWidth = MovieCardController.STANDARD_CARD_WIDTH;
 
     for (Node tmpChild : gridPane.getChildren()) {
       if (tmpChild instanceof VBox) {
         ((Region) tmpChild).setPrefWidth(tmpCardWidth);
+        ((Region) tmpChild).setMinWidth(tmpCardWidth);
         ((Region) tmpChild).setMaxWidth(tmpCardWidth);
       }
     }
 
-    // Update card controllers
+    // Update card controllers with standard card width
     for (MovieCardController tmpController : controllerCache.values()) {
       tmpController.updateCardWidth(tmpCardWidth);
     }

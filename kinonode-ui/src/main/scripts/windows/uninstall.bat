@@ -1,5 +1,11 @@
 @echo off
-setlocal
+:: BSD 3-Clause License
+:: Copyright (c) 2026, Hannah Kullik
+::
+:: uninstall.bat
+::
+:: KinoNode Deep Uninstaller for Windows
+:: Removes application shortcuts and all associated user data.
 echo Warning: This will completely remove KinoNode, including your movie database (kinonode.db) and all cached posters.
 set /p CONFIRM="Are you sure you want to proceed? (Y/N): "
 if /I "%CONFIRM%" neq "Y" (

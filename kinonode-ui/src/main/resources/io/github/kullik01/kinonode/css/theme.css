@@ -170,7 +170,9 @@
     -fx-background-radius: 10px;
     -fx-padding: 10px;
     -fx-spacing: 8px;
-    -fx-min-width: 180px;
+    -fx-min-width: 200px;
+    -fx-pref-width: 200px;
+    -fx-max-width: 200px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 6, 0.0, 0, 3);
     -fx-alignment: top-center;
     -fx-border-color: -color-border-default;
@@ -189,12 +191,13 @@
 .movie-poster-container {
     -fx-background-color: -color-bg-subtle;
     -fx-background-radius: 8px;
-    -fx-max-width: infinity;
+    -fx-max-width: 180px;
+    -fx-pref-width: 180px;
     -fx-alignment: center;
 }
 
 .movie-poster {
-    -fx-preserve-ratio: false;
+    -fx-preserve-ratio: true;
 }
 
 .movie-title-label {

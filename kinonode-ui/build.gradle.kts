@@ -36,6 +36,7 @@ val isMac = System.getProperty("os.name").lowercase().contains("mac")
 val isLinux = System.getProperty("os.name").lowercase().contains("linux") || System.getProperty("os.name").lowercase().contains("unix")
 
 jlink {
+    mergedModuleName.set("kinonode.merged.module")
     imageDir.set(layout.buildDirectory.dir("KinoNode-${version}"))
     val zipOsSuffix = when {
         isWindows -> "Windows"

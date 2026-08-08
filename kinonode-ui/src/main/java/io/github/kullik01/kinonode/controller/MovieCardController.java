@@ -62,6 +62,12 @@ public class MovieCardController {
       Logger.getLogger(MovieCardController.class.getName());
   private static Image PLACEHOLDER_IMAGE;
 
+  public static final double STANDARD_CARD_WIDTH = 200.0;
+  private static final double CARD_PADDING = 10.0;
+  private static final double POSTER_WIDTH =
+      STANDARD_CARD_WIDTH - (CARD_PADDING * 2);
+  private static final double POSTER_HEIGHT = POSTER_WIDTH * 1.45;
+
   private ImageView imgPoster;
   private Label lblTitle;
   private Label lblYear;
@@ -73,6 +79,9 @@ public class MovieCardController {
   public Parent buildView() {
     VBox rootPane = new VBox();
     rootPane.getStyleClass().add("movie-card");
+    rootPane.setPrefWidth(STANDARD_CARD_WIDTH);
+    rootPane.setMinWidth(STANDARD_CARD_WIDTH);
+    rootPane.setMaxWidth(STANDARD_CARD_WIDTH);
     rootPane.setOnMouseClicked(this::onCardClicked);
 
     VBox posterContainer = new VBox();
@@ -80,12 +89,15 @@ public class MovieCardController {
 
     imgPoster = new ImageView();
     imgPoster.getStyleClass().add("movie-poster");
+    imgPoster.setFitWidth(POSTER_WIDTH);
+    imgPoster.setFitHeight(POSTER_HEIGHT);
     imgPoster.setPreserveRatio(true);
     imgPoster.setSmooth(true);
     posterContainer.getChildren().add(imgPoster);
 
     lblTitle = new Label();
     lblTitle.getStyleClass().add("movie-title-label");
+    lblTitle.setMaxWidth(POSTER_WIDTH);
 
     lblYear = new Label();
     lblYear.getStyleClass().add("movie-year-label");
@@ -99,12 +111,12 @@ public class MovieCardController {
   }
 
   /**
-   * Updates the card width to dynamically fit the responsive grid layout.
+   * Updates the card width to fit the specified dimensions.
    *
-   * @param cardWidth the new card width in pixels
+   * @param cardWidth the card width in pixels
    */
   public void updateCardWidth(double cardWidth) {
-    double tmpPosterWidth = cardWidth - 20; // card padding
+    double tmpPosterWidth = cardWidth - (CARD_PADDING * 2);
     imgPoster.setFitWidth(tmpPosterWidth);
     imgPoster.setFitHeight(tmpPosterWidth * 1.45); // ~2:3 aspect ratio
     lblTitle.setMaxWidth(tmpPosterWidth);

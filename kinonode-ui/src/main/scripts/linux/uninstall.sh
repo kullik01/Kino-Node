@@ -1,5 +1,12 @@
 #!/bin/bash
+# 
+# BSD 3-Clause License
+# Copyright (c) 2026, Hannah Kullik
+#
 # uninstall.sh
+#
+# KinoNode Deep Uninstaller for Linux
+# Removes application binaries, shortcuts, and all associated user data.
 
 echo "Warning: This will completely remove KinoNode, including your movie database (kinonode.db) and all cached posters."
 read -p "Are you sure you want to proceed? (y/N): " CONFIRM
