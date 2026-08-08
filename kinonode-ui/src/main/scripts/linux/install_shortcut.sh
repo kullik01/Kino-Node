@@ -1,11 +1,8 @@
 #!/bin/bash
 
-# BSD 3-Clause License
-# Copyright (c) 2026, Hannah Kullik
-#
-# KinoNode Desktop Shortcut Installer
+# Focus Bean / KinoNode Desktop Shortcut Installer
 # Creates application menu and desktop shortcuts that point to the
-# installed location at ~/.kinonode-app or current release folder.
+# installed location at ~/.kinonode-app, regardless of where this script is run from.
 
 INSTALL_DIR="$HOME/.kinonode-app"
 
@@ -50,17 +47,15 @@ if [ -f "$ICON_PATH" ]; then
     cp "$ICON_PATH" "$HOME/.local/share/icons/hicolor/256x256/apps/kinonode.png"
 fi
 
-# Build the .desktop file content once
+# Build the .desktop file content
 DESKTOP_CONTENT="[Desktop Entry]
 Name=KinoNode
-GenericName=Movie Library Manager
-Comment=Personal Movie Library Manager & Media Center
+Comment=Personal Movie Library Manager
 Exec=$EXEC_PATH
 Icon=$ICON_PATH
 Terminal=false
 Type=Application
-Categories=Utility;AudioVideo;
-StartupWMClass=io-github-kullik01-kinonode-Launcher"
+Categories=Utility;Application;"
 
 # --- Application menu shortcut ---
 mkdir -p "$HOME/.local/share/applications"

@@ -39,14 +39,20 @@ package io.github.kullik01.kinonode;
 
 import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
+import io.github.kullik01.kinonode.controller.MainController;
 import io.github.kullik01.kinonode.di.AppContext;
+import io.github.kullik01.kinonode.uiutil.DesktopIntegration;
 import java.io.InputStream;
-import java.util.logging.LogManager;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
-
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.image.Image;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 /**
@@ -56,6 +62,9 @@ import javafx.stage.Stage;
  * and cleanup on exit.
  */
 public class KinoNodeApp extends Application {
+
+  private static final Logger LOGGER =
+      Logger.getLogger(KinoNodeApp.class.getName());
 
   private static KinoNodeApp instance;
 
@@ -108,36 +117,31 @@ public class KinoNodeApp extends Application {
       System.setProperty("sun.java2d.dpiaware", "true");
 
       // Build the JavaFX node tree programmatically using Guice Injector
-      io.github.kullik01.kinonode.controller.MainController tmpController =
-          AppContext.getInstance().getInjector().getInstance(
-              io.github.kullik01.kinonode.controller.MainController.class);
+      MainController tmpController = AppContext.getInstance().getInjector()
+          .getInstance(MainController.class);
       Parent tmpRoot = tmpController.buildView();
       tmpController.initialize();
 
-      // Set the application logo and title with multi-resolution icon support
-      String[] tmpLogoPaths = new String[] {
-          "/io/github/kullik01/kinonode/images/logos/logo_highres.png",
-          "/io/github/kullik01/kinonode/images/logos/logo.png",
-          "/io/github/kullik01/kinonode/images/logos/app_logo_cursor_128.png",
-          "/io/github/kullik01/kinonode/images/logos/app_logo_cursor_48.png",
-          "/io/github/kullik01/kinonode/images/logos/app_logo_cursor_32.png"};
-      for (String tmpLogoPath : tmpLogoPaths) {
-        try (InputStream tmpIconStream =
-            getClass().getResourceAsStream(tmpLogoPath)) {
-          if (tmpIconStream != null) {
-            primaryStage.getIcons()
-                .add(new javafx.scene.image.Image(tmpIconStream));
-          }
-        } catch (Exception tmpException) {
-          // Ignore unreadable individual resolution streams
+      // Load application icon
+      try {
+        String tmpLogoPath =
+            "/io/github/kullik01/kinonode/images/logos/logo.png";
+        if (getClass().getResource(tmpLogoPath) != null) {
+          primaryStage.getIcons()
+              .add(new Image(getClass().getResourceAsStream(tmpLogoPath)));
+        } else if (getClass().getResource("/logo.png") != null) {
+          primaryStage.getIcons()
+              .add(new Image(getClass().getResourceAsStream("/logo.png")));
         }
+      } catch (Exception tmpException) {
+        LOGGER.log(Level.WARNING, "Failed to load application icon",
+            tmpException);
       }
       primaryStage.setTitle("KinoNode - Personal Movie Library");
 
       // Calculate adaptive, high-resolution initial window dimensions based on
       // screen bounds
-      javafx.geometry.Rectangle2D tmpVisualBounds =
-          javafx.stage.Screen.getPrimary().getVisualBounds();
+      Rectangle2D tmpVisualBounds = Screen.getPrimary().getVisualBounds();
       double tmpTargetWidth =
           Math.max(960, Math.min(1600, tmpVisualBounds.getWidth() * 0.80));
       double tmpTargetHeight =
@@ -172,9 +176,7 @@ public class KinoNodeApp extends Application {
       primaryStage.show();
 
       // Trigger automatic cross-platform desktop shortcut & icon integration
-      // (Linux, Windows, macOS)
-      io.github.kullik01.kinonode.uiutil.DesktopIntegration
-          .ensureDesktopIntegrationAsync();
+      DesktopIntegration.ensureDesktopIntegrationAsync();
 
       Platform.runLater(() -> {
         primaryStage.setIconified(false);
@@ -184,8 +186,7 @@ public class KinoNodeApp extends Application {
         primaryStage.setAlwaysOnTop(false);
       });
     } catch (Throwable tmpThrowable) {
-      java.util.logging.Logger.getLogger(KinoNodeApp.class.getName()).log(
-          java.util.logging.Level.SEVERE,
+      LOGGER.log(Level.SEVERE,
           "Fatal exception encountered during application startup",
           tmpThrowable);
       showFatalStartupErrorDialog(primaryStage, tmpThrowable);
@@ -194,59 +195,20 @@ public class KinoNodeApp extends Application {
 
   private void showFatalStartupErrorDialog(Stage stage, Throwable throwable) {
     try {
-      javafx.scene.control.Alert tmpAlert = new javafx.scene.control.Alert(
-          javafx.scene.control.Alert.AlertType.ERROR);
+      Alert tmpAlert = new Alert(Alert.AlertType.ERROR);
       tmpAlert.setTitle("KinoNode - Startup Error");
       tmpAlert.setHeaderText("Failed to initialize application context");
       tmpAlert.setContentText("An unexpected error occurred during startup:\n\n"
           + throwable.getClass().getName() + ": " + throwable.getMessage()
           + "\n\nPlease verify file permissions and system configuration.");
       tmpAlert.showAndWait();
-    } catch (Exception tmpIgnored) {
-      System.err.println("Fatal startup error: " + throwable.getMessage());
-      throwable.printStackTrace();
-    }
-  }
-
-  /**
-   * Performs clean shutdown operations when the application stops. This ensures
-   * the database connections and other application context resources are closed
-   * properly on app exit.
-   *
-   * @throws Exception if an error occurs during shutdown
-   */
-  @Override
-  public void stop() throws Exception {
-    // Shut down database service cleanly on app exit
-    AppContext.getInstance().close();
-    super.stop();
-  }
-
-  /**
-   * Main entry point for the application. Launches the JavaFX application
-   * framework.
-   *
-   * @param arguments the command-line arguments
-   */
-  public static void main(String[] arguments) {
-    Thread.setDefaultUncaughtExceptionHandler((tmpThread, tmpThrowable) -> {
-      java.util.logging.Logger.getLogger(KinoNodeApp.class.getName()).log(
-          java.util.logging.Level.SEVERE,
-          "Uncaught exception on thread " + tmpThread.getName(), tmpThrowable);
-    });
-
-    try (InputStream tmpConfigStream = KinoNodeApp.class.getResourceAsStream(
-        "/io/github/kullik01/kinonode/config/logging.properties")) {
-      if (tmpConfigStream != null) {
-        LogManager.getLogManager().readConfiguration(tmpConfigStream);
-      } else {
-        System.err
-            .println("Could not find logging.properties configuration file");
-      }
     } catch (Exception tmpException) {
-      System.err
-          .println("Error initializing logger: " + tmpException.getMessage());
+      LOGGER.log(Level.SEVERE, "Failed to display startup error dialog",
+          tmpException);
     }
-    launch(arguments);
+  }
+
+  public static void main(String[] args) {
+    launch(args);
   }
 }

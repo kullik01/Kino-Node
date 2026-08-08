@@ -120,8 +120,7 @@ public final class DesktopIntegration {
       }
     }
 
-    // Also check if logo.png exists next to the release directory (FocusBean
-    // style)
+    // Also check if logo.png exists next to the release directory
     Path tmpReleaseLogo =
         tmpExecPath.getParent().getParent().resolve("logo.png");
     Path tmpTargetIconPath =
@@ -132,16 +131,13 @@ public final class DesktopIntegration {
 
     String tmpDesktopContent = """
         [Desktop Entry]
-        Version=1.0
-        Type=Application
         Name=KinoNode
-        GenericName=Movie Library Manager
-        Comment=Personal Movie Library Manager & Media Center
+        Comment=Personal Movie Library Manager
         Exec=%s
         Icon=%s
         Terminal=false
-        Categories=Utility;AudioVideo;
-        StartupWMClass=io-github-kullik01-kinonode-Launcher
+        Type=Application
+        Categories=Utility;Application;
         """.formatted(tmpExecString, tmpIconString);
 
     // Application Menu Entry

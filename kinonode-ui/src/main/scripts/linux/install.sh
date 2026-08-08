@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# BSD 3-Clause License
-# Copyright (c) 2026, Hannah Kullik
-#
 # KinoNode Installer for Linux
 # Removes any previous version and installs the current release to ~/.kinonode-app.
 
@@ -13,7 +10,7 @@ INSTALL_DIR="$HOME/.kinonode-app"
 # Determine the directory where this script is located (inside the release archive)
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 
-# The release folder name follows the pattern KinoNode-x.y.z
+# The release folder name follows the pattern KinoNode-x.y.z.
 RELEASE_DIR_NAME="$(basename "$SCRIPT_DIR")"
 
 # --- Validate release structure -------------------------------------------------

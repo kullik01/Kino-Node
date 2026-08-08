@@ -343,7 +343,7 @@
     -fx-fill: white;
 }
 
-/* About Card styling inspired by FocusBean */
+/* About Card styling */
 .about-card {
     -fx-background-color: -color-bg-subtle;
     -fx-background-radius: 12px;
