@@ -67,11 +67,12 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
- * Modal dialog presenting a complete overview of movies processed after syncing the library.
- * Displays each scanned file alongside options to alter matching via Interactive Match Selection
- * or Manual Search via IMDb ID directly next to the filename.
- * Guarantees responsive resizing layout with Ok button always in the bottom-right corner
- * and disables UI interactions during re-indexing tasks to prevent accidental double actions.
+ * Modal dialog presenting a complete overview of movies processed after syncing
+ * the library. Displays each scanned file alongside options to alter matching
+ * via Interactive Match Selection or Manual Search via IMDb ID directly next to
+ * the filename. Guarantees responsive resizing layout with Ok button always in
+ * the bottom-right corner and disables UI interactions during re-indexing tasks
+ * to prevent accidental double actions.
  */
 public class SyncOverviewView {
   private static final Logger LOGGER =
@@ -132,14 +133,18 @@ public class SyncOverviewView {
     String tmpSummaryText = String.format(
         "Total files scanned: %d  •  New movies added: %d  •  Unresolved items: %d",
         scanResult.totalScanned(), scanResult.newAdded(),
-        scanResult.unresolvedMovies() != null ? scanResult.unresolvedMovies().size() : 0);
+        scanResult.unresolvedMovies() != null
+            ? scanResult.unresolvedMovies().size()
+            : 0);
     Label tmpSummaryLbl = new Label(tmpSummaryText);
-    tmpSummaryLbl.setStyle("-fx-font-size: 13px; -fx-text-fill: -color-fg-muted;");
+    tmpSummaryLbl
+        .setStyle("-fx-font-size: 13px; -fx-text-fill: -color-fg-muted;");
 
     tmpHeaderBox.getChildren().addAll(tmpTitleLbl, tmpSummaryLbl);
 
     Label tmpListTitle = new Label("Processed Movies Overview");
-    tmpListTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: -color-fg-default;");
+    tmpListTitle.setStyle(
+        "-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: -color-fg-default;");
 
     VBox tmpTopBox = new VBox(10, tmpHeaderBox, tmpListTitle);
     tmpRoot.setTop(tmpTopBox);
@@ -159,7 +164,8 @@ public class SyncOverviewView {
     // Bottom Ok Button - ALWAYS pinned at bottom right corner
     Button btnDone = new Button("OK");
     btnDone.getStyleClass().add("button-primary");
-    btnDone.setStyle("-fx-padding: 8px 28px; -fx-font-size: 14px; -fx-font-weight: bold;");
+    btnDone.setStyle(
+        "-fx-padding: 8px 28px; -fx-font-size: 14px; -fx-font-weight: bold;");
     btnDone.setOnAction(e -> dialogStage.close());
 
     HBox tmpBottomBox = new HBox(btnDone);
@@ -180,7 +186,8 @@ public class SyncOverviewView {
     List<Movie> tmpMovies = scanResult.scannedMovies();
     if (tmpMovies == null || tmpMovies.isEmpty()) {
       Label tmpEmptyLbl = new Label("No movies processed during this scan.");
-      tmpEmptyLbl.setStyle("-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
+      tmpEmptyLbl
+          .setStyle("-fx-font-size: 14px; -fx-text-fill: -color-fg-muted;");
       movieListContainer.getChildren().add(tmpEmptyLbl);
       return;
     }
@@ -202,14 +209,17 @@ public class SyncOverviewView {
     tmpPosterView.setFitHeight(90);
     tmpPosterView.setPreserveRatio(true);
 
-    if (movie.getCoverImagePath() != null && !movie.getCoverImagePath().isBlank()) {
+    if (movie.getCoverImagePath() != null
+        && !movie.getCoverImagePath().isBlank()) {
       File tmpImgFile = new File(movie.getCoverImagePath());
       if (tmpImgFile.exists()) {
         try {
-          tmpPosterView.setImage(new Image(tmpImgFile.toURI().toURL().toExternalForm(),
-              60, 90, true, true, true));
+          tmpPosterView
+              .setImage(new Image(tmpImgFile.toURI().toURL().toExternalForm(),
+                  60, 90, true, true, true));
         } catch (MalformedURLException tmpException) {
-          LOGGER.log(Level.WARNING, "Failed to load poster image", tmpException);
+          LOGGER.log(Level.WARNING, "Failed to load poster image",
+              tmpException);
         }
       }
     }
@@ -220,21 +230,28 @@ public class SyncOverviewView {
 
     File tmpFile = new File(movie.getFilePath());
     Label tmpFileLbl = new Label("Filename: " + tmpFile.getName());
-    tmpFileLbl.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #2178dd;");
+    tmpFileLbl.setStyle(
+        "-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #2178dd;");
 
-    Label tmpTitleLbl = new Label("Title: " + (movie.getTitle() != null ? movie.getTitle() : "—"));
-    tmpTitleLbl.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
+    Label tmpTitleLbl = new Label(
+        "Title: " + (movie.getTitle() != null ? movie.getTitle() : "—"));
+    tmpTitleLbl.setStyle(
+        "-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default;");
 
-    String tmpYearStr = movie.getYear() != null ? String.valueOf(movie.getYear()) : "—";
-    String tmpMatchStr = movie.getMatchStatus() != null ? movie.getMatchStatus() : "MATCHED";
-    Label tmpSubLbl = new Label("Year: " + tmpYearStr + "  •  Status: " + tmpMatchStr);
+    String tmpYearStr =
+        movie.getYear() != null ? String.valueOf(movie.getYear()) : "—";
+    String tmpMatchStr =
+        movie.getMatchStatus() != null ? movie.getMatchStatus() : "MATCHED";
+    Label tmpSubLbl =
+        new Label("Year: " + tmpYearStr + "  •  Status: " + tmpMatchStr);
     tmpSubLbl.setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-muted;");
 
     tmpInfoBox.getChildren().addAll(tmpFileLbl, tmpTitleLbl, tmpSubLbl);
 
     if (movie.getDirector() != null && !movie.getDirector().isBlank()) {
       Label tmpDirLbl = new Label("Director: " + movie.getDirector());
-      tmpDirLbl.setStyle("-fx-font-size: 11px; -fx-text-fill: -color-fg-subtle;");
+      tmpDirLbl
+          .setStyle("-fx-font-size: 11px; -fx-text-fill: -color-fg-subtle;");
       tmpInfoBox.getChildren().add(tmpDirLbl);
     }
 
@@ -245,7 +262,8 @@ public class SyncOverviewView {
     Button btnInteractiveMatch = new Button("Interactive Match Selection");
     btnInteractiveMatch.getStyleClass().add("button-primary");
     btnInteractiveMatch.setStyle("-fx-font-size: 12px; -fx-padding: 6px 12px;");
-    btnInteractiveMatch.setOnAction(e -> openInteractiveMatchDialog(movie, tmpRow));
+    btnInteractiveMatch
+        .setOnAction(e -> openInteractiveMatchDialog(movie, tmpRow));
 
     Button btnManualImdb = new Button("Manual Search via IMDb ID");
     btnManualImdb.getStyleClass().add("button-secondary");
@@ -271,11 +289,13 @@ public class SyncOverviewView {
     tmpRoot.setStyle("-fx-background-color: -color-bg-default;");
 
     Label tmpHeaderLabel = new Label("Interactive Match Selection");
-    tmpHeaderLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
+    tmpHeaderLabel.setStyle(
+        "-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
 
     File tmpFile = new File(movie.getFilePath());
     Label tmpFileLabel = new Label("File: " + tmpFile.getName());
-    tmpFileLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: -color-fg-muted;");
+    tmpFileLabel
+        .setStyle("-fx-font-size: 13px; -fx-text-fill: -color-fg-muted;");
 
     TextField tmpSearchInput = new TextField(movie.getTitle());
     tmpSearchInput.setPromptText("Enter movie title to search candidates...");
@@ -310,8 +330,10 @@ public class SyncOverviewView {
 
     Runnable tmpPerformSearch = () -> {
       String tmpQuery = tmpSearchInput.getText().trim();
-      if (tmpQuery.isEmpty()) return;
-      tmpCandidateContainer.getChildren().setAll(new Label("Searching IMDb for matches..."));
+      if (tmpQuery.isEmpty())
+        return;
+      tmpCandidateContainer.getChildren()
+          .setAll(new Label("Searching IMDb for matches..."));
 
       Task<List<Movie>> tmpTask = new Task<>() {
         @Override
@@ -324,12 +346,14 @@ public class SyncOverviewView {
         List<Movie> tmpResults = tmpTask.getValue();
         tmpCandidateContainer.getChildren().clear();
         if (tmpResults.isEmpty()) {
-          tmpCandidateContainer.getChildren().add(new Label("No candidate matches found."));
+          tmpCandidateContainer.getChildren()
+              .add(new Label("No candidate matches found."));
         } else {
           for (Movie tmpCand : tmpResults) {
             HBox tmpCandRow = new HBox(15);
             tmpCandRow.setAlignment(Pos.CENTER_LEFT);
-            tmpCandRow.setStyle("-fx-background-color: -color-bg-subtle; -fx-padding: 12; -fx-background-radius: 8; -fx-border-color: -color-border-default; -fx-border-radius: 8;");
+            tmpCandRow.setStyle(
+                "-fx-background-color: -color-bg-subtle; -fx-padding: 12; -fx-background-radius: 8; -fx-border-color: -color-border-default; -fx-border-radius: 8;");
 
             ImageView tmpPoster = new ImageView();
             tmpPoster.setFitWidth(70);
@@ -340,24 +364,33 @@ public class SyncOverviewView {
               File tmpImgFile = new File(tmpCand.getCoverImagePath());
               if (tmpImgFile.exists()) {
                 try {
-                  tmpPoster.setImage(new Image(tmpImgFile.toURI().toURL().toExternalForm(), 70, 105, true, true, true));
-                } catch (Exception ignored) {}
+                  tmpPoster.setImage(
+                      new Image(tmpImgFile.toURI().toURL().toExternalForm(), 70,
+                          105, true, true, true));
+                } catch (Exception ignored) {
+                }
               }
             }
 
             VBox tmpInfo = new VBox(4);
             Label tmpT = new Label(tmpCand.getTitle());
-            tmpT.setStyle("-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: -color-fg-default;");
+            tmpT.setStyle(
+                "-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: -color-fg-default;");
 
-            String tmpSubText = (tmpCand.getYear() != null ? "Year: " + tmpCand.getYear() : "")
-                + (tmpCand.getImdbId() != null ? "  •  IMDb ID: " + tmpCand.getImdbId() : "");
+            String tmpSubText =
+                (tmpCand.getYear() != null ? "Year: " + tmpCand.getYear() : "")
+                    + (tmpCand.getImdbId() != null
+                        ? "  •  IMDb ID: " + tmpCand.getImdbId()
+                        : "");
             Label tmpSub = new Label(tmpSubText);
-            tmpSub.setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-muted;");
+            tmpSub.setStyle(
+                "-fx-font-size: 12px; -fx-text-fill: -color-fg-muted;");
             tmpInfo.getChildren().addAll(tmpT, tmpSub);
 
             if (tmpCand.getActors() != null && !tmpCand.getActors().isBlank()) {
               Label tmpAct = new Label("Cast: " + tmpCand.getActors());
-              tmpAct.setStyle("-fx-font-size: 11px; -fx-text-fill: -color-fg-subtle;");
+              tmpAct.setStyle(
+                  "-fx-font-size: 11px; -fx-text-fill: -color-fg-subtle;");
               tmpInfo.getChildren().add(tmpAct);
             }
 
@@ -366,10 +399,12 @@ public class SyncOverviewView {
 
             Button btnSelectMatch = new Button("Select & Re-index");
             btnSelectMatch.getStyleClass().add("button-primary");
-            btnSelectMatch.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 8px 16px;");
+            btnSelectMatch.setStyle(
+                "-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 8px 16px;");
             btnSelectMatch.setOnAction(e -> {
               String tmpTargetId = tmpCand.getImdbId();
-              if (tmpTargetId == null || tmpTargetId.isBlank()) return;
+              if (tmpTargetId == null || tmpTargetId.isBlank())
+                return;
 
               // Prevent user from clicking anywhere during re-indexing
               tmpRoot.setDisable(true);
@@ -397,7 +432,8 @@ public class SyncOverviewView {
               t.start();
             });
 
-            tmpCandRow.getChildren().addAll(tmpPoster, tmpInfo, tmpSp, btnSelectMatch);
+            tmpCandRow.getChildren().addAll(tmpPoster, tmpInfo, tmpSp,
+                btnSelectMatch);
             tmpCandidateContainer.getChildren().add(tmpCandRow);
           }
         }
@@ -429,11 +465,13 @@ public class SyncOverviewView {
     tmpRoot.setStyle("-fx-background-color: -color-bg-default;");
 
     Label tmpHeaderLabel = new Label("Manual Search via IMDb ID");
-    tmpHeaderLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
+    tmpHeaderLabel.setStyle(
+        "-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
 
     File tmpFile = new File(movie.getFilePath());
     Label tmpFileLabel = new Label("File: " + tmpFile.getName());
-    tmpFileLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: -color-fg-muted;");
+    tmpFileLabel
+        .setStyle("-fx-font-size: 13px; -fx-text-fill: -color-fg-muted;");
 
     VBox tmpTopBox = new VBox(8, tmpHeaderLabel, tmpFileLabel);
     tmpRoot.setTop(tmpTopBox);

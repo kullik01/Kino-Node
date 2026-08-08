@@ -420,14 +420,14 @@ public class MovieRepository {
     try {
       int tmpDuration = resultSet.getInt("duration");
       tmpMovie.setDuration(resultSet.wasNull() ? null : tmpDuration);
-    } catch (SQLException e) {
+    } catch (SQLException tmpException) {
       tmpMovie.setDuration(null);
     }
 
     try {
       double tmpRawRating = resultSet.getDouble("raw_rating");
       tmpMovie.setRawRating(resultSet.wasNull() ? null : tmpRawRating);
-    } catch (SQLException e) {
+    } catch (SQLException tmpException) {
       tmpMovie.setRawRating(null);
     }
 

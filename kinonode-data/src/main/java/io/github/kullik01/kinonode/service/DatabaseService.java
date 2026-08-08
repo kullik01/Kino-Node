@@ -190,14 +190,14 @@ public class DatabaseService {
               "actors", "duration", "raw_rating", "match_status", "imdb_id"};
       for (String tmpColumn : tmpNewColumns) {
         try {
-          String columnType =
+          String tmpColumnType =
               tmpColumn.equals("duration") ? "INTEGER"
                   : (tmpColumn.equals("raw_rating") ? "REAL"
                       : (tmpColumn.equals("match_status")
                           ? "TEXT DEFAULT 'MATCHED'"
                           : "TEXT"));
           tmpStatement.execute("ALTER TABLE movies ADD COLUMN " + tmpColumn
-              + " " + columnType + ";");
+              + " " + tmpColumnType + ";");
           LOGGER.info("Added new column to movies: " + tmpColumn);
         } catch (SQLException tmpException) {
           // Ignore, column likely already exists.
@@ -208,10 +208,10 @@ public class DatabaseService {
       String[] tmpWatchlistColumns = {"is_smart", "smart_rules_json"};
       for (String tmpColumn : tmpWatchlistColumns) {
         try {
-          String columnType =
+          String tmpColumnType =
               tmpColumn.equals("is_smart") ? "BOOLEAN DEFAULT 0" : "TEXT";
           tmpStatement.execute("ALTER TABLE watchlists ADD COLUMN " + tmpColumn
-              + " " + columnType + ";");
+              + " " + tmpColumnType + ";");
           LOGGER.info("Added new column to watchlists: " + tmpColumn);
         } catch (SQLException tmpException) {
           // Ignore, column likely already exists.

@@ -415,18 +415,18 @@ public class WatchlistRepository {
    * Retrieves all movies dynamically matching the JSON rule criteria for a
    * Smart Watchlist.
    *
-   * @param tmpRulesJson the serialized JSON rules string
+   * @param rulesJson the serialized JSON rules string
    * @return a list of dynamically matched {@link Movie} entities
    */
-  public List<Movie> findMoviesForSmartWatchlist(String tmpRulesJson) {
+  public List<Movie> findMoviesForSmartWatchlist(String rulesJson) {
     List<Movie> tmpMovies = new ArrayList<>();
-    if (tmpRulesJson == null || tmpRulesJson.isBlank()) {
+    if (rulesJson == null || rulesJson.isBlank()) {
       return tmpMovies;
     }
 
     try {
       Gson tmpGson = new Gson();
-      List<SmartRule> tmpRules = tmpGson.fromJson(tmpRulesJson,
+      List<SmartRule> tmpRules = tmpGson.fromJson(rulesJson,
           new TypeToken<List<SmartRule>>() {}.getType());
 
       StringBuilder tmpQueryBuilder =

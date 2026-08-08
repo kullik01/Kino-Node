@@ -337,7 +337,8 @@ public class MovieDetailController implements Refreshable {
     ttFixMatch.setShowDelay(Duration.millis(250));
     btnFixMatch.setTooltip(ttFixMatch);
 
-    actionBox.getChildren().addAll(btnPlay, btnTrailer, btnImdbPage, btnFixMatch);
+    actionBox.getChildren().addAll(btnPlay, btnTrailer, btnImdbPage,
+        btnFixMatch);
     leftBox.getChildren().addAll(posterContainer, btnChangePoster, actionBox);
 
     // Right Side: Details Grid
@@ -2028,8 +2029,9 @@ public class MovieDetailController implements Refreshable {
   }
 
   /**
-   * Displays an interactive match management dialog for re-indexing the current movie,
-   * providing interactive candidate selection with metadata preview and manual search via IMDb ID.
+   * Displays an interactive match management dialog for re-indexing the current
+   * movie, providing interactive candidate selection with metadata preview and
+   * manual search via IMDb ID.
    */
   private void showFixMatchDialog() {
     if (movie == null)
@@ -2048,13 +2050,16 @@ public class MovieDetailController implements Refreshable {
     tmpRoot.setPadding(new Insets(20));
     tmpRoot.setStyle("-fx-background-color: -color-bg-default;");
 
-    Label tmpHeaderLabel = new Label("Enhanced Movie Import & Match Management");
-    tmpHeaderLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
+    Label tmpHeaderLabel =
+        new Label("Enhanced Movie Import & Match Management");
+    tmpHeaderLabel.setStyle(
+        "-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
     tmpRoot.setTop(tmpHeaderLabel);
 
     // Interactive Title Search & Match Options List
     VBox tmpSection1 = new VBox(10);
-    tmpSection1.setStyle("-fx-background-color: -color-bg-overlay; -fx-padding: 15; -fx-background-radius: 8;");
+    tmpSection1.setStyle(
+        "-fx-background-color: -color-bg-overlay; -fx-padding: 15; -fx-background-radius: 8;");
 
     Label tmpSec1Title = new Label("Interactive Match Selection");
     tmpSec1Title.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
@@ -2077,7 +2082,8 @@ public class MovieDetailController implements Refreshable {
 
     // Manual Search via IMDb ID
     VBox tmpSection2 = new VBox(10);
-    tmpSection2.setStyle("-fx-background-color: -color-bg-overlay; -fx-padding: 15; -fx-background-radius: 8;");
+    tmpSection2.setStyle(
+        "-fx-background-color: -color-bg-overlay; -fx-padding: 15; -fx-background-radius: 8;");
 
     Label tmpSec2Title = new Label("Manual Search via IMDb ID");
     tmpSec2Title.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
@@ -2108,8 +2114,10 @@ public class MovieDetailController implements Refreshable {
 
     Runnable tmpPerformSearch = () -> {
       String tmpQuery = tmpSearchInput.getText().trim();
-      if (tmpQuery.isEmpty()) return;
-      tmpCandidateContainer.getChildren().setAll(new Label("Searching IMDb for matches..."));
+      if (tmpQuery.isEmpty())
+        return;
+      tmpCandidateContainer.getChildren()
+          .setAll(new Label("Searching IMDb for matches..."));
 
       Task<List<Movie>> tmpTask = new Task<>() {
         @Override
@@ -2122,12 +2130,14 @@ public class MovieDetailController implements Refreshable {
         List<Movie> tmpResults = tmpTask.getValue();
         tmpCandidateContainer.getChildren().clear();
         if (tmpResults.isEmpty()) {
-          tmpCandidateContainer.getChildren().add(new Label("No candidate movie matches found."));
+          tmpCandidateContainer.getChildren()
+              .add(new Label("No candidate movie matches found."));
         } else {
           for (Movie tmpCand : tmpResults) {
             HBox tmpRow = new HBox(15);
             tmpRow.setAlignment(Pos.CENTER_LEFT);
-            tmpRow.setStyle("-fx-background-color: -color-bg-subtle; -fx-padding: 12; -fx-background-radius: 8; -fx-border-color: -color-border-default; -fx-border-radius: 8;");
+            tmpRow.setStyle(
+                "-fx-background-color: -color-bg-subtle; -fx-padding: 12; -fx-background-radius: 8; -fx-border-color: -color-border-default; -fx-border-radius: 8;");
 
             ImageView tmpPoster = new ImageView();
             tmpPoster.setFitWidth(70);
@@ -2138,23 +2148,32 @@ public class MovieDetailController implements Refreshable {
               File tmpImgFile = new File(tmpCand.getCoverImagePath());
               if (tmpImgFile.exists()) {
                 try {
-                  tmpPoster.setImage(new Image(tmpImgFile.toURI().toURL().toExternalForm(), 70, 105, true, true, true));
-                } catch (Exception ignored) {}
+                  tmpPoster.setImage(
+                      new Image(tmpImgFile.toURI().toURL().toExternalForm(), 70,
+                          105, true, true, true));
+                } catch (Exception ignored) {
+                }
               }
             }
 
             VBox tmpInfo = new VBox(4);
             Label tmpT = new Label(tmpCand.getTitle());
-            tmpT.setStyle("-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: -color-fg-default;");
-            String tmpSubText = (tmpCand.getYear() != null ? "Year: " + tmpCand.getYear() : "")
-                + (tmpCand.getImdbId() != null ? "  •  IMDb ID: " + tmpCand.getImdbId() : "");
+            tmpT.setStyle(
+                "-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: -color-fg-default;");
+            String tmpSubText =
+                (tmpCand.getYear() != null ? "Year: " + tmpCand.getYear() : "")
+                    + (tmpCand.getImdbId() != null
+                        ? "  •  IMDb ID: " + tmpCand.getImdbId()
+                        : "");
             Label tmpSub = new Label(tmpSubText);
-            tmpSub.setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-muted;");
+            tmpSub.setStyle(
+                "-fx-font-size: 12px; -fx-text-fill: -color-fg-muted;");
             tmpInfo.getChildren().addAll(tmpT, tmpSub);
 
             if (tmpCand.getActors() != null && !tmpCand.getActors().isBlank()) {
               Label tmpAct = new Label("Cast: " + tmpCand.getActors());
-              tmpAct.setStyle("-fx-font-size: 11px; -fx-text-fill: -color-fg-subtle;");
+              tmpAct.setStyle(
+                  "-fx-font-size: 11px; -fx-text-fill: -color-fg-subtle;");
               tmpInfo.getChildren().add(tmpAct);
             }
 
@@ -2163,10 +2182,12 @@ public class MovieDetailController implements Refreshable {
 
             Button btnSelectMatch = new Button("Select & Re-index");
             btnSelectMatch.getStyleClass().add("button-primary");
-            btnSelectMatch.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 8px 16px;");
+            btnSelectMatch.setStyle(
+                "-fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 8px 16px;");
             btnSelectMatch.setOnAction(e -> {
               String tmpTargetId = tmpCand.getImdbId();
-              if (tmpTargetId == null || tmpTargetId.isBlank()) return;
+              if (tmpTargetId == null || tmpTargetId.isBlank())
+                return;
 
               tmpRoot.setDisable(true);
               if (tmpStage.getScene() != null) {
@@ -2198,7 +2219,8 @@ public class MovieDetailController implements Refreshable {
               t.start();
             });
 
-            tmpRow.getChildren().addAll(tmpPoster, tmpInfo, tmpSp, btnSelectMatch);
+            tmpRow.getChildren().addAll(tmpPoster, tmpInfo, tmpSp,
+                btnSelectMatch);
             tmpCandidateContainer.getChildren().add(tmpRow);
           }
         }

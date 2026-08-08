@@ -77,8 +77,8 @@ public class AnalyticsService {
       throws IOException {
     StringBuilder tmpBuilder = new StringBuilder();
     tmpBuilder.append("{\n  \"movies\": [\n");
-    for (int i = 0; i < movies.size(); i++) {
-      Movie tmpMovie = movies.get(i);
+    for (int tmpI = 0; tmpI < movies.size(); tmpI++) {
+      Movie tmpMovie = movies.get(tmpI);
       tmpBuilder.append("    {\n");
       tmpBuilder.append("      \"id\": ").append(tmpMovie.getId())
           .append(",\n");
@@ -113,7 +113,7 @@ public class AnalyticsService {
       tmpBuilder.append("      \"filePath\": ")
           .append(escapeJson(tmpMovie.getFilePath())).append("\n");
       tmpBuilder.append("    }");
-      if (i < movies.size() - 1) {
+      if (tmpI < movies.size() - 1) {
         tmpBuilder.append(",");
       }
       tmpBuilder.append("\n");

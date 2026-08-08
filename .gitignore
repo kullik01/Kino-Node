@@ -23,11 +23,20 @@
 hs_err_pid*
 replay_pid*
 
-/.gradle
-/.idea
-/build
+.gradle/
+.idea/
+build/
 /opt
 !gradle/wrapper/gradle-wrapper.jar
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# OS metadata
+.DS_Store
+Thumbs.db
 
 # AI agent local state (not committed)
 .agents/.cache/

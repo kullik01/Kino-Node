@@ -1,5 +1,5 @@
 <h1 align="center">
-  <sub><img src="src/main/resources/io/github/kullik01/kinonode/images/logo.png" height="250" alt="KinoNode Logo" /></sub>
+  <sub><img src="kinonode-ui/src/main/resources/io/github/kullik01/kinonode/images/logos/logo.png" height="250" alt="KinoNode Logo" /></sub>
   <br>
   KinoNode
 </h1>

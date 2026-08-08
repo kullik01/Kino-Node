@@ -92,179 +92,185 @@ public class AboutView {
         getClass().getResource("/io/github/kullik01/kinonode/css/theme.css")
             .toExternalForm());
 
-    VBox mainContent = new VBox(25.0);
-    mainContent.getStyleClass().add("detail-pane");
-    mainContent.setPadding(new Insets(30.0, 30.0, 30.0, 30.0));
+    VBox tmpMainContent = new VBox(25.0);
+    tmpMainContent.getStyleClass().add("detail-pane");
+    tmpMainContent.setPadding(new Insets(30.0, 30.0, 30.0, 30.0));
 
     // Header Section
-    VBox headerSection = new VBox(10.0);
-    headerSection.setAlignment(Pos.CENTER);
+    VBox tmpHeaderSection = new VBox(10.0);
+    tmpHeaderSection.setAlignment(Pos.CENTER);
 
-    ImageView logoView = new ImageView();
-    logoView.setFitHeight(100.0);
-    logoView.setFitWidth(100.0);
-    logoView.setPreserveRatio(true);
-    logoView.setSmooth(true);
-    Image logoImage = new Image(getClass()
+    ImageView tmpLogoView = new ImageView();
+    tmpLogoView.setFitHeight(100.0);
+    tmpLogoView.setFitWidth(100.0);
+    tmpLogoView.setPreserveRatio(true);
+    tmpLogoView.setSmooth(true);
+    Image tmpLogoImage = new Image(getClass()
         .getResource("/io/github/kullik01/kinonode/images/logos/logo.png")
         .toExternalForm(), 200, 200, true, true);
-    logoView.setImage(logoImage);
+    tmpLogoView.setImage(tmpLogoImage);
 
-    Label appTitle = new Label(resources.getString("about.title"));
-    appTitle.getStyleClass().add("title-1");
+    Label tmpAppTitle = new Label(resources.getString("about.title"));
+    tmpAppTitle.getStyleClass().add("title-1");
 
-    Label appSubtitle = new Label(resources.getString("about.subtitle"));
-    appSubtitle.getStyleClass().add("text-muted");
-    appSubtitle.setStyle("-fx-font-size: 16px;");
+    Label tmpAppSubtitle = new Label(resources.getString("about.subtitle"));
+    tmpAppSubtitle.getStyleClass().add("text-muted");
+    tmpAppSubtitle.setStyle("-fx-font-size: 16px;");
 
-    HBox btnBox = new HBox(15.0);
-    btnBox.setAlignment(Pos.CENTER);
-    btnBox.setPadding(new Insets(15.0, 0, 15.0, 0));
+    HBox tmpBtnBox = new HBox(15.0);
+    tmpBtnBox.setAlignment(Pos.CENTER);
+    tmpBtnBox.setPadding(new Insets(15.0, 0, 15.0, 0));
 
     btnGitHub.getStyleClass().add("accent");
     btnGitHub.setStyle("-fx-text-fill: white;");
     btnBug.setStyle("-fx-text-fill: white;");
     btnUpdate.setStyle("-fx-text-fill: white;");
 
-    btnBox.getChildren().addAll(btnGitHub, btnBug, btnUpdate);
-    headerSection.getChildren().addAll(logoView, appTitle, appSubtitle, btnBox);
+    tmpBtnBox.getChildren().addAll(btnGitHub, btnBug, btnUpdate);
+    tmpHeaderSection.getChildren().addAll(tmpLogoView, tmpAppTitle,
+        tmpAppSubtitle, tmpBtnBox);
 
     // Cards Row
-    HBox cardsRow = new HBox(20.0);
-    cardsRow.setAlignment(Pos.TOP_LEFT);
+    HBox tmpCardsRow = new HBox(20.0);
+    tmpCardsRow.setAlignment(Pos.TOP_LEFT);
 
     // Left Card
-    VBox leftCard = new VBox();
-    leftCard.getStyleClass().add("about-card");
-    HBox.setHgrow(leftCard, Priority.ALWAYS);
+    VBox tmpLeftCard = new VBox();
+    tmpLeftCard.getStyleClass().add("about-card");
+    HBox.setHgrow(tmpLeftCard, Priority.ALWAYS);
 
-    Label leftCardTitle = new Label(resources.getString("about.card.details"));
-    leftCardTitle.setStyle(
+    Label tmpLeftCardTitle =
+        new Label(resources.getString("about.card.details"));
+    tmpLeftCardTitle.setStyle(
         "-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
-    Region sep1 = new Region();
-    sep1.setMinHeight(Region.USE_PREF_SIZE);
-    sep1.setStyle(
+    Region tmpSep1 = new Region();
+    tmpSep1.setMinHeight(Region.USE_PREF_SIZE);
+    tmpSep1.setStyle(
         "-fx-background-color: -color-border-default; -fx-pref-height: 1;");
 
-    GridPane grid1 = new GridPane();
-    grid1.setHgap(15.0);
-    grid1.setVgap(12.0);
-    ColumnConstraints gc1 = new ColumnConstraints();
-    gc1.setMinWidth(110.0);
-    gc1.setPrefWidth(140.0);
-    ColumnConstraints gc2 = new ColumnConstraints();
-    gc2.setHgrow(Priority.ALWAYS);
-    grid1.getColumnConstraints().addAll(gc1, gc2);
+    GridPane tmpGrid1 = new GridPane();
+    tmpGrid1.setHgap(15.0);
+    tmpGrid1.setVgap(12.0);
+    ColumnConstraints tmpGc1 = new ColumnConstraints();
+    tmpGc1.setMinWidth(110.0);
+    tmpGc1.setPrefWidth(140.0);
+    ColumnConstraints tmpGc2 = new ColumnConstraints();
+    tmpGc2.setHgrow(Priority.ALWAYS);
+    tmpGrid1.getColumnConstraints().addAll(tmpGc1, tmpGc2);
 
     lblVersion.setId("lblVersion");
-    addGridRow(grid1, 0, resources.getString("about.label.version"),
+    addGridRow(tmpGrid1, 0, resources.getString("about.label.version"),
         lblVersion);
-    addGridRow(grid1, 1, resources.getString("about.label.developer"),
+    addGridRow(tmpGrid1, 1, resources.getString("about.label.developer"),
         new Label(resources.getString("about.val.developer")));
-    addGridRow(grid1, 2, resources.getString("about.label.designers"),
+    addGridRow(tmpGrid1, 2, resources.getString("about.label.designers"),
         new Label(resources.getString("about.val.designers")));
-    addGridRow(grid1, 3, resources.getString("about.label.license"),
+    addGridRow(tmpGrid1, 3, resources.getString("about.label.license"),
         new Label(resources.getString("about.val.license")));
-    addGridRow(grid1, 4, resources.getString("about.label.copyright"),
+    addGridRow(tmpGrid1, 4, resources.getString("about.label.copyright"),
         new Label(resources.getString("about.val.copyright")));
 
-    Label envTitle = new Label(resources.getString("about.card.env"));
-    envTitle.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
-    VBox.setMargin(envTitle, new Insets(15.0, 0, 0, 0));
-    Region sep2 = new Region();
-    sep2.setMinHeight(Region.USE_PREF_SIZE);
-    sep2.setStyle(
+    Label tmpEnvTitle = new Label(resources.getString("about.card.env"));
+    tmpEnvTitle.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
+    VBox.setMargin(tmpEnvTitle, new Insets(15.0, 0, 0, 0));
+    Region tmpSep2 = new Region();
+    tmpSep2.setMinHeight(Region.USE_PREF_SIZE);
+    tmpSep2.setStyle(
         "-fx-background-color: -color-border-default; -fx-pref-height: 1;");
 
-    GridPane grid2 = new GridPane();
-    grid2.setHgap(15.0);
-    grid2.setVgap(12.0);
-    grid2.getColumnConstraints().addAll(gc1, gc2);
+    GridPane tmpGrid2 = new GridPane();
+    tmpGrid2.setHgap(15.0);
+    tmpGrid2.setVgap(12.0);
+    tmpGrid2.getColumnConstraints().addAll(tmpGc1, tmpGc2);
 
     lblJavaRuntime.setId("lblJavaRuntime");
-    addGridRow(grid2, 0, resources.getString("about.label.java"),
+    addGridRow(tmpGrid2, 0, resources.getString("about.label.java"),
         lblJavaRuntime);
     lblOsDetails.setId("lblOsDetails");
-    addGridRow(grid2, 1, resources.getString("about.label.os"), lblOsDetails);
+    addGridRow(tmpGrid2, 1, resources.getString("about.label.os"),
+        lblOsDetails);
 
-    Label builtTitle = new Label(resources.getString("about.card.built"));
-    builtTitle.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
-    VBox.setMargin(builtTitle, new Insets(15.0, 0, 0, 0));
-    Region sep3 = new Region();
-    sep3.setMinHeight(Region.USE_PREF_SIZE);
-    sep3.setStyle(
+    Label tmpBuiltTitle = new Label(resources.getString("about.card.built"));
+    tmpBuiltTitle.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
+    VBox.setMargin(tmpBuiltTitle, new Insets(15.0, 0, 0, 0));
+    Region tmpSep3 = new Region();
+    tmpSep3.setMinHeight(Region.USE_PREF_SIZE);
+    tmpSep3.setStyle(
         "-fx-background-color: -color-border-default; -fx-pref-height: 1;");
 
-    VBox builtBox = new VBox(4.0);
-    builtBox.getChildren().addAll(
+    VBox tmpBuiltBox = new VBox(4.0);
+    tmpBuiltBox.getChildren().addAll(
         createMutedLabel(resources.getString("about.built.java")),
         createMutedLabel(resources.getString("about.built.javafx")),
         createMutedLabel(resources.getString("about.built.sqlite")),
         createMutedLabel(resources.getString("about.built.atlantafx")),
         createMutedLabel(resources.getString("about.built.gson")));
 
-    leftCard.getChildren().addAll(leftCardTitle, sep1, grid1, envTitle, sep2,
-        grid2, builtTitle, sep3, builtBox);
+    tmpLeftCard.getChildren().addAll(tmpLeftCardTitle, tmpSep1, tmpGrid1,
+        tmpEnvTitle, tmpSep2, tmpGrid2, tmpBuiltTitle, tmpSep3, tmpBuiltBox);
 
     // Right Card
-    VBox rightCard = new VBox();
-    rightCard.getStyleClass().add("about-card");
-    HBox.setHgrow(rightCard, Priority.ALWAYS);
+    VBox tmpRightCard = new VBox();
+    tmpRightCard.getStyleClass().add("about-card");
+    HBox.setHgrow(tmpRightCard, Priority.ALWAYS);
 
-    Label rightCardTitle = new Label(resources.getString("about.card.storage"));
-    rightCardTitle.setStyle(
+    Label tmpRightCardTitle =
+        new Label(resources.getString("about.card.storage"));
+    tmpRightCardTitle.setStyle(
         "-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
-    Region sep4 = new Region();
-    sep4.setMinHeight(Region.USE_PREF_SIZE);
-    sep4.setStyle(
+    Region tmpSep4 = new Region();
+    tmpSep4.setMinHeight(Region.USE_PREF_SIZE);
+    tmpSep4.setStyle(
         "-fx-background-color: -color-border-default; -fx-pref-height: 1;");
 
-    GridPane grid3 = new GridPane();
-    grid3.setHgap(15.0);
-    grid3.setVgap(12.0);
-    ColumnConstraints gc3 = new ColumnConstraints();
-    gc3.setMinWidth(130.0);
-    gc3.setPrefWidth(140.0);
-    grid3.getColumnConstraints().addAll(gc3, gc2);
+    GridPane tmpGrid3 = new GridPane();
+    tmpGrid3.setHgap(15.0);
+    tmpGrid3.setVgap(12.0);
+    ColumnConstraints tmpGc3 = new ColumnConstraints();
+    tmpGc3.setMinWidth(130.0);
+    tmpGc3.setPrefWidth(140.0);
+    tmpGrid3.getColumnConstraints().addAll(tmpGc3, tmpGc2);
 
     lblWorkspaceSize.setId("lblWorkspaceSize");
-    addGridRow(grid3, 0, resources.getString("about.label.workspace"),
+    addGridRow(tmpGrid3, 0, resources.getString("about.label.workspace"),
         lblWorkspaceSize);
     lblDbSize.setId("lblDbSize");
-    addGridRow(grid3, 1, resources.getString("about.label.db_size"), lblDbSize);
+    addGridRow(tmpGrid3, 1, resources.getString("about.label.db_size"),
+        lblDbSize);
     lblMovieCount.setId("lblMovieCount");
-    addGridRow(grid3, 2, resources.getString("about.label.movies"),
+    addGridRow(tmpGrid3, 2, resources.getString("about.label.movies"),
         lblMovieCount);
     lblRegularWatchlistCount.setId("lblRegularWatchlistCount");
-    addGridRow(grid3, 3, resources.getString("about.label.regular_watchlists"),
+    addGridRow(tmpGrid3, 3,
+        resources.getString("about.label.regular_watchlists"),
         lblRegularWatchlistCount);
     lblSmartWatchlistCount.setId("lblSmartWatchlistCount");
-    addGridRow(grid3, 4, resources.getString("about.label.smart_watchlists"),
+    addGridRow(tmpGrid3, 4, resources.getString("about.label.smart_watchlists"),
         lblSmartWatchlistCount);
 
-    rightCard.getChildren().addAll(rightCardTitle, sep4, grid3);
+    tmpRightCard.getChildren().addAll(tmpRightCardTitle, tmpSep4, tmpGrid3);
 
-    cardsRow.getChildren().addAll(leftCard, rightCard);
+    tmpCardsRow.getChildren().addAll(tmpLeftCard, tmpRightCard);
 
     // Full-width card
-    VBox fullCard = new VBox();
-    fullCard.getStyleClass().add("about-card");
+    VBox tmpFullCard = new VBox();
+    tmpFullCard.getStyleClass().add("about-card");
 
-    Label fullCardTitle = new Label(resources.getString("about.card.paths"));
-    fullCardTitle.setStyle(
+    Label tmpFullCardTitle = new Label(resources.getString("about.card.paths"));
+    tmpFullCardTitle.setStyle(
         "-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
-    Region sep5 = new Region();
-    sep5.setMinHeight(Region.USE_PREF_SIZE);
-    sep5.setStyle(
+    Region tmpSep5 = new Region();
+    tmpSep5.setMinHeight(Region.USE_PREF_SIZE);
+    tmpSep5.setStyle(
         "-fx-background-color: -color-border-default; -fx-pref-height: 1;");
 
-    VBox playerBox = new VBox(8.0);
-    Label playerLabel =
+    VBox tmpPlayerBox = new VBox(8.0);
+    Label tmpPlayerLabel =
         new Label(resources.getString("about.label.player_path"));
-    playerLabel
+    tmpPlayerLabel
         .setStyle("-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;");
-    HBox playerInputBox = new HBox(10.0);
-    playerInputBox.setAlignment(Pos.CENTER_LEFT);
+    HBox tmpPlayerInputBox = new HBox(10.0);
+    tmpPlayerInputBox.setAlignment(Pos.CENTER_LEFT);
 
     lblPlayerPath.setId("lblPlayerPath");
     lblPlayerPath.setEditable(false);
@@ -277,46 +283,49 @@ public class AboutView {
     btnPlayerLoc.getStyleClass().add("button-secondary");
     btnPlayerLoc.setMinWidth(Region.USE_PREF_SIZE);
     btnPlayerLoc.setStyle("-fx-text-fill: white;");
-    Tooltip playerLocTip =
+    Tooltip tmpPlayerLocTip =
         new Tooltip(resources.getString("about.tooltip.open_location"));
-    playerLocTip.setShowDelay(Duration.millis(250));
-    btnPlayerLoc.setTooltip(playerLocTip);
-    playerInputBox.getChildren().addAll(lblPlayerPath, btnPlayerLoc);
-    playerBox.getChildren().addAll(playerLabel, playerInputBox);
+    tmpPlayerLocTip.setShowDelay(Duration.millis(250));
+    btnPlayerLoc.setTooltip(tmpPlayerLocTip);
+    tmpPlayerInputBox.getChildren().addAll(lblPlayerPath, btnPlayerLoc);
+    tmpPlayerBox.getChildren().addAll(tmpPlayerLabel, tmpPlayerInputBox);
 
-    Region sep6 = new Region();
-    sep6.setMinHeight(Region.USE_PREF_SIZE);
-    sep6.setStyle(
+    Region tmpSep6 = new Region();
+    tmpSep6.setMinHeight(Region.USE_PREF_SIZE);
+    tmpSep6.setStyle(
         "-fx-background-color: -color-border-default; -fx-pref-height: 1;");
 
-    VBox extBox = new VBox(8.0);
-    Label extLabel = new Label(resources.getString("about.label.extensions"));
-    extLabel.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;");
+    VBox tmpExtBox = new VBox(8.0);
+    Label tmpExtLabel =
+        new Label(resources.getString("about.label.extensions"));
+    tmpExtLabel
+        .setStyle("-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;");
     lblExtensions.setId("lblExtensions");
     lblExtensions.setEditable(false);
     lblExtensions.setFocusTraversable(false);
     lblExtensions.setStyle(
         "-fx-font-family: 'Courier New'; -fx-font-size: 12px; -fx-text-fill: -color-fg-default; -fx-control-inner-background: -color-bg-default; -fx-background-radius: 6px; -fx-border-color: -color-border-default; -fx-border-radius: 6px;");
     lblExtensions.setMaxWidth(Double.MAX_VALUE);
-    extBox.getChildren().addAll(extLabel, lblExtensions);
+    tmpExtBox.getChildren().addAll(tmpExtLabel, lblExtensions);
 
-    Region sep7 = new Region();
-    sep7.setMinHeight(Region.USE_PREF_SIZE);
-    sep7.setStyle(
+    Region tmpSep7 = new Region();
+    tmpSep7.setMinHeight(Region.USE_PREF_SIZE);
+    tmpSep7.setStyle(
         "-fx-background-color: -color-border-default; -fx-pref-height: 1;");
 
-    VBox dbBox = new VBox(8.0);
-    HBox dbLabelBox = new HBox(8.0);
-    dbLabelBox.setAlignment(Pos.CENTER_LEFT);
-    Label dbLabel = new Label(resources.getString("about.label.db_location"));
-    dbLabel.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;");
+    VBox tmpDbBox = new VBox(8.0);
+    HBox tmpDbLabelBox = new HBox(8.0);
+    tmpDbLabelBox.setAlignment(Pos.CENTER_LEFT);
+    Label tmpDbLabel =
+        new Label(resources.getString("about.label.db_location"));
+    tmpDbLabel.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;");
     lblStorageMode.setId("lblStorageMode");
     lblStorageMode
         .setStyle("-fx-font-size: 11px; -fx-text-fill: -color-fg-muted;");
-    dbLabelBox.getChildren().addAll(dbLabel, lblStorageMode);
+    tmpDbLabelBox.getChildren().addAll(tmpDbLabel, lblStorageMode);
 
-    HBox dbInputBox = new HBox(10.0);
-    dbInputBox.setAlignment(Pos.CENTER_LEFT);
+    HBox tmpDbInputBox = new HBox(10.0);
+    tmpDbInputBox.setAlignment(Pos.CENTER_LEFT);
     lblDbPath.setId("lblDbPath");
     lblDbPath.setEditable(false);
     lblDbPath.setFocusTraversable(false);
@@ -328,18 +337,19 @@ public class AboutView {
     btnDbLoc.getStyleClass().add("button-secondary");
     btnDbLoc.setMinWidth(Region.USE_PREF_SIZE);
     btnDbLoc.setStyle("-fx-text-fill: white;");
-    Tooltip dbLocTip =
+    Tooltip tmpDbLocTip =
         new Tooltip(resources.getString("about.tooltip.open_location"));
-    dbLocTip.setShowDelay(Duration.millis(250));
-    btnDbLoc.setTooltip(dbLocTip);
-    dbInputBox.getChildren().addAll(lblDbPath, btnDbLoc);
-    dbBox.getChildren().addAll(dbLabelBox, dbInputBox);
+    tmpDbLocTip.setShowDelay(Duration.millis(250));
+    btnDbLoc.setTooltip(tmpDbLocTip);
+    tmpDbInputBox.getChildren().addAll(lblDbPath, btnDbLoc);
+    tmpDbBox.getChildren().addAll(tmpDbLabelBox, tmpDbInputBox);
 
-    fullCard.getChildren().addAll(fullCardTitle, sep5, playerBox, sep6, extBox,
-        sep7, dbBox);
+    tmpFullCard.getChildren().addAll(tmpFullCardTitle, tmpSep5, tmpPlayerBox,
+        tmpSep6, tmpExtBox, tmpSep7, tmpDbBox);
 
-    mainContent.getChildren().addAll(headerSection, cardsRow, fullCard);
-    rootPane.setContent(mainContent);
+    tmpMainContent.getChildren().addAll(tmpHeaderSection, tmpCardsRow,
+        tmpFullCard);
+    rootPane.setContent(tmpMainContent);
   }
 
   public Parent getRoot() {
@@ -347,17 +357,18 @@ public class AboutView {
   }
 
   private void addGridRow(GridPane grid, int row, String name, Label valLabel) {
-    Label nameLabel = new Label(name);
-    nameLabel.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;");
-    GridPane.setConstraints(nameLabel, 0, row);
+    Label tmpNameLabel = new Label(name);
+    tmpNameLabel
+        .setStyle("-fx-text-fill: -color-fg-muted; -fx-font-size: 13px;");
+    GridPane.setConstraints(tmpNameLabel, 0, row);
     valLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
     GridPane.setConstraints(valLabel, 1, row);
-    grid.getChildren().addAll(nameLabel, valLabel);
+    grid.getChildren().addAll(tmpNameLabel, valLabel);
   }
 
   private Label createMutedLabel(String text) {
-    Label label = new Label(text);
-    label.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;");
-    return label;
+    Label tmpLabel = new Label(text);
+    tmpLabel.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-size: 12px;");
+    return tmpLabel;
   }
 }

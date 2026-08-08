@@ -277,10 +277,13 @@ public class DisambiguationView {
 
     VBox tmpInfoBox = new VBox(4);
     Label tmpTitleLbl = new Label(candidate.getTitle());
-    tmpTitleLbl.setStyle("-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: -color-fg-default;");
+    tmpTitleLbl.setStyle(
+        "-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: -color-fg-default;");
 
-    String tmpYearStr = candidate.getYear() != null ? " (" + candidate.getYear() + ")" : "";
-    String tmpIdStr = candidate.getImdbId() != null ? " • " + candidate.getImdbId() : "";
+    String tmpYearStr =
+        candidate.getYear() != null ? " (" + candidate.getYear() + ")" : "";
+    String tmpIdStr =
+        candidate.getImdbId() != null ? " • " + candidate.getImdbId() : "";
     Label tmpSubLbl = new Label("Release Year" + tmpYearStr + tmpIdStr);
     tmpSubLbl.setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-muted;");
 
@@ -288,13 +291,15 @@ public class DisambiguationView {
 
     if (candidate.getDirector() != null && !candidate.getDirector().isBlank()) {
       Label tmpDirLbl = new Label("Director: " + candidate.getDirector());
-      tmpDirLbl.setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-subtle;");
+      tmpDirLbl
+          .setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-subtle;");
       tmpInfoBox.getChildren().add(tmpDirLbl);
     }
 
     if (candidate.getActors() != null && !candidate.getActors().isBlank()) {
       Label tmpCastLbl = new Label("Cast: " + candidate.getActors());
-      tmpCastLbl.setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-subtle;");
+      tmpCastLbl
+          .setStyle("-fx-font-size: 12px; -fx-text-fill: -color-fg-subtle;");
       tmpInfoBox.getChildren().add(tmpCastLbl);
     }
 
