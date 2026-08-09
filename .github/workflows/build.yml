@@ -85,8 +85,11 @@ jobs:
       - name: Package Windows (.exe, .msi, portable .zip, and .tar.gz)
         if: matrix.os == 'windows-latest'
         run: |
+          mkdir -p kinonode-ui/build/jpackage-saved
           ./gradlew jpackage -PinstallerType=exe -PtargetArch=${{ matrix.arch }}
+          cp kinonode-ui/build/jpackage/*.* kinonode-ui/build/jpackage-saved/ || true
           ./gradlew jpackage -PinstallerType=msi -PtargetArch=${{ matrix.arch }}
+          cp kinonode-ui/build/jpackage/*.* kinonode-ui/build/jpackage-saved/ || true
           ./gradlew windowsX64AppImageZip
           ./gradlew windowsX64AppImageTar
         shell: bash
@@ -96,16 +99,22 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y binutils fakeroot dpkg-dev rpm
+          mkdir -p kinonode-ui/build/jpackage-saved
           ./gradlew jpackage -PinstallerType=deb -PtargetArch=${{ matrix.arch }}
+          cp kinonode-ui/build/jpackage/*.* kinonode-ui/build/jpackage-saved/ || true
           ./gradlew jpackage -PinstallerType=rpm -PtargetArch=${{ matrix.arch }}
+          cp kinonode-ui/build/jpackage/*.* kinonode-ui/build/jpackage-saved/ || true
           ./gradlew linuxAppImageZip
           ./gradlew linuxAppImageTar
 
       - name: Package macOS (.dmg, .pkg, portable .zip, and .tar.gz)
         if: matrix.os == 'macos-latest'
         run: |
+          mkdir -p kinonode-ui/build/jpackage-saved
           ./gradlew jpackage -PinstallerType=dmg -PtargetArch=${{ matrix.arch }}
+          cp kinonode-ui/build/jpackage/*.* kinonode-ui/build/jpackage-saved/ || true
           ./gradlew jpackage -PinstallerType=pkg -PtargetArch=${{ matrix.arch }}
+          cp kinonode-ui/build/jpackage/*.* kinonode-ui/build/jpackage-saved/ || true
           ./gradlew macAppImageZip
           ./gradlew macAppImageTar
 
@@ -114,8 +123,8 @@ jobs:
         run: |
           mkdir -p build/installers
           # Rename jpackage outputs
-          if [ -d "kinonode-ui/build/jpackage" ]; then
-            for file in kinonode-ui/build/jpackage/*; do
+          if [ -d "kinonode-ui/build/jpackage-saved" ]; then
+            for file in kinonode-ui/build/jpackage-saved/*; do
               if [ -f "$file" ]; then
                 ext="${file##*.}"
                 # Get architecture mapping
