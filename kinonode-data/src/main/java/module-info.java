@@ -42,6 +42,8 @@ module kinonode.data {
     requires java.logging;
     requires java.desktop;
     requires java.net.http;
+    requires jdk.unsupported;
+    requires java.naming;
     requires com.google.guice;
     requires jakarta.inject;
     requires com.google.gson;

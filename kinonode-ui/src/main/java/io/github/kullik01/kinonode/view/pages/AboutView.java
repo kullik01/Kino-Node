@@ -60,7 +60,7 @@ public class AboutView {
 
   private final ScrollPane rootPane;
 
-  public final Label labelVersion = new Label("1.0.0");
+  public final Label labelVersion = new Label("1.0.1");
   public final TextField labelExtensions = new TextField();
   public final TextField labelDatabasePath = new TextField();
   public final Label labelStorageMode = new Label("");

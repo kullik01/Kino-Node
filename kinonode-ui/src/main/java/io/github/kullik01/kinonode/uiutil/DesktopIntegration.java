@@ -268,13 +268,13 @@ public final class DesktopIntegration {
 
     // Check jlink build directory in kinonode-ui/build/KinoNode-*/bin/KinoNode
     Path tmpJlinkExec = tmpUserDir
-        .resolve("kinonode-ui/build/KinoNode-1.0.0/bin/" + tmpExecName);
+        .resolve("kinonode-ui/build/KinoNode-1.0.1/bin/" + tmpExecName);
     if (Files.exists(tmpJlinkExec)) {
       return tmpJlinkExec;
     }
 
     Path tmpRootJlinkExec =
-        tmpUserDir.resolve("build/KinoNode-1.0.0/bin/" + tmpExecName);
+        tmpUserDir.resolve("build/KinoNode-1.0.1/bin/" + tmpExecName);
     if (Files.exists(tmpRootJlinkExec)) {
       return tmpRootJlinkExec;
     }

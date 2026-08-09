@@ -13,7 +13,7 @@
 | **Description** | Personal Movie Library Manager |
 | **Repository** | `kullik01/Kino-Node` |
 | **License** | BSD 3-Clause (Hannah Kullik, 2026) |
-| **Version** | 1.0.0 |
+| **Version** | 1.0.1 |
 
 ## Technology Stack
 

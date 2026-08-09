@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "io.github.kullik01"
-version = "1.0.0"
+version = "1.0.1"
 
 extra["junitVersion"] = "5.10.2"
 extra["sqliteVersion"] = "3.45.1.0"
@@ -17,7 +17,7 @@ extra["javafxVersion"] = "25.0.2"
 
 allprojects {
     group = "io.github.kullik01"
-    version = "1.0.0"
+    version = "1.0.1"
     
     repositories {
         mavenCentral()
@@ -65,14 +65,14 @@ tasks.register("jlinkZip") {
 
 tasks.register<Zip>("windowsX64AppImageZip") {
     dependsOn(":kinonode-ui:jlink")
-    archiveFileName.set("KinoNode-windows-x64-${version}.zip")
+    archiveFileName.set("KinoNode-${version}-windows-x64.zip")
     destinationDirectory.set(file("build/distributions"))
     from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))
 }
 
 tasks.register<Zip>("windowsX86AppImageZip") {
     dependsOn(":kinonode-ui:jlink")
-    archiveFileName.set("KinoNode-windows-x86-${version}.zip")
+    archiveFileName.set("KinoNode-${version}-windows-x86.zip")
     destinationDirectory.set(file("build/distributions"))
     from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))
 }
@@ -83,14 +83,14 @@ tasks.register("windowsAppImageZip") {
 
 tasks.register<Zip>("linuxAppImageZip") {
     dependsOn(":kinonode-ui:jlink")
-    archiveFileName.set("KinoNode-linux-x64-${version}.zip")
+    archiveFileName.set("KinoNode-${version}-linux-x64.zip")
     destinationDirectory.set(file("build/distributions"))
     from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))
 }
 
 tasks.register<Tar>("linuxAppImageTar") {
     dependsOn(":kinonode-ui:jlink")
-    archiveFileName.set("KinoNode-linux-x64-${version}.tar.gz")
+    archiveFileName.set("KinoNode-${version}-linux-x64.tar.gz")
     destinationDirectory.set(file("build/distributions"))
     compression = Compression.GZIP
     from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))
@@ -98,14 +98,14 @@ tasks.register<Tar>("linuxAppImageTar") {
 
 tasks.register<Zip>("macAppImageZip") {
     dependsOn(":kinonode-ui:jlink")
-    archiveFileName.set("KinoNode-macos-x64-${version}.zip")
+    archiveFileName.set("KinoNode-${version}-macos-x64.zip")
     destinationDirectory.set(file("build/distributions"))
     from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))
 }
 
 tasks.register<Tar>("macAppImageTar") {
     dependsOn(":kinonode-ui:jlink")
-    archiveFileName.set("KinoNode-macos-x64-${version}.tar.gz")
+    archiveFileName.set("KinoNode-${version}-macos-x64.tar.gz")
     destinationDirectory.set(file("build/distributions"))
     compression = Compression.GZIP
     from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))
@@ -113,7 +113,7 @@ tasks.register<Tar>("macAppImageTar") {
 
 tasks.register<Tar>("windowsX64AppImageTar") {
     dependsOn(":kinonode-ui:jlink")
-    archiveFileName.set("KinoNode-windows-x64-${version}.tar.gz")
+    archiveFileName.set("KinoNode-${version}-windows-x64.tar.gz")
     destinationDirectory.set(file("build/distributions"))
     compression = Compression.GZIP
     from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))
@@ -121,7 +121,7 @@ tasks.register<Tar>("windowsX64AppImageTar") {
 
 tasks.register<Tar>("windowsX86AppImageTar") {
     dependsOn(":kinonode-ui:jlink")
-    archiveFileName.set("KinoNode-windows-x86-${version}.tar.gz")
+    archiveFileName.set("KinoNode-${version}-windows-x86.tar.gz")
     destinationDirectory.set(file("build/distributions"))
     compression = Compression.GZIP
     from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))

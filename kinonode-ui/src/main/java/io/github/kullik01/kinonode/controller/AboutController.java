@@ -108,7 +108,7 @@ public class AboutController implements Refreshable {
     if (view == null)
       return;
 
-    view.labelVersion.setText("1.0.0");
+    view.labelVersion.setText("1.0.1");
 
     // 1. Extensions
     String tmpExtensions = settingsRepository.get("video_extensions",

@@ -74,7 +74,7 @@ jlink {
         }
         
         installerName = "KinoNode-${osSuffix}-${archProp}"
-        appVersion = "1.0.0"
+        appVersion = "1.0.1"
         vendor = "Hannah Kullik"
         
         val iconPath = when {

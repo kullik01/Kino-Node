@@ -15,24 +15,34 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
         include:
           - os: windows-latest
-            display_name: windows-latest
+            arch: x64
+            display_name: windows-latest-x64
+            artifact-path: |
+              kinonode-ui/build/jpackage/*
+              kinonode-ui/build/distributions/*
+              build/distributions/*
+              build/installers/*
+          - os: windows-latest
+            arch: x86
+            display_name: windows-latest-x86
             artifact-path: |
               kinonode-ui/build/jpackage/*
               kinonode-ui/build/distributions/*
               build/distributions/*
               build/installers/*
           - os: ubuntu-latest
-            display_name: linux-latest
+            arch: x64
+            display_name: linux-latest-x64
             artifact-path: |
               kinonode-ui/build/jpackage/*
               kinonode-ui/build/distributions/*
               build/distributions/*
               build/installers/*
           - os: macos-latest
-            display_name: macos-latest
+            arch: x64
+            display_name: macos-latest-x64
             artifact-path: |
               kinonode-ui/build/jpackage/*
               kinonode-ui/build/distributions/*
@@ -48,6 +58,7 @@ jobs:
         with:
           java-version: '25'
           distribution: 'zulu'
+          architecture: ${{ matrix.arch }}
           cache: 'gradle'
 
       - name: Grant execute permission for gradlew
@@ -82,34 +93,69 @@ jobs:
       - name: Package Windows (.exe, .msi, portable .zip, and .tar.gz)
         if: matrix.os == 'windows-latest'
         run: |
-          ./gradlew jpackage -PinstallerType=exe
-          ./gradlew jpackage -PinstallerType=msi
-          ./gradlew windowsAppImageZip
-          ./gradlew windowsAppImageTar
+          ./gradlew jpackage -PinstallerType=exe -PtargetArch=${{ matrix.arch }}
+          ./gradlew jpackage -PinstallerType=msi -PtargetArch=${{ matrix.arch }}
+          if [ "${{ matrix.arch }}" == "x86" ]; then
+            ./gradlew windowsX86AppImageZip
+            ./gradlew windowsX86AppImageTar
+          else
+            ./gradlew windowsX64AppImageZip
+            ./gradlew windowsX64AppImageTar
+          fi
+        shell: bash
 
       - name: Package Linux (.deb, .rpm, portable .zip, and .tar.gz)
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y binutils fakeroot dpkg-dev rpm
-          ./gradlew jpackage -PinstallerType=deb
-          ./gradlew jpackage -PinstallerType=rpm
+          ./gradlew jpackage -PinstallerType=deb -PtargetArch=${{ matrix.arch }}
+          ./gradlew jpackage -PinstallerType=rpm -PtargetArch=${{ matrix.arch }}
           ./gradlew linuxAppImageZip
           ./gradlew linuxAppImageTar
 
       - name: Package macOS (.dmg, .pkg, portable .zip, and .tar.gz)
         if: matrix.os == 'macos-latest'
         run: |
-          ./gradlew jpackage -PinstallerType=dmg
-          ./gradlew jpackage -PinstallerType=pkg
+          ./gradlew jpackage -PinstallerType=dmg -PtargetArch=${{ matrix.arch }}
+          ./gradlew jpackage -PinstallerType=pkg -PtargetArch=${{ matrix.arch }}
           ./gradlew macAppImageZip
           ./gradlew macAppImageTar
+
+      - name: Rename artifacts
+        shell: bash
+        run: |
+          mkdir -p build/installers
+          # Rename jpackage outputs
+          if [ -d "kinonode-ui/build/jpackage" ]; then
+            for file in kinonode-ui/build/jpackage/*; do
+              if [ -f "$file" ]; then
+                ext="${file##*.}"
+                # Get architecture mapping
+                arch_suffix="${{ matrix.arch }}"
+                # Check for rpm and deb special naming
+                if [[ "$ext" == "rpm" || "$ext" == "deb" ]]; then
+                  arch_suffix="amd64"
+                fi
+                # Formulate the new name
+                os_suffix=""
+                if [[ "${{ matrix.os }}" == "windows-latest" ]]; then os_suffix="windows"; fi
+                if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then os_suffix="linux"; fi
+                if [[ "${{ matrix.os }}" == "macos-latest" ]]; then os_suffix="macos"; fi
+                
+                new_name="KinoNode-1.0.1-${os_suffix}-${arch_suffix}.${ext}"
+                mv "$file" "build/installers/$new_name"
+              fi
+            done
+          fi
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: KinoNode-${{ matrix.display_name }}-artifacts
-          path: ${{ matrix.artifact-path }}
+          path: |
+            build/distributions/*
+            build/installers/*
           if-no-files-found: warn
 
   release:
