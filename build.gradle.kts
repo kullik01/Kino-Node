@@ -102,3 +102,43 @@ tasks.register<Zip>("macAppImageZip") {
     destinationDirectory.set(file("build/distributions"))
     from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))
 }
+
+tasks.register<Tar>("macAppImageTar") {
+    dependsOn(":kinonode-ui:jlink")
+    archiveFileName.set("KinoNode-macos-x64-${version}.tar.gz")
+    destinationDirectory.set(file("build/distributions"))
+    compression = Compression.GZIP
+    from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))
+}
+
+tasks.register<Tar>("windowsX64AppImageTar") {
+    dependsOn(":kinonode-ui:jlink")
+    archiveFileName.set("KinoNode-windows-x64-${version}.tar.gz")
+    destinationDirectory.set(file("build/distributions"))
+    compression = Compression.GZIP
+    from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))
+}
+
+tasks.register<Tar>("windowsX86AppImageTar") {
+    dependsOn(":kinonode-ui:jlink")
+    archiveFileName.set("KinoNode-windows-x86-${version}.tar.gz")
+    destinationDirectory.set(file("build/distributions"))
+    compression = Compression.GZIP
+    from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))
+}
+
+tasks.register("windowsAppImageTar") {
+    dependsOn("windowsX64AppImageTar", "windowsX86AppImageTar")
+}
+
+tasks.register("zipDistributions") {
+    dependsOn("windowsAppImageZip", "linuxAppImageZip", "macAppImageZip")
+}
+
+tasks.register("tarDistributions") {
+    dependsOn("windowsAppImageTar", "linuxAppImageTar", "macAppImageTar")
+}
+
+tasks.register("allDistributions") {
+    dependsOn("zipDistributions", "tarDistributions", "jpackage")
+}
