@@ -82,12 +82,10 @@ jobs:
         run: ./gradlew test
 
       # Platform-specific native installer and portable packaging
-      - name: Package Windows (.exe, .msi, portable .zip, and .tar.gz)
+      - name: Package Windows (.msi, portable .zip, and .tar.gz)
         if: matrix.os == 'windows-latest'
         run: |
           mkdir -p kinonode-ui/build/jpackage-saved
-          ./gradlew jpackage -PinstallerType=exe -PtargetArch=${{ matrix.arch }}
-          cp kinonode-ui/build/jpackage/*.* kinonode-ui/build/jpackage-saved/ || true
           ./gradlew jpackage -PinstallerType=msi -PtargetArch=${{ matrix.arch }}
           cp kinonode-ui/build/jpackage/*.* kinonode-ui/build/jpackage-saved/ || true
           ./gradlew windowsX64AppImageZip
