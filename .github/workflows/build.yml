@@ -24,14 +24,6 @@ jobs:
               kinonode-ui/build/distributions/*
               build/distributions/*
               build/installers/*
-          - os: windows-latest
-            arch: x86
-            display_name: windows-latest-x86
-            artifact-path: |
-              kinonode-ui/build/jpackage/*
-              kinonode-ui/build/distributions/*
-              build/distributions/*
-              build/installers/*
           - os: ubuntu-latest
             arch: x64
             display_name: linux-latest-x64
@@ -95,13 +87,8 @@ jobs:
         run: |
           ./gradlew jpackage -PinstallerType=exe -PtargetArch=${{ matrix.arch }}
           ./gradlew jpackage -PinstallerType=msi -PtargetArch=${{ matrix.arch }}
-          if [ "${{ matrix.arch }}" == "x86" ]; then
-            ./gradlew windowsX86AppImageZip
-            ./gradlew windowsX86AppImageTar
-          else
-            ./gradlew windowsX64AppImageZip
-            ./gradlew windowsX64AppImageTar
-          fi
+          ./gradlew windowsX64AppImageZip
+          ./gradlew windowsX64AppImageTar
         shell: bash
 
       - name: Package Linux (.deb, .rpm, portable .zip, and .tar.gz)
