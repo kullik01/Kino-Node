@@ -144,22 +144,33 @@ public final class DesktopIntegration {
     Path tmpAppsDir = Paths.get(tmpUserHome, ".local", "share", "applications");
     Files.createDirectories(tmpAppsDir);
     Path tmpMenuDesktopFile = tmpAppsDir.resolve("KinoNode.desktop");
-    Files.writeString(tmpMenuDesktopFile, tmpDesktopContent);
-    tmpMenuDesktopFile.toFile().setExecutable(true);
+
+    Path tmpSystemMenuFile =
+        Paths.get("/usr/share/applications/KinoNode.desktop");
+    Path tmpSystemMenuFileLower =
+        Paths.get("/usr/share/applications/kinonode.desktop");
+
+    if (!Files.exists(tmpMenuDesktopFile) && !Files.exists(tmpSystemMenuFile)
+        && !Files.exists(tmpSystemMenuFileLower)) {
+      Files.writeString(tmpMenuDesktopFile, tmpDesktopContent);
+      tmpMenuDesktopFile.toFile().setExecutable(true);
+    }
 
     // Desktop Shortcut
     Path tmpDesktopDir = resolveDesktopDirectory(tmpUserHome);
     if (Files.exists(tmpDesktopDir) && Files.isDirectory(tmpDesktopDir)) {
       Path tmpShortcutFile = tmpDesktopDir.resolve("KinoNode.desktop");
-      Files.writeString(tmpShortcutFile, tmpDesktopContent);
-      tmpShortcutFile.toFile().setExecutable(true);
+      if (!Files.exists(tmpShortcutFile)) {
+        Files.writeString(tmpShortcutFile, tmpDesktopContent);
+        tmpShortcutFile.toFile().setExecutable(true);
 
-      try {
-        new ProcessBuilder("gio", "set",
-            tmpShortcutFile.toAbsolutePath().toString(), "metadata::trusted",
-            "true").start().waitFor();
-      } catch (Exception tmpException) {
-        // optional gio metadata
+        try {
+          new ProcessBuilder("gio", "set",
+              tmpShortcutFile.toAbsolutePath().toString(), "metadata::trusted",
+              "true").start().waitFor();
+        } catch (Exception tmpException) {
+          // optional gio metadata
+        }
       }
     }
 
@@ -193,7 +204,12 @@ public final class DesktopIntegration {
     Path tmpDesktopDir = resolveDesktopDirectory(tmpUserHome);
     Path tmpShortcutPath = tmpDesktopDir.resolve("KinoNode.lnk");
 
-    if (!Files.exists(tmpShortcutPath)) {
+    String tmpPublicEnv = System.getenv("PUBLIC");
+    Path tmpPublicDesktop = Paths.get(
+        tmpPublicEnv != null ? tmpPublicEnv : "C:\\Users\\Public", "Desktop");
+    Path tmpPublicShortcut = tmpPublicDesktop.resolve("KinoNode.lnk");
+
+    if (!Files.exists(tmpShortcutPath) && !Files.exists(tmpPublicShortcut)) {
       String tmpExecString = tmpExecPath.toAbsolutePath().toString();
       String tmpWorkDir = tmpExecPath.getParent().toAbsolutePath().toString();
 

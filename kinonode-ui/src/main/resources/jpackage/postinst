@@ -25,6 +25,7 @@ Icon=/usr/share/icons/hicolor/256x256/apps/kinonode.png
 Terminal=false
 Type=Application
 Categories=Utility;Application;
+Publisher=Hannah Kullik
 EOF
         chmod 644 /usr/share/applications/kinonode.desktop
 

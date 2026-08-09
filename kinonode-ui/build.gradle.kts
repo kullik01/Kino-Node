@@ -118,7 +118,7 @@ jlink {
                     "--install-dir", "/opt/KinoNode"
                 )
                 when (installerType) {
-                    "deb" -> linuxCommon + listOf("--linux-deb-maintainer", "hannah@example.com")
+                    "deb" -> linuxCommon + listOf("--linux-deb-maintainer", "Hannah Kullik")
                     "rpm" -> linuxCommon + listOf("--linux-rpm-license-type", "BSD-3-Clause")
                     else -> linuxCommon
                 }

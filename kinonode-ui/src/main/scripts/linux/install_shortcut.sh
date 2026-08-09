@@ -55,7 +55,8 @@ Exec=$EXEC_PATH
 Icon=$ICON_PATH
 Terminal=false
 Type=Application
-Categories=Utility;Application;"
+Categories=Utility;Application;
+Publisher=Hannah Kullik"
 
 # --- Application menu shortcut ---
 mkdir -p "$HOME/.local/share/applications"
