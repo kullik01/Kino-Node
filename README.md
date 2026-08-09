@@ -66,7 +66,7 @@ The easiest way to use KinoNode is to download the latest pre-compiled binaries 
 * **Embedded IMDb Web Browser:** A built-in, tab-integrated browser preloaded on startup, complete with custom back, forward, reload, and home buttons for seamless movie exploration.
 
 ### 🎬 Organization & Playback
-* **Smart Watchlists & Dynamic Queries:** Build automated watchlists using an interactive rule builder. Define conditions (e.g., Year > 2000, IMDb Rating > 8.0) and watch the list instantly populate. The UI reacts in real-time, automatically updating smart watchlists whenever new movies match or metadata changes.
+* **Smart Watchlists & Dynamic Queries:** Build automated watchlists using an interactive rule builder. Define conditions (e.g., Year < 2000, IMDb Rating > 8.0) and watch the list instantly populate. The UI reacts in real-time, automatically updating smart watchlists whenever new movies match or metadata changes.
 * **Playlists & Watchlists:** Build, rename, and manage multiple standard watchlists. Drag, reorder, or organize movies exactly the way you want them.
 * **Top Cast & Crew Leaderboards:** Automatically calculates and displays ranked leaderboards of your collection's most featured Directors and Actors/Cast members.
 * **External Player Launch:** Seamlessly watch your movies. KinoNode auto-detects system media players (like `mpv` and `VLC`) or launches any custom player executable path.
@@ -88,6 +88,7 @@ The easiest way to use KinoNode is to download the latest pre-compiled binaries 
 | **UI Toolkit** | JavaFX 25 | Fully modular hardware-accelerated user interface framework. |
 | **Theming** | AtlantaFX (Primer Dark) | Modern CSS system styled after Github's Primer Dark design language. |
 | **Database** | SQLite via JDBC | Embedded, zero-configuration database stored in a single local file. |
+| **Dependency Injection** | Google Guice | Lightweight DI framework wiring the UI and data layers together. |
 | **Build Tool** | Gradle (Kotlin DSL) | Modern build automation utilizing modular compilation pipelines. |
 | **Testing** | JUnit 5 | Comprehensive test suite targeting data layers and repositories. |
 | **Code Formatting** | Spotless & Google Java Format | Enforces consistent and clean code layout automatically. |
@@ -158,7 +159,7 @@ Create a minimal, platform-specific custom Java Runtime Image containing only th
 ```
 
 ### Native OS Installers
-Generate a native executable installer (Windows `.exe`, macOS `.dmg`, or Linux `.deb` / `.rpm`) configured for the current host system:
+Generate a native executable installer (Windows `.msi`, macOS `.dmg`, or Linux `.deb` / `.rpm`) configured for the current host system:
 ```bash
 ./gradlew jpackage
 ```
@@ -174,8 +175,8 @@ KinoNode automatically extracts FreeDesktop icon assets (`~/.local/share/icons/h
 
 ### Automated CI/CD Pipelines
 KinoNode features a GitHub Actions workflow (`.github/workflows/build.yml`) triggered on pushes and pull requests to the main branch. The workflow runs automated tests and builds distribution assets across a multi-OS matrix:
-* **Windows:** `.exe` and `.msi` installers, plus portable `.zip` archives.
-* **macOS:** Premium `.dmg` and `.pkg` installers, plus portable `.zip` archives.
+* **Windows:** `.msi` installer, plus portable `.zip` and `.tar.gz` archives.
+* **macOS:** Premium `.dmg` and `.pkg` installers, plus portable `.zip` and `.tar.gz` archives.
 * **Linux:** Debian `.deb` and RedHat `.rpm` packages, plus portable `.zip` and `.tar.gz` archives.
 
 ---
