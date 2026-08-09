@@ -30,6 +30,15 @@ EOF
 
         for USER_HOME in /home/*; do
             if [ -d "$USER_HOME" ]; then
+                LOCAL_APPS="$USER_HOME/.local/share/applications"
+                if [ -d "$LOCAL_APPS" ]; then
+                    if [ -f "$LOCAL_APPS/KinoNode.desktop" ] || [ -f "$LOCAL_APPS/kinonode.desktop" ]; then
+                        cp /usr/share/applications/kinonode.desktop "$LOCAL_APPS/KinoNode.desktop"
+                        cp /usr/share/applications/kinonode.desktop "$LOCAL_APPS/kinonode.desktop" 2>/dev/null || true
+                        chown "$(basename "$USER_HOME")" "$LOCAL_APPS/KinoNode.desktop" 2>/dev/null || true
+                    fi
+                fi
+
                 DESKTOP_DIR="$USER_HOME/Desktop"
                 if [ -d "$DESKTOP_DIR" ]; then
                     cp /usr/share/applications/kinonode.desktop "$DESKTOP_DIR/KinoNode.desktop"

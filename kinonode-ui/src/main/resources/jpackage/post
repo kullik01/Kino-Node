@@ -13,7 +13,7 @@ elif [ -f /opt/KinoNode/logo.png ]; then
     cp /opt/KinoNode/logo.png /usr/share/pixmaps/kinonode.png
 fi
 
-# 2. Deploy Application Menu Entry
+# 2. Deploy System Application Menu Entry
 mkdir -p /usr/share/applications
 cat << 'EOF' > /usr/share/applications/kinonode.desktop
 [Desktop Entry]
@@ -27,9 +27,20 @@ Categories=Utility;Application;
 EOF
 chmod 644 /usr/share/applications/kinonode.desktop
 
-# 3. Deploy Desktop Icon to all user desktop folders
+# 3. Update User Local Applications and Desktop Icons (overwriting stale download paths)
 for USER_HOME in /home/*; do
     if [ -d "$USER_HOME" ]; then
+        # Overwrite user-level application menu overrides
+        LOCAL_APPS="$USER_HOME/.local/share/applications"
+        if [ -d "$LOCAL_APPS" ]; then
+            if [ -f "$LOCAL_APPS/KinoNode.desktop" ] || [ -f "$LOCAL_APPS/kinonode.desktop" ]; then
+                cp /usr/share/applications/kinonode.desktop "$LOCAL_APPS/KinoNode.desktop"
+                cp /usr/share/applications/kinonode.desktop "$LOCAL_APPS/kinonode.desktop" 2>/dev/null || true
+                chown "$(basename "$USER_HOME")" "$LOCAL_APPS/KinoNode.desktop" 2>/dev/null || true
+            fi
+        fi
+
+        # Overwrite desktop shortcut
         DESKTOP_DIR="$USER_HOME/Desktop"
         if [ -d "$DESKTOP_DIR" ]; then
             cp /usr/share/applications/kinonode.desktop "$DESKTOP_DIR/KinoNode.desktop"

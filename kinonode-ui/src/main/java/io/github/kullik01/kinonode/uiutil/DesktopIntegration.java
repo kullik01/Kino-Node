@@ -260,6 +260,12 @@ public final class DesktopIntegration {
     Path tmpUserHome = Paths.get(System.getProperty("user.home"));
     Path tmpUserDir = Paths.get(System.getProperty("user.dir"));
 
+    // Prioritize system installation path in /opt/KinoNode/bin/KinoNode
+    Path tmpOptExec = Paths.get("/opt/KinoNode/bin/" + tmpExecName);
+    if (Files.exists(tmpOptExec)) {
+      return tmpOptExec;
+    }
+
     // Check jlink build directory in kinonode-ui/build/KinoNode-*/bin/KinoNode
     Path tmpJlinkExec = tmpUserDir
         .resolve("kinonode-ui/build/KinoNode-1.0.0/bin/" + tmpExecName);
