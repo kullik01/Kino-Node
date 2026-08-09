@@ -65,7 +65,15 @@ jlink {
             else -> "deb"
         }
         
-        installerName = "KinoNode"
+        val archProp = (project.findProperty("targetArch") as? String)
+            ?: if (System.getProperty("os.arch").lowercase().contains("86") && !System.getProperty("os.arch").lowercase().contains("64")) "x86" else "x64"
+        val osSuffix = when {
+            isWindows -> "windows"
+            isMac -> "macos"
+            else -> "linux"
+        }
+        
+        installerName = "KinoNode-${osSuffix}-${archProp}"
         appVersion = "1.0.0"
         vendor = "Hannah Kullik"
         

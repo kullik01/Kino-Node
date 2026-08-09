@@ -63,11 +63,22 @@ tasks.register("jlinkZip") {
     dependsOn(":kinonode-ui:jlinkZip")
 }
 
-tasks.register<Zip>("windowsAppImageZip") {
+tasks.register<Zip>("windowsX64AppImageZip") {
     dependsOn(":kinonode-ui:jlink")
     archiveFileName.set("KinoNode-windows-x64-${version}.zip")
     destinationDirectory.set(file("build/distributions"))
     from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))
+}
+
+tasks.register<Zip>("windowsX86AppImageZip") {
+    dependsOn(":kinonode-ui:jlink")
+    archiveFileName.set("KinoNode-windows-x86-${version}.zip")
+    destinationDirectory.set(file("build/distributions"))
+    from(project(":kinonode-ui").layout.buildDirectory.dir("KinoNode-${version}"))
+}
+
+tasks.register("windowsAppImageZip") {
+    dependsOn("windowsX64AppImageZip", "windowsX86AppImageZip")
 }
 
 tasks.register<Zip>("linuxAppImageZip") {
