@@ -5,7 +5,7 @@
 </h1>
 
 [![Build Status](https://github.com/kullik01/Kino-Node/actions/workflows/build.yml/badge.svg)](https://github.com/kullik01/Kino-Node/actions/workflows/build.yml)
-[![Latest Release](https://img.shields.io/github/v/release/kullik01/Kino-Node?style=flat-square&color=success)](https://github.com/kullik01/Kino-Node/releases)
+[![Latest Release](https://img.shields.io/github/v/release/kullik01/Kino-Node?style=flat-square&color=success)](https://github.com/kullik01/Kino-Node/releases/tag/v1.0.0)
 [![Java Version](https://img.shields.io/badge/Java-25-orange.svg?style=flat-square)](https://jdk.java.net/)
 [![JavaFX](https://img.shields.io/badge/JavaFX-25-blue.svg?style=flat-square)](https://openjfx.io/)
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-green.svg?style=flat-square)](LICENSE)
