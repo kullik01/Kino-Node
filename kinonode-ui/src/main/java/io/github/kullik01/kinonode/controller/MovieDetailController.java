@@ -352,9 +352,19 @@ public class MovieDetailController implements Refreshable {
     ttFixMatch.setShowDelay(Duration.millis(250));
     buttonFixMatch.setTooltip(ttFixMatch);
 
-    buttonCopyToShare =
-        new Button(resources.getString("movie.detail.share.btn.copy"));
-    buttonCopyToShare.getStyleClass().add("button-secondary");
+    buttonCopyToShare = new Button();
+    buttonCopyToShare.getStyleClass().addAll("button-secondary", "button-icon");
+    buttonCopyToShare.setMinSize(36.0, 36.0);
+    buttonCopyToShare.setMaxSize(36.0, 36.0);
+    buttonCopyToShare
+        .setAccessibleText(resources.getString("movie.detail.share.btn.copy"));
+    SVGPath tmpShareIcon = new SVGPath();
+    tmpShareIcon.setContent(
+        "M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92S20.92 20.61 20.92 19 19.61 16.08 18 16.08z");
+    tmpShareIcon.setFill(Color.WHITE);
+    tmpShareIcon.setScaleX(0.75);
+    tmpShareIcon.setScaleY(0.75);
+    buttonCopyToShare.setGraphic(tmpShareIcon);
     buttonCopyToShare.setDisable(true);
     buttonCopyToShare.setOnAction(tmpEvent -> copyToShare());
     Tooltip tmpShareTooltip =

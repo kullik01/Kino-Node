@@ -40,10 +40,10 @@ needed.
 
 ## Intended user experience
 
-1. Open a movie's details and see a text button labeled **Copy to Share** beneath
-   the poster, alongside the existing actions. Use `button-secondary` styling and
-   enough width for the full label; do not apply the existing 36-pixel icon-only
-   sizing to this button.
+1. Open a movie's details and see a share icon button beneath the poster,
+   alongside the existing actions. Use the same `button-secondary` / `button-icon`
+   styling and 36-pixel sizing as the other actions. Show **Copy to Share** in
+   its tooltip and accessible label.
 2. Clicking the button opens a `FileChooser` through `showSaveDialog(...)`, owned
    by the current details view's window. Set the title to **Copy Movie to Share**
    and suggest the original file's full filename, including its extension.
@@ -208,7 +208,8 @@ future implementation checks; they are not required for this plan-only change.
 
 ## Acceptance criteria
 
-- [ ] Movie Details includes a text button labeled **Copy to Share**.
+- [ ] Movie Details includes a share icon button with a **Copy to Share** tooltip
+      and accessible label.
 - [ ] One click opens the owned native Save As dialog with the original filename.
 - [ ] Canceling creates no file and shows no error.
 - [ ] Saving copies the selected movie's bytes to the requested final path.
