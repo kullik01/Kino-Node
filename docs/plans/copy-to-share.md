@@ -3,7 +3,7 @@
 - Date: 30 October 2026
 - Feature branch: `codex/movie-details-copy-to-share`
 - Baseline: `a730730` (`main` at branch creation)
-- Status: Ready for implementation; this change contains the plan only.
+- Status: Implemented and verified on Windows; see validation results below.
 
 ## Goal and scope
 
@@ -221,3 +221,34 @@ future implementation checks; they are not required for this plan-only change.
 - [ ] The original movie file and its catalog path remain unchanged.
 - [ ] New strings, DI wiring, filesystem tests, formatting, build, and manual
       platform checks are complete.
+
+## Implementation and validation results
+
+Implemented using the existing Movie Details action container, native JavaFX
+`FileChooser`, `Task`/daemon-thread pattern, `DialogBuilder`, `CustomAlert`,
+ResourceBundle provider, and Guice service bindings. Filesystem operations live
+in `MovieFileCopyService` in the existing data service package. No dependencies,
+database changes, navigation framework, or alternative dialog/task system were
+introduced. A controller-local busy flag tracks the two sequential tasks; task
+cancellation is intentionally not exposed.
+
+Validation completed on Windows with a repository-local Java 25 toolchain:
+
+- `spotlessApply` and `spotlessCheck` passed, with no unrelated formatting diff.
+- Sequential `spotlessCheck build` passed for all modules.
+- 18 tests discovered: 17 passed, one symbolic-link test skipped because this
+  Windows session cannot create symbolic links. The 11 new service tests cover
+  byte contents, empty files, Unicode names, invalid paths, source aliases,
+  replacement approval, cleanup on failure, atomic-replacement fallback, target
+  creation during a copy, and source modification during a copy.
+- Used the actual MovieDetailController with an isolated temporary movie fixture
+  to inspect the button and native Save As dialog, save to another filename,
+  observe the themed completion message, and cancel a subsequent save. The
+  original and copied fixture had matching SHA-256 hashes. Cancel restored the
+  button and removed the busy indicator without an error dialog.
+
+Remaining platform QA: native dialogs on macOS/Linux, symbolic-link handling on
+an enabled host, multi-gigabyte/removable/network transfers, and physical
+full-disk or device-disconnection scenarios. Failure cleanup and fallback paths
+were exercised deterministically in unit tests. These environment-dependent QA
+items are not claimed as completed.

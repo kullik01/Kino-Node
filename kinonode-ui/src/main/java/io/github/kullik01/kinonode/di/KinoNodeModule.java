@@ -49,6 +49,7 @@ import io.github.kullik01.kinonode.repository.WatchlistRepository;
 import io.github.kullik01.kinonode.service.AnalyticsService;
 import io.github.kullik01.kinonode.service.LibraryScanService;
 import io.github.kullik01.kinonode.service.PlaybackService;
+import io.github.kullik01.kinonode.service.MovieFileCopyService;
 
 public class KinoNodeModule extends AbstractModule {
   @Override
@@ -58,6 +59,7 @@ public class KinoNodeModule extends AbstractModule {
     bind(AnalyticsService.class).in(Singleton.class);
     bind(LibraryScanService.class).in(Singleton.class);
     bind(PlaybackService.class).in(Singleton.class);
+    bind(MovieFileCopyService.class).in(Singleton.class);
 
     // Repositories
     bind(MovieRepository.class).in(Singleton.class);

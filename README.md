@@ -69,6 +69,7 @@ The easiest way to use KinoNode is to download the latest pre-compiled binaries 
 * **Smart Watchlists & Dynamic Queries:** Build automated watchlists using an interactive rule builder. Define conditions (e.g., Year < 2000, IMDb Rating > 8.0) and watch the list instantly populate. The UI reacts in real-time, automatically updating smart watchlists whenever new movies match or metadata changes.
 * **Playlists & Watchlists:** Build, rename, and manage multiple standard watchlists. Drag, reorder, or organize movies exactly the way you want them.
 * **Top Cast & Crew Leaderboards:** Automatically calculates and displays ranked leaderboards of your collection's most featured Directors and Actors/Cast members.
+* **Copy to Share:** Save a copy of a movie from its details screen to a folder, removable drive, or mounted network location using the native Save As dialog. Copies run in the background and leave the original movie in place.
 * **External Player Launch:** Seamlessly watch your movies. KinoNode auto-detects system media players (like `mpv` and `VLC`) or launches any custom player executable path.
 * **YouTube Trailer Integration:** Automatically scrapes and saves official YouTube trailer URLs, allowing you to watch them in your default web browser with a single click.
 
