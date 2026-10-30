@@ -123,6 +123,12 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.FileChooser;
+import javafx.stage.Window;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ButtonBar;
+import java.util.ResourceBundle;
+import io.github.kullik01.kinonode.service.MovieFileCopyService;
+import io.github.kullik01.kinonode.uiutil.CustomAlert;
 
 /**
  * Controller for the Movie Detail View. Displays details of a {@link Movie} and
@@ -137,6 +143,11 @@ public class MovieDetailController implements Refreshable {
 
   private Label labelHeaderTitle;
   private ImageView imgPoster;
+  private Button buttonCopyToShare;
+  private HBox copyProgress;
+  private boolean copyBusy;
+  private final MovieFileCopyService movieFileCopyService;
+  private final ResourceBundle resources;
   private Button buttonPlay;
   private Button buttonTrailer;
   private Button btnImdbPage;
@@ -181,7 +192,10 @@ public class MovieDetailController implements Refreshable {
       WatchlistRepository watchlistRepository, AppContext appContext,
       ImdbService imdbService, PlaybackService playbackService,
       DatabaseService databaseService,
-      Provider<LibraryController> libraryControllerProvider) {
+      Provider<LibraryController> libraryControllerProvider,
+      MovieFileCopyService movieFileCopyService, ResourceBundle resources) {
+    this.movieFileCopyService = movieFileCopyService;
+    this.resources = resources;
     this.movieRepository = movieRepository;
     this.watchlistRepository = watchlistRepository;
     this.appContext = appContext;
@@ -338,8 +352,34 @@ public class MovieDetailController implements Refreshable {
     ttFixMatch.setShowDelay(Duration.millis(250));
     buttonFixMatch.setTooltip(ttFixMatch);
 
+    buttonCopyToShare = new Button();
+    buttonCopyToShare.getStyleClass().addAll("button-secondary", "button-icon");
+    buttonCopyToShare.setMinSize(36.0, 36.0);
+    buttonCopyToShare.setMaxSize(36.0, 36.0);
+    buttonCopyToShare
+        .setAccessibleText(resources.getString("movie.detail.share.btn.copy"));
+    SVGPath tmpShareIcon = new SVGPath();
+    tmpShareIcon.setContent(
+        "M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92S20.92 20.61 20.92 19 19.61 16.08 18 16.08z");
+    tmpShareIcon.setFill(Color.WHITE);
+    tmpShareIcon.setScaleX(0.75);
+    tmpShareIcon.setScaleY(0.75);
+    buttonCopyToShare.setGraphic(tmpShareIcon);
+    buttonCopyToShare.setDisable(true);
+    buttonCopyToShare.setOnAction(tmpEvent -> copyToShare());
+    Tooltip tmpShareTooltip =
+        new Tooltip(resources.getString("movie.detail.share.tooltip"));
+    tmpShareTooltip.setShowDelay(Duration.millis(250));
+    buttonCopyToShare.setTooltip(tmpShareTooltip);
+    ProgressIndicator tmpCopyIndicator = new ProgressIndicator();
+    tmpCopyIndicator.setPrefSize(20, 20);
+    copyProgress = new HBox(8, tmpCopyIndicator,
+        new Label(resources.getString("movie.detail.share.status.copying")));
+    copyProgress.setAlignment(Pos.CENTER);
+    copyProgress.setVisible(false);
+    copyProgress.managedProperty().bind(copyProgress.visibleProperty());
     actionBox.getChildren().addAll(buttonPlay, buttonTrailer, btnImdbPage,
-        buttonFixMatch);
+        buttonFixMatch, buttonCopyToShare, copyProgress);
     leftBox.getChildren().addAll(posterContainer, buttonChangePoster,
         actionBox);
 
@@ -620,6 +660,7 @@ public class MovieDetailController implements Refreshable {
    */
   public void setMovie(Movie movie) {
     this.movie = movie;
+    updateCopyState();
     this.currentRating = movie.getRating();
 
     labelHeaderTitle.setText(movie.getTitle());
@@ -956,6 +997,7 @@ public class MovieDetailController implements Refreshable {
 
   @Override
   public void refresh() {
+    updateCopyState();
     refreshWatchlistStatus();
   }
 
@@ -1254,6 +1296,146 @@ public class MovieDetailController implements Refreshable {
         LOGGER.log(Level.SEVERE, "Failed to copy cover poster file", exception);
         showStatus("Error saving poster: " + exception.getMessage());
       }
+    }
+  }
+
+  /**
+   * Opens the existing native save chooser and prepares a background movie
+   * copy.
+   */
+  private void copyToShare() {
+    if (copyBusy || movie == null || movie.getFilePath() == null
+        || movie.getFilePath().isBlank()) {
+      return;
+    }
+    Window tmpOwner = buttonCopyToShare.getScene().getWindow();
+    String tmpTitle = movie.getTitle();
+    try {
+      Path tmpSource = Path.of(movie.getFilePath());
+      FileChooser tmpChooser = new FileChooser();
+      tmpChooser
+          .setTitle(resources.getString("movie.detail.share.dialog.title"));
+      tmpChooser.setInitialFileName(tmpSource.getFileName().toString());
+      String tmpExtension = PathUtils.getFileExtension(tmpSource.toFile());
+      if (!tmpExtension.isEmpty()) {
+        tmpChooser.getExtensionFilters()
+            .add(new FileChooser.ExtensionFilter(String.format(
+                resources.getString("movie.detail.share.filter.movie"),
+                tmpExtension), "*." + tmpExtension));
+      }
+      tmpChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
+          resources.getString("movie.detail.share.filter.all"), "*"));
+      copyBusy = true;
+      updateCopyState();
+      File tmpSelected = tmpChooser.showSaveDialog(tmpOwner);
+      if (tmpSelected == null) {
+        finishCopy();
+        return;
+      }
+      Path tmpDestination = tmpSelected.toPath();
+      if (PathUtils.getFileExtension(tmpSelected).isEmpty()
+          && !tmpExtension.isEmpty()) {
+        tmpDestination = tmpDestination
+            .resolveSibling(tmpSelected.getName() + "." + tmpExtension);
+      }
+      Path tmpTarget = tmpDestination;
+      Task<Boolean> tmpPreflight = new Task<>() {
+        @Override
+        protected Boolean call() throws IOException {
+          return movieFileCopyService.requiresReplacement(tmpSource, tmpTarget);
+        }
+      };
+      tmpPreflight.setOnFailed(tmpEvent -> copyFailed(tmpOwner, tmpTitle,
+          tmpPreflight.getException()));
+      tmpPreflight.setOnSucceeded(tmpEvent -> {
+        if (!tmpOwner.isShowing()) {
+          finishCopy();
+          return;
+        }
+        boolean tmpReplace = tmpPreflight.getValue();
+        if (tmpReplace) {
+          Dialog<ButtonType> tmpDialog = DialogBuilder.createDialog(
+              resources.getString("movie.detail.share.replace.title"),
+              resources.getString("movie.detail.share.replace.header"), null);
+          tmpDialog.initOwner(tmpOwner);
+          tmpDialog.setContentText(String.format(
+              resources.getString("movie.detail.share.replace.message"),
+              tmpTarget));
+          ButtonType tmpReplaceButton = new ButtonType(
+              resources.getString("movie.detail.share.replace.btn"),
+              ButtonBar.ButtonData.OK_DONE);
+          ButtonType tmpCancelButton =
+              new ButtonType(resources.getString("button.cancel"),
+                  ButtonBar.ButtonData.CANCEL_CLOSE);
+          tmpDialog.getDialogPane().getButtonTypes().addAll(tmpReplaceButton,
+              tmpCancelButton);
+          if (tmpDialog.showAndWait()
+              .orElse(tmpCancelButton) != tmpReplaceButton) {
+            finishCopy();
+            return;
+          }
+        }
+        Task<Path> tmpCopy = new Task<>() {
+          @Override
+          protected Path call() throws IOException {
+            return movieFileCopyService.copy(tmpSource, tmpTarget, tmpReplace);
+          }
+        };
+        tmpCopy.setOnFailed(tmpCopyEvent -> copyFailed(tmpOwner, tmpTitle,
+            tmpCopy.getException()));
+        tmpCopy.setOnSucceeded(tmpCopyEvent -> {
+          finishCopy();
+          if (tmpOwner.isShowing()) {
+            CustomAlert.showInformation(tmpOwner,
+                resources.getString("movie.detail.share.success.title"),
+                resources.getString("movie.detail.share.success.title"),
+                String.format(
+                    resources.getString("movie.detail.share.success.message"),
+                    tmpTitle, tmpCopy.getValue()));
+          }
+        });
+        Thread tmpCopyThread = new Thread(tmpCopy, "movie-file-copy");
+        tmpCopyThread.setDaemon(true);
+        tmpCopyThread.start();
+      });
+      Thread tmpPreflightThread =
+          new Thread(tmpPreflight, "movie-copy-preflight");
+      tmpPreflightThread.setDaemon(true);
+      tmpPreflightThread.start();
+    } catch (RuntimeException tmpException) {
+      copyFailed(tmpOwner, tmpTitle, tmpException);
+    }
+  }
+
+  /**
+   * Updates only this details view, leaving metadata status messages
+   * independent.
+   */
+  private void updateCopyState() {
+    buttonCopyToShare.setDisable(copyBusy || movie == null
+        || movie.getFilePath() == null || movie.getFilePath().isBlank());
+    copyProgress.setVisible(copyBusy);
+  }
+
+  /** Restores the copy action after completion, cancellation, or failure. */
+  private void finishCopy() {
+    copyBusy = false;
+    updateCopyState();
+  }
+
+  /**
+   * Reports a failed operation through the existing themed alert
+   * infrastructure.
+   */
+  private void copyFailed(Window owner, String title, Throwable failure) {
+    finishCopy();
+    LOGGER.log(Level.SEVERE, "Failed to copy movie " + title, failure);
+    if (owner.isShowing()) {
+      CustomAlert.showError(owner,
+          resources.getString("movie.detail.share.error.title"),
+          resources.getString("movie.detail.share.error.title"),
+          String.format(resources.getString("movie.detail.share.error.message"),
+              title, failure.getMessage()));
     }
   }
 
